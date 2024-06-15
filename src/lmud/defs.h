@@ -10,3 +10,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+
+typedef int LMud_Integer;
+
+struct LMud_Object;
