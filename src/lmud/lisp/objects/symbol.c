@@ -2,7 +2,7 @@
 #include "symbol.h"
 
 
-void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_String* name)
+void LMud_Symbol_Create(struct LMud_Symbol* self, LMud_Any name)
 {
     (void) self;
     (void) name;
