@@ -2,6 +2,27 @@
 #include "any.h"
 
 
+LMud_AnyType LMud_Any_GetType(LMud_Any any)
+{
+    return any.type;
+}
+
+bool LMud_Any_Is(LMud_Any any, LMud_AnyType type)
+{
+    return LMud_Any_GetType(any) == type;
+}
+
+bool LMud_Any_IsPointer(LMud_Any any)
+{
+    return LMud_Any_Is(any, LMud_AnyType_POINTER);
+}
+
+bool LMud_Any_IsInteger(LMud_Any any)
+{
+    return LMud_Any_Is(any, LMud_AnyType_INTEGER);
+}
+
+
 LMud_Any LMud_Any_FromPointer(struct LMud_Object* value)
 {
     LMud_Any  any;
@@ -22,22 +43,13 @@ LMud_Any LMud_Any_FromInteger(LMud_Integer value)
     return any;
 }
 
-LMud_AnyType LMud_Any_GetType(LMud_Any any)
+
+struct LMud_Object* LMud_Any_AsPointer(LMud_Any any)
 {
-    return any.type;
+    return any.value.pointer;
 }
 
-bool LMud_Any_Is(LMud_Any any, LMud_AnyType type)
+LMud_Integer LMud_Any_AsInteger(LMud_Any any)
 {
-    return LMud_Any_GetType(any) == type;
-}
-
-bool LMud_Any_IsPointer(LMud_Any any)
-{
-    return LMud_Any_Is(any, LMud_AnyType_POINTER);
-}
-
-bool LMud_Any_IsInteger(LMud_Any any)
-{
-    return LMud_Any_Is(any, LMud_AnyType_INTEGER);
+    return any.value.integer;
 }
