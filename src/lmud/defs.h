@@ -15,5 +15,7 @@ typedef size_t LMud_Size;
 
 typedef int LMud_Integer;
 
+
+struct LMud_Lisp;
 struct LMud_Object;
 struct LMud_Objects;

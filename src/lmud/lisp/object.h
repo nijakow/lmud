@@ -18,5 +18,4 @@ struct LMud_Object
 bool LMud_Object_Create(struct LMud_Object* self, struct LMud_Objects* objects, struct LMud_Type* type);
 void LMud_Object_Destroy(struct LMud_Object* self);
 
-
-typedef void (*LMud_ObjectConstructor)(void*);
+bool LMud_Type_TypeCheck(struct LMud_Type* self, struct LMud_Object* object);

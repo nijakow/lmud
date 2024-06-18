@@ -1,4 +1,6 @@
 
+#include <lmud/lisp/io.h>
+
 #include "lmud.h"
 
 
@@ -12,14 +14,19 @@ void LMud_Destroy(struct LMud* self)
     LMud_Lisp_Destroy(&self->lisp);
 }
 
+void LMud_Test(struct LMud* self)
+{
+    struct LMud_Lisp*  lisp;
+
+    lisp = &self->lisp;
+
+    LMud_Lisp_Print(lisp, LMud_Lisp_Cons(lisp, LMud_Lisp_Intern(lisp, "foo"), LMud_Lisp_Cons(lisp, LMud_Lisp_Intern(lisp, "bar"), LMud_Lisp_Intern(lisp, "baz"))), stdout, true);
+}
+
 void LMud_Main(struct LMud* self, int argc, char* argv[])
 {
-    (void) self;
     (void) argc;
     (void) argv;
 
-    printf("%p\n", LMud_Objects_Intern(&self->lisp.objects, "hello"));
-    printf("%p\n", LMud_Objects_Intern(&self->lisp.objects, "hello"));
-    printf("%p\n", LMud_Objects_Intern(&self->lisp.objects, "hello2"));
-    printf("%p\n", LMud_Objects_Intern(&self->lisp.objects, "hello2"));
+    LMud_Test(self);
 }

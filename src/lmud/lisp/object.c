@@ -20,3 +20,9 @@ void LMud_Object_Destroy(struct LMud_Object* self)
 {
     (void) self;
 }
+
+
+bool LMud_Type_TypeCheck(struct LMud_Type* self, struct LMud_Object* object)
+{
+    return object->type == self;
+}

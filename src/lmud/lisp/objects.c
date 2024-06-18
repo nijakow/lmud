@@ -16,6 +16,21 @@ void LMud_Types_Destroy(struct LMud_Types* self)
     (void) self;
 }
 
+bool LMud_Types_IsCons(struct LMud_Types* self, void* object)
+{
+    return LMud_Type_TypeCheck(&self->cons, object);
+}
+
+bool LMud_Types_IsString(struct LMud_Types* self, void* object)
+{
+    return LMud_Type_TypeCheck(&self->string, object);
+}
+
+bool LMud_Types_IsSymbol(struct LMud_Types* self, void* object)
+{
+    return LMud_Type_TypeCheck(&self->symbol, object);
+}
+
 
 bool LMud_Objects_Create(struct LMud_Objects* self)
 {

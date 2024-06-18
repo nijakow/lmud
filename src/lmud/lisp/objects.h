@@ -18,6 +18,10 @@ struct LMud_Types
 void LMud_Types_Create(struct LMud_Types* self);
 void LMud_Types_Destroy(struct LMud_Types* self);
 
+bool LMud_Types_IsCons(struct LMud_Types* self, void* object);
+bool LMud_Types_IsString(struct LMud_Types* self, void* object);
+bool LMud_Types_IsSymbol(struct LMud_Types* self, void* object);
+
 
 struct LMud_Objects
 {
