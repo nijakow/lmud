@@ -15,12 +15,14 @@ void LMud_Types_Destroy(struct LMud_Types* self)
 }
 
 
-void LMud_Objects_Create(struct LMud_Objects* self)
+bool LMud_Objects_Create(struct LMud_Objects* self)
 {
     self->objects = NULL;
     self->symbols = NULL;
 
     LMud_Types_Create(&self->types);
+
+    return true;
 }
 
 void LMud_Objects_Destroy(struct LMud_Objects* self)

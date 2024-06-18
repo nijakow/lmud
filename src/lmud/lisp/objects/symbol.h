@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <lmud/lisp/lisp.h>
+#include <lmud/lisp/base.h>
 
 struct LMud_Symbol
 {

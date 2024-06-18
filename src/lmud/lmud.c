@@ -4,14 +4,12 @@
 
 bool LMud_Create(struct LMud* self)
 {
-    (void) self;
-
-    return true;
+    return LMud_Lisp_Create(&self->lisp);
 }
 
 void LMud_Destroy(struct LMud* self)
 {
-    (void) self;
+    LMud_Lisp_Destroy(&self->lisp);
 }
 
 void LMud_Main(struct LMud* self, int argc, char* argv[])

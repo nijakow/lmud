@@ -26,7 +26,7 @@ struct LMud_Objects
     struct LMud_Types    types;
 };
 
-void LMud_Objects_Create(struct LMud_Objects* self);
+bool LMud_Objects_Create(struct LMud_Objects* self);
 void LMud_Objects_Destroy(struct LMud_Objects* self);
 
 void* LMud_Objects_Allocate(struct LMud_Objects* self, struct LMud_Type* type, LMud_Size extra);

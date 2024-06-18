@@ -3,6 +3,7 @@
 
 #include <lmud/defs.h>
 
+
 struct LMud_Type
 {
     LMud_Size  base_size;

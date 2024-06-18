@@ -2,9 +2,11 @@
 #pragma once
 
 #include <lmud/defs.h>
+#include <lmud/lisp/lisp.h>
 
 struct LMud
 {
+    struct LMud_Lisp  lisp;
 };
 
 bool LMud_Create(struct LMud* self);
