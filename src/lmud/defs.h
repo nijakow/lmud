@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef size_t LMud_Size;
 
 typedef int LMud_Integer;
 
