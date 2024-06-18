@@ -18,6 +18,7 @@ void LMud_Types_Destroy(struct LMud_Types* self)
 void LMud_Objects_Create(struct LMud_Objects* self)
 {
     self->objects = NULL;
+    self->symbols = NULL;
 
     LMud_Types_Create(&self->types);
 }
@@ -86,8 +87,22 @@ struct LMud_String* LMud_Objects_String(struct LMud_Objects* self, const char* t
 
 struct LMud_Symbol* LMud_Objects_PrimitiveIntern(struct LMud_Objects* self, const char* name)
 {
-    (void) self;
-    (void) name;
+    struct LMud_Symbol*  symbol;
+
+    for (symbol = self->symbols; symbol != NULL; symbol = symbol->next)
+    {
+        if (LMud_String_Equals(LMud_Any_AsPointer(symbol->name), name))
+        {
+            return symbol;
+        }
+    }
+
+    symbol = LMud_Objects_Allocate(self, &self->types.symbol, 0);
+
+    if (symbol != NULL)
+    {
+        LMud_Symbol_Create(symbol, &self->symbols, LMud_Any_FromPointer(LMud_Objects_String(self, name)));
+    }
 
     return NULL;
 }

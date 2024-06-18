@@ -23,7 +23,7 @@ bool LMud_Any_IsInteger(LMud_Any any)
 }
 
 
-LMud_Any LMud_Any_FromPointer(struct LMud_Object* value)
+LMud_Any LMud_Any_FromPointer(void* value)
 {
     LMud_Any  any;
 
@@ -44,7 +44,7 @@ LMud_Any LMud_Any_FromInteger(LMud_Integer value)
 }
 
 
-struct LMud_Object* LMud_Any_AsPointer(LMud_Any any)
+void* LMud_Any_AsPointer(LMud_Any any)
 {
     return any.value.pointer;
 }

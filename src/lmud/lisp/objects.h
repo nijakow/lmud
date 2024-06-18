@@ -22,6 +22,7 @@ void LMud_Types_Destroy(struct LMud_Types* self);
 struct LMud_Objects
 {
     struct LMud_Object*  objects;
+    struct LMud_Symbol*  symbols;
     struct LMud_Types    types;
 };
 

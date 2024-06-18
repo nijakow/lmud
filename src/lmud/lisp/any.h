@@ -29,8 +29,8 @@ bool LMud_Any_Is(LMud_Any any, LMud_AnyType type);
 bool LMud_Any_IsPointer(LMud_Any any);
 bool LMud_Any_IsInteger(LMud_Any any);
 
-LMud_Any LMud_Any_FromPointer(struct LMud_Object* value);
+LMud_Any LMud_Any_FromPointer(void* value);
 LMud_Any LMud_Any_FromInteger(LMud_Integer value);
 
-struct LMud_Object* LMud_Any_AsPointer(LMud_Any any);
-LMud_Integer        LMud_Any_AsInteger(LMud_Any any);
+void*         LMud_Any_AsPointer(LMud_Any any);
+LMud_Integer  LMud_Any_AsInteger(LMud_Any any);

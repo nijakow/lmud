@@ -13,3 +13,5 @@ struct LMud_String
 
 void LMud_String_Create(struct LMud_String* self, const char* chars);
 void LMud_String_Destroy(struct LMud_String* self);
+
+bool LMud_String_Equals(struct LMud_String* self, const char* value);
