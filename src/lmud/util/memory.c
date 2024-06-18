@@ -24,3 +24,10 @@ void LMud_Free(void* ptr)
         free(ptr);
     }
 }
+
+
+LMud_Size LMud_CStr_Length(const char* str)
+{
+    if (str == NULL) return 0;
+    else             return strlen(str);
+}
