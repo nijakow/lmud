@@ -21,10 +21,10 @@ void LMud_Symbol_Destroy(struct LMud_Symbol* self)
 
 void LMud_Symbol_Unlink(struct LMud_Symbol* self)
 {
-    if (self->next != NULL)
-        self->next->prev = self->prev;
     if (self->prev != NULL)
         *self->prev = self->next;
+    if (self->next != NULL)
+        self->next->prev = self->prev;
 
     self->prev = NULL;
     self->next = NULL;

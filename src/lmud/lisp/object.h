@@ -9,15 +9,10 @@ struct LMud_Type
     LMud_Size  base_size;
 };
 
-struct LMud_Header
-{
-    struct LMud_Type*  type;
-};
-
 struct LMud_Object
 {
     struct LMud_Object*  next;
-    struct LMud_Header   header;
+    struct LMud_Type*    type;
 };
 
 bool LMud_Object_Create(struct LMud_Object* self, struct LMud_Objects* objects, struct LMud_Type* type);

@@ -1,4 +1,6 @@
 
+#include <lmud/lisp/objects.h>
+
 #include "object.h"
 
 
@@ -6,7 +8,10 @@ bool LMud_Object_Create(struct LMud_Object* self, struct LMud_Objects* objects, 
 {
     (void) objects;
 
-    self->header.type = type;
+    self->next       = objects->objects;
+    objects->objects = self;
+
+    self->type = type;
 
     return true;
 }

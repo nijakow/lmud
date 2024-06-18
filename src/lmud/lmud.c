@@ -17,4 +17,9 @@ void LMud_Main(struct LMud* self, int argc, char* argv[])
     (void) self;
     (void) argc;
     (void) argv;
+
+    printf("%p\n", LMud_Objects_Intern(&self->lisp.objects, "hello"));
+    printf("%p\n", LMud_Objects_Intern(&self->lisp.objects, "hello"));
+    printf("%p\n", LMud_Objects_Intern(&self->lisp.objects, "hello2"));
+    printf("%p\n", LMud_Objects_Intern(&self->lisp.objects, "hello2"));
 }

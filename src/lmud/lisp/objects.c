@@ -6,7 +6,9 @@
 
 void LMud_Types_Create(struct LMud_Types* self)
 {
-    (void) self;
+    self->cons.base_size   = sizeof(struct LMud_Cons);
+    self->string.base_size = sizeof(struct LMud_String);
+    self->symbol.base_size = sizeof(struct LMud_Symbol);
 }
 
 void LMud_Types_Destroy(struct LMud_Types* self)
@@ -106,7 +108,7 @@ struct LMud_Symbol* LMud_Objects_PrimitiveIntern(struct LMud_Objects* self, cons
         LMud_Symbol_Create(symbol, &self->symbols, LMud_Any_FromPointer(LMud_Objects_String(self, name)));
     }
 
-    return NULL;
+    return symbol;
 }
 
 struct LMud_Symbol* LMud_Objects_Intern(struct LMud_Objects* self, const char* name)
