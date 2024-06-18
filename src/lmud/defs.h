@@ -15,3 +15,4 @@
 typedef int LMud_Integer;
 
 struct LMud_Object;
+struct LMud_Objects;

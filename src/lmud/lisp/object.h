@@ -3,8 +3,13 @@
 
 #include <lmud/defs.h>
 
+struct LMud_Type
+{
+};
+
 struct LMud_Header
 {
+    struct LMud_Type*  type;
 };
 
 struct LMud_Object
@@ -13,5 +18,5 @@ struct LMud_Object
     struct LMud_Header   header;
 };
 
-bool LMud_Object_Create(struct LMud_Object* self);
+bool LMud_Object_Create(struct LMud_Object* self, struct LMud_Objects* objects, struct LMud_Type* type);
 void LMud_Object_Destroy(struct LMud_Object* self);
