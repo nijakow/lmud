@@ -23,8 +23,10 @@ void LMud_Test(struct LMud* self)
 
     LMud_InputStream_CreateFromFile(&stream, stdin);
 
-    while (true)
+    while (!LMud_InputStream_Eof(&stream))
     {
+        printf("> ");
+        fflush(stdout);
         LMud_Lisp_Print(lisp, LMud_Lisp_Read(lisp, &stream), stdout, true);
         putchar('\n');
     }

@@ -1,5 +1,6 @@
 
 #include <lmud/lisp/lisp.h>
+#include <lmud/util/stringbuilder.h>
 
 #include "io.h"
 
@@ -106,6 +107,33 @@ bool LMud_Lisp_ParseInt(struct LMud_Lisp* lisp, const char* buffer, LMud_Any* va
 }
 
 
+void LMud_Lisp_ReadEscaped(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, struct LMud_StringBuilder* builder, const char* terminator)
+{
+    (void) lisp;
+
+    while (!LMud_InputStream_Eof(stream))
+    {
+        if (LMud_InputStream_CheckStr(stream, terminator)) {
+            break;
+        }
+
+        LMud_StringBuilder_AppendChar(builder, LMud_InputStream_Read(stream));
+    }
+}
+
+LMud_Any LMud_Lisp_ReadString(struct LMud_Lisp* lisp, struct LMud_InputStream* stream)
+{
+    struct LMud_StringBuilder  builder;
+    LMud_Any                   value;
+
+    LMud_StringBuilder_Create(&builder);
+    LMud_Lisp_ReadEscaped(lisp, stream, &builder, "\"");
+    value = LMud_Lisp_String(lisp, LMud_StringBuilder_GetStatic(&builder));
+    LMud_StringBuilder_Destroy(&builder);
+
+    return value;
+}
+
 LMud_Any LMud_Lisp_ReadAtom(struct LMud_Lisp* lisp, struct LMud_InputStream* stream)
 {
     char      buffer[LMud_SYMBOL_NAME_LENGTH + 1];
@@ -152,6 +180,8 @@ LMud_Any LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream)
         return LMud_Lisp_QuoteFunction(lisp, LMud_Lisp_Read(lisp, stream));
     } else if (LMud_InputStream_CheckStr(stream, "'")) {
         return LMud_Lisp_Quote(lisp, LMud_Lisp_Read(lisp, stream));
+    } else if (LMud_InputStream_CheckStr(stream, "\"")) {
+        return LMud_Lisp_ReadString(lisp, stream);
     } else if (LMud_InputStream_CheckStr(stream, "(")) {
         return LMud_Lisp_ReadList(lisp, stream);
     } else {
