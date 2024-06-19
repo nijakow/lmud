@@ -94,12 +94,25 @@ LMud_Any LMud_Lisp_ReadList(struct LMud_Lisp* lisp, struct LMud_InputStream* str
 }
 
 
+bool LMud_Lisp_ParseInt(struct LMud_Lisp* lisp, const char* buffer, LMud_Any* value)
+{
+    char*  end;
+
+    (void) lisp;
+
+    *value = LMud_Any_FromInteger((int) strtol(buffer, &end, 10));
+
+    return (*end == '\0');
+}
+
+
 LMud_Any LMud_Lisp_ReadAtom(struct LMud_Lisp* lisp, struct LMud_InputStream* stream)
 {
-    char   buffer[LMud_SYMBOL_NAME_LENGTH + 1];
-    char*  ptr;
-    char*  end;
-    char   c;
+    char      buffer[LMud_SYMBOL_NAME_LENGTH + 1];
+    char*     ptr;
+    char*     end;
+    char      c;
+    LMud_Any  value;
 
     ptr = &buffer[0];
     end = &buffer[sizeof(buffer) - 1];
@@ -121,7 +134,11 @@ LMud_Any LMud_Lisp_ReadAtom(struct LMud_Lisp* lisp, struct LMud_InputStream* str
 
     *(ptr++) = '\0';
 
-    return LMud_Lisp_InternUpcase(lisp, buffer);
+    if (LMud_Lisp_ParseInt(lisp, buffer, &value)) {
+        return value;
+    } else {
+        return LMud_Lisp_InternUpcase(lisp, buffer);
+    }
 }
 
 LMud_Any LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream)
