@@ -14,6 +14,8 @@
 #include <ctype.h>
 
 
+#define LMud_VERSION "0.0.1"
+
 #define LMud_SYMBOL_NAME_LENGTH 1023
 
 
