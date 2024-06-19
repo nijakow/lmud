@@ -130,7 +130,11 @@ LMud_Any LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream)
 
     if (LMud_InputStream_Eof(stream)) {
         // TODO: Read error
-        return LMud_Lisp_Nil(lisp);    
+        return LMud_Lisp_Nil(lisp);
+    } else if (LMud_InputStream_CheckStr(stream, "#'")) {
+        return LMud_Lisp_QuoteFunction(lisp, LMud_Lisp_Read(lisp, stream));
+    } else if (LMud_InputStream_CheckStr(stream, "'")) {
+        return LMud_Lisp_Quote(lisp, LMud_Lisp_Read(lisp, stream));
     } else if (LMud_InputStream_CheckStr(stream, "(")) {
         return LMud_Lisp_ReadList(lisp, stream);
     } else {

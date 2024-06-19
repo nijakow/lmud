@@ -8,6 +8,8 @@ struct LMud_Constants
 {
     LMud_Any  nil;
     LMud_Any  t;
+    LMud_Any  quote;
+    LMud_Any  function;
 };
 
 bool LMud_Constants_Create(struct LMud_Constants* self, struct LMud_Lisp* lisp);
@@ -46,3 +48,6 @@ LMud_Any LMud_Lisp_InternUpcase(struct LMud_Lisp* self, const char* name);
 
 LMud_Any LMud_Lisp_Car(struct LMud_Lisp* self, LMud_Any value);
 LMud_Any LMud_Lisp_Cdr(struct LMud_Lisp* self, LMud_Any value);
+
+LMud_Any LMud_Lisp_Quote(struct LMud_Lisp* self, LMud_Any value);
+LMud_Any LMud_Lisp_QuoteFunction(struct LMud_Lisp* self, LMud_Any value);

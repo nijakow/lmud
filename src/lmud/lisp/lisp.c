@@ -6,8 +6,10 @@
 
 bool LMud_Constants_Create(struct LMud_Constants* self, struct LMud_Lisp* lisp)
 {
-    self->nil = LMud_Lisp_Intern(lisp, "NIL");
-    self->t   = LMud_Lisp_Intern(lisp, "T");
+    self->nil      = LMud_Lisp_Intern(lisp, "NIL");
+    self->t        = LMud_Lisp_Intern(lisp, "T");
+    self->quote    = LMud_Lisp_Intern(lisp, "QUOTE");
+    self->function = LMud_Lisp_Intern(lisp, "FUNCTION");
 
     return true;
 }
@@ -126,4 +128,15 @@ LMud_Any LMud_Lisp_Cdr(struct LMud_Lisp* self, LMud_Any value)
     if (!LMud_Lisp_IsCons(self, value))
         return value;
     return ((struct LMud_Cons*) LMud_Any_AsPointer(value))->cdr;
+}
+
+
+LMud_Any LMud_Lisp_Quote(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Lisp_Cons(self, self->constants.quote, LMud_Lisp_Cons(self, value, LMud_Lisp_Nil(self)));
+}
+
+LMud_Any LMud_Lisp_QuoteFunction(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Lisp_Cons(self, self->constants.function, LMud_Lisp_Cons(self, value, LMud_Lisp_Nil(self)));
 }
