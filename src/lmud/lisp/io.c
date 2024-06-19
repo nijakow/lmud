@@ -63,6 +63,7 @@ bool LMud_Lisp_Read_IsWhitespace(char c)
 bool LMud_Lisp_Read_IsBreakingChar(char c)
 {
     return LMud_Lisp_Read_IsWhitespace(c)
+        || (c == '(')
         || (c == ')');
 }
 
@@ -95,7 +96,7 @@ LMud_Any LMud_Lisp_ReadList(struct LMud_Lisp* lisp, struct LMud_InputStream* str
 
 LMud_Any LMud_Lisp_ReadAtom(struct LMud_Lisp* lisp, struct LMud_InputStream* stream)
 {
-    char   buffer[1024];
+    char   buffer[LMud_SYMBOL_NAME_LENGTH + 1];
     char*  ptr;
     char*  end;
     char   c;
@@ -120,7 +121,7 @@ LMud_Any LMud_Lisp_ReadAtom(struct LMud_Lisp* lisp, struct LMud_InputStream* str
 
     *(ptr++) = '\0';
 
-    return LMud_Lisp_Intern(lisp, buffer);
+    return LMud_Lisp_InternUpcase(lisp, buffer);
 }
 
 LMud_Any LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream)

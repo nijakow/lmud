@@ -11,6 +11,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <ctype.h>
+
+
+#define LMud_SYMBOL_NAME_LENGTH 1023
+
+
 typedef size_t LMud_Size;
 
 typedef int LMud_Integer;

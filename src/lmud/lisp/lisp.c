@@ -1,4 +1,6 @@
 
+#include <lmud/util/stringbuilder.h>
+
 #include "lisp.h"
 
 
@@ -91,6 +93,24 @@ LMud_Any LMud_Lisp_String(struct LMud_Lisp* self, const char* text)
 LMud_Any LMud_Lisp_Intern(struct LMud_Lisp* self, const char* name)
 {
     return LMud_Any_FromPointer(LMud_Objects_Intern(&self->objects, name));
+}
+
+LMud_Any LMud_Lisp_InternUpcase(struct LMud_Lisp* self, const char* name)
+{
+    struct LMud_StringBuilder  builder;
+    LMud_Any                   result;
+    LMud_Size                  index;
+
+    LMud_StringBuilder_Create(&builder);
+
+    for (index = 0; name[index] != '\0'; index++)
+        LMud_StringBuilder_AppendChar(&builder, toupper(name[index]));
+
+    result = LMud_Lisp_Intern(self, LMud_StringBuilder_GetStatic(&builder));
+
+    LMud_StringBuilder_Destroy(&builder);
+
+    return result;
 }
 
 
