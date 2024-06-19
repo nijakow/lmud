@@ -34,3 +34,5 @@ LMud_Any LMud_Any_FromInteger(LMud_Integer value);
 
 void*         LMud_Any_AsPointer(LMud_Any any);
 LMud_Integer  LMud_Any_AsInteger(LMud_Any any);
+
+bool LMud_Any_Eq(LMud_Any a, LMud_Any b);

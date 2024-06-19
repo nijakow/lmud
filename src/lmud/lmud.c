@@ -16,11 +16,18 @@ void LMud_Destroy(struct LMud* self)
 
 void LMud_Test(struct LMud* self)
 {
-    struct LMud_Lisp*  lisp;
+    struct LMud_Lisp*        lisp;
+    struct LMud_InputStream  stream;
 
     lisp = &self->lisp;
 
-    LMud_Lisp_Print(lisp, LMud_Lisp_Cons(lisp, LMud_Lisp_Intern(lisp, "foo"), LMud_Lisp_Cons(lisp, LMud_Lisp_Intern(lisp, "bar"), LMud_Lisp_Intern(lisp, "baz"))), stdout, true);
+    LMud_InputStream_CreateFromFile(&stream, stdin);
+
+    while (true)
+    {
+        LMud_Lisp_Print(lisp, LMud_Lisp_Read(lisp, &stream), stdout, true);
+        putchar('\n');
+    }
 }
 
 void LMud_Main(struct LMud* self, int argc, char* argv[])

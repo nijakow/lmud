@@ -4,6 +4,28 @@
 #include "io.h"
 
 
+void LMud_Lisp_PrintList(struct LMud_Lisp* lisp, LMud_Any list, FILE* stream, bool escaped)
+{
+    fprintf(stream, "(");
+
+    LMud_Lisp_Print(lisp, LMud_Lisp_Car(lisp, list), stream, escaped);
+    list = LMud_Lisp_Cdr(lisp, list);
+
+    while (LMud_Lisp_IsCons(lisp, list))
+    {
+        fprintf(stream, " ");
+        LMud_Lisp_Print(lisp, LMud_Lisp_Car(lisp, list), stream, escaped);
+        list = LMud_Lisp_Cdr(lisp, list);
+    }
+
+    if (!LMud_Lisp_IsNil(lisp, list)) {
+        fprintf(stream, " . ");
+        LMud_Lisp_Print(lisp, list, stream, escaped);
+    }
+
+    fprintf(stream, ")");
+}
+
 void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool escaped)
 {
     void*  pointer;
@@ -13,19 +35,15 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
     } else if (LMud_Any_IsPointer(object)) {
         pointer = LMud_Any_AsPointer(object);
 
-        if (LMud_Lisp_IsCons(lisp, pointer)) {
-            fprintf(stream, "(");
-            LMud_Lisp_Print(lisp, ((struct LMud_Cons*) pointer)->car, stream, escaped);
-            fprintf(stream, " . ");
-            LMud_Lisp_Print(lisp, ((struct LMud_Cons*) pointer)->cdr, stream, escaped);
-            fprintf(stream, ")");
-        } else if (LMud_Lisp_IsString(lisp, pointer)) {
+        if (LMud_Lisp_IsConsPointer(lisp, pointer)) {
+            LMud_Lisp_PrintList(lisp, object, stream, escaped);
+        } else if (LMud_Lisp_IsStringPointer(lisp, pointer)) {
             if (escaped) {
                 fprintf(stream, "\"%s\"", ((struct LMud_String*) pointer)->chars);
             } else {
                 fprintf(stream, "%s", ((struct LMud_String*) pointer)->chars);
             }
-        } else if (LMud_Lisp_IsSymbol(lisp, pointer)) {
+        } else if (LMud_Lisp_IsSymbolPointer(lisp, pointer)) {
             LMud_Lisp_Print(lisp, ((struct LMud_Symbol*) pointer)->name, stream, false);
         }
     } else {
@@ -56,7 +74,7 @@ LMud_Any LMud_Lisp_ReadList(struct LMud_Lisp* lisp, struct LMud_InputStream* str
     LMud_InputStream_SkipIf(stream, &LMud_Lisp_Read_IsWhitespace);
 
     if (LMud_InputStream_CheckStr(stream, ". ")) {
-         value = LMud_Lisp_ReadList(lisp, stream);
+         value = LMud_Lisp_Read(lisp, stream);
          if (!LMud_InputStream_CheckStr(stream, ")")) {
             // TODO: Read error
          }

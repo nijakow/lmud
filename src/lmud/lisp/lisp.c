@@ -36,19 +36,40 @@ struct LMud_Types* LMud_Lisp_Types(struct LMud_Lisp* self)
 }
 
 
-bool LMud_Lisp_IsCons(struct LMud_Lisp* self, void* object)
+bool LMud_Lisp_IsConsPointer(struct LMud_Lisp* self, void* object)
 {
     return LMud_Types_IsCons(LMud_Lisp_Types(self), object);
 }
 
-bool LMud_Lisp_IsString(struct LMud_Lisp* self, void* object)
+bool LMud_Lisp_IsStringPointer(struct LMud_Lisp* self, void* object)
 {
     return LMud_Types_IsString(LMud_Lisp_Types(self), object);
 }
 
-bool LMud_Lisp_IsSymbol(struct LMud_Lisp* self, void* object)
+bool LMud_Lisp_IsSymbolPointer(struct LMud_Lisp* self, void* object)
 {
     return LMud_Types_IsSymbol(LMud_Lisp_Types(self), object);
+}
+
+bool LMud_Lisp_IsCons(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Any_IsPointer(value) && LMud_Lisp_IsConsPointer(self, LMud_Any_AsPointer(value));
+}
+
+bool LMud_Lisp_IsString(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Any_IsPointer(value) && LMud_Lisp_IsStringPointer(self, LMud_Any_AsPointer(value));
+}
+
+bool LMud_Lisp_IsSymbol(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Any_IsPointer(value) && LMud_Lisp_IsSymbolPointer(self, LMud_Any_AsPointer(value));
+}
+
+
+bool LMud_Lisp_IsNil(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Any_Eq(LMud_Lisp_Nil(self), value);
 }
 
 
@@ -70,4 +91,19 @@ LMud_Any LMud_Lisp_String(struct LMud_Lisp* self, const char* text)
 LMud_Any LMud_Lisp_Intern(struct LMud_Lisp* self, const char* name)
 {
     return LMud_Any_FromPointer(LMud_Objects_Intern(&self->objects, name));
+}
+
+
+LMud_Any LMud_Lisp_Car(struct LMud_Lisp* self, LMud_Any value)
+{
+    if (!LMud_Lisp_IsCons(self, value))
+        return value;
+    return ((struct LMud_Cons*) LMud_Any_AsPointer(value))->car;
+}
+
+LMud_Any LMud_Lisp_Cdr(struct LMud_Lisp* self, LMud_Any value)
+{
+    if (!LMud_Lisp_IsCons(self, value))
+        return value;
+    return ((struct LMud_Cons*) LMud_Any_AsPointer(value))->cdr;
 }
