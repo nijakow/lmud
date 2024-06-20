@@ -1,5 +1,6 @@
 
 #include <lmud/lisp/objects.h>
+#include <lmud/lisp/objects/string.h>
 
 #include "symbol.h"
 
@@ -33,10 +34,22 @@ struct LMud_Symbol* LMud_SymbolTable_Intern(struct LMud_SymbolTable* self, struc
 
     if (symbol != NULL)
     {
-        LMud_Symbol_Create(symbol, &self->symbols, LMud_Any_FromPointer(LMud_Objects_String(objects, name)));
+        LMud_Symbol_Create(symbol, self, LMud_Any_FromPointer(LMud_Objects_String(objects, name)));
     }
 
     return symbol;
+}
+
+void LMud_SymbolTable_Dump(struct LMud_SymbolTable* self)
+{
+    struct LMud_Symbol*  symbol;
+
+    printf("Symbol table:\n");
+
+    for (symbol = self->symbols; symbol != NULL; symbol = symbol->next)
+    {
+        printf(" - %s\n", LMud_Symbol_Name(symbol));
+    }
 }
 
 
@@ -87,4 +100,9 @@ void LMud_Symbol_LinkIntoList(struct LMud_Symbol* self, struct LMud_Symbol** lis
 void LMud_Symbol_Link(struct LMud_Symbol* self, struct LMud_SymbolTable* table)
 {
     LMud_Symbol_LinkIntoList(self, &table->symbols);
+}
+
+const char* LMud_Symbol_Name(struct LMud_Symbol* self)
+{
+    return LMud_String_Chars((struct LMud_String*) LMud_Any_AsPointer(self->name));
 }

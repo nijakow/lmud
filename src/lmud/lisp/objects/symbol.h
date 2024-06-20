@@ -15,6 +15,8 @@ void LMud_SymbolTable_Destroy(struct LMud_SymbolTable* self);
 
 struct LMud_Symbol* LMud_SymbolTable_Intern(struct LMud_SymbolTable* self, struct LMud_Objects* objects, const char* name);
 
+void LMud_SymbolTable_Dump(struct LMud_SymbolTable* self);
+
 
 struct LMud_Symbol
 {
@@ -35,3 +37,5 @@ void LMud_Symbol_Destroy(struct LMud_Symbol* self);
 void LMud_Symbol_Unlink(struct LMud_Symbol* self);
 void LMud_Symbol_LinkIntoList(struct LMud_Symbol* self, struct LMud_Symbol** list);
 void LMud_Symbol_Link(struct LMud_Symbol* self, struct LMud_SymbolTable* table);
+
+const char* LMud_Symbol_Name(struct LMud_Symbol* self);
