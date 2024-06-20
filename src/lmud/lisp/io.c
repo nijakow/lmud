@@ -53,6 +53,11 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
 }
 
 
+bool LMud_Lisp_Read_IsNotNewline(char c)
+{
+    return (c != '\n');
+}
+
 bool LMud_Lisp_Read_IsWhitespace(char c)
 {
     return (c == ' ')
@@ -176,6 +181,9 @@ LMud_Any LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream)
     if (LMud_InputStream_Eof(stream)) {
         // TODO: Read error
         return LMud_Lisp_Nil(lisp);
+    } else if (LMud_InputStream_CheckStr(stream, ";")) {
+        LMud_InputStream_SkipIf(stream, &LMud_Lisp_Read_IsNotNewline);
+        return LMud_Lisp_Read(lisp, stream);
     } else if (LMud_InputStream_CheckStr(stream, "#'")) {
         return LMud_Lisp_QuoteFunction(lisp, LMud_Lisp_Read(lisp, stream));
     } else if (LMud_InputStream_CheckStr(stream, "'")) {
