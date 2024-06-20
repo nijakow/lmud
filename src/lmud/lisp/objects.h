@@ -25,9 +25,9 @@ bool LMud_Types_IsSymbol(struct LMud_Types* self, void* object);
 
 struct LMud_Objects
 {
-    struct LMud_Object*  objects;
-    struct LMud_Symbol*  symbols;
-    struct LMud_Types    types;
+    struct LMud_Object*      objects;
+    struct LMud_SymbolTable  symbols;
+    struct LMud_Types        types;
 };
 
 bool LMud_Objects_Create(struct LMud_Objects* self);

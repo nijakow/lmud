@@ -35,8 +35,8 @@ bool LMud_Types_IsSymbol(struct LMud_Types* self, void* object)
 bool LMud_Objects_Create(struct LMud_Objects* self)
 {
     self->objects = NULL;
-    self->symbols = NULL;
-
+    
+    LMud_SymbolTable_Create(&self->symbols);
     LMud_Types_Create(&self->types);
 
     return true;
@@ -45,6 +45,7 @@ bool LMud_Objects_Create(struct LMud_Objects* self)
 void LMud_Objects_Destroy(struct LMud_Objects* self)
 {
     LMud_Types_Destroy(&self->types);
+    LMud_SymbolTable_Destroy(&self->symbols);
 }
 
 
@@ -106,24 +107,7 @@ struct LMud_String* LMud_Objects_String(struct LMud_Objects* self, const char* t
 
 struct LMud_Symbol* LMud_Objects_PrimitiveIntern(struct LMud_Objects* self, const char* name)
 {
-    struct LMud_Symbol*  symbol;
-
-    for (symbol = self->symbols; symbol != NULL; symbol = symbol->next)
-    {
-        if (LMud_String_Equals(LMud_Any_AsPointer(symbol->name), name))
-        {
-            return symbol;
-        }
-    }
-
-    symbol = LMud_Objects_Allocate(self, &self->types.symbol, 0);
-
-    if (symbol != NULL)
-    {
-        LMud_Symbol_Create(symbol, &self->symbols, LMud_Any_FromPointer(LMud_Objects_String(self, name)));
-    }
-
-    return symbol;
+    return LMud_SymbolTable_Intern(&self->symbols, self, name);
 }
 
 struct LMud_Symbol* LMud_Objects_Intern(struct LMud_Objects* self, const char* name)
