@@ -35,8 +35,6 @@ void LMud_Test(struct LMud* self)
 
     while (!LMud_InputStream_Eof(&stream))
     {
-        printf("\n");
-        LMud_SymbolTable_Dump(&lisp->objects.symbols);
         printf("> ");
         fflush(stdout);
         value = LMud_Lisp_Read(lisp, &stream);
