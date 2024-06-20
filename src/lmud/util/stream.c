@@ -33,6 +33,13 @@ bool LMud_InputStream_Eof(struct LMud_InputStream* self)
     return (self->file_based) ? feof(self->file) : (self->data[self->index] == '\0');
 }
 
+static void LMud_InputStream_Unread(struct LMud_InputStream* self, char c)
+{
+    if (self->file_based) {
+        ungetc(c, self->file);
+    }
+}
+
 void LMud_InputStream_Advance(struct LMud_InputStream* self)
 {
     if (!LMud_InputStream_Eof(self)) {
@@ -49,7 +56,7 @@ char LMud_InputStream_Get(struct LMud_InputStream* self)
 
     if (self->file_based) {
         c = fgetc(self->file);
-        ungetc(c, self->file);
+        LMud_InputStream_Unread(self, c);
         return (char) c;
     } else {
         return self->data[self->index];
@@ -82,17 +89,36 @@ bool LMud_InputStream_CheckStr(struct LMud_InputStream* self, const char* str)
 {
     LMud_Size  saved;
     LMud_Size  index;
+    char       c;
+    char       pushbacks[1024];
 
-    saved = (self->file_based) ? ((LMud_Size) ftell(self->file)) : self->index;
+    if (self->file_based) {
+        saved = 0;
 
-    for (index = 0; str[index] != '\0'; index++)
-    {
-        if (!LMud_InputStream_Check(self, str[index])) {
-            if (self->file_based)
-                fseek(self->file, SEEK_SET, (long) saved);
-            else
+        for (index = 0; str[index] != '\0'; index++)
+        {
+            c = LMud_InputStream_Read(self);
+
+            pushbacks[saved++] = c;
+            
+            if (c != str[index]) {
+                while (saved --> 0)
+                {
+                    LMud_InputStream_Unread(self, pushbacks[saved]);
+                }
+
+                return false;
+            }
+        }
+    } else {
+        saved = self->index;
+
+        for (index = 0; str[index] != '\0'; index++)
+        {
+            if (!LMud_InputStream_Check(self, str[index])) {
                 self->index = saved;
-            return false;
+                return false;
+            }
         }
     }
 
