@@ -40,6 +40,11 @@ struct LMud_Types* LMud_Lisp_Types(struct LMud_Lisp* self)
 }
 
 
+bool LMud_Lisp_IsArrayPointer(struct LMud_Lisp* self, void* object)
+{
+    return LMud_Types_IsArray(LMud_Lisp_Types(self), object);
+}
+
 bool LMud_Lisp_IsConsPointer(struct LMud_Lisp* self, void* object)
 {
     return LMud_Types_IsCons(LMud_Lisp_Types(self), object);
@@ -53,6 +58,12 @@ bool LMud_Lisp_IsStringPointer(struct LMud_Lisp* self, void* object)
 bool LMud_Lisp_IsSymbolPointer(struct LMud_Lisp* self, void* object)
 {
     return LMud_Types_IsSymbol(LMud_Lisp_Types(self), object);
+}
+
+
+bool LMud_Lisp_IsArray(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Any_IsPointer(value) && LMud_Lisp_IsArrayPointer(self, LMud_Any_AsPointer(value));
 }
 
 bool LMud_Lisp_IsCons(struct LMud_Lisp* self, LMud_Any value)

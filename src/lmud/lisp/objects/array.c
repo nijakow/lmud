@@ -19,3 +19,15 @@ void LMud_Array_Destroy(struct LMud_Array* self)
 {
     (void) self;
 }
+
+LMud_Size LMud_Array_GetSize(struct LMud_Array* self)
+{
+    return self->size;
+}
+
+LMud_Any LMud_Array_Aref(struct LMud_Array* self, LMud_Size index, LMud_Any default_value)
+{
+    if (index >= LMud_Array_GetSize(self))
+        return default_value;
+    return self->data[index];
+}

@@ -27,6 +27,25 @@ void LMud_Lisp_PrintList(struct LMud_Lisp* lisp, LMud_Any list, FILE* stream, bo
     fprintf(stream, ")");
 }
 
+void LMud_Lisp_PrintArray(struct LMud_Lisp* lisp, struct LMud_Array* array, FILE* stream, bool escaped)
+{
+    LMud_Any   default_value;
+    LMud_Size  index;
+    LMud_Size  size;
+
+    fprintf(stream, "#(");
+
+    default_value = LMud_Lisp_Nil(lisp);
+    size          = LMud_Array_GetSize(array);
+    
+    for (index = 0; index < size; index++)
+    {
+        if (index > 0)
+            fprintf(stream, " ");
+        LMud_Lisp_Print(lisp, LMud_Array_Aref(array, index, default_value), stream, escaped);
+    }
+}
+
 void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool escaped)
 {
     void*  pointer;
@@ -38,6 +57,8 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
 
         if (LMud_Lisp_IsConsPointer(lisp, pointer)) {
             LMud_Lisp_PrintList(lisp, object, stream, escaped);
+        } else if (LMud_Lisp_IsArrayPointer(lisp, pointer)) {
+            LMud_Lisp_PrintArray(lisp, pointer, stream, escaped);
         } else if (LMud_Lisp_IsStringPointer(lisp, pointer)) {
             if (escaped) {
                 fprintf(stream, "\"%s\"", ((struct LMud_String*) pointer)->chars);
