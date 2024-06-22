@@ -82,6 +82,11 @@ LMud_Any LMud_Lisp_Nil(struct LMud_Lisp* self)
     return self->constants.nil;
 }
 
+LMud_Any LMud_Lisp_MakeArray(struct LMud_Lisp* self, LMud_Size size, LMud_Any fill)
+{
+    return LMud_Any_FromPointer(LMud_Objects_MakeArray(&self->objects, size, fill));
+}
+
 LMud_Any LMud_Lisp_Cons(struct LMud_Lisp* self, LMud_Any car, LMud_Any cdr)
 {
     return LMud_Any_FromPointer(LMud_Objects_Cons(&self->objects, car, cdr));

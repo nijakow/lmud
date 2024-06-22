@@ -6,6 +6,7 @@
 
 void LMud_Types_Create(struct LMud_Types* self)
 {
+    self->array.base_size  = sizeof(struct LMud_Array);
     self->cons.base_size   = sizeof(struct LMud_Cons);
     self->string.base_size = sizeof(struct LMud_String);
     self->symbol.base_size = sizeof(struct LMud_Symbol);
@@ -14,6 +15,11 @@ void LMud_Types_Create(struct LMud_Types* self)
 void LMud_Types_Destroy(struct LMud_Types* self)
 {
     (void) self;
+}
+
+bool LMud_Types_IsArray(struct LMud_Types* self, void* object)
+{
+    return LMud_Type_TypeCheck(&self->array, object);
 }
 
 bool LMud_Types_IsCons(struct LMud_Types* self, void* object)
@@ -64,6 +70,20 @@ void* LMud_Objects_Allocate(struct LMud_Objects* self, struct LMud_Type* type, L
 }
 
 
+struct LMud_Array*  LMud_Objects_MakeArray(struct LMud_Objects* self, LMud_Size size, LMud_Any fill)
+{
+    struct LMud_Array*  array;
+
+    array = LMud_Objects_Allocate(self, &self->types.array, size * sizeof(LMud_Any));
+
+    if (array != NULL)
+    {
+        LMud_Array_Create_Overallocated(array, size, fill);
+    }
+
+    return array;
+}
+
 struct LMud_Cons* LMud_Objects_Cons(struct LMud_Objects* self, LMud_Any car, LMud_Any cdr)
 {
     struct LMud_Cons*  cons;
@@ -72,8 +92,7 @@ struct LMud_Cons* LMud_Objects_Cons(struct LMud_Objects* self, LMud_Any car, LMu
 
     if (cons != NULL)
     {
-        cons->car = car;
-        cons->cdr = cdr;
+        LMud_Cons_Create(cons, car, cdr);
     }
 
     return cons;
