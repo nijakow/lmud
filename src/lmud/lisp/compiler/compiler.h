@@ -39,7 +39,10 @@ struct LMud_Lisp* LMud_Compiler_GetLisp(struct LMud_Compiler* self);
 void LMud_Compiler_PushScope(struct LMud_Compiler* self);
 void LMud_Compiler_PopScope(struct LMud_Compiler* self);
 
-void      LMud_Compiler_PushBytecode(struct LMud_Compiler* self, uint8_t bytecode);
-LMud_Size LMud_Compiler_PushConstant(struct LMud_Compiler* self, LMud_Any constant);
+void      LMud_Compiler_PushU8(struct LMud_Compiler* self, uint8_t byte);
+void      LMud_Compiler_PushU16(struct LMud_Compiler* self, uint16_t word);
+void      LMud_Compiler_PushBytecode(struct LMud_Compiler* self, enum LMud_Bytecode bytecode);
+LMud_Size LMud_Compiler_PushConstant_None(struct LMud_Compiler* self, LMud_Any constant);
+void      LMud_Compiler_PushConstant(struct LMud_Compiler* self, LMud_Any constant);
 
 void LMud_Compiler_Compile(struct LMud_Compiler* self, LMud_Any expression);

@@ -76,7 +76,7 @@ void LMud_Compiler_PopScope(struct LMud_Compiler* self)
 }
 
 
-void LMud_Compiler_PushBytecode(struct LMud_Compiler* self, uint8_t bytecode)
+void LMud_Compiler_PushU8(struct LMud_Compiler* self, uint8_t byte)
 {
     LMud_Size  new_size;
     uint8_t*   new_bytecodes;
@@ -97,10 +97,21 @@ void LMud_Compiler_PushBytecode(struct LMud_Compiler* self, uint8_t bytecode)
         self->bytecodes_alloc = new_size;
     }
 
-    self->bytecodes[self->bytecodes_fill++] = bytecode;
+    self->bytecodes[self->bytecodes_fill++] = byte;
 }
 
-LMud_Size LMud_Compiler_PushConstant(struct LMud_Compiler* self, LMud_Any constant)
+void LMud_Compiler_PushU16(struct LMud_Compiler* self, uint16_t word)
+{
+    LMud_Compiler_PushU8(self, (word >> 8) & 0xFF);
+    LMud_Compiler_PushU8(self, word & 0xFF);
+}
+
+void LMud_Compiler_PushBytecode(struct LMud_Compiler* self, enum LMud_Bytecode bytecode)
+{
+    LMud_Compiler_PushU8(self, (uint8_t) bytecode);
+}
+
+LMud_Size LMud_Compiler_PushConstant_None(struct LMud_Compiler* self, LMud_Any constant)
 {
     LMud_Size  index;
     LMud_Size  new_size;
@@ -127,6 +138,11 @@ LMud_Size LMud_Compiler_PushConstant(struct LMud_Compiler* self, LMud_Any consta
     self->constants[index] = constant;
 
     return index;
+}
+
+void LMud_Compiler_PushConstant(struct LMud_Compiler* self, LMud_Any constant)
+{
+    LMud_Compiler_PushU16(self, LMud_Compiler_PushConstant_None(self, constant));
 }
 
 
