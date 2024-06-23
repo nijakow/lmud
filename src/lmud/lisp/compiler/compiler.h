@@ -45,4 +45,8 @@ void      LMud_Compiler_PushBytecode(struct LMud_Compiler* self, enum LMud_Bytec
 LMud_Size LMud_Compiler_PushConstant_None(struct LMud_Compiler* self, LMud_Any constant);
 void      LMud_Compiler_PushConstant(struct LMud_Compiler* self, LMud_Any constant);
 
+void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant);
+void LMud_Compiler_WritePush(struct LMud_Compiler* self);
+void LMud_Compiler_WriteCall(struct LMud_Compiler* self, LMud_Size arity);
+
 void LMud_Compiler_Compile(struct LMud_Compiler* self, LMud_Any expression);

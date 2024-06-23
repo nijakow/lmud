@@ -146,10 +146,27 @@ void LMud_Compiler_PushConstant(struct LMud_Compiler* self, LMud_Any constant)
 }
 
 
+void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_CONSTANT);
+    LMud_Compiler_PushConstant(self, constant);
+}
+
+void LMud_Compiler_WritePush(struct LMud_Compiler* self)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_PUSH);
+}
+
+void LMud_Compiler_WriteCall(struct LMud_Compiler* self, LMud_Size arity)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_CALL);
+    LMud_Compiler_PushU8(self, arity);
+}
+
+
 void LMud_Compiler_CompileConstant(struct LMud_Compiler* self, LMud_Any expression)
 {
-    (void) self;
-    (void) expression;
+    LMud_Compiler_WriteConstant(self, expression);
 }
 
 void LMud_Compiler_CompileVariable(struct LMud_Compiler* self, LMud_Any expression)
@@ -158,10 +175,47 @@ void LMud_Compiler_CompileVariable(struct LMud_Compiler* self, LMud_Any expressi
     (void) expression;
 }
 
-void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expression)
+void LMud_Compiler_CompileFunction(struct LMud_Compiler* self, LMud_Any expression)
 {
     (void) self;
     (void) expression;
+}
+
+void LMud_Compiler_CompileFuncall(struct LMud_Compiler* self, LMud_Any function, LMud_Any arguments)
+{
+    LMud_Any   argument;
+    LMud_Size  arity;
+
+    arity = 0;
+
+    while (!LMud_Lisp_IsNil(LMud_Compiler_GetLisp(self), arguments))
+    {
+        argument = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
+
+        LMud_Compiler_Compile(self, argument);
+        LMud_Compiler_WritePush(self);
+
+        arguments = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arguments);
+        arity     = arity + 1;
+    }
+
+    LMud_Compiler_CompileFunction(self, function);
+    LMud_Compiler_WriteCall(self, arity);
+}
+
+void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expression)
+{
+    LMud_Any  function;
+    LMud_Any  arguments;
+
+    function  = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), expression);
+    arguments = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), expression);
+
+    /*
+     * TODO: Handle special forms
+     */
+
+    LMud_Compiler_CompileFuncall(self, function, arguments);
 }
 
 void LMud_Compiler_Compile(struct LMud_Compiler* self, LMud_Any expression)
