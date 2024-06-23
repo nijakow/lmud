@@ -22,6 +22,14 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->lexical = NULL;
     self->scopes  = NULL;
 
+    self->bytecodes       = NULL;
+    self->bytecodes_fill  = 0;
+    self->bytecodes_alloc = 0;
+
+    self->constants       = NULL;
+    self->constants_fill  = 0;
+    self->constants_alloc = 0;
+
     LMud_Compiler_PushScope(self);
 }
 
@@ -31,6 +39,15 @@ void LMud_Compiler_Destroy(struct LMud_Compiler* self)
     {
         LMud_Compiler_PopScope(self);
     }
+
+    LMud_Free(self->bytecodes);
+    LMud_Free(self->constants);
+}
+
+
+struct LMud_Lisp* LMud_Compiler_GetLisp(struct LMud_Compiler* self)
+{
+    return LMud_CompilerSession_GetLisp(self->session);
 }
 
 
@@ -59,10 +76,57 @@ void LMud_Compiler_PopScope(struct LMud_Compiler* self)
 }
 
 
-
-struct LMud_Lisp* LMud_Compiler_GetLisp(struct LMud_Compiler* self)
+void LMud_Compiler_PushBytecode(struct LMud_Compiler* self, uint8_t bytecode)
 {
-    return LMud_CompilerSession_GetLisp(self->session);
+    LMud_Size  new_size;
+    uint8_t*   new_bytecodes;
+
+    if (self->bytecodes_fill >= self->bytecodes_alloc)
+    {
+        if (self->bytecodes_alloc == 0) {
+            new_size = 1;
+        } else {
+            new_size = self->bytecodes_alloc * 2;
+        }
+
+        new_bytecodes = LMud_Realloc(self->bytecodes, new_size);
+
+        // TODO: Error if new_bytecodes == NULL
+
+        self->bytecodes       = new_bytecodes;
+        self->bytecodes_alloc = new_size;
+    }
+
+    self->bytecodes[self->bytecodes_fill++] = bytecode;
+}
+
+LMud_Size LMud_Compiler_PushConstant(struct LMud_Compiler* self, LMud_Any constant)
+{
+    LMud_Size  index;
+    LMud_Size  new_size;
+    LMud_Any*  new_constants;
+
+    if (self->constants_fill >= self->constants_alloc)
+    {
+        if (self->constants_alloc == 0) {
+            new_size = 1;
+        } else {
+            new_size = self->constants_alloc * 2;
+        }
+
+        new_constants = LMud_Realloc(self->constants, new_size * sizeof(LMud_Any));
+
+        // TODO: Error if new_constants == NULL
+
+        self->constants       = new_constants;
+        self->constants_alloc = new_size;
+    }
+
+    index = self->constants_fill++;
+
+    self->constants[index] = constant;
+
+    return index;
 }
 
 
