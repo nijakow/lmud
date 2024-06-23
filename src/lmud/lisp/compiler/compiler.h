@@ -27,3 +27,7 @@ void LMud_Compiler_Destroy(struct LMud_Compiler* self);
 
 void LMud_Compiler_PushScope(struct LMud_Compiler* self);
 void LMud_Compiler_PopScope(struct LMud_Compiler* self);
+
+struct LMud_Lisp* LMud_Compiler_GetLisp(struct LMud_Compiler* self);
+
+void LMud_Compiler_Compile(struct LMud_Compiler* self, LMud_Any expression);
