@@ -10,6 +10,7 @@ void LMud_Binding_Create(struct LMud_Binding* self, enum LMud_BindingType type, 
     self->next = NULL;
     self->type = type;
     self->name = name;
+    self->reg  = NULL;
 }
 
 void LMud_Binding_Destroy(struct LMud_Binding* self)
@@ -22,6 +23,18 @@ void LMud_Binding_Delete(struct LMud_Binding* self)
     LMud_Binding_Destroy(self);
     LMud_Free(self);
 }
+
+
+struct LMud_Register* LMud_Binding_GetRegister(struct LMud_Binding* self)
+{
+    return self->reg;
+}
+
+void LMud_Binding_SetRegister(struct LMud_Binding* self, struct LMud_Register* reg)
+{
+    self->reg = reg;
+}
+
 
 
 void LMud_Scope_Create(struct LMud_Scope* self, struct LMud_Scope* surrounding)
@@ -182,6 +195,33 @@ bool LMud_CompilerLabelInfo_WriteTargets(struct LMud_CompilerLabelInfo* self, ui
 }
 
 
+void LMud_Register_Create(struct LMud_Register* self, LMud_Size index, struct LMud_Register** list)
+{
+    self->index =  index;
+
+    self->prev  =  list;
+    self->next  = *list;
+    *list       =  self;
+}
+
+void LMud_Register_Destroy(struct LMud_Register* self)
+{
+    /*
+     * Unlink ourself from the list.
+     */
+    *self->prev = self->next;
+    if (self->next != NULL)
+        self->next->prev = self->prev;
+}
+
+void LMud_Register_Delete(struct LMud_Register* self)
+{
+    LMud_Register_Destroy(self);
+    LMud_Free(self);
+}
+
+
+
 void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSession* session)
 {
     self->session = session;
@@ -197,6 +237,7 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->constants_alloc = 0;
 
     self->labels          = NULL;
+    self->registers       = NULL;
 
     self->cached.symbol_quote    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "QUOTE");
     self->cached.symbol_function = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FUNCTION");
@@ -227,6 +268,11 @@ void LMud_Compiler_Destroy(struct LMud_Compiler* self)
     while (self->labels != NULL)
     {
         LMud_CompilerLabelInfo_Delete(self->labels);
+    }
+
+    while (self->registers != NULL)
+    {
+        LMud_Register_Delete(self->registers);
     }
 
     LMud_Free(self->bytecodes);
@@ -262,6 +308,59 @@ void LMud_Compiler_PopScope(struct LMud_Compiler* self)
 
     LMud_Scope_Destroy(scope);
     LMud_Free(scope);
+}
+
+
+bool LMud_Compiler_FindBinding(struct LMud_Compiler* self, LMud_Any name, enum LMud_BindingType type, struct LMud_Binding** binding)
+{
+    struct LMud_Scope*  scope;
+
+    for (scope = self->scopes; scope != NULL; scope = scope->surrounding)
+    {
+        *binding = LMud_Scope_FindBinding(scope, name, type);
+
+        if (*binding != NULL)
+            return true;
+    }
+
+    return false;
+}
+
+
+struct LMud_Register* LMud_Compiler_AllocateRegister(struct LMud_Compiler* self)
+{
+    struct LMud_Register*  reg;
+
+    reg = LMud_Alloc(sizeof(struct LMud_Register));
+
+    if (reg != NULL)
+    {
+        LMud_Register_Create(reg, self->registers == NULL ? 0 : self->registers->index + 1, &self->registers);
+    }
+
+    return reg;
+}
+
+bool LMud_Compiler_IdentifyRegister(struct LMud_Compiler* self, struct LMud_Register* reg, LMud_Size* depth, LMud_Size* index)
+{
+    struct LMud_Compiler*  compiler;
+    struct LMud_Register*  the_reg;
+    LMud_Size              our_depth;
+
+    for (compiler = self, our_depth = 0; compiler != NULL; compiler = compiler->lexical, depth++)
+    {
+        for (the_reg = compiler->registers; the_reg != NULL; the_reg = the_reg->next)
+        {
+            if (the_reg == reg)
+            {
+                *depth = our_depth;
+                *index = the_reg->index;
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 
@@ -421,6 +520,20 @@ void LMud_Compiler_WriteSymbolFunction(struct LMud_Compiler* self, LMud_Any symb
     LMud_Compiler_PushConstant(self, symbol);
 }
 
+void LMud_Compiler_WriteLoad(struct LMud_Compiler* self, LMud_Size depth, LMud_Size index)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_LEXICAL_LOAD);
+    LMud_Compiler_PushU8(self, depth);
+    LMud_Compiler_PushU8(self, index);
+}
+
+void LMud_Compiler_WriteStore(struct LMud_Compiler* self, LMud_Size depth, LMud_Size index)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_LEXICAL_STORE);
+    LMud_Compiler_PushU8(self, depth);
+    LMud_Compiler_PushU8(self, index);
+}
+
 void LMud_Compiler_WritePush(struct LMud_Compiler* self)
 {
     LMud_Compiler_PushBytecode(self, LMud_Bytecode_PUSH);
@@ -433,23 +546,88 @@ void LMud_Compiler_WriteCall(struct LMud_Compiler* self, LMud_Size arity)
 }
 
 
+
+bool LMud_Compiler_WriteLoadRegister(struct LMud_Compiler* self, struct LMud_Register* reg)
+{
+    LMud_Size  depth;
+    LMud_Size  index;
+
+    if (LMud_Compiler_IdentifyRegister(self, reg, &depth, &index)) {
+        LMud_Compiler_WriteLoad(self, depth, index);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool LMud_Compiler_WriteStoreRegister(struct LMud_Compiler* self, struct LMud_Register* reg)
+{
+    LMud_Size  depth;
+    LMud_Size  index;
+
+    if (LMud_Compiler_IdentifyRegister(self, reg, &depth, &index)) {
+        LMud_Compiler_WriteStore(self, depth, index);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
 void LMud_Compiler_CompileConstant(struct LMud_Compiler* self, LMud_Any expression)
 {
     LMud_Compiler_WriteConstant(self, expression);
 }
 
-void LMud_Compiler_CompileVariable(struct LMud_Compiler* self, LMud_Any expression, enum LMud_BindingType type)
+enum LMud_VariableMode
 {
+    LMud_VariableMode_LOAD,
+    LMud_VariableMode_STORE
+};
+
+void LMud_Compiler_CompileVariable(struct LMud_Compiler* self, LMud_Any expression, enum LMud_BindingType type, enum LMud_VariableMode mode)
+{
+    struct LMud_Binding*  binding;
+
+    if (LMud_Compiler_FindBinding(self, expression, type, &binding))
+    {
+        if (LMud_Binding_GetRegister(binding) != NULL) {
+            switch (mode)
+            {
+                case LMud_VariableMode_LOAD:
+                    LMud_Compiler_WriteLoadRegister(self, LMud_Binding_GetRegister(binding));
+                    break;
+
+                case LMud_VariableMode_STORE:
+                    LMud_Compiler_WriteStoreRegister(self, LMud_Binding_GetRegister(binding));
+                    break;
+                
+                // TODO: Error on default
+            }
+            return;
+        }
+    }
+
     switch (type)
     {
-        case LMud_BindingType_VARIABLE:
+        case LMud_BindingType_VARIABLE: // TODO: Load vs. Store
             LMud_Compiler_WriteSymbolVariable(self, expression);
             break;
 
-        case LMud_BindingType_FUNCTION:
+        case LMud_BindingType_FUNCTION: // TODO: Load vs. Store
             LMud_Compiler_WriteSymbolFunction(self, expression);
             break;
     }
+}
+
+void LMud_Compiler_CompileLoadVariable(struct LMud_Compiler* self, LMud_Any expression, enum LMud_BindingType type)
+{
+    LMud_Compiler_CompileVariable(self, expression, type, LMud_VariableMode_LOAD);
+}
+
+void LMud_Compiler_CompileStoreVariable(struct LMud_Compiler* self, LMud_Any expression, enum LMud_BindingType type)
+{
+    LMud_Compiler_CompileVariable(self, expression, type, LMud_VariableMode_STORE);
 }
 
 void LMud_Compiler_CompileLambda(struct LMud_Compiler* self, LMud_Any arglist, LMud_Any body)
@@ -470,7 +648,7 @@ void LMud_Compiler_CompileLambda(struct LMud_Compiler* self, LMud_Any arglist, L
 void LMud_Compiler_CompileFunction(struct LMud_Compiler* self, LMud_Any expression)
 {
     if (LMud_Lisp_IsSymbol(LMud_Compiler_GetLisp(self), expression))
-        LMud_Compiler_CompileVariable(self, expression, LMud_BindingType_FUNCTION);
+        LMud_Compiler_CompileLoadVariable(self, expression, LMud_BindingType_FUNCTION);
     else
         LMud_Compiler_Compile(self, expression);
 }
@@ -673,7 +851,7 @@ void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expre
 void LMud_Compiler_Compile(struct LMud_Compiler* self, LMud_Any expression)
 {
     if (LMud_Lisp_IsSymbol(LMud_Compiler_GetLisp(self), expression))
-        LMud_Compiler_CompileVariable(self, expression, LMud_BindingType_VARIABLE);
+        LMud_Compiler_CompileLoadVariable(self, expression, LMud_BindingType_VARIABLE);
     else if (LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), expression))
         LMud_Compiler_CompileCombination(self, expression);
     else

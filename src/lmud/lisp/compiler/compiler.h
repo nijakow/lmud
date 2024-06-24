@@ -6,6 +6,9 @@
 #include "session.h"
 
 
+struct LMud_Register;
+
+
 enum LMud_BindingType
 {
     LMud_BindingType_VARIABLE,
@@ -17,12 +20,15 @@ struct LMud_Binding
     struct LMud_Binding*   next;
     enum LMud_BindingType  type;
     LMud_Any               name;
-    // TODO: Register location
+    struct LMud_Register*  reg;
 };
 
 void LMud_Binding_Create(struct LMud_Binding* self, enum LMud_BindingType type, LMud_Any name);
 void LMud_Binding_Destroy(struct LMud_Binding* self);
 void LMud_Binding_Delete(struct LMud_Binding* self);
+
+struct LMud_Register* LMud_Binding_GetRegister(struct LMud_Binding* self);
+void                  LMud_Binding_SetRegister(struct LMud_Binding* self, struct LMud_Register* reg);
 
 
 struct LMud_Scope
@@ -63,34 +69,48 @@ void LMud_CompilerLabelInfo_AddTarget(struct LMud_CompilerLabelInfo* self, LMud_
 bool LMud_CompilerLabelInfo_WriteTargets(struct LMud_CompilerLabelInfo* self, uint8_t* bytecodes);
 
 
+
+struct LMud_Register
+{
+    struct LMud_Register**  prev;
+    struct LMud_Register*   next;
+    LMud_Size               index;
+};
+
+void LMud_Register_Create(struct LMud_Register* self, LMud_Size index, struct LMud_Register** list);
+void LMud_Register_Destroy(struct LMud_Register* self);
+void LMud_Register_Delete(struct LMud_Register* self);
+
+
 struct LMud_Compiler
 {
-    struct LMud_CompilerSession*   session;
-    struct LMud_Compiler*          lexical;
-    struct LMud_Scope*             scopes;
+    struct LMud_CompilerSession*    session;
+    struct LMud_Compiler*           lexical;
+    struct LMud_Scope*              scopes;
 
-    uint8_t*                       bytecodes;
-    LMud_Size                      bytecodes_fill;
-    LMud_Size                      bytecodes_alloc;
+    uint8_t*                        bytecodes;
+    LMud_Size                       bytecodes_fill;
+    LMud_Size                       bytecodes_alloc;
 
-    LMud_Any*                      constants;
-    LMud_Size                      constants_fill;
-    LMud_Size                      constants_alloc;
+    LMud_Any*                       constants;
+    LMud_Size                       constants_fill;
+    LMud_Size                       constants_alloc;
 
-    struct LMud_CompilerLabelInfo* labels;
+    struct LMud_CompilerLabelInfo*  labels;
+    struct LMud_Register*           registers;
 
     struct
     {
-        LMud_Any                   symbol_quote;
-        LMud_Any                   symbol_function;
-        LMud_Any                   symbol_lambda;
-        LMud_Any                   symbol_progn;
-        LMud_Any                   symbol_setq;
-        LMud_Any                   symbol_let;
-        LMud_Any                   symbol_flet;
-        LMud_Any                   symbol_labels;
-        LMud_Any                   symbol_if;
-    }                              cached;
+        LMud_Any                    symbol_quote;
+        LMud_Any                    symbol_function;
+        LMud_Any                    symbol_lambda;
+        LMud_Any                    symbol_progn;
+        LMud_Any                    symbol_setq;
+        LMud_Any                    symbol_let;
+        LMud_Any                    symbol_flet;
+        LMud_Any                    symbol_labels;
+        LMud_Any                    symbol_if;
+    }                               cached;
 };
 
 typedef struct LMud_CompilerLabelInfo* LMud_CompilerLabel;
@@ -104,6 +124,8 @@ struct LMud_Lisp* LMud_Compiler_GetLisp(struct LMud_Compiler* self);
 
 void LMud_Compiler_PushScope(struct LMud_Compiler* self);
 void LMud_Compiler_PopScope(struct LMud_Compiler* self);
+
+struct LMud_Register* LMud_Compiler_AllocateRegister(struct LMud_Compiler* self);
 
 void      LMud_Compiler_PushU8(struct LMud_Compiler* self, uint8_t byte);
 void      LMud_Compiler_PushU16(struct LMud_Compiler* self, uint16_t word);
@@ -121,6 +143,8 @@ void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant);
 void LMud_Compiler_WriteLambda(struct LMud_Compiler* self, LMud_Any lambda);
 void LMud_Compiler_WriteSymbolVariable(struct LMud_Compiler* self, LMud_Any symbol);
 void LMud_Compiler_WriteSymbolFunction(struct LMud_Compiler* self, LMud_Any symbol);
+void LMud_Compiler_WriteLoad(struct LMud_Compiler* self, LMud_Size depth, LMud_Size index);
+void LMud_Compiler_WriteStore(struct LMud_Compiler* self, LMud_Size depth, LMud_Size index);
 void LMud_Compiler_WritePush(struct LMud_Compiler* self);
 void LMud_Compiler_WriteCall(struct LMud_Compiler* self, LMud_Size arity);
 
