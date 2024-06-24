@@ -529,8 +529,8 @@ void LMud_Compiler_CompileSpecialLambda(struct LMud_Compiler* self, LMud_Any arg
     /*
      * TODO: Error if there is no arglist.
      */
-    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &arglist);
-    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &body);
+    arglist = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
+    body    = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arguments);
 
     LMud_Compiler_CompileLambda(self, arglist, body);
 }
