@@ -6,6 +6,8 @@
 
 struct LMud_ArgInfo
 {
+    LMud_Size  stack_size;
+    LMud_Size  register_count;
 };
 
 struct LMud_Function

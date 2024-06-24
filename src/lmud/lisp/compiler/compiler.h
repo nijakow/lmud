@@ -99,6 +99,10 @@ struct LMud_Compiler
     struct LMud_CompilerLabelInfo*  labels;
     struct LMud_Register*           registers;
 
+    LMud_Size                       max_stack_depth;
+    LMud_Size                       current_stack_depth;
+    LMud_Size                       max_register_index;
+
     struct
     {
         LMud_Any                    symbol_symbol_value;
