@@ -1,4 +1,5 @@
 
+#include <lmud/lisp/builtins.h>
 #include <lmud/util/stringbuilder.h>
 
 #include "lisp.h"
@@ -20,6 +21,8 @@ bool LMud_Constants_Create(struct LMud_Constants* self, struct LMud_Lisp* lisp)
 
     self->quote    = LMud_Lisp_Intern(lisp, "QUOTE");
     self->function = LMud_Lisp_Intern(lisp, "FUNCTION");
+
+    LMud_Lisp_InstallBuiltins(lisp);
 
     return true;
 }
