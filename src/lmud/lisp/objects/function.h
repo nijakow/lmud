@@ -8,6 +8,7 @@ struct LMud_ArgInfo
 {
     LMud_Size  stack_size;
     LMud_Size  register_count;
+    bool       lexicalized;
 };
 
 struct LMud_Function

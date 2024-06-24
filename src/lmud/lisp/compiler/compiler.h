@@ -102,6 +102,7 @@ struct LMud_Compiler
     LMud_Size                       max_stack_depth;
     LMud_Size                       current_stack_depth;
     LMud_Size                       max_register_index;
+    bool                            uses_lexical_stuff;
 
     struct
     {

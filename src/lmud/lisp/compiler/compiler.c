@@ -242,6 +242,7 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->max_stack_depth     = 0;
     self->current_stack_depth = 0;
     self->max_register_index  = 0;
+    self->uses_lexical_stuff  = false;
 
     self->cached.symbol_quote    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "QUOTE");
     self->cached.symbol_function = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FUNCTION");
@@ -300,7 +301,12 @@ void LMud_Compiler_IncreaseStackDepth(struct LMud_Compiler* self, LMud_Size dept
 void LMud_Compiler_DecreaseStackDepth(struct LMud_Compiler* self, LMud_Size depth)
 {
     self->current_stack_depth -= depth;
-}   
+}
+
+void LMud_Compiler_EnableLexicalStuff(struct LMud_Compiler* self)
+{
+    self->uses_lexical_stuff = true;
+}
 
 
 void LMud_Compiler_PushScope(struct LMud_Compiler* self)
@@ -561,6 +567,8 @@ void LMud_Compiler_WriteSymbolFunction(struct LMud_Compiler* self, LMud_Any symb
 
 void LMud_Compiler_WriteLoad(struct LMud_Compiler* self, LMud_Size depth, LMud_Size index)
 {
+    if (depth > 0)
+        LMud_Compiler_EnableLexicalStuff(self);
     LMud_Compiler_PushBytecode(self, LMud_Bytecode_LEXICAL_LOAD);
     LMud_Compiler_PushU8(self, depth);
     LMud_Compiler_PushU8(self, index);
@@ -568,6 +576,8 @@ void LMud_Compiler_WriteLoad(struct LMud_Compiler* self, LMud_Size depth, LMud_S
 
 void LMud_Compiler_WriteStore(struct LMud_Compiler* self, LMud_Size depth, LMud_Size index)
 {
+    if (depth > 0)
+        LMud_Compiler_EnableLexicalStuff(self);
     LMud_Compiler_PushBytecode(self, LMud_Bytecode_LEXICAL_STORE);
     LMud_Compiler_PushU8(self, depth);
     LMud_Compiler_PushU8(self, index);
@@ -984,6 +994,7 @@ LMud_Any LMud_Compiler_Build(struct LMud_Compiler* self)
         (struct LMud_ArgInfo) {
             .stack_size     = self->max_stack_depth,
             .register_count = self->max_register_index, // We keep an increment of 1
+            .lexicalized    = self->uses_lexical_stuff,
         },
         LMud_Lisp_MakeBytes_FromData(LMud_Compiler_GetLisp(self), self->bytecodes_fill, (const char*) self->bytecodes),
         LMud_Lisp_MakeArray_FromData(LMud_Compiler_GetLisp(self), self->constants_fill, self->constants)

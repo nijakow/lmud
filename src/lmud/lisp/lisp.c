@@ -108,9 +108,22 @@ bool LMud_Lisp_IsNil(struct LMud_Lisp* self, LMud_Any value)
 }
 
 
+LMud_Any LMud_Lisp_T(struct LMud_Lisp* self)
+{
+    return self->constants.t;
+}
+
 LMud_Any LMud_Lisp_Nil(struct LMud_Lisp* self)
 {
     return self->constants.nil;
+}
+
+LMud_Any LMud_Lisp_Boolean(struct LMud_Lisp* self, bool value)
+{
+    if (value)
+        return LMud_Lisp_T(self);
+    else
+        return LMud_Lisp_Nil(self);
 }
 
 LMud_Any LMud_Lisp_MakeArray(struct LMud_Lisp* self, LMud_Size size, LMud_Any fill)
