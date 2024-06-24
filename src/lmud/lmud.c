@@ -1,5 +1,6 @@
 
 #include <lmud/lisp/io.h>
+#include <lmud/lisp/compiler/compiler.h>
 
 #include "lmud.h"
 
@@ -23,6 +24,22 @@ void LMud_Banner(struct LMud* self)
     printf("  Copyright (c) 2024 nijakow\n");
 }
 
+void LMud_TestCompile(struct LMud* self, LMud_Any expression)
+{
+    struct LMud_CompilerSession  session;
+    struct LMud_Compiler         compiler;
+
+    printf("; Compiling...\n");
+
+    LMud_CompilerSession_Create(&session, &self->lisp);
+    LMud_Compiler_Create(&compiler, &session);
+
+    LMud_Compiler_Compile(&compiler, expression);
+
+    LMud_Compiler_Destroy(&compiler);
+    LMud_CompilerSession_Destroy(&session);
+}
+
 void LMud_Test(struct LMud* self)
 {
     struct LMud_Lisp*        lisp;
@@ -38,6 +55,7 @@ void LMud_Test(struct LMud* self)
         printf("> ");
         fflush(stdout);
         value = LMud_Lisp_Read(lisp, &stream);
+        LMud_TestCompile(self, value);
         printf("  ");
         LMud_Lisp_Print(lisp, value, stdout, true);
         putchar('\n');
