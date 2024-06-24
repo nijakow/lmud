@@ -810,40 +810,62 @@ void LMud_Compiler_CompileSpecialLet(struct LMud_Compiler* self, LMud_Any argume
 
 void LMud_Compiler_CompileSpecialFlet(struct LMud_Compiler* self, LMud_Any arguments)
 {
-    LMud_Any  bindings;
-    LMud_Any  body;
+    LMud_Any                      bindings;
+    LMud_Any                      body;
+    LMud_Any                      iterator;
+    LMud_Size                     binding_count;
+    LMud_Size                     index;
+    struct LMud_LetVariableInfo*  variable_infos;
 
     bindings = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
     body     = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arguments);
 
+    {
+        binding_count = 0;
+
+        for (iterator = bindings; LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), iterator); iterator = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), iterator))
+        {
+            binding_count = binding_count + 1;
+        }
+    }
+
+    variable_infos = LMud_Alloc(binding_count * sizeof(struct LMud_LetVariableInfo));
+
+    {
+        index = 0;
+
+        for (iterator = bindings; LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), iterator); iterator = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), iterator))
+        {
+            variable_infos[index].name  = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), LMud_Lisp_Car(LMud_Compiler_GetLisp(self), iterator));
+            variable_infos[index].reg   = LMud_Compiler_AllocateRegister(self);
+
+            LMud_Compiler_CompileSpecialLambda(self, LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), LMud_Lisp_Car(LMud_Compiler_GetLisp(self), iterator)));
+            LMud_Compiler_WriteStoreRegister(self, variable_infos[index].reg);
+
+            index = index + 1;
+        }
+    }
+
     LMud_Compiler_PushScope(self);
     {
-        /*
-         * TODO: Bind the functions.
-         */
-        (void) bindings;
+        for (index = 0; index < binding_count; index++)
+        {
+            LMud_Compiler_BindRegister(self, variable_infos[index].name, LMud_BindingType_FUNCTION, variable_infos[index].reg);
+        }
+
         LMud_Compiler_CompileExpressions(self, body);
     }
     LMud_Compiler_PopScope(self);
+
+    LMud_Free(variable_infos);
 }
 
 void LMud_Compiler_CompileSpecialLabels(struct LMud_Compiler* self, LMud_Any arguments)
 {
-    LMud_Any  bindings;
-    LMud_Any  body;
-
-    bindings = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
-    body     = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arguments);
-
-    LMud_Compiler_PushScope(self);
-    {
-        /*
-         * TODO: Bind the functions.
-         */
-        (void) bindings;
-        LMud_Compiler_CompileExpressions(self, body);
-    }
-    LMud_Compiler_PopScope(self);
+    /*
+     * For now, treat this as a call to flet.
+     */
+    LMud_Compiler_CompileSpecialFlet(self, arguments);
 }
 
 void LMud_Compiler_CompileSpecialIf(struct LMud_Compiler* self, LMud_Any arguments)
