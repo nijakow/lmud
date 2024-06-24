@@ -22,6 +22,11 @@ bool LMud_Types_IsArray(struct LMud_Types* self, void* object)
     return LMud_Type_TypeCheck(&self->array, object);
 }
 
+bool LMud_Types_IsBytes(struct LMud_Types* self, void* object)
+{
+    return LMud_Type_TypeCheck(&self->bytes, object);
+}
+
 bool LMud_Types_IsCons(struct LMud_Types* self, void* object)
 {
     return LMud_Type_TypeCheck(&self->cons, object);
@@ -82,6 +87,38 @@ struct LMud_Array*  LMud_Objects_MakeArray(struct LMud_Objects* self, LMud_Size 
     }
 
     return array;
+}
+
+struct LMud_Bytes* LMud_Objects_MakeBytes(struct LMud_Objects* self, LMud_Size size)
+{
+    struct LMud_Bytes*  bytes;
+
+    bytes = LMud_Objects_Allocate(self, &self->types.bytes, size);
+
+    if (bytes != NULL)
+    {
+        LMud_Bytes_Create_Overallocated(bytes, size);
+    }
+
+    return bytes;
+}
+
+struct LMud_Bytes* LMud_Objects_MakeBytes_FromData(struct LMud_Objects* self, LMud_Size size, const char* data)
+{
+    struct LMud_Bytes*  bytes;
+    LMud_Size           index;
+
+    bytes = LMud_Objects_MakeBytes(self, size);
+
+    if (bytes != NULL)
+    {
+        for (index = 0; index < size; index++)
+        {
+            bytes->data[index] = data[index];
+        }
+    }
+
+    return bytes;
 }
 
 struct LMud_Cons* LMud_Objects_Cons(struct LMud_Objects* self, LMud_Any car, LMud_Any cdr)
