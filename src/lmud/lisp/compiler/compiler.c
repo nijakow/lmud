@@ -5,14 +5,72 @@
 #include "compiler.h"
 
 
+void LMud_Binding_Create(struct LMud_Binding* self, enum LMud_BindingType type, LMud_Any name)
+{
+    self->next = NULL;
+    self->type = type;
+    self->name = name;
+}
+
+void LMud_Binding_Destroy(struct LMud_Binding* self)
+{
+    (void) self;
+}
+
+void LMud_Binding_Delete(struct LMud_Binding* self)
+{
+    LMud_Binding_Destroy(self);
+    LMud_Free(self);
+}
+
+
 void LMud_Scope_Create(struct LMud_Scope* self, struct LMud_Scope* surrounding)
 {
     self->surrounding = surrounding;
+    self->bindings    = NULL;
 }
 
 void LMud_Scope_Destroy(struct LMud_Scope* self)
 {
-    (void) self;
+    struct LMud_Binding*  binding;
+
+    while (self->bindings != NULL)
+    {
+        binding        = self->bindings;
+        self->bindings = binding->next;
+
+        LMud_Binding_Delete(binding);
+    }
+}
+
+struct LMud_Binding* LMud_Scope_FindBinding(struct LMud_Scope* self, LMud_Any name, enum LMud_BindingType type)
+{
+    struct LMud_Binding*  binding;
+
+    for (binding = self->bindings; binding != NULL; binding = binding->next)
+    {
+        if (LMud_Any_Eq(binding->name, name) && binding->type == type)
+            return binding;
+    }
+
+    return NULL;
+}
+
+struct LMud_Binding* LMud_Scope_CreateBinding(struct LMud_Scope* self, LMud_Any name, enum LMud_BindingType type)
+{
+    struct LMud_Binding*  binding;
+
+    binding = LMud_Alloc(sizeof(struct LMud_Binding));
+
+    if (binding != NULL)
+    {
+        LMud_Binding_Create(binding, type, name);
+
+        binding->next  = self->bindings;
+        self->bindings = binding;
+    }
+
+    return binding;
 }
 
 

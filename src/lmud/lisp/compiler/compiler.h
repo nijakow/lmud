@@ -6,13 +6,36 @@
 #include "session.h"
 
 
+enum LMud_BindingType
+{
+    LMud_BindingType_VARIABLE,
+    LMud_BindingType_FUNCTION,
+};
+
+struct LMud_Binding
+{
+    struct LMud_Binding*   next;
+    enum LMud_BindingType  type;
+    LMud_Any               name;
+    // TODO: Register location
+};
+
+void LMud_Binding_Create(struct LMud_Binding* self, enum LMud_BindingType type, LMud_Any name);
+void LMud_Binding_Destroy(struct LMud_Binding* self);
+void LMud_Binding_Delete(struct LMud_Binding* self);
+
+
 struct LMud_Scope
 {
-    struct LMud_Scope*  surrounding;
+    struct LMud_Scope*    surrounding;
+    struct LMud_Binding*  bindings;
 };
 
 void LMud_Scope_Create(struct LMud_Scope* self, struct LMud_Scope* surrounding);
 void LMud_Scope_Destroy(struct LMud_Scope* self);
+
+struct LMud_Binding* LMud_Scope_FindBinding(struct LMud_Scope* self, LMud_Any name, enum LMud_BindingType type);
+struct LMud_Binding* LMud_Scope_CreateBinding(struct LMud_Scope* self, LMud_Any name, enum LMud_BindingType type);
 
 
 #define LMud_CompilerLabelInfo_NOT_PLACED  ((LMud_Size) -1)
