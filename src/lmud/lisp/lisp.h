@@ -51,6 +51,7 @@ LMud_Any LMud_Lisp_InternUpcase(struct LMud_Lisp* self, const char* name);
 
 LMud_Any LMud_Lisp_Car(struct LMud_Lisp* self, LMud_Any value);
 LMud_Any LMud_Lisp_Cdr(struct LMud_Lisp* self, LMud_Any value);
+bool     LMud_Lisp_Nth(struct LMud_Lisp* self, LMud_Any value, LMud_Size index, LMud_Any* result);
 
 LMud_Any LMud_Lisp_Quote(struct LMud_Lisp* self, LMud_Any value);
 LMud_Any LMud_Lisp_QuoteFunction(struct LMud_Lisp* self, LMud_Any value);

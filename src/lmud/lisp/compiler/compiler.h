@@ -28,6 +28,18 @@ struct LMud_Compiler
     LMud_Any*                     constants;
     LMud_Size                     constants_fill;
     LMud_Size                     constants_alloc;
+
+    struct
+    {
+        LMud_Any                  symbol_quote;
+        LMud_Any                  symbol_lambda;
+        LMud_Any                  symbol_progn;
+        LMud_Any                  symbol_setq;
+        LMud_Any                  symbol_let;
+        LMud_Any                  symbol_flet;
+        LMud_Any                  symbol_labels;
+        LMud_Any                  symbol_if;
+    }                             cached;
 };
 
 void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSession* session);

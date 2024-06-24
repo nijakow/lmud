@@ -30,6 +30,15 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->constants_fill  = 0;
     self->constants_alloc = 0;
 
+    self->cached.symbol_quote  = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "QUOTE");
+    self->cached.symbol_lambda = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LAMBDA");
+    self->cached.symbol_progn  = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "PROGN");
+    self->cached.symbol_setq   = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "SETQ");
+    self->cached.symbol_let    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LET");
+    self->cached.symbol_flet   = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FLET");
+    self->cached.symbol_labels = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LABELS");
+    self->cached.symbol_if     = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "IF");
+
     LMud_Compiler_PushScope(self);
 }
 
@@ -203,6 +212,76 @@ void LMud_Compiler_CompileFuncall(struct LMud_Compiler* self, LMud_Any function,
     LMud_Compiler_WriteCall(self, arity);
 }
 
+void LMud_Compiler_CompileSpecialQuote(struct LMud_Compiler* self, LMud_Any arguments)
+{
+    LMud_Any  value;
+
+    /*
+     * TODO: Error if arguments is not a list of length 1
+     */
+    LMud_Lisp_Nth(LMud_Compiler_GetLisp(self), arguments, 0, &value);
+
+    LMud_Compiler_CompileConstant(self, value);
+}
+
+void LMud_Compiler_CompileSpecialLambda(struct LMud_Compiler* self, LMud_Any arguments)
+{
+    (void) self;
+    (void) arguments;
+}
+
+void LMud_Compiler_CompileSpecialProgn(struct LMud_Compiler* self, LMud_Any arguments)
+{
+    LMud_Any  argument;
+
+    while (LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), arguments))
+    {
+        argument = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
+
+        LMud_Compiler_Compile(self, argument);
+
+        arguments = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arguments);
+    }
+}
+
+void LMud_Compiler_CompileSpecialSetq(struct LMud_Compiler* self, LMud_Any arguments)
+{
+    LMud_Any  variable;
+    LMud_Any  value;
+
+    /*
+     * TODO: Error if arguments is not a list of length 2
+     */
+    LMud_Lisp_Nth(LMud_Compiler_GetLisp(self), arguments, 0, &variable);
+    LMud_Lisp_Nth(LMud_Compiler_GetLisp(self), arguments, 1, &value);
+
+    // TODO
+}
+
+void LMud_Compiler_CompileSpecialLet(struct LMud_Compiler* self, LMud_Any arguments)
+{
+    (void) self;
+    (void) arguments;
+}
+
+void LMud_Compiler_CompileSpecialFlet(struct LMud_Compiler* self, LMud_Any arguments)
+{
+    (void) self;
+    (void) arguments;
+}
+
+void LMud_Compiler_CompileSpecialLabels(struct LMud_Compiler* self, LMud_Any arguments)
+{
+    (void) self;
+    (void) arguments;
+}
+
+void LMud_Compiler_CompileSpecialIf(struct LMud_Compiler* self, LMud_Any arguments)
+{
+    (void) self;
+    (void) arguments;
+}
+
 void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expression)
 {
     LMud_Any  function;
@@ -212,10 +291,17 @@ void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expre
     arguments = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), expression);
 
     /*
-     * TODO: Handle special forms
+     * Handle special forms
      */
-
-    LMud_Compiler_CompileFuncall(self, function, arguments);
+         if (LMud_Any_Eq(function, self->cached.symbol_quote))  LMud_Compiler_CompileSpecialQuote(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_lambda)) LMud_Compiler_CompileSpecialLambda(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_progn))  LMud_Compiler_CompileSpecialProgn(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_setq))   LMud_Compiler_CompileSpecialSetq(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_let))    LMud_Compiler_CompileSpecialLet(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_flet))   LMud_Compiler_CompileSpecialFlet(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_labels)) LMud_Compiler_CompileSpecialLabels(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_if))     LMud_Compiler_CompileSpecialIf(self, arguments);
+    else LMud_Compiler_CompileFuncall(self, function, arguments);
 }
 
 void LMud_Compiler_Compile(struct LMud_Compiler* self, LMud_Any expression)

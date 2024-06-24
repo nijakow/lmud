@@ -146,6 +146,20 @@ LMud_Any LMud_Lisp_Cdr(struct LMud_Lisp* self, LMud_Any value)
     return ((struct LMud_Cons*) LMud_Any_AsPointer(value))->cdr;
 }
 
+bool LMud_Lisp_Nth(struct LMud_Lisp* self, LMud_Any value, LMud_Size index, LMud_Any* result)
+{
+    while (index > 0)
+    {
+        if (!LMud_Lisp_IsCons(self, value))
+            return false;
+        value = LMud_Lisp_Cdr(self, value);
+        index--;
+    }
+
+    *result = value;
+    return true;
+}
+
 
 LMud_Any LMud_Lisp_Quote(struct LMud_Lisp* self, LMud_Any value)
 {
