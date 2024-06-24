@@ -312,6 +312,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 LMud_Fiber_PerformReturn(self->fiber);
                 if (!LMud_Fiber_HasFrames(self->fiber))
                     goto end;
+                LMud_Interpreter_Restore(self);
                 break;
             }
 
