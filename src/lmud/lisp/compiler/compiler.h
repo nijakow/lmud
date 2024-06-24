@@ -101,6 +101,10 @@ struct LMud_Compiler
 
     struct
     {
+        LMud_Any                    symbol_symbol_value;
+        LMud_Any                    symbol_set_symbol_value;
+        LMud_Any                    symbol_set_symbol_function;
+
         LMud_Any                    symbol_quote;
         LMud_Any                    symbol_function;
         LMud_Any                    symbol_lambda;

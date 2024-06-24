@@ -726,10 +726,11 @@ void LMud_Compiler_CompileSpecialSetq(struct LMud_Compiler* self, LMud_Any argum
     /*
      * TODO: Error if arguments is not a list of length 2
      */
-    LMud_Lisp_Nth(LMud_Compiler_GetLisp(self), arguments, 0, &variable);
-    LMud_Lisp_Nth(LMud_Compiler_GetLisp(self), arguments, 1, &value);
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &variable);
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &value);
 
-    // TODO
+    LMud_Compiler_Compile(self, value);
+    LMud_Compiler_CompileStoreVariable(self, variable, LMud_BindingType_VARIABLE);
 }
 
 void LMud_Compiler_CompileSpecialLet(struct LMud_Compiler* self, LMud_Any arguments)
