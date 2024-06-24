@@ -22,10 +22,15 @@ struct LMud_Fiber
 void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp);
 void LMud_Fiber_Destroy(struct LMud_Fiber* self);
 
+bool LMud_Fiber_HasFrames(struct LMud_Fiber* self);
+
 LMud_Any LMud_Fiber_GetAccumulator(struct LMud_Fiber* self);
 void     LMud_Fiber_SetAccumulator(struct LMud_Fiber* self, LMud_Any value);
 
 struct LMud_Frame* LMud_Fiber_PushFrame(struct LMud_Fiber* self, struct LMud_Function* function, struct LMud_Frame* lexical, LMud_Any* arguments, LMud_Size argument_count);
 void               LMud_Fiber_PopFrame(struct LMud_Fiber* self);
+
+void LMud_Fiber_PerformReturn(struct LMud_Fiber* self);
+void LMud_Fiber_PerformError(struct LMud_Fiber* self, const char* message);
 
 void LMud_Fiber_Tick(struct LMud_Fiber* self);

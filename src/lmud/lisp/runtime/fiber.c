@@ -23,6 +23,11 @@ void LMud_Fiber_Destroy(struct LMud_Fiber* self)
     (void) self;
 }
 
+bool LMud_Fiber_HasFrames(struct LMud_Fiber* self)
+{
+    return self->top != NULL;
+}
+
 LMud_Any LMud_Fiber_GetAccumulator(struct LMud_Fiber* self)
 {
     return self->accumulator[0];
@@ -63,6 +68,30 @@ void LMud_Fiber_PopFrame(struct LMud_Fiber* self)
     frame               = self->top;
     self->top           = frame->previous;
     self->stack_pointer = (char*) frame;
+}
+
+
+void LMud_Fiber_Unwind(struct LMud_Fiber* self)
+{
+    /*
+     * TODO: Implement condition handling.
+     */
+    while (LMud_Fiber_HasFrames(self))
+    {
+        LMud_Fiber_PopFrame(self);
+    }
+}
+
+
+void LMud_Fiber_PerformReturn(struct LMud_Fiber* self)
+{
+    LMud_Fiber_PopFrame(self);
+}
+
+void LMud_Fiber_PerformError(struct LMud_Fiber* self, const char* message)
+{
+    printf("  Error: %s\n", message);
+    LMud_Fiber_Unwind(self);
 }
 
 

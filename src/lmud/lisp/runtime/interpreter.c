@@ -36,22 +36,36 @@ struct LMud_Array* LMud_InstructionStream_GetConstants(struct LMud_InstructionSt
     return (struct LMud_Array*) LMud_Any_AsPointer(LMud_InstructionStream_GetFunction(self)->constants);
 }
 
-void LMud_InstructionStream_Create(struct LMud_InstructionStream* self, struct LMud_Frame* frame)
+void LMud_InstructionStream_Flush(struct LMud_InstructionStream* self)
 {
+    self->frame->ip = self->ip - LMud_Bytes_GetData(LMud_InstructionStream_GetBytecodes(self));
+    self->frame     = NULL;
+}
+
+void LMud_InstructionStream_Restore(struct LMud_InstructionStream* self, struct LMud_Frame* frame)
+{
+    assert(self->frame == NULL);
     self->frame     = frame;
     self->ip        = LMud_Bytes_GetData(LMud_InstructionStream_GetBytecodes(self)) + frame->ip;
     self->constants = LMud_Array_GetData(LMud_InstructionStream_GetConstants(self));
 }
 
+void LMud_InstructionStream_Create(struct LMud_InstructionStream* self, struct LMud_Frame* frame)
+{
+    self->frame = NULL;
+    LMud_InstructionStream_Restore(self, frame);
+}
+
 void LMud_InstructionStream_Destroy(struct LMud_InstructionStream* self)
 {
-    self->frame->ip = self->ip - LMud_Bytes_GetData(LMud_InstructionStream_GetBytecodes(self));
+    if (self->frame != NULL)
+        LMud_InstructionStream_Flush(self);
 }
 
 void LMud_InstructionStream_Switch(struct LMud_InstructionStream* self, struct LMud_Frame* frame)
 {
-    LMud_InstructionStream_Destroy(self);
-    LMud_InstructionStream_Create(self, frame);
+    LMud_InstructionStream_Flush(self);
+    LMud_InstructionStream_Restore(self, frame);
 }
 
 void LMud_InstructionStream_Jump(struct LMud_InstructionStream* self, LMud_Size offset)
@@ -125,6 +139,11 @@ struct LMud_Frame* LMud_Interpreter_LexicalFrame(struct LMud_Interpreter* self, 
     return frame;
 }
 
+
+#define LMud_Interpreter_Flush(self) \
+    LMud_InstructionStream_Flush(&(self)->stream)
+#define LMud_Interpreter_Restore(self) \
+    LMud_InstructionStream_Restore(&(self)->stream)
 
 void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 {
@@ -235,6 +254,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 /*
                  * TODO
                  */
+
                 break;
             }
 
@@ -260,22 +280,22 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
             case LMud_Bytecode_RETURN:
             {
-                /*
-                 * TODO
-                 */
-
+                LMud_InstructionStream_Flush(&stream);
+                LMud_Fiber_PerformReturn(self->fiber);
+                if (!LMud_Fiber_HasFrames(self->fiber))
+                    goto end;
                 break;
             }
 
             default:
             {
-                /*
-                 * TODO: Handle unknown bytecodes.
-                 */
-                break;
+                LMud_InstructionStream_Flush(&stream);
+                LMud_Fiber_PerformError(self->fiber, "Invalid bytecode!");
+                goto end;
             }
         }
     }
 
+  end:
     LMud_InstructionStream_Destroy(&stream);
 }
