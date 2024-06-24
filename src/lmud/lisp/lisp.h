@@ -28,6 +28,7 @@ void LMud_Lisp_Destroy(struct LMud_Lisp* self);
 struct LMud_Types* LMud_Lisp_Types(struct LMud_Lisp* self);
 
 bool LMud_Lisp_IsArrayPointer(struct LMud_Lisp* self, void* object);
+bool LMud_Lisp_IsBuiltinPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsBytesPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsClosurePointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsConsPointer(struct LMud_Lisp* self, void* object);
@@ -36,6 +37,7 @@ bool LMud_Lisp_IsStringPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsSymbolPointer(struct LMud_Lisp* self, void* object);
 
 bool LMud_Lisp_IsArray(struct LMud_Lisp* self, LMud_Any value);
+bool LMud_Lisp_IsBuiltin(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsBytes(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsClosure(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsCons(struct LMud_Lisp* self, LMud_Any value);
@@ -52,6 +54,7 @@ LMud_Any LMud_Lisp_Boolean(struct LMud_Lisp* self, bool value);
 
 LMud_Any LMud_Lisp_MakeArray(struct LMud_Lisp* self, LMud_Size size, LMud_Any fill);
 LMud_Any LMud_Lisp_MakeArray_FromData(struct LMud_Lisp* self, LMud_Size size, LMud_Any* data);
+LMud_Any LMud_Lisp_Builtin(struct LMud_Lisp* self, const char* name, LMud_BuiltinFunction function);
 LMud_Any LMud_Lisp_MakeBytes(struct LMud_Lisp* self, LMud_Size size);
 LMud_Any LMud_Lisp_MakeBytes_FromData(struct LMud_Lisp* self, LMud_Size size, const char* data);
 LMud_Any LMud_Lisp_Closure(struct LMud_Lisp* self, struct LMud_Function* function, struct LMud_Frame* lexical);
@@ -69,3 +72,5 @@ bool     LMud_Lisp_Nth(struct LMud_Lisp* self, LMud_Any value, LMud_Size index, 
 
 LMud_Any LMud_Lisp_Quote(struct LMud_Lisp* self, LMud_Any value);
 LMud_Any LMud_Lisp_QuoteFunction(struct LMud_Lisp* self, LMud_Any value);
+
+void LMud_Lisp_InstallBuiltin(struct LMud_Lisp* self, const char* name, LMud_BuiltinFunction function);

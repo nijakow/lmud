@@ -7,6 +7,7 @@
 void LMud_Types_Create(struct LMud_Types* self)
 {
     self->array.base_size    = sizeof(struct LMud_Array);
+    self->builtin.base_size  = sizeof(struct LMud_Builtin);
     self->bytes.base_size    = sizeof(struct LMud_Bytes);
     self->closure.base_size  = sizeof(struct LMud_Closure);
     self->cons.base_size     = sizeof(struct LMud_Cons);
@@ -23,6 +24,11 @@ void LMud_Types_Destroy(struct LMud_Types* self)
 bool LMud_Types_IsArray(struct LMud_Types* self, void* object)
 {
     return LMud_Type_TypeCheck(&self->array, object);
+}
+
+bool LMud_Types_IsBuiltin(struct LMud_Types* self, void* object)
+{
+    return LMud_Type_TypeCheck(&self->builtin, object);
 }
 
 bool LMud_Types_IsBytes(struct LMud_Types* self, void* object)
@@ -114,6 +120,20 @@ struct LMud_Array*  LMud_Objects_MakeArray_FromData(struct LMud_Objects* self, L
     }
 
     return array;
+}
+
+struct LMud_Builtin* LMud_Objects_Builtin(struct LMud_Objects* self, const char* name, LMud_BuiltinFunction function)
+{
+    struct LMud_Builtin*  builtin;
+
+    builtin = LMud_Objects_Allocate(self, &self->types.builtin, 0);
+
+    if (builtin != NULL)
+    {
+        LMud_Builtin_Create(builtin, name, function);
+    }
+
+    return builtin;
 }
 
 struct LMud_Bytes* LMud_Objects_MakeBytes(struct LMud_Objects* self, LMud_Size size)

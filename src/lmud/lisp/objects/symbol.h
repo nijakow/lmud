@@ -39,5 +39,9 @@ void LMud_Symbol_LinkIntoList(struct LMud_Symbol* self, struct LMud_Symbol** lis
 void LMud_Symbol_Link(struct LMud_Symbol* self, struct LMud_SymbolTable* table);
 
 const char* LMud_Symbol_Name(struct LMud_Symbol* self);
+
 LMud_Any    LMud_Symbol_Value(struct LMud_Symbol* self);
 LMud_Any    LMud_Symbol_Function(struct LMud_Symbol* self);
+
+void LMud_Symbol_SetValue(struct LMud_Symbol* self, LMud_Any value);
+void LMud_Symbol_SetFunction(struct LMud_Symbol* self, LMud_Any function);

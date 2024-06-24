@@ -4,6 +4,7 @@
 #include <lmud/lisp/object.h>
 
 #include <lmud/lisp/objects/array.h>
+#include <lmud/lisp/objects/builtin.h>
 #include <lmud/lisp/objects/bytes.h>
 #include <lmud/lisp/objects/closure.h>
 #include <lmud/lisp/objects/cons.h>
@@ -15,6 +16,7 @@
 struct LMud_Types
 {
     struct LMud_Type     array;
+    struct LMud_Type     builtin;
     struct LMud_Type     bytes;
     struct LMud_Type     closure;
     struct LMud_Type     cons;
@@ -27,6 +29,7 @@ void LMud_Types_Create(struct LMud_Types* self);
 void LMud_Types_Destroy(struct LMud_Types* self);
 
 bool LMud_Types_IsArray(struct LMud_Types* self, void* object);
+bool LMud_Types_IsBuiltin(struct LMud_Types* self, void* object);
 bool LMud_Types_IsBytes(struct LMud_Types* self, void* object);
 bool LMud_Types_IsClosure(struct LMud_Types* self, void* object);
 bool LMud_Types_IsCons(struct LMud_Types* self, void* object);
@@ -49,6 +52,8 @@ void* LMud_Objects_Allocate(struct LMud_Objects* self, struct LMud_Type* type, L
 
 struct LMud_Array*  LMud_Objects_MakeArray(struct LMud_Objects* self, LMud_Size size, LMud_Any fill);
 struct LMud_Array*  LMud_Objects_MakeArray_FromData(struct LMud_Objects* self, LMud_Size size, LMud_Any* data);
+
+struct LMud_Builtin* LMud_Objects_Builtin(struct LMud_Objects* self, const char* name, LMud_BuiltinFunction function);
 
 struct LMud_Bytes*  LMud_Objects_MakeBytes(struct LMud_Objects* self, LMud_Size size);
 struct LMud_Bytes*  LMud_Objects_MakeBytes_FromData(struct LMud_Objects* self, LMud_Size size, const char* data);

@@ -45,6 +45,11 @@ bool LMud_Lisp_IsArrayPointer(struct LMud_Lisp* self, void* object)
     return LMud_Types_IsArray(LMud_Lisp_Types(self), object);
 }
 
+bool LMud_Lisp_IsBuiltinPointer(struct LMud_Lisp* self, void* object)
+{
+    return LMud_Types_IsBuiltin(LMud_Lisp_Types(self), object);
+}
+
 bool LMud_Lisp_IsBytesPointer(struct LMud_Lisp* self, void* object)
 {
     return LMud_Types_IsBytes(LMud_Lisp_Types(self), object);
@@ -79,6 +84,11 @@ bool LMud_Lisp_IsSymbolPointer(struct LMud_Lisp* self, void* object)
 bool LMud_Lisp_IsArray(struct LMud_Lisp* self, LMud_Any value)
 {
     return LMud_Any_IsPointer(value) && LMud_Lisp_IsArrayPointer(self, LMud_Any_AsPointer(value));
+}
+
+bool LMud_Lisp_IsBuiltin(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Any_IsPointer(value) && LMud_Lisp_IsBuiltinPointer(self, LMud_Any_AsPointer(value));
 }
 
 bool LMud_Lisp_IsBytes(struct LMud_Lisp* self, LMud_Any value)
@@ -144,6 +154,11 @@ LMud_Any LMud_Lisp_MakeArray(struct LMud_Lisp* self, LMud_Size size, LMud_Any fi
 LMud_Any LMud_Lisp_MakeArray_FromData(struct LMud_Lisp* self, LMud_Size size, LMud_Any* data)
 {
     return LMud_Any_FromPointer(LMud_Objects_MakeArray_FromData(&self->objects, size, data));
+}
+
+LMud_Any LMud_Lisp_Builtin(struct LMud_Lisp* self, const char* name, LMud_BuiltinFunction function)
+{
+    return LMud_Any_FromPointer(LMud_Objects_Builtin(&self->objects, name, function));
 }
 
 LMud_Any LMud_Lisp_MakeBytes(struct LMud_Lisp* self, LMud_Size size)
@@ -250,4 +265,16 @@ LMud_Any LMud_Lisp_Quote(struct LMud_Lisp* self, LMud_Any value)
 LMud_Any LMud_Lisp_QuoteFunction(struct LMud_Lisp* self, LMud_Any value)
 {
     return LMud_Lisp_Cons(self, self->constants.function, LMud_Lisp_Cons(self, value, LMud_Lisp_Nil(self)));
+}
+
+
+void LMud_Lisp_InstallBuiltin(struct LMud_Lisp* self, const char* name, LMud_BuiltinFunction function)
+{
+    struct LMud_Symbol*  symbol;
+    LMud_Any             builtin;
+
+    symbol  = LMud_Objects_Intern(&self->objects, name);
+    builtin = LMud_Lisp_Builtin(self, name, function);
+
+    LMud_Symbol_SetFunction(symbol, builtin);
 }

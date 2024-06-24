@@ -115,3 +115,13 @@ LMud_Any LMud_Symbol_Function(struct LMud_Symbol* self)
 {
     return self->function;
 }
+
+void LMud_Symbol_SetValue(struct LMud_Symbol* self, LMud_Any value)
+{
+    self->value = value;
+}
+
+void LMud_Symbol_SetFunction(struct LMud_Symbol* self, LMud_Any function)
+{
+    self->function = function;
+}

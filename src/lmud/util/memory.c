@@ -31,3 +31,8 @@ LMud_Size LMud_CStr_Length(const char* str)
     if (str == NULL) return 0;
     else             return strlen(str);
 }
+
+char* LMud_Strdup(const char* str)
+{
+    return strdup(str);
+}

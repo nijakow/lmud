@@ -112,6 +112,8 @@ void LMud_Fiber_Enter(struct LMud_Fiber* self, LMud_Any function, LMud_Any* argu
             arguments,
             argument_count
         );
+    } else if (LMud_Lisp_IsBuiltin(self->lisp, function)) {
+        ((struct LMud_Builtin*) LMud_Any_AsPointer(function))->function(self, arguments, argument_count);
     } else {
         LMud_Fiber_PerformError(self, "Not a function.");
     }
