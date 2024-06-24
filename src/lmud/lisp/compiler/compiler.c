@@ -31,6 +31,13 @@ void LMud_CompilerLabelInfo_Create(struct LMud_CompilerLabelInfo* self, struct L
      * Set the placement status to "not placed".
      */
     self->offset = LMud_CompilerLabelInfo_NOT_PLACED;
+
+    /*
+     * Initialize the target list.
+     */
+    self->targets       = NULL;
+    self->targets_fill  = 0;
+    self->targets_alloc = 0;
 }
 
 void LMud_CompilerLabelInfo_Destroy(struct LMud_CompilerLabelInfo* self)
@@ -41,6 +48,11 @@ void LMud_CompilerLabelInfo_Destroy(struct LMud_CompilerLabelInfo* self)
     if (self->next != NULL)
         self->next->prev = self->prev;
     *self->prev = self->next;
+
+    /*
+     * Free the target list.
+     */
+    LMud_Free(self->targets);
 }
 
 void LMud_CompilerLabelInfo_Delete(struct LMud_CompilerLabelInfo* self)
@@ -60,6 +72,53 @@ bool LMud_CompilerLabelInfo_Place(struct LMud_CompilerLabelInfo* self, LMud_Size
         return false;
 
     self->offset = offset;
+
+    return true;
+}
+
+LMud_Size LMud_CompilerLabelInfo_GetOffset(struct LMud_CompilerLabelInfo* self)
+{
+    return self->offset;
+}
+
+void LMud_CompilerLabelInfo_AddTarget(struct LMud_CompilerLabelInfo* self, LMud_Size target)
+{
+    LMud_Size  new_size;
+    LMud_Size* new_targets;
+
+    if (self->targets_fill >= self->targets_alloc)
+    {
+        if (self->targets_alloc == 0) {
+            new_size = 1;
+        } else {
+            new_size = self->targets_alloc * 2;
+        }
+
+        new_targets = LMud_Realloc(self->targets, new_size * sizeof(LMud_Size));
+
+        // TODO: Error if new_targets == NULL
+
+        self->targets       = new_targets;
+        self->targets_alloc = new_size;
+    }
+
+    self->targets[self->targets_fill++] = target;
+}
+
+bool LMud_CompilerLabelInfo_WriteTargets(struct LMud_CompilerLabelInfo* self, uint8_t* bytecodes)
+{
+    LMud_Size  index;
+
+    if (!LMud_CompilerLabelInfo_IsPlaced(self))
+        return false;
+
+    for (index = 0; index < self->targets_fill; index++)
+    {
+        bytecodes[self->targets[index] + 0] = (self->offset >> 8) & 0xFF;
+        bytecodes[self->targets[index] + 1] = self->offset & 0xFF;
+    }
+
+    self->targets_fill = 0;
 
     return true;
 }
@@ -210,21 +269,26 @@ void LMud_Compiler_PushConstant(struct LMud_Compiler* self, LMud_Any constant)
     LMud_Compiler_PushU16(self, LMud_Compiler_PushConstant_None(self, constant));
 }
 
-LMud_CompilerLabel LMud_Compiler_OpenLabel(struct LMud_Compiler* self)
+bool LMud_Compiler_OpenLabel(struct LMud_Compiler* self, LMud_CompilerLabel* label)
 {
-    struct LMud_CompilerLabelInfo*  label;
+    struct LMud_CompilerLabelInfo*  the_label;
 
-    label = LMud_Alloc(sizeof(struct LMud_CompilerLabelInfo));
+    the_label = LMud_Alloc(sizeof(struct LMud_CompilerLabelInfo));
 
     // TODO: Error if label == NULL
 
-    LMud_CompilerLabelInfo_Create(label, &self->labels);
+    LMud_CompilerLabelInfo_Create(the_label, &self->labels);
 
-    return label;
+    *label = the_label;
+
+    return true;
 }
 
 void LMud_Compiler_CloseLabel(struct LMud_Compiler* self, LMud_CompilerLabel label)
 {
+    /*
+     * TODO: Warning / Error if the label has not been placed or used.
+     */
     (void) self;
     LMud_CompilerLabelInfo_Delete(label);
 }
@@ -235,18 +299,29 @@ void LMud_Compiler_PlaceLabel(struct LMud_Compiler* self, LMud_CompilerLabel lab
      * TODO: Error if label is already placed.
      */
     LMud_CompilerLabelInfo_Place(label, self->bytecodes_fill);
+    LMud_CompilerLabelInfo_WriteTargets(label, self->bytecodes);
+}
+
+void LMud_Compiler_WriteLabel(struct LMud_Compiler* self, LMud_CompilerLabel label)
+{
+    if (LMud_CompilerLabelInfo_IsPlaced(label))
+        LMud_Compiler_PushU16(self, LMud_CompilerLabelInfo_GetOffset((struct LMud_CompilerLabelInfo*) label));
+    else {
+        LMud_CompilerLabelInfo_AddTarget(label, self->bytecodes_fill);
+        LMud_Compiler_PushU16(self, 0xffff);
+    }
 }
 
 void LMud_Compiler_WriteJump(struct LMud_Compiler* self, LMud_CompilerLabel label)
 {
-    (void) self;
-    (void) label;
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_JUMP);
+    LMud_Compiler_WriteLabel(self, label);
 }
 
 void LMud_Compiler_WriteJumpIfNil(struct LMud_Compiler* self, LMud_CompilerLabel label)
 {
-    (void) self;
-    (void) label;
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_JUMP_IF_NIL);
+    LMud_Compiler_WriteLabel(self, label);
 }
 
 
@@ -373,8 +448,38 @@ void LMud_Compiler_CompileSpecialLabels(struct LMud_Compiler* self, LMud_Any arg
 
 void LMud_Compiler_CompileSpecialIf(struct LMud_Compiler* self, LMud_Any arguments)
 {
-    (void) self;
-    (void) arguments;
+    LMud_Any            condition;
+    LMud_Any            consequent;
+    LMud_Any            alternative;
+    LMud_CompilerLabel  else_label;
+    LMud_CompilerLabel  end_label;
+
+    /*
+     * TODO: Error if arguments is not a list of length 2 or 3
+     */
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &condition);
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &consequent);
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &alternative);
+
+    LMud_Compiler_OpenLabel(self, &else_label);
+    LMud_Compiler_OpenLabel(self, &end_label);
+
+    LMud_Compiler_Compile(self, condition);
+
+    LMud_Compiler_WriteJumpIfNil(self, else_label);
+
+    LMud_Compiler_Compile(self, consequent);
+
+    LMud_Compiler_WriteJump(self, end_label);
+
+    LMud_Compiler_PlaceLabel(self, else_label);
+
+    LMud_Compiler_Compile(self, alternative);
+
+    LMud_Compiler_PlaceLabel(self, end_label);
+
+    LMud_Compiler_CloseLabel(self, else_label);
+    LMud_Compiler_CloseLabel(self, end_label);
 }
 
 void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expression)

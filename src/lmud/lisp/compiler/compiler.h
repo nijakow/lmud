@@ -22,6 +22,9 @@ struct LMud_CompilerLabelInfo
     struct LMud_CompilerLabelInfo**  prev;
     struct LMud_CompilerLabelInfo*   next;
     LMud_Size                        offset;
+    LMud_Size*                       targets;
+    LMud_Size                        targets_fill;
+    LMud_Size                        targets_alloc;
 };
 
 void LMud_CompilerLabelInfo_Create(struct LMud_CompilerLabelInfo* self, struct LMud_CompilerLabelInfo** list);
@@ -30,6 +33,11 @@ void LMud_CompilerLabelInfo_Delete(struct LMud_CompilerLabelInfo* self);
 
 bool LMud_CompilerLabelInfo_IsPlaced(struct LMud_CompilerLabelInfo* self);
 bool LMud_CompilerLabelInfo_Place(struct LMud_CompilerLabelInfo* self, LMud_Size offset);
+
+LMud_Size LMud_CompilerLabelInfo_GetOffset(struct LMud_CompilerLabelInfo* self);
+
+void LMud_CompilerLabelInfo_AddTarget(struct LMud_CompilerLabelInfo* self, LMud_Size target);
+bool LMud_CompilerLabelInfo_WriteTargets(struct LMud_CompilerLabelInfo* self, uint8_t* bytecodes);
 
 
 struct LMud_Compiler
@@ -78,11 +86,11 @@ void      LMud_Compiler_PushBytecode(struct LMud_Compiler* self, enum LMud_Bytec
 LMud_Size LMud_Compiler_PushConstant_None(struct LMud_Compiler* self, LMud_Any constant);
 void      LMud_Compiler_PushConstant(struct LMud_Compiler* self, LMud_Any constant);
 
-LMud_CompilerLabel LMud_Compiler_OpenLabel(struct LMud_Compiler* self);
-void               LMud_Compiler_CloseLabel(struct LMud_Compiler* self, LMud_CompilerLabel label);
-void               LMud_Compiler_PlaceLabel(struct LMud_Compiler* self, LMud_CompilerLabel label);
-void               LMud_Compiler_WriteJump(struct LMud_Compiler* self, LMud_CompilerLabel label);
-void               LMud_Compiler_WriteJumpIfNil(struct LMud_Compiler* self, LMud_CompilerLabel label);
+bool LMud_Compiler_OpenLabel(struct LMud_Compiler* self, LMud_CompilerLabel* label);
+void LMud_Compiler_CloseLabel(struct LMud_Compiler* self, LMud_CompilerLabel label);
+void LMud_Compiler_PlaceLabel(struct LMud_Compiler* self, LMud_CompilerLabel label);
+void LMud_Compiler_WriteJump(struct LMud_Compiler* self, LMud_CompilerLabel label);
+void LMud_Compiler_WriteJumpIfNil(struct LMud_Compiler* self, LMud_CompilerLabel label);
 
 void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant);
 void LMud_Compiler_WritePush(struct LMud_Compiler* self);
