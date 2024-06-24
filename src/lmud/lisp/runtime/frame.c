@@ -22,23 +22,40 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
                        struct LMud_Frame*    previous,
                        struct LMud_Frame*    lexical,
                        struct LMud_Function* function,
-                       LMud_Any*             arguments_base,
-                       LMud_Size             arguments_count)
+                       LMud_Any*             arguments,
+                       LMud_Size             extra_argument_count)
 {
+    LMud_Size  index;
+
     self->previous       = previous;
     
     LMud_FrameRef_Create(&self->lexical, lexical);
 
-    self->arguments_base = arguments_base;
-    self->arguments_top  = arguments_base + arguments_count;
     self->function       = function;
     self->ip             = 0;
-    self->sp             = function->args.register_count;
+    self->sp             = function->info.register_count;
+    self->ap             = function->info.register_count + function->info.stack_size + extra_argument_count;
+
+    for (index = 0; index < function->info.fixed_argument_count; ++index)
+    {
+        self->payload[index] = arguments[index];
+    }
+
+    for (index = 0; index < extra_argument_count; ++index)
+    {
+        self->payload[function->info.fixed_argument_count + function->info.stack_size + index] = arguments[function->info.fixed_argument_count + index];
+    }
 }
 
 void LMud_Frame_Destroy(struct LMud_Frame* self)
 {
     LMud_FrameRef_Destroy(&self->lexical);
+}
+
+
+LMud_Size LMud_Frame_RemainingExtraArgumentCount(struct LMud_Frame* self)
+{
+    return self->ap - (self->function->info.register_count + self->function->info.stack_size);
 }
 
 

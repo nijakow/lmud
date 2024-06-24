@@ -19,11 +19,10 @@ struct LMud_Frame
 {
     struct LMud_Frame*     previous;
     struct LMud_FrameRef   lexical;
-    LMud_Any*              arguments_base;
-    LMud_Any*              arguments_top;
     struct LMud_Function*  function;
     LMud_Size              ip;
     LMud_Size              sp;
+    LMud_Size              ap;
     LMud_Any               payload[];
 };
 
@@ -31,10 +30,12 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
                        struct LMud_Frame*    previous,
                        struct LMud_Frame*    lexical,
                        struct LMud_Function* function,
-                       LMud_Any*             arguments_base,
-                       LMud_Size             arguments_count);
+                       LMud_Any*             arguments,
+                       LMud_Size             extra_argument_count);
 
 void LMud_Frame_Destroy(struct LMud_Frame* self);
+
+LMud_Size LMud_Frame_RemainingExtraArgumentCount(struct LMud_Frame* self);
 
 LMud_Any LMud_Frame_GetRegister(struct LMud_Frame* self, LMud_Size index);
 void     LMud_Frame_SetRegister(struct LMud_Frame* self, LMud_Size index, LMud_Any value);

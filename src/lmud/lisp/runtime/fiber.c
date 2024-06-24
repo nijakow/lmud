@@ -48,11 +48,16 @@ static void* LMud_Fiber_StackTop(struct LMud_Fiber* self)
 struct LMud_Frame* LMud_Fiber_PushFrame(struct LMud_Fiber* self, struct LMud_Function* function, struct LMud_Frame* lexical, LMud_Any* arguments, LMud_Size argument_count)
 {
     struct LMud_Frame*  frame;
+    LMud_Size           extra_args;
+
+    extra_args = argument_count - function->info.fixed_argument_count;
+
+    // TODO: Handle variadic functions.
     
     frame               = LMud_Fiber_StackTop(self);
-    self->stack_pointer = self->stack_pointer + sizeof(struct LMud_Frame) + (function->args.register_count + function->args.stack_size) * sizeof(LMud_Any);
+    self->stack_pointer = self->stack_pointer + sizeof(struct LMud_Frame) + (function->info.register_count + function->info.stack_size + extra_args) * sizeof(LMud_Any);
 
-    LMud_Frame_Create(frame, self->top, lexical, function, arguments, argument_count);
+    LMud_Frame_Create(frame, self->top, lexical, function, arguments, extra_args);
 
     return frame;
 }

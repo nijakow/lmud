@@ -100,9 +100,9 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
             fprintf(
                 stream,
                 " :STACK-SIZE %lu :REGISTER-COUNT %lu :LEXICALIZED %s>",
-                ((struct LMud_Function*) pointer)->args.stack_size,
-                ((struct LMud_Function*) pointer)->args.register_count,
-                ((struct LMud_Function*) pointer)->args.lexicalized ? "T" : "NIL"
+                ((struct LMud_Function*) pointer)->info.stack_size,
+                ((struct LMud_Function*) pointer)->info.register_count,
+                ((struct LMud_Function*) pointer)->info.lexicalized ? "T" : "NIL"
             );
         } else {
             fprintf(stream, "#<?>");

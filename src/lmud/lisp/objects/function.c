@@ -1,9 +1,9 @@
 
 #include "function.h"
 
-void LMud_Function_Create(struct LMud_Function* self, struct LMud_ArgInfo args, LMud_Any bytecodes, LMud_Any constants)
+void LMud_Function_Create(struct LMud_Function* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants)
 {
-    self->args      = args;
+    self->info      = info;
     self->bytecodes = bytecodes;
     self->constants = constants;
 }
@@ -27,5 +27,5 @@ LMud_Any LMud_Function_Constants(struct LMud_Function* self)
 
 bool LMud_Function_IsLexicalized(struct LMud_Function* self)
 {
-    return self->args.lexicalized;
+    return self->info.lexicalized;
 }

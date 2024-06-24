@@ -166,9 +166,9 @@ LMud_Any LMud_Lisp_Cons(struct LMud_Lisp* self, LMud_Any car, LMud_Any cdr)
     return LMud_Any_FromPointer(LMud_Objects_Cons(&self->objects, car, cdr));
 }
 
-LMud_Any LMud_Lisp_Function(struct LMud_Lisp* self, struct LMud_ArgInfo args, LMud_Any bytecodes, LMud_Any constants)
+LMud_Any LMud_Lisp_Function(struct LMud_Lisp* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants)
 {
-    return LMud_Any_FromPointer(LMud_Objects_Function(&self->objects, args, bytecodes, constants));
+    return LMud_Any_FromPointer(LMud_Objects_Function(&self->objects, info, bytecodes, constants));
 }
 
 LMud_Any LMud_Lisp_String(struct LMud_Lisp* self, const char* text)

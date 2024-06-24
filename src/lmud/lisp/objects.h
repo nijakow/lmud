@@ -57,7 +57,7 @@ struct LMud_Closure* LMud_Objects_Closure(struct LMud_Objects* self, struct LMud
 
 struct LMud_Cons*   LMud_Objects_Cons(struct LMud_Objects* self, LMud_Any car, LMud_Any cdr);
 
-struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LMud_ArgInfo args, LMud_Any bytecodes, LMud_Any constants);
+struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants);
 
 struct LMud_String* LMud_Objects_String(struct LMud_Objects* self, const char* text);
 
