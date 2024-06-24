@@ -20,8 +20,9 @@ void LMud_Banner(struct LMud* self)
     (void) self;
 
     printf("\n");
-    printf("  LMud v%s\n", LMud_VERSION);
+    printf("  LMud v%s %s '%s'\n", LMud_VERSION, LMud_VERSION_EXTRA, LMud_RELEASE_NAME);
     printf("  Copyright (c) 2024 nijakow\n");
+    printf("\n");
 }
 
 LMud_Any LMud_TestCompile(struct LMud* self, LMud_Any expression)

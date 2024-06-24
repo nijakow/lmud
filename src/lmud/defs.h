@@ -15,7 +15,9 @@
 #include <ctype.h>
 
 
-#define LMud_VERSION "0.0.1"
+#define LMud_VERSION "0.1"
+#define LMud_VERSION_EXTRA "pre-alpha"
+#define LMud_RELEASE_NAME "Duct Tape Dragon"
 
 #define LMud_SYMBOL_NAME_LENGTH 1023
 
