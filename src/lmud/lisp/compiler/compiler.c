@@ -185,8 +185,8 @@ bool LMud_CompilerLabelInfo_WriteTargets(struct LMud_CompilerLabelInfo* self, ui
 
     for (index = 0; index < self->targets_fill; index++)
     {
-        bytecodes[self->targets[index] + 0] = (self->offset >> 8) & 0xFF;
-        bytecodes[self->targets[index] + 1] = self->offset & 0xFF;
+        bytecodes[self->targets[index] + 0] = self->offset & 0xFF;
+        bytecodes[self->targets[index] + 1] = (self->offset >> 8) & 0xFF;
     }
 
     self->targets_fill = 0;
@@ -435,8 +435,8 @@ void LMud_Compiler_PushU8(struct LMud_Compiler* self, uint8_t byte)
 
 void LMud_Compiler_PushU16(struct LMud_Compiler* self, uint16_t word)
 {
-    LMud_Compiler_PushU8(self, (word >> 8) & 0xFF);
     LMud_Compiler_PushU8(self, word & 0xFF);
+    LMud_Compiler_PushU8(self, (word >> 8) & 0xFF);
 }
 
 void LMud_Compiler_PushBytecode(struct LMud_Compiler* self, enum LMud_Bytecode bytecode)

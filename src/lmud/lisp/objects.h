@@ -40,13 +40,16 @@ bool LMud_Types_IsSymbol(struct LMud_Types* self, void* object);
 
 struct LMud_Objects
 {
+    struct LMud_Lisp*        lisp;
     struct LMud_Object*      objects;
     struct LMud_SymbolTable  symbols;
     struct LMud_Types        types;
 };
 
-bool LMud_Objects_Create(struct LMud_Objects* self);
+bool LMud_Objects_Create(struct LMud_Objects* self, struct LMud_Lisp* lisp);
 void LMud_Objects_Destroy(struct LMud_Objects* self);
+
+struct LMud_Lisp* LMud_Objects_GetLisp(struct LMud_Objects* self);
 
 void* LMud_Objects_Allocate(struct LMud_Objects* self, struct LMud_Type* type, LMud_Size extra);
 

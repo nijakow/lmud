@@ -11,6 +11,9 @@ bool LMud_Constants_Create(struct LMud_Constants* self, struct LMud_Lisp* lisp)
     self->quote    = LMud_Lisp_Intern(lisp, "QUOTE");
     self->function = LMud_Lisp_Intern(lisp, "FUNCTION");
 
+    LMud_Symbol_MakeConstant(LMud_Any_AsPointer(self->nil));
+    LMud_Symbol_MakeConstant(LMud_Any_AsPointer(self->t));
+
     return true;
 }
 
@@ -23,7 +26,7 @@ void LMud_Constants_Destroy(struct LMud_Constants* self)
 
 bool LMud_Lisp_Create(struct LMud_Lisp* self)
 {
-    return LMud_Objects_Create(&self->objects)
+    return LMud_Objects_Create(&self->objects, self)
         && LMud_Constants_Create(&self->constants, self);
 }
 

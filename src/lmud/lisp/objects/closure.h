@@ -8,6 +8,8 @@
 
 struct LMud_Closure
 {
+    struct LMud_Object     _;
+
     struct LMud_Function*  function;
     struct LMud_FrameRef   lexical;
 };

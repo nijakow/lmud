@@ -1,4 +1,5 @@
 
+#include <lmud/lisp/lisp.h>
 #include <lmud/lisp/objects.h>
 #include <lmud/lisp/objects/string.h>
 
@@ -33,7 +34,13 @@ struct LMud_Symbol* LMud_SymbolTable_Intern(struct LMud_SymbolTable* self, struc
 
     if (symbol != NULL)
     {
-        LMud_Symbol_Create(symbol, self, LMud_Any_FromPointer(LMud_Objects_String(objects, name)));
+        LMud_Symbol_Create(
+            symbol,
+            self,
+            LMud_Any_FromPointer(LMud_Objects_String(objects, name)),
+            LMud_Lisp_Nil(LMud_Objects_GetLisp(objects)),
+            LMud_Lisp_Nil(LMud_Objects_GetLisp(objects))
+        );
     }
 
     return symbol;
@@ -52,14 +59,15 @@ void LMud_SymbolTable_Dump(struct LMud_SymbolTable* self)
 }
 
 
-void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_SymbolTable* table, LMud_Any name)
+void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_SymbolTable* table, LMud_Any name, LMud_Any value, LMud_Any function)
 {
     self->prev = NULL;
     self->next = NULL;
 
     self->name = name;
 
-    // TODO: value, function
+    self->value    = value;
+    self->function = function;
 
     LMud_Symbol_Link(self, table);
 }
@@ -124,4 +132,9 @@ void LMud_Symbol_SetValue(struct LMud_Symbol* self, LMud_Any value)
 void LMud_Symbol_SetFunction(struct LMud_Symbol* self, LMud_Any function)
 {
     self->function = function;
+}
+
+void LMud_Symbol_MakeConstant(struct LMud_Symbol* self)
+{
+    LMud_Symbol_SetValue(self, LMud_Any_FromPointer(self));
 }

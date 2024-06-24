@@ -62,8 +62,10 @@ bool LMud_Types_IsSymbol(struct LMud_Types* self, void* object)
 }
 
 
-bool LMud_Objects_Create(struct LMud_Objects* self)
+bool LMud_Objects_Create(struct LMud_Objects* self, struct LMud_Lisp* lisp)
 {
+    self->lisp    = lisp;
+
     self->objects = NULL;
     
     LMud_SymbolTable_Create(&self->symbols);
@@ -76,6 +78,12 @@ void LMud_Objects_Destroy(struct LMud_Objects* self)
 {
     LMud_Types_Destroy(&self->types);
     LMud_SymbolTable_Destroy(&self->symbols);
+}
+
+
+struct LMud_Lisp* LMud_Objects_GetLisp(struct LMud_Objects* self)
+{
+    return self->lisp;
 }
 
 

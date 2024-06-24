@@ -49,10 +49,11 @@ LMud_Any LMud_TestCompile(struct LMud* self, LMud_Any expression)
     return function;
 }
 
-void LMud_TestRun(struct LMud* self, LMud_Any function)
+LMud_Any LMud_TestRun(struct LMud* self, LMud_Any function)
 {
     struct LMud_Scheduler*  scheduler;
     struct LMud_Fiber*      fiber;
+    LMud_Any                result;
 
     scheduler = &self->scheduler;
     fiber     = LMud_Scheduler_SpawnFiber(scheduler);
@@ -62,7 +63,9 @@ void LMud_TestRun(struct LMud* self, LMud_Any function)
     LMud_Fiber_EnterThunk(fiber, function);
     LMud_Fiber_Tick(fiber);
 
-    LMud_Fiber_Destroy(fiber);
+    result = LMud_Fiber_GetAccumulator(fiber);
+
+    return result;
 }
 
 void LMud_Test(struct LMud* self)
@@ -81,7 +84,10 @@ void LMud_Test(struct LMud* self)
         fflush(stdout);
         value = LMud_Lisp_Read(lisp, &stream);
         value = LMud_TestCompile(self, value);
-        LMud_TestRun(self, value);
+        printf(";  ");
+        LMud_Lisp_Print(lisp, value, stdout, true);
+        putchar('\n');
+        value = LMud_TestRun(self, value);
         printf("  ");
         LMud_Lisp_Print(lisp, value, stdout, true);
         putchar('\n');
