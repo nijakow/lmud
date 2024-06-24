@@ -1,5 +1,6 @@
 
 #include <lmud/lisp/lisp.h>
+#include <lmud/lisp/runtime/interpreter.h>
 #include <lmud/util/memory.h>
 
 #include "fiber.h"
@@ -22,9 +23,9 @@ void LMud_Fiber_Destroy(struct LMud_Fiber* self)
     (void) self;
 }
 
-LMud_Any LMud_Fiber_GetAccumulator(struct LMud_Fiber* self, LMud_Size index)
+LMud_Any LMud_Fiber_GetAccumulator(struct LMud_Fiber* self)
 {
-    return self->accumulator[index];
+    return self->accumulator[0];
 }
 
 void LMud_Fiber_SetAccumulator(struct LMud_Fiber* self, LMud_Any value)
@@ -62,4 +63,14 @@ void LMud_Fiber_PopFrame(struct LMud_Fiber* self)
     frame               = self->top;
     self->top           = frame->previous;
     self->stack_pointer = (char*) frame;
+}
+
+
+void LMud_Fiber_Tick(struct LMud_Fiber* self)
+{
+    struct LMud_Interpreter  interpreter;
+
+    LMud_Interpreter_Create(&interpreter, self);
+    LMud_Interpreter_Tick(&interpreter);
+    LMud_Interpreter_Destroy(&interpreter);
 }

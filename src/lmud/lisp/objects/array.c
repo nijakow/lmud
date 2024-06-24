@@ -38,6 +38,11 @@ LMud_Size LMud_Array_GetSize(struct LMud_Array* self)
     return self->size;
 }
 
+LMud_Any* LMud_Array_GetData(struct LMud_Array* self)
+{
+    return self->data;
+}
+
 LMud_Any LMud_Array_Aref(struct LMud_Array* self, LMud_Size index, LMud_Any default_value)
 {
     if (index >= LMud_Array_GetSize(self))

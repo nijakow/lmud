@@ -27,3 +27,5 @@ typedef int LMud_Integer;
 struct LMud_Lisp;
 struct LMud_Object;
 struct LMud_Objects;
+struct LMud_Fiber;
+struct LMud_Frame;

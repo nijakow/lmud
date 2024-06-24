@@ -106,3 +106,13 @@ const char* LMud_Symbol_Name(struct LMud_Symbol* self)
 {
     return LMud_String_Chars((struct LMud_String*) LMud_Any_AsPointer(self->name));
 }
+
+LMud_Any LMud_Symbol_Value(struct LMud_Symbol* self)
+{
+    return self->value;
+}
+
+LMud_Any LMud_Symbol_Function(struct LMud_Symbol* self)
+{
+    return self->function;
+}

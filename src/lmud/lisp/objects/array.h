@@ -17,4 +17,5 @@ void LMud_Array_Create_OverallocatedFromData(struct LMud_Array* self, LMud_Size 
 void LMud_Array_Destroy(struct LMud_Array* self);
 
 LMud_Size LMud_Array_GetSize(struct LMud_Array* self);
+LMud_Any* LMud_Array_GetData(struct LMud_Array* self);
 LMud_Any  LMud_Array_Aref(struct LMud_Array* self, LMud_Size index, LMud_Any default_value);
