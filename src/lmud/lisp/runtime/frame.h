@@ -22,9 +22,9 @@ struct LMud_Frame
     struct LMud_Frame*     previous;
     struct LMud_FrameRef   lexical;
     struct LMud_Function*  function;
-    LMud_Size              ip;
-    LMud_Size              sp;
-    LMud_Size              ap;
+    uint16_t               ip;
+    uint8_t                sp;
+    uint8_t                ap;
     LMud_Any               payload[];
 };
 
