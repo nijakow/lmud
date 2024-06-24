@@ -94,9 +94,9 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
             LMud_Lisp_Print(lisp, ((struct LMud_Symbol*) pointer)->name, stream, false);
         } else if (LMud_Lisp_IsFunctionPointer(lisp, pointer)) {
             fprintf(stream, "#<BYTE-COMPILED-FUNCTION :BYTECODES ");
-            LMud_Lisp_Print(lisp, LMud_Function_Bytecodes(pointer), stream, false);
+            LMud_Lisp_Print(lisp, LMud_Function_Bytecodes(pointer), stream, true);
             fprintf(stream, " :CONSTANTS ");
-            LMud_Lisp_Print(lisp, LMud_Function_Constants(pointer), stream, false);
+            LMud_Lisp_Print(lisp, LMud_Function_Constants(pointer), stream, true);
             fprintf(
                 stream,
                 " :STACK-SIZE %lu :REGISTER-COUNT %lu :LEXICALIZED %s>",
