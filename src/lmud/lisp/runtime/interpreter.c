@@ -179,14 +179,22 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                      */
                 }
 
-                LMud_Interpreter_SetAccu(
-                    self,
-                    LMud_Lisp_Closure(
-                        LMud_Interpreter_GetLisp(self),
-                        (struct LMud_Function*) LMud_Any_AsPointer(value),
-                        self->fiber->top
-                    )
-                );
+                if (LMud_Function_IsLexicalized((struct LMud_Function*) LMud_Any_AsPointer(value))) {
+                    LMud_Interpreter_SetAccu(
+                        self,
+                        LMud_Lisp_Closure(
+                            LMud_Interpreter_GetLisp(self),
+                            (struct LMud_Function*) LMud_Any_AsPointer(value),
+                            self->fiber->top
+                        )
+                    );
+                } else {
+                    LMud_Interpreter_SetAccu(
+                        self,
+                        value
+                    );
+                }
+
                 break;
             }
 

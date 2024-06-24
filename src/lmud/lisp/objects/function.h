@@ -26,3 +26,5 @@ void LMud_Function_Destroy(struct LMud_Function* self);
 
 LMud_Any LMud_Function_Bytecodes(struct LMud_Function* self);
 LMud_Any LMud_Function_Constants(struct LMud_Function* self);
+
+bool LMud_Function_IsLexicalized(struct LMud_Function* self);

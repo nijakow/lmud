@@ -23,3 +23,9 @@ LMud_Any LMud_Function_Constants(struct LMud_Function* self)
 {
     return self->constants;
 }
+
+
+bool LMud_Function_IsLexicalized(struct LMud_Function* self)
+{
+    return self->args.lexicalized;
+}
