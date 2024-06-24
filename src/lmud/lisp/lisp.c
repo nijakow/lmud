@@ -6,13 +6,20 @@
 
 bool LMud_Constants_Create(struct LMud_Constants* self, struct LMud_Lisp* lisp)
 {
+    /*
+     * We have a bit of a chicken-and-egg problem here. We need to create the
+     * NIL and T symbols, but we need to have the lisp object to initialize
+     * them. So we have to do this manually.
+     */
     self->nil      = LMud_Lisp_Intern(lisp, "NIL");
+    LMud_Symbol_SetValue(LMud_Any_AsPointer(self->nil), self->nil);
+    LMud_Symbol_SetFunction(LMud_Any_AsPointer(self->nil), self->nil);
     self->t        = LMud_Lisp_Intern(lisp, "T");
-    self->quote    = LMud_Lisp_Intern(lisp, "QUOTE");
-    self->function = LMud_Lisp_Intern(lisp, "FUNCTION");
-
     LMud_Symbol_MakeConstant(LMud_Any_AsPointer(self->nil));
     LMud_Symbol_MakeConstant(LMud_Any_AsPointer(self->t));
+
+    self->quote    = LMud_Lisp_Intern(lisp, "QUOTE");
+    self->function = LMud_Lisp_Intern(lisp, "FUNCTION");
 
     return true;
 }

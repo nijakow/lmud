@@ -181,7 +181,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                      */
                 }
 
-                if (true || LMud_Function_IsLexicalized((struct LMud_Function*) LMud_Any_AsPointer(value))) {
+                if (LMud_Function_IsLexicalized((struct LMud_Function*) LMud_Any_AsPointer(value))) {
                     LMud_Interpreter_SetAccu(
                         self,
                         LMud_Lisp_Closure(
