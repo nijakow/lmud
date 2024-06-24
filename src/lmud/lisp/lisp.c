@@ -156,7 +156,7 @@ LMud_Any LMud_Lisp_MakeBytes_FromData(struct LMud_Lisp* self, LMud_Size size, co
     return LMud_Any_FromPointer(LMud_Objects_MakeBytes_FromData(&self->objects, size, data));
 }
 
-LMud_Any LMud_Lisp_Closure(struct LMud_Lisp* self, LMud_Any function, struct LMud_Frame* lexical)
+LMud_Any LMud_Lisp_Closure(struct LMud_Lisp* self, struct LMud_Function* function, struct LMud_Frame* lexical)
 {
     return LMud_Any_FromPointer(LMud_Objects_Closure(&self->objects, function, lexical));
 }

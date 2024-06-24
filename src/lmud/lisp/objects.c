@@ -148,7 +148,7 @@ struct LMud_Bytes* LMud_Objects_MakeBytes_FromData(struct LMud_Objects* self, LM
     return bytes;
 }
 
-struct LMud_Closure* LMud_Objects_Closure(struct LMud_Objects* self, LMud_Any function, struct LMud_Frame* lexical)
+struct LMud_Closure* LMud_Objects_Closure(struct LMud_Objects* self, struct LMud_Function* function, struct LMud_Frame* lexical)
 {
     struct LMud_Closure*  closure;
 

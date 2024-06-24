@@ -170,11 +170,20 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
             case LMud_Bytecode_LAMBDA:
             {
+                value = LMud_InstructionStream_NextConstant(&stream);
+
+                if (!LMud_Lisp_IsFunction(LMud_Interpreter_GetLisp(self), value))
+                {
+                    /*
+                     * TODO
+                     */
+                }
+
                 LMud_Interpreter_SetAccu(
                     self,
                     LMud_Lisp_Closure(
                         LMud_Interpreter_GetLisp(self),
-                        LMud_InstructionStream_NextConstant(&stream),
+                        (struct LMud_Function*) LMud_Any_AsPointer(value),
                         self->fiber->top
                     )
                 );

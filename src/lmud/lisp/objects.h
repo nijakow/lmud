@@ -53,7 +53,7 @@ struct LMud_Array*  LMud_Objects_MakeArray_FromData(struct LMud_Objects* self, L
 struct LMud_Bytes*  LMud_Objects_MakeBytes(struct LMud_Objects* self, LMud_Size size);
 struct LMud_Bytes*  LMud_Objects_MakeBytes_FromData(struct LMud_Objects* self, LMud_Size size, const char* data);
 
-struct LMud_Closure* LMud_Objects_Closure(struct LMud_Objects* self, LMud_Any function, struct LMud_Frame* lexical);
+struct LMud_Closure* LMud_Objects_Closure(struct LMud_Objects* self, struct LMud_Function* function, struct LMud_Frame* lexical);
 
 struct LMud_Cons*   LMud_Objects_Cons(struct LMud_Objects* self, LMud_Any car, LMud_Any cdr);
 
