@@ -1,20 +1,38 @@
 
+#include <lmud/lisp/lisp.h>
 #include <lmud/util/memory.h>
 
 #include "fiber.h"
 
 
-void LMud_Fiber_Create(struct LMud_Fiber* self)
+void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp)
 {
+    self->lisp          = lisp;
+
     self->stack         =  LMud_Alloc(1024 * 1024);
     self->stack_roof    = &self->stack[1024 * 1024];
     self->stack_pointer =  self->stack;
+
+    self->accumulator_count = 1;
+    self->accumulator[0]    = LMud_Lisp_Nil(lisp);
 }
 
 void LMud_Fiber_Destroy(struct LMud_Fiber* self)
 {
     (void) self;
 }
+
+LMud_Any LMud_Fiber_GetAccumulator(struct LMud_Fiber* self, LMud_Size index)
+{
+    return self->accumulator[index];
+}
+
+void LMud_Fiber_SetAccumulator(struct LMud_Fiber* self, LMud_Any value)
+{
+    self->accumulator[0]    = value;
+    self->accumulator_count = 1;
+}
+
 
 static void* LMud_Fiber_StackTop(struct LMud_Fiber* self)
 {
