@@ -395,6 +395,19 @@ void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant)
     LMud_Compiler_PushConstant(self, constant);
 }
 
+
+void LMud_Compiler_WriteSymbolVariable(struct LMud_Compiler* self, LMud_Any symbol)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SYMBOL_VARIABLE);
+    LMud_Compiler_PushConstant(self, symbol);
+}
+
+void LMud_Compiler_WriteSymbolFunction(struct LMud_Compiler* self, LMud_Any symbol)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SYMBOL_FUNCTION);
+    LMud_Compiler_PushConstant(self, symbol);
+}
+
 void LMud_Compiler_WritePush(struct LMud_Compiler* self)
 {
     LMud_Compiler_PushBytecode(self, LMud_Bytecode_PUSH);
@@ -412,16 +425,26 @@ void LMud_Compiler_CompileConstant(struct LMud_Compiler* self, LMud_Any expressi
     LMud_Compiler_WriteConstant(self, expression);
 }
 
-void LMud_Compiler_CompileVariable(struct LMud_Compiler* self, LMud_Any expression)
+void LMud_Compiler_CompileVariable(struct LMud_Compiler* self, LMud_Any expression, enum LMud_BindingType type)
 {
-    (void) self;
-    (void) expression;
+    switch (type)
+    {
+        case LMud_BindingType_VARIABLE:
+            LMud_Compiler_WriteSymbolVariable(self, expression);
+            break;
+
+        case LMud_BindingType_FUNCTION:
+            LMud_Compiler_WriteSymbolFunction(self, expression);
+            break;
+    }
 }
 
 void LMud_Compiler_CompileFunction(struct LMud_Compiler* self, LMud_Any expression)
 {
-    (void) self;
-    (void) expression;
+    if (LMud_Lisp_IsSymbol(LMud_Compiler_GetLisp(self), expression))
+        LMud_Compiler_CompileVariable(self, expression, LMud_BindingType_FUNCTION);
+    else
+        LMud_Compiler_Compile(self, expression);
 }
 
 void LMud_Compiler_CompileFuncall(struct LMud_Compiler* self, LMud_Any function, LMud_Any arguments)
@@ -571,7 +594,7 @@ void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expre
 void LMud_Compiler_Compile(struct LMud_Compiler* self, LMud_Any expression)
 {
     if (LMud_Lisp_IsSymbol(LMud_Compiler_GetLisp(self), expression))
-        LMud_Compiler_CompileVariable(self, expression);
+        LMud_Compiler_CompileVariable(self, expression, LMud_BindingType_VARIABLE);
     else if (LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), expression))
         LMud_Compiler_CompileCombination(self, expression);
     else
