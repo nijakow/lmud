@@ -6,7 +6,8 @@
 
 struct LMud_FrameRef
 {
-    struct LMud_Frame*  frame;
+    struct LMud_Frame*     frame;
+    struct LMud_FrameRef*  next;
 };
 
 void LMud_FrameRef_Create(struct LMud_FrameRef* self, struct LMud_Frame* frame);
@@ -17,6 +18,7 @@ struct LMud_Frame* LMud_FrameRef_GetFrame(struct LMud_FrameRef* self);
 
 struct LMud_Frame
 {
+    struct LMud_FrameRef*  references;
     struct LMud_Frame*     previous;
     struct LMud_FrameRef   lexical;
     struct LMud_Function*  function;
@@ -34,6 +36,8 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
                        LMud_Size             extra_argument_count);
 
 void LMud_Frame_Destroy(struct LMud_Frame* self);
+
+void LMud_Frame_RemoveReference(struct LMud_Frame* self, struct LMud_FrameRef* reference);
 
 LMud_Size LMud_Frame_RemainingExtraArgumentCount(struct LMud_Frame* self);
 

@@ -4,12 +4,14 @@
 
 void LMud_FrameRef_Create(struct LMud_FrameRef* self, struct LMud_Frame* frame)
 {
-    self->frame = frame;
+    self->frame       = frame;
+    self->next        = frame->references;
+    frame->references = self;
 }
 
 void LMud_FrameRef_Destroy(struct LMud_FrameRef* self)
 {
-    (void) self;
+    LMud_Frame_RemoveReference(self->frame, self);
 }
 
 struct LMud_Frame* LMud_FrameRef_GetFrame(struct LMud_FrameRef* self)
@@ -49,7 +51,31 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
 
 void LMud_Frame_Destroy(struct LMud_Frame* self)
 {
+    assert(self->references == NULL);
     LMud_FrameRef_Destroy(&self->lexical);
+}
+
+void LMud_Frame_RemoveReference(struct LMud_Frame* self, struct LMud_FrameRef* reference)
+{
+    struct LMud_FrameRef**  current;
+
+    current = &self->references;
+
+    while (*current != NULL)
+    {
+        if (*current == reference)
+        {
+            *current = reference->next;
+            return;
+        }
+
+        current = &(*current)->next;
+    }
+
+    /*
+     * TODO: If the reference count drops to zero and if we are heap-allocated,
+     *       we should free ourselves.
+     */
 }
 
 
