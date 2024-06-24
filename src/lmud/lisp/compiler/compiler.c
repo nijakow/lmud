@@ -313,17 +313,33 @@ void LMud_Compiler_PopScope(struct LMud_Compiler* self)
 
 bool LMud_Compiler_FindBinding(struct LMud_Compiler* self, LMud_Any name, enum LMud_BindingType type, struct LMud_Binding** binding)
 {
-    struct LMud_Scope*  scope;
+    struct LMud_Compiler*  compiler;
+    struct LMud_Scope*     scope;
 
-    for (scope = self->scopes; scope != NULL; scope = scope->surrounding)
+    for (compiler = self; compiler != NULL; compiler = compiler->lexical)
     {
-        *binding = LMud_Scope_FindBinding(scope, name, type);
+        for (scope = compiler->scopes; scope != NULL; scope = scope->surrounding)
+        {
+            *binding = LMud_Scope_FindBinding(scope, name, type);
 
-        if (*binding != NULL)
-            return true;
+            if (*binding != NULL)
+                return true;
+        }
     }
 
     return false;
+}
+
+void LMud_Compiler_BindRegister(struct LMud_Compiler* self, LMud_Any name, enum LMud_BindingType type, struct LMud_Register* reg)
+{
+    struct LMud_Binding*  binding;
+
+    if (!LMud_Compiler_FindBinding(self, name, type, &binding))
+    {
+        binding = LMud_Scope_CreateBinding(self->scopes, name, type);
+    }
+
+    LMud_Binding_SetRegister(binding, reg);
 }
 
 
@@ -347,7 +363,7 @@ bool LMud_Compiler_IdentifyRegister(struct LMud_Compiler* self, struct LMud_Regi
     struct LMud_Register*  the_reg;
     LMud_Size              our_depth;
 
-    for (compiler = self, our_depth = 0; compiler != NULL; compiler = compiler->lexical, depth++)
+    for (compiler = self, our_depth = 0; compiler != NULL; compiler = compiler->lexical, our_depth++)
     {
         for (the_reg = compiler->registers; the_reg != NULL; the_reg = the_reg->next)
         {
@@ -733,23 +749,63 @@ void LMud_Compiler_CompileSpecialSetq(struct LMud_Compiler* self, LMud_Any argum
     LMud_Compiler_CompileStoreVariable(self, variable, LMud_BindingType_VARIABLE);
 }
 
+
+struct LMud_LetVariableInfo
+{
+    LMud_Any               name;
+    struct LMud_Register*  reg;
+};
+
 void LMud_Compiler_CompileSpecialLet(struct LMud_Compiler* self, LMud_Any arguments)
 {
-    LMud_Any  bindings;
-    LMud_Any  body;
+    LMud_Any                      bindings;
+    LMud_Any                      body;
+    LMud_Any                      iterator;
+    LMud_Size                     binding_count;
+    LMud_Size                     index;
+    struct LMud_LetVariableInfo*  variable_infos;
 
     bindings = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
     body     = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arguments);
 
+    {
+        binding_count = 0;
+
+        for (iterator = bindings; LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), iterator); iterator = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), iterator))
+        {
+            binding_count = binding_count + 1;
+        }
+    }
+
+    variable_infos = LMud_Alloc(binding_count * sizeof(struct LMud_LetVariableInfo));
+
+    {
+        index = 0;
+
+        for (iterator = bindings; LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), iterator); iterator = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), iterator))
+        {
+            variable_infos[index].name  = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), LMud_Lisp_Car(LMud_Compiler_GetLisp(self), iterator));
+            variable_infos[index].reg   = LMud_Compiler_AllocateRegister(self);
+
+            LMud_Compiler_CompileExpressions(self, LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), LMud_Lisp_Car(LMud_Compiler_GetLisp(self), iterator)));
+            LMud_Compiler_WriteStoreRegister(self, variable_infos[index].reg);
+
+            index = index + 1;
+        }
+    }
+
     LMud_Compiler_PushScope(self);
     {
-        /*
-         * TODO: Bind the variables.
-         */
-        (void) bindings;
+        for (index = 0; index < binding_count; index++)
+        {
+            LMud_Compiler_BindRegister(self, variable_infos[index].name, LMud_BindingType_VARIABLE, variable_infos[index].reg);
+        }
+
         LMud_Compiler_CompileExpressions(self, body);
     }
     LMud_Compiler_PopScope(self);
+
+    LMud_Free(variable_infos);
 }
 
 void LMud_Compiler_CompileSpecialFlet(struct LMud_Compiler* self, LMud_Any arguments)
