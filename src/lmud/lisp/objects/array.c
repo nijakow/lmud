@@ -15,6 +15,19 @@ void LMud_Array_Create_Overallocated(struct LMud_Array* self, LMud_Size size, LM
     }
 }
 
+void LMud_Array_Create_OverallocatedFromData(struct LMud_Array* self, LMud_Size size, LMud_Any* data)
+{
+    LMud_Size  index;
+
+    self->size = size;
+    self->data = self->payload;
+
+    for (index = 0; index < size; index++)
+    {
+        self->data[index] = data[index];
+    }
+}
+
 void LMud_Array_Destroy(struct LMud_Array* self)
 {
     (void) self;

@@ -47,6 +47,7 @@ bool LMud_Lisp_IsNil(struct LMud_Lisp* self, LMud_Any value);
 LMud_Any LMud_Lisp_Nil(struct LMud_Lisp* self);
 
 LMud_Any LMud_Lisp_MakeArray(struct LMud_Lisp* self, LMud_Size size, LMud_Any fill);
+LMud_Any LMud_Lisp_MakeArray_FromData(struct LMud_Lisp* self, LMud_Size size, LMud_Any* data);
 LMud_Any LMud_Lisp_MakeBytes(struct LMud_Lisp* self, LMud_Size size);
 LMud_Any LMud_Lisp_MakeBytes_FromData(struct LMud_Lisp* self, LMud_Size size, const char* data);
 LMud_Any LMud_Lisp_Cons(struct LMud_Lisp* self, LMud_Any car, LMud_Any cdr);

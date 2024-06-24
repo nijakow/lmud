@@ -120,3 +120,5 @@ void LMud_Compiler_WritePush(struct LMud_Compiler* self);
 void LMud_Compiler_WriteCall(struct LMud_Compiler* self, LMud_Size arity);
 
 void LMud_Compiler_Compile(struct LMud_Compiler* self, LMud_Any expression);
+
+LMud_Any LMud_Compiler_Build(struct LMud_Compiler* self);

@@ -24,10 +24,11 @@ void LMud_Banner(struct LMud* self)
     printf("  Copyright (c) 2024 nijakow\n");
 }
 
-void LMud_TestCompile(struct LMud* self, LMud_Any expression)
+LMud_Any LMud_TestCompile(struct LMud* self, LMud_Any expression)
 {
     struct LMud_CompilerSession  session;
     struct LMud_Compiler         compiler;
+    LMud_Any                     function;
 
     printf("; Compiling...\n");
 
@@ -36,8 +37,12 @@ void LMud_TestCompile(struct LMud* self, LMud_Any expression)
 
     LMud_Compiler_Compile(&compiler, expression);
 
+    function = LMud_Compiler_Build(&compiler);
+
     LMud_Compiler_Destroy(&compiler);
     LMud_CompilerSession_Destroy(&session);
+
+    return function;
 }
 
 void LMud_Test(struct LMud* self)
@@ -55,7 +60,7 @@ void LMud_Test(struct LMud* self)
         printf("> ");
         fflush(stdout);
         value = LMud_Lisp_Read(lisp, &stream);
-        LMud_TestCompile(self, value);
+        value = LMud_TestCompile(self, value);
         printf("  ");
         LMud_Lisp_Print(lisp, value, stdout, true);
         putchar('\n');

@@ -44,6 +44,29 @@ void LMud_Lisp_PrintArray(struct LMud_Lisp* lisp, struct LMud_Array* array, FILE
             fprintf(stream, " ");
         LMud_Lisp_Print(lisp, LMud_Array_Aref(array, index, default_value), stream, escaped);
     }
+
+    fprintf(stream, ")");
+}
+
+void LMud_Lisp_PrintBytes(struct LMud_Lisp* lisp, struct LMud_Bytes* bytes, FILE* stream)
+{
+    LMud_Size  index;
+    LMud_Size  size;
+
+    (void) lisp;
+
+    fprintf(stream, "#[");
+
+    size = LMud_Bytes_GetSize(bytes);
+
+    for (index = 0; index < size; index++)
+    {
+        if (index > 0)
+            fprintf(stream, " ");
+        fprintf(stream, "%02X", (unsigned char) LMud_Bytes_At(bytes, index));
+    }
+
+    fprintf(stream, "]");
 }
 
 void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool escaped)
@@ -59,6 +82,8 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
             LMud_Lisp_PrintList(lisp, object, stream, escaped);
         } else if (LMud_Lisp_IsArrayPointer(lisp, pointer)) {
             LMud_Lisp_PrintArray(lisp, pointer, stream, escaped);
+        } else if (LMud_Lisp_IsBytesPointer(lisp, pointer)) {
+            LMud_Lisp_PrintBytes(lisp, pointer, stream);
         } else if (LMud_Lisp_IsStringPointer(lisp, pointer)) {
             if (escaped) {
                 fprintf(stream, "\"%s\"", ((struct LMud_String*) pointer)->chars);
@@ -67,6 +92,14 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
             }
         } else if (LMud_Lisp_IsSymbolPointer(lisp, pointer)) {
             LMud_Lisp_Print(lisp, ((struct LMud_Symbol*) pointer)->name, stream, false);
+        } else if (LMud_Lisp_IsFunctionPointer(lisp, pointer)) {
+            fprintf(stream, "#<BYTE-COMPILED-FUNCTION ");
+            LMud_Lisp_Print(lisp, LMud_Function_Bytecodes(pointer), stream, false);
+            fprintf(stream, " ");
+            LMud_Lisp_Print(lisp, LMud_Function_Constants(pointer), stream, false);
+            fprintf(stream, ">");
+        } else {
+            fprintf(stream, "#<?>");
         }
     } else {
         fprintf(stream, "#<?>");

@@ -96,6 +96,20 @@ struct LMud_Array*  LMud_Objects_MakeArray(struct LMud_Objects* self, LMud_Size 
     return array;
 }
 
+struct LMud_Array*  LMud_Objects_MakeArray_FromData(struct LMud_Objects* self, LMud_Size size, LMud_Any* data)
+{
+    struct LMud_Array*  array;
+
+    array = LMud_Objects_Allocate(self, &self->types.array, size * sizeof(LMud_Any));
+
+    if (array != NULL)
+    {
+        LMud_Array_Create_OverallocatedFromData(array, size, data);
+    }
+
+    return array;
+}
+
 struct LMud_Bytes* LMud_Objects_MakeBytes(struct LMud_Objects* self, LMud_Size size)
 {
     struct LMud_Bytes*  bytes;

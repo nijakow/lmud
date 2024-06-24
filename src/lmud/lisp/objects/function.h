@@ -20,3 +20,6 @@ struct LMud_Function
 
 void LMud_Function_Create(struct LMud_Function* self, struct LMud_ArgInfo args, LMud_Any bytecodes, LMud_Any constants);
 void LMud_Function_Destroy(struct LMud_Function* self);
+
+LMud_Any LMud_Function_Bytecodes(struct LMud_Function* self);
+LMud_Any LMud_Function_Constants(struct LMud_Function* self);

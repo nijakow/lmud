@@ -45,6 +45,7 @@ void LMud_Objects_Destroy(struct LMud_Objects* self);
 void* LMud_Objects_Allocate(struct LMud_Objects* self, struct LMud_Type* type, LMud_Size extra);
 
 struct LMud_Array*  LMud_Objects_MakeArray(struct LMud_Objects* self, LMud_Size size, LMud_Any fill);
+struct LMud_Array*  LMud_Objects_MakeArray_FromData(struct LMud_Objects* self, LMud_Size size, LMud_Any* data);
 
 struct LMud_Bytes*  LMud_Objects_MakeBytes(struct LMud_Objects* self, LMud_Size size);
 struct LMud_Bytes*  LMud_Objects_MakeBytes_FromData(struct LMud_Objects* self, LMud_Size size, const char* data);

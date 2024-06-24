@@ -118,6 +118,11 @@ LMud_Any LMud_Lisp_MakeArray(struct LMud_Lisp* self, LMud_Size size, LMud_Any fi
     return LMud_Any_FromPointer(LMud_Objects_MakeArray(&self->objects, size, fill));
 }
 
+LMud_Any LMud_Lisp_MakeArray_FromData(struct LMud_Lisp* self, LMud_Size size, LMud_Any* data)
+{
+    return LMud_Any_FromPointer(LMud_Objects_MakeArray_FromData(&self->objects, size, data));
+}
+
 LMud_Any LMud_Lisp_MakeBytes(struct LMud_Lisp* self, LMud_Size size)
 {
     return LMud_Any_FromPointer(LMud_Objects_MakeBytes(&self->objects, size));

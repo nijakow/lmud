@@ -299,6 +299,12 @@ LMud_Size LMud_Compiler_PushConstant_None(struct LMud_Compiler* self, LMud_Any c
     LMud_Size  new_size;
     LMud_Any*  new_constants;
 
+    for (index = 0; index < self->constants_fill; index++)
+    {
+        if (LMud_Any_Eq(self->constants[index], constant))
+            return index;
+    }
+
     if (self->constants_fill >= self->constants_alloc)
     {
         if (self->constants_alloc == 0) {
@@ -570,4 +576,15 @@ void LMud_Compiler_Compile(struct LMud_Compiler* self, LMud_Any expression)
         LMud_Compiler_CompileCombination(self, expression);
     else
         LMud_Compiler_CompileConstant(self, expression);
+}
+
+
+LMud_Any LMud_Compiler_Build(struct LMud_Compiler* self)
+{
+    return LMud_Lisp_Function(
+        LMud_Compiler_GetLisp(self),
+        (struct LMud_ArgInfo) { },
+        LMud_Lisp_MakeBytes_FromData(LMud_Compiler_GetLisp(self), self->bytecodes_fill, (const char*) self->bytecodes),
+        LMud_Lisp_MakeArray_FromData(LMud_Compiler_GetLisp(self), self->constants_fill, self->constants)
+    );
 }
