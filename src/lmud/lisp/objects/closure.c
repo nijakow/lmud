@@ -11,3 +11,14 @@ void LMud_Closure_Destroy(struct LMud_Closure* self)
 {
     LMud_FrameRef_Destroy(&self->lexical);
 }
+
+
+struct LMud_Function* LMud_Closure_GetFunction(struct LMud_Closure* self)
+{
+    return self->function;
+}
+
+struct LMud_Frame* LMud_Closure_GetLexical(struct LMud_Closure* self)
+{
+    return LMud_FrameRef_GetFrame(&self->lexical);
+}

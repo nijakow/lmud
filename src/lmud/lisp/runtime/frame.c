@@ -4,14 +4,22 @@
 
 void LMud_FrameRef_Create(struct LMud_FrameRef* self, struct LMud_Frame* frame)
 {
-    self->frame       = frame;
-    self->next        = frame->references;
-    frame->references = self;
+    self->frame = frame;
+    
+    if (frame == NULL) {
+        self->next = NULL;
+    } else {
+        self->next        = frame->references;
+        frame->references = self;
+    }
 }
 
 void LMud_FrameRef_Destroy(struct LMud_FrameRef* self)
 {
-    LMud_Frame_RemoveReference(self->frame, self);
+    if (self->frame != NULL)
+    {
+        LMud_Frame_RemoveReference(self->frame, self);
+    }
 }
 
 struct LMud_Frame* LMud_FrameRef_GetFrame(struct LMud_FrameRef* self)

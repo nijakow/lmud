@@ -1,5 +1,7 @@
 
 #include <lmud/lisp/lisp.h>
+#include <lmud/lisp/objects/closure.h>
+#include <lmud/lisp/objects/function.h>
 #include <lmud/lisp/runtime/interpreter.h>
 #include <lmud/util/memory.h>
 
@@ -94,13 +96,25 @@ void LMud_Fiber_Unwind(struct LMud_Fiber* self)
 
 void LMud_Fiber_Enter(struct LMud_Fiber* self, LMud_Any function, LMud_Any* arguments, LMud_Size argument_count)
 {
-    /*
-     * TODO
-     */
-    (void) self;
-    (void) function;
-    (void) arguments;
-    (void) argument_count;
+    if (LMud_Lisp_IsFunction(self->lisp, function)) {
+        LMud_Fiber_PushFrame(
+            self,
+            (struct LMud_Function*) LMud_Any_AsPointer(function),
+            NULL,
+            arguments,
+            argument_count
+        );
+    } else if (LMud_Lisp_IsClosure(self->lisp, function)) {
+        LMud_Fiber_PushFrame(
+            self,
+            LMud_Closure_GetFunction(LMud_Any_AsPointer(function)),
+            LMud_Closure_GetLexical(LMud_Any_AsPointer(function)),
+            arguments,
+            argument_count
+        );
+    } else {
+        LMud_Fiber_PerformError(self, "Not a function.");
+    }
 }
 
 void LMud_Fiber_PerformCall(struct LMud_Fiber* self, LMud_Any function, LMud_Size argument_count)
