@@ -270,6 +270,28 @@ bool LMud_Lisp_Nth(struct LMud_Lisp* self, LMud_Any value, LMud_Size index, LMud
 }
 
 
+bool LMud_Lisp_Aref(struct LMud_Lisp* self, LMud_Any object, LMud_Any index, LMud_Any* result)
+{
+    LMud_Size  index_value;
+
+    if (!LMud_Any_IsInteger(index))
+        return false;
+    
+    index_value = LMud_Any_AsInteger(index);
+
+    if (LMud_Lisp_IsArray(self, object)) {
+        *result = LMud_Array_Aref(LMud_Any_AsPointer(object), index_value, LMud_Lisp_Nil(self));
+        return true;
+    } else if (LMud_Lisp_IsBytes(self, object)) {
+        *result = LMud_Bytes_Aref(LMud_Any_AsPointer(object), index_value);
+        return true;
+    } else {
+        *result = LMud_Lisp_Nil(self);
+        return false;
+    }
+}
+
+
 LMud_Any LMud_Lisp_Quote(struct LMud_Lisp* self, LMud_Any value)
 {
     return LMud_Lisp_Cons(self, self->constants.quote, LMud_Lisp_Cons(self, value, LMud_Lisp_Nil(self)));

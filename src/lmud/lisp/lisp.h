@@ -70,6 +70,8 @@ LMud_Any LMud_Lisp_Cdr(struct LMud_Lisp* self, LMud_Any value);
 bool     LMud_Lisp_TakeNext(struct LMud_Lisp* self, LMud_Any* value, LMud_Any* result);
 bool     LMud_Lisp_Nth(struct LMud_Lisp* self, LMud_Any value, LMud_Size index, LMud_Any* result);
 
+bool LMud_Lisp_Aref(struct LMud_Lisp* self, LMud_Any object, LMud_Any index, LMud_Any* result);
+
 LMud_Any LMud_Lisp_Quote(struct LMud_Lisp* self, LMud_Any value);
 LMud_Any LMud_Lisp_QuoteFunction(struct LMud_Lisp* self, LMud_Any value);
 
