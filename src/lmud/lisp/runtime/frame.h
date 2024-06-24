@@ -39,6 +39,7 @@ void LMud_Frame_Destroy(struct LMud_Frame* self);
 LMud_Any LMud_Frame_GetRegister(struct LMud_Frame* self, LMud_Size index);
 void     LMud_Frame_SetRegister(struct LMud_Frame* self, LMud_Size index, LMud_Any value);
 
-void     LMud_Frame_Push(struct LMud_Frame* self, LMud_Any value);
-LMud_Any LMud_Frame_Pop(struct LMud_Frame* self);
-void     LMud_Frame_Drop(struct LMud_Frame* self, LMud_Size count);
+void      LMud_Frame_Push(struct LMud_Frame* self, LMud_Any value);
+LMud_Any  LMud_Frame_Pop(struct LMud_Frame* self);
+LMud_Any* LMud_Frame_PopN(struct LMud_Frame* self, LMud_Size count);
+void      LMud_Frame_Drop(struct LMud_Frame* self, LMud_Size count);

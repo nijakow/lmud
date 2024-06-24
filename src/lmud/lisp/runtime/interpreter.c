@@ -144,9 +144,9 @@ struct LMud_Frame* LMud_Interpreter_LexicalFrame(struct LMud_Interpreter* self, 
 
 
 #define LMud_Interpreter_Flush(self) \
-    LMud_InstructionStream_Flush(&(self)->stream)
+    LMud_InstructionStream_Flush(&stream)
 #define LMud_Interpreter_Restore(self) \
-    LMud_InstructionStream_Restore(&(self)->stream)
+    LMud_InstructionStream_Restore(&stream, self->fiber->top)
 
 void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 {
@@ -276,9 +276,12 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
             case LMud_Bytecode_CALL:
             {
-                /*
-                 * TODO
-                 */
+                index = LMud_InstructionStream_NextU8(&stream);
+                value = LMud_Interpreter_GetAccu(self);
+
+                LMud_Interpreter_Flush(self);
+                LMud_Fiber_PerformCall(self->fiber, value, index);
+                LMud_Interpreter_Restore(self);
 
                 break;
             }
@@ -305,7 +308,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
             case LMud_Bytecode_RETURN:
             {
-                LMud_InstructionStream_Flush(&stream);
+                LMud_Interpreter_Flush(self);
                 LMud_Fiber_PerformReturn(self->fiber);
                 if (!LMud_Fiber_HasFrames(self->fiber))
                     goto end;
@@ -314,7 +317,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
             default:
             {
-                LMud_InstructionStream_Flush(&stream);
+                LMud_Interpreter_Flush(self);
                 LMud_Fiber_PerformError(self->fiber, "Invalid bytecode!");
                 goto end;
             }

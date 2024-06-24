@@ -83,6 +83,22 @@ void LMud_Fiber_Unwind(struct LMud_Fiber* self)
 }
 
 
+void LMud_Fiber_Enter(struct LMud_Fiber* self, LMud_Any function, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO
+     */
+    (void) self;
+    (void) function;
+    (void) arguments;
+    (void) argument_count;
+}
+
+void LMud_Fiber_PerformCall(struct LMud_Fiber* self, LMud_Any function, LMud_Size argument_count)
+{
+    LMud_Fiber_Enter(self, function, LMud_Frame_PopN(self->top, argument_count), argument_count);
+}
+
 void LMud_Fiber_PerformReturn(struct LMud_Fiber* self)
 {
     LMud_Fiber_PopFrame(self);

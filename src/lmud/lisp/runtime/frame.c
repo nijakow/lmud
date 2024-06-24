@@ -63,6 +63,12 @@ LMud_Any LMud_Frame_Pop(struct LMud_Frame* self)
     return self->payload[--self->sp];
 }
 
+LMud_Any* LMud_Frame_PopN(struct LMud_Frame* self, LMud_Size count)
+{
+    self->sp -= count;
+    return &self->payload[self->sp];
+}
+
 void LMud_Frame_Drop(struct LMud_Frame* self, LMud_Size count)
 {
     self->sp -= count;
