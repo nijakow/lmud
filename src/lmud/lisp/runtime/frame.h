@@ -20,6 +20,7 @@ struct LMud_Frame
 {
     struct LMud_FrameRef*  references;
     struct LMud_Frame*     previous;
+    struct LMud_Frame*     child;
     struct LMud_FrameRef   lexical;
     struct LMud_Function*  function;
     uint16_t               ip;

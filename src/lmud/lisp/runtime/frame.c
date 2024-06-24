@@ -30,6 +30,7 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
     LMud_Size  index;
 
     self->previous       = previous;
+    self->child          = NULL;
     
     LMud_FrameRef_Create(&self->lexical, lexical);
 

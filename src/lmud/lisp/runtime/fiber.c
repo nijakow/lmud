@@ -59,6 +59,9 @@ struct LMud_Frame* LMud_Fiber_PushFrame(struct LMud_Fiber* self, struct LMud_Fun
 
     LMud_Frame_Create(frame, self->top, lexical, function, arguments, extra_args);
 
+    self->top->child = frame;
+    self->top        = frame;
+
     return frame;
 }
 
@@ -73,6 +76,7 @@ void LMud_Fiber_PopFrame(struct LMud_Fiber* self)
     frame               = self->top;
     self->top           = frame->previous;
     self->stack_pointer = (char*) frame;
+    self->top->child    = NULL;
 }
 
 
