@@ -476,7 +476,7 @@ void LMud_Compiler_CompileSpecialQuote(struct LMud_Compiler* self, LMud_Any argu
     /*
      * TODO: Error if arguments is not a list of length 1
      */
-    LMud_Lisp_Nth(LMud_Compiler_GetLisp(self), arguments, 0, &value);
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &value);
 
     LMud_Compiler_CompileConstant(self, value);
 }
@@ -489,16 +489,7 @@ void LMud_Compiler_CompileSpecialLambda(struct LMud_Compiler* self, LMud_Any arg
 
 void LMud_Compiler_CompileSpecialProgn(struct LMud_Compiler* self, LMud_Any arguments)
 {
-    LMud_Any  argument;
-
-    while (LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), arguments))
-    {
-        argument = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
-
-        LMud_Compiler_Compile(self, argument);
-
-        arguments = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arguments);
-    }
+    LMud_Compiler_CompileExpressions(self, arguments);
 }
 
 void LMud_Compiler_CompileSpecialSetq(struct LMud_Compiler* self, LMud_Any arguments)
@@ -517,20 +508,59 @@ void LMud_Compiler_CompileSpecialSetq(struct LMud_Compiler* self, LMud_Any argum
 
 void LMud_Compiler_CompileSpecialLet(struct LMud_Compiler* self, LMud_Any arguments)
 {
-    (void) self;
-    (void) arguments;
+    LMud_Any  bindings;
+    LMud_Any  body;
+
+    bindings = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
+    body     = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arguments);
+
+    LMud_Compiler_PushScope(self);
+    {
+        /*
+         * TODO: Bind the variables.
+         */
+        (void) bindings;
+        LMud_Compiler_CompileExpressions(self, body);
+    }
+    LMud_Compiler_PopScope(self);
 }
 
 void LMud_Compiler_CompileSpecialFlet(struct LMud_Compiler* self, LMud_Any arguments)
 {
-    (void) self;
-    (void) arguments;
+    LMud_Any  bindings;
+    LMud_Any  body;
+
+    bindings = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
+    body     = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arguments);
+
+    LMud_Compiler_PushScope(self);
+    {
+        /*
+         * TODO: Bind the functions.
+         */
+        (void) bindings;
+        LMud_Compiler_CompileExpressions(self, body);
+    }
+    LMud_Compiler_PopScope(self);
 }
 
 void LMud_Compiler_CompileSpecialLabels(struct LMud_Compiler* self, LMud_Any arguments)
 {
-    (void) self;
-    (void) arguments;
+    LMud_Any  bindings;
+    LMud_Any  body;
+
+    bindings = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
+    body     = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arguments);
+
+    LMud_Compiler_PushScope(self);
+    {
+        /*
+         * TODO: Bind the functions.
+         */
+        (void) bindings;
+        LMud_Compiler_CompileExpressions(self, body);
+    }
+    LMud_Compiler_PopScope(self);
 }
 
 void LMud_Compiler_CompileSpecialIf(struct LMud_Compiler* self, LMud_Any arguments)
@@ -599,6 +629,20 @@ void LMud_Compiler_Compile(struct LMud_Compiler* self, LMud_Any expression)
         LMud_Compiler_CompileCombination(self, expression);
     else
         LMud_Compiler_CompileConstant(self, expression);
+}
+
+void LMud_Compiler_CompileExpressions(struct LMud_Compiler* self, LMud_Any expressions)
+{
+    LMud_Any  expression;
+
+    while (LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), expressions))
+    {
+        expression = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), expressions);
+
+        LMud_Compiler_Compile(self, expression);
+
+        expressions = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), expressions);
+    }
 }
 
 
