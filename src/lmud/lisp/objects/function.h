@@ -1,0 +1,22 @@
+
+#pragma once
+
+#include <lmud/lisp/base.h>
+
+
+struct LMud_ArgInfo
+{
+};
+
+struct LMud_Function
+{
+    struct LMud_Object   _;
+
+    struct LMud_ArgInfo  args;
+
+    LMud_Any             bytecodes;
+    LMud_Any             constants;
+};
+
+void LMud_Function_Create(struct LMud_Function* self, struct LMud_ArgInfo args, LMud_Any bytecodes, LMud_Any constants);
+void LMud_Function_Destroy(struct LMud_Function* self);

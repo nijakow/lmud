@@ -30,12 +30,14 @@ struct LMud_Types* LMud_Lisp_Types(struct LMud_Lisp* self);
 bool LMud_Lisp_IsArrayPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsBytesPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsConsPointer(struct LMud_Lisp* self, void* object);
+bool LMud_Lisp_IsFunctionPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsStringPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsSymbolPointer(struct LMud_Lisp* self, void* object);
 
 bool LMud_Lisp_IsArray(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsBytes(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsCons(struct LMud_Lisp* self, LMud_Any value);
+bool LMud_Lisp_IsFunction(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsString(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsSymbol(struct LMud_Lisp* self, LMud_Any value);
 
@@ -48,6 +50,7 @@ LMud_Any LMud_Lisp_MakeArray(struct LMud_Lisp* self, LMud_Size size, LMud_Any fi
 LMud_Any LMud_Lisp_MakeBytes(struct LMud_Lisp* self, LMud_Size size);
 LMud_Any LMud_Lisp_MakeBytes_FromData(struct LMud_Lisp* self, LMud_Size size, const char* data);
 LMud_Any LMud_Lisp_Cons(struct LMud_Lisp* self, LMud_Any car, LMud_Any cdr);
+LMud_Any LMud_Lisp_Function(struct LMud_Lisp* self, struct LMud_ArgInfo args, LMud_Any bytecodes, LMud_Any constants);
 LMud_Any LMud_Lisp_String(struct LMud_Lisp* self, const char* text);
 LMud_Any LMud_Lisp_Intern(struct LMud_Lisp* self, const char* name);
 LMud_Any LMud_Lisp_InternUpcase(struct LMud_Lisp* self, const char* name);

@@ -55,6 +55,11 @@ bool LMud_Lisp_IsConsPointer(struct LMud_Lisp* self, void* object)
     return LMud_Types_IsCons(LMud_Lisp_Types(self), object);
 }
 
+bool LMud_Lisp_IsFunctionPointer(struct LMud_Lisp* self, void* object)
+{
+    return LMud_Types_IsFunction(LMud_Lisp_Types(self), object);
+}
+
 bool LMud_Lisp_IsStringPointer(struct LMud_Lisp* self, void* object)
 {
     return LMud_Types_IsString(LMud_Lisp_Types(self), object);
@@ -79,6 +84,11 @@ bool LMud_Lisp_IsBytes(struct LMud_Lisp* self, LMud_Any value)
 bool LMud_Lisp_IsCons(struct LMud_Lisp* self, LMud_Any value)
 {
     return LMud_Any_IsPointer(value) && LMud_Lisp_IsConsPointer(self, LMud_Any_AsPointer(value));
+}
+
+bool LMud_Lisp_IsFunction(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Any_IsPointer(value) && LMud_Lisp_IsFunctionPointer(self, LMud_Any_AsPointer(value));
 }
 
 bool LMud_Lisp_IsString(struct LMud_Lisp* self, LMud_Any value)
@@ -121,6 +131,11 @@ LMud_Any LMud_Lisp_MakeBytes_FromData(struct LMud_Lisp* self, LMud_Size size, co
 LMud_Any LMud_Lisp_Cons(struct LMud_Lisp* self, LMud_Any car, LMud_Any cdr)
 {
     return LMud_Any_FromPointer(LMud_Objects_Cons(&self->objects, car, cdr));
+}
+
+LMud_Any LMud_Lisp_Function(struct LMud_Lisp* self, struct LMud_ArgInfo args, LMud_Any bytecodes, LMud_Any constants)
+{
+    return LMud_Any_FromPointer(LMud_Objects_Function(&self->objects, args, bytecodes, constants));
 }
 
 LMud_Any LMud_Lisp_String(struct LMud_Lisp* self, const char* text)

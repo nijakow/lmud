@@ -6,10 +6,12 @@
 
 void LMud_Types_Create(struct LMud_Types* self)
 {
-    self->array.base_size  = sizeof(struct LMud_Array);
-    self->cons.base_size   = sizeof(struct LMud_Cons);
-    self->string.base_size = sizeof(struct LMud_String);
-    self->symbol.base_size = sizeof(struct LMud_Symbol);
+    self->array.base_size    = sizeof(struct LMud_Array);
+    self->bytes.base_size    = sizeof(struct LMud_Bytes);
+    self->cons.base_size     = sizeof(struct LMud_Cons);
+    self->function.base_size = sizeof(struct LMud_Function);
+    self->string.base_size   = sizeof(struct LMud_String);
+    self->symbol.base_size   = sizeof(struct LMud_Symbol);
 }
 
 void LMud_Types_Destroy(struct LMud_Types* self)
@@ -30,6 +32,11 @@ bool LMud_Types_IsBytes(struct LMud_Types* self, void* object)
 bool LMud_Types_IsCons(struct LMud_Types* self, void* object)
 {
     return LMud_Type_TypeCheck(&self->cons, object);
+}
+
+bool LMud_Types_IsFunction(struct LMud_Types* self, void* object)
+{
+    return LMud_Type_TypeCheck(&self->function, object);
 }
 
 bool LMud_Types_IsString(struct LMud_Types* self, void* object)
@@ -133,6 +140,20 @@ struct LMud_Cons* LMud_Objects_Cons(struct LMud_Objects* self, LMud_Any car, LMu
     }
 
     return cons;
+}
+
+struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LMud_ArgInfo args, LMud_Any bytecodes, LMud_Any constants)
+{
+    struct LMud_Function*  function;
+
+    function = LMud_Objects_Allocate(self, &self->types.function, 0);
+
+    if (function != NULL)
+    {
+        LMud_Function_Create(function, args, bytecodes, constants);
+    }
+
+    return function;
 }
 
 struct LMud_String* LMud_Objects_String(struct LMud_Objects* self, const char* text)

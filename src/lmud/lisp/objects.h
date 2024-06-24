@@ -6,6 +6,7 @@
 #include <lmud/lisp/objects/array.h>
 #include <lmud/lisp/objects/bytes.h>
 #include <lmud/lisp/objects/cons.h>
+#include <lmud/lisp/objects/function.h>
 #include <lmud/lisp/objects/string.h>
 #include <lmud/lisp/objects/symbol.h>
 
@@ -15,6 +16,7 @@ struct LMud_Types
     struct LMud_Type     array;
     struct LMud_Type     bytes;
     struct LMud_Type     cons;
+    struct LMud_Type     function;
     struct LMud_Type     string;
     struct LMud_Type     symbol;
 };
@@ -25,6 +27,7 @@ void LMud_Types_Destroy(struct LMud_Types* self);
 bool LMud_Types_IsArray(struct LMud_Types* self, void* object);
 bool LMud_Types_IsBytes(struct LMud_Types* self, void* object);
 bool LMud_Types_IsCons(struct LMud_Types* self, void* object);
+bool LMud_Types_IsFunction(struct LMud_Types* self, void* object);
 bool LMud_Types_IsString(struct LMud_Types* self, void* object);
 bool LMud_Types_IsSymbol(struct LMud_Types* self, void* object);
 
@@ -47,6 +50,8 @@ struct LMud_Bytes*  LMud_Objects_MakeBytes(struct LMud_Objects* self, LMud_Size 
 struct LMud_Bytes*  LMud_Objects_MakeBytes_FromData(struct LMud_Objects* self, LMud_Size size, const char* data);
 
 struct LMud_Cons*   LMud_Objects_Cons(struct LMud_Objects* self, LMud_Any car, LMud_Any cdr);
+
+struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LMud_ArgInfo args, LMud_Any bytecodes, LMud_Any constants);
 
 struct LMud_String* LMud_Objects_String(struct LMud_Objects* self, const char* text);
 
