@@ -16,6 +16,55 @@ void LMud_Scope_Destroy(struct LMud_Scope* self)
 }
 
 
+void LMud_CompilerLabelInfo_Create(struct LMud_CompilerLabelInfo* self, struct LMud_CompilerLabelInfo** list)
+{
+    /*
+     * Link ourself into the list.
+     */
+    if (*list != NULL)
+        (*list)->prev = &self->next;
+    self->prev =  list;
+    self->next = *list;
+    *list      =  self;
+
+    /*
+     * Set the placement status to "not placed".
+     */
+    self->offset = LMud_CompilerLabelInfo_NOT_PLACED;
+}
+
+void LMud_CompilerLabelInfo_Destroy(struct LMud_CompilerLabelInfo* self)
+{
+    /*
+     * Unlink ourself from the list.
+     */
+    if (self->next != NULL)
+        self->next->prev = self->prev;
+    *self->prev = self->next;
+}
+
+void LMud_CompilerLabelInfo_Delete(struct LMud_CompilerLabelInfo* self)
+{
+    LMud_CompilerLabelInfo_Destroy(self);
+    LMud_Free(self);
+}
+
+bool LMud_CompilerLabelInfo_IsPlaced(struct LMud_CompilerLabelInfo* self)
+{
+    return self->offset != LMud_CompilerLabelInfo_NOT_PLACED;
+}
+
+bool LMud_CompilerLabelInfo_Place(struct LMud_CompilerLabelInfo* self, LMud_Size offset)
+{
+    if (self->offset != LMud_CompilerLabelInfo_NOT_PLACED)
+        return false;
+
+    self->offset = offset;
+
+    return true;
+}
+
+
 void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSession* session)
 {
     self->session = session;
@@ -29,6 +78,8 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->constants       = NULL;
     self->constants_fill  = 0;
     self->constants_alloc = 0;
+
+    self->labels          = NULL;
 
     self->cached.symbol_quote  = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "QUOTE");
     self->cached.symbol_lambda = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LAMBDA");
@@ -47,6 +98,11 @@ void LMud_Compiler_Destroy(struct LMud_Compiler* self)
     while (self->scopes != NULL)
     {
         LMud_Compiler_PopScope(self);
+    }
+
+    while (self->labels != NULL)
+    {
+        LMud_CompilerLabelInfo_Delete(self->labels);
     }
 
     LMud_Free(self->bytecodes);
@@ -152,6 +208,45 @@ LMud_Size LMud_Compiler_PushConstant_None(struct LMud_Compiler* self, LMud_Any c
 void LMud_Compiler_PushConstant(struct LMud_Compiler* self, LMud_Any constant)
 {
     LMud_Compiler_PushU16(self, LMud_Compiler_PushConstant_None(self, constant));
+}
+
+LMud_CompilerLabel LMud_Compiler_OpenLabel(struct LMud_Compiler* self)
+{
+    struct LMud_CompilerLabelInfo*  label;
+
+    label = LMud_Alloc(sizeof(struct LMud_CompilerLabelInfo));
+
+    // TODO: Error if label == NULL
+
+    LMud_CompilerLabelInfo_Create(label, &self->labels);
+
+    return label;
+}
+
+void LMud_Compiler_CloseLabel(struct LMud_Compiler* self, LMud_CompilerLabel label)
+{
+    (void) self;
+    LMud_CompilerLabelInfo_Delete(label);
+}
+
+void LMud_Compiler_PlaceLabel(struct LMud_Compiler* self, LMud_CompilerLabel label)
+{
+    /*
+     * TODO: Error if label is already placed.
+     */
+    LMud_CompilerLabelInfo_Place(label, self->bytecodes_fill);
+}
+
+void LMud_Compiler_WriteJump(struct LMud_Compiler* self, LMud_CompilerLabel label)
+{
+    (void) self;
+    (void) label;
+}
+
+void LMud_Compiler_WriteJumpIfNil(struct LMud_Compiler* self, LMud_CompilerLabel label)
+{
+    (void) self;
+    (void) label;
 }
 
 

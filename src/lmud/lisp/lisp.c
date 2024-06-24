@@ -139,6 +139,19 @@ LMud_Any LMud_Lisp_Car(struct LMud_Lisp* self, LMud_Any value)
     return ((struct LMud_Cons*) LMud_Any_AsPointer(value))->car;
 }
 
+bool LMud_Lisp_TakeNext(struct LMud_Lisp* self, LMud_Any* value, LMud_Any* result)
+{
+    if (!LMud_Lisp_IsCons(self, *value)) {
+        *result = LMud_Lisp_Nil(self);
+        return false;
+    }
+
+    *result = LMud_Lisp_Car(self, *value);
+    *value  = LMud_Lisp_Cdr(self, *value);
+
+    return true;
+}
+
 LMud_Any LMud_Lisp_Cdr(struct LMud_Lisp* self, LMud_Any value)
 {
     if (!LMud_Lisp_IsCons(self, value))

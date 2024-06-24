@@ -15,32 +15,53 @@ void LMud_Scope_Create(struct LMud_Scope* self, struct LMud_Scope* surrounding);
 void LMud_Scope_Destroy(struct LMud_Scope* self);
 
 
+#define LMud_CompilerLabelInfo_NOT_PLACED  ((LMud_Size) -1)
+
+struct LMud_CompilerLabelInfo
+{
+    struct LMud_CompilerLabelInfo**  prev;
+    struct LMud_CompilerLabelInfo*   next;
+    LMud_Size                        offset;
+};
+
+void LMud_CompilerLabelInfo_Create(struct LMud_CompilerLabelInfo* self, struct LMud_CompilerLabelInfo** list);
+void LMud_CompilerLabelInfo_Destroy(struct LMud_CompilerLabelInfo* self);
+void LMud_CompilerLabelInfo_Delete(struct LMud_CompilerLabelInfo* self);
+
+bool LMud_CompilerLabelInfo_IsPlaced(struct LMud_CompilerLabelInfo* self);
+bool LMud_CompilerLabelInfo_Place(struct LMud_CompilerLabelInfo* self, LMud_Size offset);
+
+
 struct LMud_Compiler
 {
-    struct LMud_CompilerSession*  session;
-    struct LMud_Compiler*         lexical;
-    struct LMud_Scope*            scopes;
+    struct LMud_CompilerSession*   session;
+    struct LMud_Compiler*          lexical;
+    struct LMud_Scope*             scopes;
 
-    uint8_t*                      bytecodes;
-    LMud_Size                     bytecodes_fill;
-    LMud_Size                     bytecodes_alloc;
+    uint8_t*                       bytecodes;
+    LMud_Size                      bytecodes_fill;
+    LMud_Size                      bytecodes_alloc;
 
-    LMud_Any*                     constants;
-    LMud_Size                     constants_fill;
-    LMud_Size                     constants_alloc;
+    LMud_Any*                      constants;
+    LMud_Size                      constants_fill;
+    LMud_Size                      constants_alloc;
+
+    struct LMud_CompilerLabelInfo* labels;
 
     struct
     {
-        LMud_Any                  symbol_quote;
-        LMud_Any                  symbol_lambda;
-        LMud_Any                  symbol_progn;
-        LMud_Any                  symbol_setq;
-        LMud_Any                  symbol_let;
-        LMud_Any                  symbol_flet;
-        LMud_Any                  symbol_labels;
-        LMud_Any                  symbol_if;
-    }                             cached;
+        LMud_Any                   symbol_quote;
+        LMud_Any                   symbol_lambda;
+        LMud_Any                   symbol_progn;
+        LMud_Any                   symbol_setq;
+        LMud_Any                   symbol_let;
+        LMud_Any                   symbol_flet;
+        LMud_Any                   symbol_labels;
+        LMud_Any                   symbol_if;
+    }                              cached;
 };
+
+typedef struct LMud_CompilerLabelInfo* LMud_CompilerLabel;
 
 void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSession* session);
 void LMud_Compiler_Destroy(struct LMud_Compiler* self);
@@ -56,6 +77,12 @@ void      LMud_Compiler_PushU16(struct LMud_Compiler* self, uint16_t word);
 void      LMud_Compiler_PushBytecode(struct LMud_Compiler* self, enum LMud_Bytecode bytecode);
 LMud_Size LMud_Compiler_PushConstant_None(struct LMud_Compiler* self, LMud_Any constant);
 void      LMud_Compiler_PushConstant(struct LMud_Compiler* self, LMud_Any constant);
+
+LMud_CompilerLabel LMud_Compiler_OpenLabel(struct LMud_Compiler* self);
+void               LMud_Compiler_CloseLabel(struct LMud_Compiler* self, LMud_CompilerLabel label);
+void               LMud_Compiler_PlaceLabel(struct LMud_Compiler* self, LMud_CompilerLabel label);
+void               LMud_Compiler_WriteJump(struct LMud_Compiler* self, LMud_CompilerLabel label);
+void               LMud_Compiler_WriteJumpIfNil(struct LMud_Compiler* self, LMud_CompilerLabel label);
 
 void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant);
 void LMud_Compiler_WritePush(struct LMud_Compiler* self);
