@@ -82,6 +82,7 @@ struct LMud_Compiler
     struct
     {
         LMud_Any                   symbol_quote;
+        LMud_Any                   symbol_function;
         LMud_Any                   symbol_lambda;
         LMud_Any                   symbol_progn;
         LMud_Any                   symbol_setq;
