@@ -1,6 +1,23 @@
 
 #include "frame.h"
 
+
+void LMud_FrameRef_Create(struct LMud_FrameRef* self, struct LMud_Frame* frame)
+{
+    self->frame = frame;
+}
+
+void LMud_FrameRef_Destroy(struct LMud_FrameRef* self)
+{
+    (void) self;
+}
+
+struct LMud_Frame* LMud_FrameRef_GetFrame(struct LMud_FrameRef* self)
+{
+    return self->frame;
+}
+
+
 void LMud_Frame_Create(struct LMud_Frame*    self,
                        struct LMud_Frame*    previous,
                        struct LMud_Frame*    lexical,
@@ -9,7 +26,9 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
                        LMud_Size             arguments_count)
 {
     self->previous       = previous;
-    self->lexical        = lexical;
+    
+    LMud_FrameRef_Create(&self->lexical, lexical);
+
     self->arguments_base = arguments_base;
     self->arguments_top  = arguments_base + arguments_count;
     self->function       = function;
@@ -19,7 +38,7 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
 
 void LMud_Frame_Destroy(struct LMud_Frame* self)
 {
-    (void) self;
+    LMud_FrameRef_Destroy(&self->lexical);
 }
 
 

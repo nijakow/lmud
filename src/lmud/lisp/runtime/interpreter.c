@@ -130,11 +130,13 @@ void LMud_Interpreter_SetAccu(struct LMud_Interpreter* self, LMud_Any value)
 
 struct LMud_Frame* LMud_Interpreter_LexicalFrame(struct LMud_Interpreter* self, LMud_Size index)
 {
-    struct LMud_Frame* frame = self->fiber->top;
+    struct LMud_Frame*  frame;
+    
+    frame = self->fiber->top;
 
     while (index --> 0)
     {
-        frame = frame->lexical;
+        frame = LMud_FrameRef_GetFrame(&frame->lexical);
     }
 
     return frame;

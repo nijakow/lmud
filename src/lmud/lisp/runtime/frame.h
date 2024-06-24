@@ -4,10 +4,21 @@
 #include <lmud/lisp/base.h>
 #include <lmud/lisp/objects/function.h>
 
+struct LMud_FrameRef
+{
+    struct LMud_Frame*  frame;
+};
+
+void LMud_FrameRef_Create(struct LMud_FrameRef* self, struct LMud_Frame* frame);
+void LMud_FrameRef_Destroy(struct LMud_FrameRef* self);
+
+struct LMud_Frame* LMud_FrameRef_GetFrame(struct LMud_FrameRef* self);
+
+
 struct LMud_Frame
 {
     struct LMud_Frame*     previous;
-    struct LMud_Frame*     lexical;
+    struct LMud_FrameRef   lexical;
     LMud_Any*              arguments_base;
     LMud_Any*              arguments_top;
     struct LMud_Function*  function;
