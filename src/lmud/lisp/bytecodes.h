@@ -7,6 +7,7 @@
 enum LMud_Bytecode
 {
     LMud_Bytecode_CONSTANT,
+    LMud_Bytecode_LAMBDA,
     LMud_Bytecode_SYMBOL_VARIABLE,
     LMud_Bytecode_SYMBOL_FUNCTION,
     LMud_Bytecode_PUSH,

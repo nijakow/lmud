@@ -95,6 +95,7 @@ struct LMud_Compiler
 typedef struct LMud_CompilerLabelInfo* LMud_CompilerLabel;
 
 void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSession* session);
+void LMud_Compiler_Create_Lexical(struct LMud_Compiler* self, struct LMud_Compiler* lexical);
 void LMud_Compiler_Destroy(struct LMud_Compiler* self);
 
 
@@ -116,6 +117,7 @@ void LMud_Compiler_WriteJump(struct LMud_Compiler* self, LMud_CompilerLabel labe
 void LMud_Compiler_WriteJumpIfNil(struct LMud_Compiler* self, LMud_CompilerLabel label);
 
 void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant);
+void LMud_Compiler_WriteLambda(struct LMud_Compiler* self, LMud_Any lambda);
 void LMud_Compiler_WriteSymbolVariable(struct LMud_Compiler* self, LMud_Any symbol);
 void LMud_Compiler_WriteSymbolFunction(struct LMud_Compiler* self, LMud_Any symbol);
 void LMud_Compiler_WritePush(struct LMud_Compiler* self);

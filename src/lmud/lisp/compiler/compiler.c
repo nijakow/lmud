@@ -210,6 +210,12 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     LMud_Compiler_PushScope(self);
 }
 
+void LMud_Compiler_Create_Lexical(struct LMud_Compiler* self, struct LMud_Compiler* lexical)
+{
+    LMud_Compiler_Create(self, lexical->session);
+    self->lexical = lexical;
+}
+
 void LMud_Compiler_Destroy(struct LMud_Compiler* self)
 {
     while (self->scopes != NULL)
@@ -395,6 +401,12 @@ void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant)
     LMud_Compiler_PushConstant(self, constant);
 }
 
+void LMud_Compiler_WriteLambda(struct LMud_Compiler* self, LMud_Any lambda)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_LAMBDA);
+    LMud_Compiler_PushConstant(self, lambda);
+}
+
 
 void LMud_Compiler_WriteSymbolVariable(struct LMud_Compiler* self, LMud_Any symbol)
 {
@@ -439,6 +451,21 @@ void LMud_Compiler_CompileVariable(struct LMud_Compiler* self, LMud_Any expressi
     }
 }
 
+void LMud_Compiler_CompileLambda(struct LMud_Compiler* self, LMud_Any arglist, LMud_Any body)
+{
+    struct LMud_Compiler  subcompiler;
+    LMud_Any              lambda;
+
+    LMud_Compiler_Create_Lexical(&subcompiler, self);
+    // TODO: Compile the variable prologue.
+    (void) arglist;
+    LMud_Compiler_CompileExpressions(&subcompiler, body);
+    lambda = LMud_Compiler_Build(&subcompiler);
+    LMud_Compiler_Destroy(&subcompiler);
+
+    LMud_Compiler_WriteLambda(self, lambda);
+}
+
 void LMud_Compiler_CompileFunction(struct LMud_Compiler* self, LMud_Any expression)
 {
     if (LMud_Lisp_IsSymbol(LMud_Compiler_GetLisp(self), expression))
@@ -474,7 +501,7 @@ void LMud_Compiler_CompileSpecialQuote(struct LMud_Compiler* self, LMud_Any argu
     LMud_Any  value;
 
     /*
-     * TODO: Error if arguments is not a list of length 1
+     * TODO: Error if arguments is not a list of length 1.
      */
     LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &value);
 
@@ -483,8 +510,16 @@ void LMud_Compiler_CompileSpecialQuote(struct LMud_Compiler* self, LMud_Any argu
 
 void LMud_Compiler_CompileSpecialLambda(struct LMud_Compiler* self, LMud_Any arguments)
 {
-    (void) self;
-    (void) arguments;
+    LMud_Any  arglist;
+    LMud_Any  body;
+
+    /*
+     * TODO: Error if there is no arglist.
+     */
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &arglist);
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &body);
+
+    LMud_Compiler_CompileLambda(self, arglist, body);
 }
 
 void LMud_Compiler_CompileSpecialProgn(struct LMud_Compiler* self, LMud_Any arguments)
