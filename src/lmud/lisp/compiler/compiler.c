@@ -596,6 +596,11 @@ void LMud_Compiler_WriteCall(struct LMud_Compiler* self, LMud_Size arity)
     LMud_Compiler_DecreaseStackDepth(self, arity);
 }
 
+void LMud_Compiler_WriteReturn(struct LMud_Compiler* self)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_RETURN);
+}
+
 
 
 bool LMud_Compiler_WriteLoadRegister(struct LMud_Compiler* self, struct LMud_Register* reg)
@@ -989,12 +994,16 @@ void LMud_Compiler_CompileExpressions(struct LMud_Compiler* self, LMud_Any expre
 
 LMud_Any LMud_Compiler_Build(struct LMud_Compiler* self)
 {
+    LMud_Compiler_WriteReturn(self);
+
     return LMud_Lisp_Function(
         LMud_Compiler_GetLisp(self),
         (struct LMud_ArgInfo) {
-            .stack_size     = self->max_stack_depth,
-            .register_count = self->max_register_index, // We keep an increment of 1
-            .lexicalized    = self->uses_lexical_stuff,
+            .fixed_argument_count = 0, // TODO
+            .stack_size           = self->max_stack_depth,
+            .register_count       = self->max_register_index, // We keep an increment of 1
+            .lexicalized          = self->uses_lexical_stuff,
+            .variadic             = false, // TODO
         },
         LMud_Lisp_MakeBytes_FromData(LMud_Compiler_GetLisp(self), self->bytecodes_fill, (const char*) self->bytecodes),
         LMud_Lisp_MakeArray_FromData(LMud_Compiler_GetLisp(self), self->constants_fill, self->constants)

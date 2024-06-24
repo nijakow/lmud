@@ -31,6 +31,7 @@ struct LMud_Frame* LMud_Fiber_PushFrame(struct LMud_Fiber* self, struct LMud_Fun
 void               LMud_Fiber_PopFrame(struct LMud_Fiber* self);
 
 void LMud_Fiber_Enter(struct LMud_Fiber* self, LMud_Any function, LMud_Any* arguments, LMud_Size argument_count);
+void LMud_Fiber_EnterThunk(struct LMud_Fiber* self, LMud_Any function);
 
 void LMud_Fiber_PerformCall(struct LMud_Fiber* self, LMud_Any function, LMud_Size argument_count);
 void LMud_Fiber_PerformReturn(struct LMud_Fiber* self);

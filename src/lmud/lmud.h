@@ -3,10 +3,12 @@
 
 #include <lmud/defs.h>
 #include <lmud/lisp/lisp.h>
+#include <lmud/lisp/runtime/scheduler.h>
 
 struct LMud
 {
-    struct LMud_Lisp  lisp;
+    struct LMud_Lisp       lisp;
+    struct LMud_Scheduler  scheduler;
 };
 
 bool LMud_Create(struct LMud* self);

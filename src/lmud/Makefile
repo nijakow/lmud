@@ -8,7 +8,7 @@ HEADERS = $(shell find . -name "*.h")
 OBJECTS = $(patsubst %.c, %.o, $(SOURCES))
 DEPENDS = $(patsubst %.c, %.d, $(SOURCES))
 
-CFLAGS = -I.. -g -Ofast -Wall -Wextra
+CFLAGS = -I.. -g -Og -Wall -Wextra
 LDFLAGS = 
 
 .default: all
