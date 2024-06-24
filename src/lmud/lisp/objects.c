@@ -8,6 +8,7 @@ void LMud_Types_Create(struct LMud_Types* self)
 {
     self->array.base_size    = sizeof(struct LMud_Array);
     self->bytes.base_size    = sizeof(struct LMud_Bytes);
+    self->closure.base_size  = sizeof(struct LMud_Closure);
     self->cons.base_size     = sizeof(struct LMud_Cons);
     self->function.base_size = sizeof(struct LMud_Function);
     self->string.base_size   = sizeof(struct LMud_String);
@@ -27,6 +28,11 @@ bool LMud_Types_IsArray(struct LMud_Types* self, void* object)
 bool LMud_Types_IsBytes(struct LMud_Types* self, void* object)
 {
     return LMud_Type_TypeCheck(&self->bytes, object);
+}
+
+bool LMud_Types_IsClosure(struct LMud_Types* self, void* object)
+{
+    return LMud_Type_TypeCheck(&self->closure, object);
 }
 
 bool LMud_Types_IsCons(struct LMud_Types* self, void* object)
@@ -140,6 +146,20 @@ struct LMud_Bytes* LMud_Objects_MakeBytes_FromData(struct LMud_Objects* self, LM
     }
 
     return bytes;
+}
+
+struct LMud_Closure* LMud_Objects_Closure(struct LMud_Objects* self, LMud_Any function, struct LMud_Frame* lexical)
+{
+    struct LMud_Closure*  closure;
+
+    closure = LMud_Objects_Allocate(self, &self->types.closure, 0);
+
+    if (closure != NULL)
+    {
+        LMud_Closure_Create(closure, function, lexical);
+    }
+
+    return closure;
 }
 
 struct LMud_Cons* LMud_Objects_Cons(struct LMud_Objects* self, LMud_Any car, LMud_Any cdr)

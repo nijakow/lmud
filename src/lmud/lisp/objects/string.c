@@ -1,7 +1,6 @@
 
 #include "string.h"
 
-
 void LMud_String_Create(struct LMud_String* self, const char* chars)
 {
     (void) self;

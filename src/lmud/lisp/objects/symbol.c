@@ -4,7 +4,6 @@
 
 #include "symbol.h"
 
-
 void LMud_SymbolTable_Create(struct LMud_SymbolTable* self)
 {
     self->symbols = NULL;

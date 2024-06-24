@@ -3,6 +3,7 @@
 
 #include <lmud/lisp/objects/array.h>
 #include <lmud/lisp/objects/bytes.h>
+#include <lmud/lisp/objects/closure.h>
 #include <lmud/lisp/objects/function.h>
 #include <lmud/lisp/objects/symbol.h>
 
@@ -169,9 +170,14 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
             case LMud_Bytecode_LAMBDA:
             {
-                /*
-                 * TODO
-                 */
+                LMud_Interpreter_SetAccu(
+                    self,
+                    LMud_Lisp_Closure(
+                        LMud_Interpreter_GetLisp(self),
+                        LMud_InstructionStream_NextConstant(&stream),
+                        self->fiber->top
+                    )
+                );
                 break;
             }
 
