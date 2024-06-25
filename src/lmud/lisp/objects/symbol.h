@@ -29,9 +29,10 @@ struct LMud_Symbol
 
     LMud_Any             value;
     LMud_Any             function;
+    LMud_Any             macro;
 };
 
-void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_SymbolTable* table, LMud_Any name, LMud_Any value, LMud_Any function);
+void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_SymbolTable* table, LMud_Any name, LMud_Any value, LMud_Any function, LMud_Any macro);
 void LMud_Symbol_Destroy(struct LMud_Symbol* self);
 
 void LMud_Symbol_Unlink(struct LMud_Symbol* self);
@@ -42,8 +43,10 @@ const char* LMud_Symbol_Name(struct LMud_Symbol* self);
 
 LMud_Any    LMud_Symbol_Value(struct LMud_Symbol* self);
 LMud_Any    LMud_Symbol_Function(struct LMud_Symbol* self);
+LMud_Any    LMud_Symbol_Macro(struct LMud_Symbol* self);
 
 void LMud_Symbol_SetValue(struct LMud_Symbol* self, LMud_Any value);
 void LMud_Symbol_SetFunction(struct LMud_Symbol* self, LMud_Any function);
+void LMud_Symbol_SetMacro(struct LMud_Symbol* self, LMud_Any macro);
 
 void LMud_Symbol_MakeConstant(struct LMud_Symbol* self);

@@ -39,6 +39,7 @@ struct LMud_Symbol* LMud_SymbolTable_Intern(struct LMud_SymbolTable* self, struc
             self,
             LMud_Any_FromPointer(LMud_Objects_String(objects, name)),
             LMud_Lisp_Nil(LMud_Objects_GetLisp(objects)),
+            LMud_Lisp_Nil(LMud_Objects_GetLisp(objects)),
             LMud_Lisp_Nil(LMud_Objects_GetLisp(objects))
         );
     }
@@ -59,7 +60,7 @@ void LMud_SymbolTable_Dump(struct LMud_SymbolTable* self)
 }
 
 
-void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_SymbolTable* table, LMud_Any name, LMud_Any value, LMud_Any function)
+void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_SymbolTable* table, LMud_Any name, LMud_Any value, LMud_Any function, LMud_Any macro)
 {
     self->prev = NULL;
     self->next = NULL;
@@ -68,6 +69,7 @@ void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_SymbolTable* table
 
     self->value    = value;
     self->function = function;
+    self->macro    = macro;
 
     LMud_Symbol_Link(self, table);
 }
@@ -124,6 +126,11 @@ LMud_Any LMud_Symbol_Function(struct LMud_Symbol* self)
     return self->function;
 }
 
+LMud_Any LMud_Symbol_Macro(struct LMud_Symbol* self)
+{
+    return self->macro;
+}
+
 void LMud_Symbol_SetValue(struct LMud_Symbol* self, LMud_Any value)
 {
     self->value = value;
@@ -133,6 +140,12 @@ void LMud_Symbol_SetFunction(struct LMud_Symbol* self, LMud_Any function)
 {
     self->function = function;
 }
+
+void LMud_Symbol_SetMacro(struct LMud_Symbol* self, LMud_Any macro)
+{
+    self->macro = macro;
+}
+
 
 void LMud_Symbol_MakeConstant(struct LMud_Symbol* self)
 {

@@ -59,6 +59,24 @@ void LMud_Builtin_Apply(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size
     LMud_Fiber_Enter(fiber, function, args, index);
 }
 
+void LMud_Builtin_Consp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsCons(fiber->lisp, arguments[0])));
+}
+
+void LMud_Builtin_Symbolp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsSymbol(fiber->lisp, arguments[0])));
+}
+
 void LMud_Builtin_SymbolValue(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     /*
@@ -94,6 +112,25 @@ void LMud_Builtin_SetSymbolFunction(struct LMud_Fiber* fiber, LMud_Any* argument
      */
     (void) argument_count;
     LMud_Symbol_SetFunction(LMud_Any_AsPointer(arguments[0]), arguments[1]);
+    LMud_Fiber_SetAccumulator(fiber, arguments[1]);
+}
+
+void LMud_Builtin_SymbolMacro(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Symbol_Macro(LMud_Any_AsPointer(arguments[0])));
+}
+
+void LMud_Builtin_SetSymbolMacro(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Symbol_SetMacro(LMud_Any_AsPointer(arguments[0]), arguments[1]);
     LMud_Fiber_SetAccumulator(fiber, arguments[1]);
 }
 
@@ -393,10 +430,14 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "HELLO-WORLD", LMud_Builtin_HelloWorld);
     LMud_Lisp_InstallBuiltin(lisp, "FUNCALL", LMud_Builtin_Funcall);
     LMud_Lisp_InstallBuiltin(lisp, "APPLY", LMud_Builtin_Apply);
+    LMud_Lisp_InstallBuiltin(lisp, "CONSP", LMud_Builtin_Consp);
+    LMud_Lisp_InstallBuiltin(lisp, "SYMBOLP", LMud_Builtin_Symbolp);
     LMud_Lisp_InstallBuiltin(lisp, "SYMBOL-VALUE", LMud_Builtin_SymbolValue);
     LMud_Lisp_InstallBuiltin(lisp, "SET-SYMBOL-VALUE", LMud_Builtin_SetSymbolValue);
     LMud_Lisp_InstallBuiltin(lisp, "SYMBOL-FUNCTION", LMud_Builtin_SymbolFunction);
     LMud_Lisp_InstallBuiltin(lisp, "SET-SYMBOL-FUNCTION", LMud_Builtin_SetSymbolFunction);
+    LMud_Lisp_InstallBuiltin(lisp, "SYMBOL-MACRO", LMud_Builtin_SymbolMacro);
+    LMud_Lisp_InstallBuiltin(lisp, "SET-SYMBOL-MACRO", LMud_Builtin_SetSymbolMacro);
     LMud_Lisp_InstallBuiltin(lisp, "CONS", LMud_Builtin_Cons);
     LMud_Lisp_InstallBuiltin(lisp, "CAR", LMud_Builtin_Car);
     LMud_Lisp_InstallBuiltin(lisp, "CDR", LMud_Builtin_Cdr);
@@ -405,7 +446,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "LENGTH", LMud_Builtin_Length);
     LMud_Lisp_InstallBuiltin(lisp, "VECTOR", LMud_Builtin_Vector);
     LMud_Lisp_InstallBuiltin(lisp, "AREF", LMud_Builtin_Aref);
-    LMud_Lisp_InstallBuiltin(lisp, "COMPILE", LMud_Builtin_Compile);
+    LMud_Lisp_InstallBuiltin(lisp, "%COMPILE", LMud_Builtin_Compile);
     LMud_Lisp_InstallBuiltin(lisp, "NUMERATOR", LMud_Builtin_Numerator);
     LMud_Lisp_InstallBuiltin(lisp, "DENOMINATOR", LMud_Builtin_Denominator);
     LMud_Lisp_InstallBuiltin(lisp, "=", LMud_Builtin_NumericEqual);
