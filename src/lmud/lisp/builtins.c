@@ -195,6 +195,27 @@ void LMud_Builtin_List(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size 
     LMud_Fiber_SetAccumulator(fiber, list);
 }
 
+void LMud_Builtin_ListStar(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any  list;
+    LMud_Size index;
+
+    /*
+     * TODO: Check arguments.
+     */
+
+    list = arguments[argument_count - 1];
+
+    index = argument_count - 1;
+
+    while (index --> 0)
+    {
+        list = LMud_Lisp_Cons(fiber->lisp, arguments[index], list);
+    }
+
+    LMud_Fiber_SetAccumulator(fiber, list);
+}
+
 void LMud_Builtin_Length(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     LMud_Any   sequence;
@@ -491,6 +512,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "CDR", LMud_Builtin_Cdr);
     LMud_Lisp_InstallBuiltin(lisp, "EQ", LMud_Builtin_Eq);
     LMud_Lisp_InstallBuiltin(lisp, "LIST", LMud_Builtin_List);
+    LMud_Lisp_InstallBuiltin(lisp, "LIST*", LMud_Builtin_ListStar);
     LMud_Lisp_InstallBuiltin(lisp, "LENGTH", LMud_Builtin_Length);
     LMud_Lisp_InstallBuiltin(lisp, "VECTOR", LMud_Builtin_Vector);
     LMud_Lisp_InstallBuiltin(lisp, "AREF", LMud_Builtin_Aref);

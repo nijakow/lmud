@@ -38,6 +38,39 @@
 
 (eval '(progn
 
+   (defun caar (e) (car (car e)))
+   (defun cadr (e) (car (cdr e)))
+   (defun cdar (e) (cdr (car e)))
+   (defun cddr (e) (cdr (cdr e)))
+   (defun caaar (e) (car (caar e)))
+   (defun caadr (e) (car (cadr e)))
+   (defun cadar (e) (car (cdar e)))
+   (defun caddr (e) (car (cddr e)))
+   (defun cdaar (e) (cdr (caar e)))
+   (defun cdadr (e) (cdr (cadr e)))
+   (defun cddar (e) (cdr (cdar e)))
+   (defun cdddr (e) (cdr (cddr e)))
+
+   (defun first   (e)  (car e))
+   (defun second  (e)  (car (cdr e)))
+   (defun third   (e)  (car (cdr (cdr e))))
+   (defun fourth  (e)  (car (cdr (cdr (cdr e)))))
+   (defun fifth   (e)  (car (cdr (cdr (cdr (cdr e))))))
+   (defun sixth   (e)  (car (cdr (cdr (cdr (cdr (cdr e)))))))
+   (defun seventh (e)  (car (cdr (cdr (cdr (cdr (cdr (cdr e))))))))
+   (defun eighth  (e)  (car (cdr (cdr (cdr (cdr (cdr (cdr (cdr e)))))))))
+   (defun ninth   (e)  (car (cdr (cdr (cdr (cdr (cdr (cdr (cdr (cdr e))))))))))
+   (defun tenth   (e)  (car (cdr (cdr (cdr (cdr (cdr (cdr (cdr (cdr (cdr e)))))))))))
+   (defun rest    (e)  (cdr e))
+
+   (defmacro cond (&rest clauses)
+      (if clauses
+          (list 'if
+                (caar clauses)
+                (cons 'progn (cdar clauses))
+                (cons 'cond (cdr clauses)))
+          nil))
+
    (defun repl ()
       (while t
          (%princ "> ")
