@@ -223,6 +223,120 @@ void LMud_Builtin_Compile(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Si
 }
 
 
+void LMud_Builtin_Plus(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any   result;
+    LMud_Size  index;
+
+    /*
+     * TODO: Check arguments.
+     */
+    
+    result = LMud_Any_FromInteger(0);
+
+    for (index = 0; index < argument_count; index++)
+    {
+        LMud_Lisp_Add2(fiber->lisp, result, arguments[index], &result);
+    }
+
+    LMud_Fiber_SetAccumulator(fiber, result);
+}
+
+void LMud_Builtin_Minus(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any   result;
+    LMud_Size  index;
+
+    /*
+     * TODO: Check arguments.
+     */
+
+    if (argument_count == 0) {
+        result = LMud_Any_FromInteger(0);
+    } else if (argument_count == 1) {
+        LMud_Lisp_Sub2(fiber->lisp, LMud_Any_FromInteger(0), arguments[0], &result);
+    } else {
+        result = arguments[0];
+
+        for (index = 1; index < argument_count; index++)
+        {
+            LMud_Lisp_Sub2(fiber->lisp, result, arguments[index], &result);
+        }
+    }
+
+    LMud_Fiber_SetAccumulator(fiber, result);
+}
+
+void LMud_Builtin_Multiply(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any   result;
+    LMud_Size  index;
+
+    /*
+     * TODO: Check arguments.
+     */
+
+    result = LMud_Any_FromInteger(1);
+
+    for (index = 0; index < argument_count; index++)
+    {
+        LMud_Lisp_Mul2(fiber->lisp, result, arguments[index], &result);
+    }
+
+    LMud_Fiber_SetAccumulator(fiber, result);
+}
+
+void LMud_Builtin_Divide(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any   result;
+    LMud_Size  index;
+
+    /*
+     * TODO: Check arguments.
+     */
+
+    if (argument_count == 0) {
+        result = LMud_Any_FromInteger(1);
+    } else if (argument_count == 1) {
+        result = arguments[0];
+    } else {
+        result = arguments[0];
+
+        for (index = 1; index < argument_count; index++)
+        {
+            LMud_Lisp_Div2(fiber->lisp, result, arguments[index], &result);
+        }
+    }
+
+    LMud_Fiber_SetAccumulator(fiber, result);
+}
+
+void LMud_Builtin_Modulo(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any   result;
+    LMud_Size  index;
+
+    /*
+     * TODO: Check arguments.
+     */
+
+    if (argument_count == 0) {
+        result = LMud_Any_FromInteger(0);
+    } else if (argument_count == 1) {
+        result = arguments[0];
+    } else {
+        result = arguments[0];
+
+        for (index = 1; index < argument_count; index++)
+        {
+            LMud_Lisp_Mod2(fiber->lisp, result, arguments[index], &result);
+        }
+    }
+
+    LMud_Fiber_SetAccumulator(fiber, result);
+}
+
+
 void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
 {
     LMud_Lisp_InstallBuiltin(lisp, "HELLO-WORLD", LMud_Builtin_HelloWorld);
@@ -241,4 +355,9 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "VECTOR", LMud_Builtin_Vector);
     LMud_Lisp_InstallBuiltin(lisp, "AREF", LMud_Builtin_Aref);
     LMud_Lisp_InstallBuiltin(lisp, "COMPILE", LMud_Builtin_Compile);
+    LMud_Lisp_InstallBuiltin(lisp, "+", LMud_Builtin_Plus);
+    LMud_Lisp_InstallBuiltin(lisp, "-", LMud_Builtin_Minus);
+    LMud_Lisp_InstallBuiltin(lisp, "*", LMud_Builtin_Multiply);
+    LMud_Lisp_InstallBuiltin(lisp, "/", LMud_Builtin_Divide);
+    LMud_Lisp_InstallBuiltin(lisp, "MOD", LMud_Builtin_Modulo);
 }

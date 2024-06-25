@@ -336,3 +336,60 @@ void LMud_Lisp_InstallBuiltin(struct LMud_Lisp* self, const char* name, LMud_Bui
 
     LMud_Symbol_SetFunction(symbol, builtin);
 }
+
+
+
+bool LMud_Lisp_Add2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
+{
+    if (LMud_Any_IsInteger(a) && LMud_Any_IsInteger(b)) {
+        *result = LMud_Any_FromInteger(LMud_Any_AsInteger(a) + LMud_Any_AsInteger(b));
+        return true;
+    } else {
+        *result = LMud_Lisp_Nil(self);
+        return false;
+    }
+}
+
+bool LMud_Lisp_Sub2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
+{
+    if (LMud_Any_IsInteger(a) && LMud_Any_IsInteger(b)) {
+        *result = LMud_Any_FromInteger(LMud_Any_AsInteger(a) - LMud_Any_AsInteger(b));
+        return true;
+    } else {
+        *result = LMud_Lisp_Nil(self);
+        return false;
+    }
+}
+
+bool LMud_Lisp_Mul2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
+{
+    if (LMud_Any_IsInteger(a) && LMud_Any_IsInteger(b)) {
+        *result = LMud_Any_FromInteger(LMud_Any_AsInteger(a) * LMud_Any_AsInteger(b));
+        return true;
+    } else {
+        *result = LMud_Lisp_Nil(self);
+        return false;
+    }
+}
+
+bool LMud_Lisp_Div2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
+{
+    if (LMud_Any_IsInteger(a) && LMud_Any_IsInteger(b)) {
+        *result = LMud_Any_FromInteger(LMud_Any_AsInteger(a) / LMud_Any_AsInteger(b));
+        return true;
+    } else {
+        *result = LMud_Lisp_Nil(self);
+        return false;
+    }
+}
+
+bool LMud_Lisp_Mod2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
+{
+    if (LMud_Any_IsInteger(a) && LMud_Any_IsInteger(b)) {
+        *result = LMud_Any_FromInteger(LMud_Any_AsInteger(a) % LMud_Any_AsInteger(b));
+        return true;
+    } else {
+        *result = LMud_Lisp_Nil(self);
+        return false;
+    }
+}
