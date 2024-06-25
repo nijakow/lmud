@@ -123,7 +123,7 @@
          (let ((expr (%read)))
             (dolist (e (multiple-value-list (eval expr)))
                (%princ "  ")
-               (%princ e)
+               (%prin1 e)
                (%terpri)))))
 
    (repl)

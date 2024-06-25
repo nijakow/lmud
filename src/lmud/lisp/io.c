@@ -69,12 +69,41 @@ void LMud_Lisp_PrintBytes(struct LMud_Lisp* lisp, struct LMud_Bytes* bytes, FILE
     fprintf(stream, "]");
 }
 
+void LMud_Lisp_PrintCharacter(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool escaped)
+{
+    struct LMud_Utf8_Encoder  encoder;
+
+    (void) lisp;
+
+    if (escaped) {
+        fprintf(stream, "#\\");
+        switch (LMud_Any_AsCharacter(object))
+        {
+            case '\n': fprintf(stream, "Newline"); break;
+            case '\r': fprintf(stream, "Return"); break;
+            case '\t': fprintf(stream, "Tab"); break;
+            case ' ':  fprintf(stream, "Space"); break;
+            default:
+                LMud_Utf8_Encoder_Create(&encoder, LMud_Any_AsCharacter(object));
+                fprintf(stream, "%s", LMud_Utf8_Encoder_AsString(&encoder));
+                LMud_Utf8_Encoder_Destroy(&encoder);
+                break;
+        }
+    } else {
+        LMud_Utf8_Encoder_Create(&encoder, LMud_Any_AsCharacter(object));
+        fprintf(stream, "%s", LMud_Utf8_Encoder_AsString(&encoder));
+        LMud_Utf8_Encoder_Destroy(&encoder);
+    }
+}
+
 void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool escaped)
 {
     void*  pointer;
 
     if (LMud_Any_IsInteger(object)) {
         fprintf(stream, "%d", LMud_Any_AsInteger(object));
+    } else if (LMud_Any_IsCharacter(object)) {
+        LMud_Lisp_PrintCharacter(lisp, object, stream, escaped);
     } else if (LMud_Any_IsPointer(object)) {
         pointer = LMud_Any_AsPointer(object);
 

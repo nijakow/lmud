@@ -112,9 +112,19 @@ LMud_Rune LMud_Rune_FromChar(char byte)
     return (LMud_Rune) byte;
 }
 
+LMud_Rune LMud_Rune_FromInteger(LMud_Integer value)
+{
+    return (LMud_Rune) value;
+}
+
 char LMud_Rune_AsChar(LMud_Rune rune)
 {
     return (char) rune;
+}
+
+LMud_Integer LMud_Rune_AsInteger(LMud_Rune rune)
+{
+    return (LMud_Integer) rune;
 }
 
 
