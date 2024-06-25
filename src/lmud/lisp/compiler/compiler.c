@@ -11,6 +11,14 @@ enum LMud_VariableMode
     LMud_VariableMode_STORE
 };
 
+enum LMud_ArgumentMode
+{
+    LMud_ArgumentMode_REQUIRED,
+    LMud_ArgumentMode_OPTIONAL,
+    LMud_ArgumentMode_KEY,
+    LMud_ArgumentMode_REST,
+};
+
 
 
 void LMud_Binding_Create(struct LMud_Binding* self, enum LMud_BindingType type, LMud_Any name)
@@ -252,6 +260,7 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->max_register_index   = 0;
     self->fixed_argument_count = 0;
     self->uses_lexical_stuff   = false;
+    self->variadic             = false;
 
     self->cached.symbol_quote    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "QUOTE");
     self->cached.symbol_function = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FUNCTION");
@@ -262,6 +271,10 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->cached.symbol_flet     = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FLET");
     self->cached.symbol_labels   = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LABELS");
     self->cached.symbol_if       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "IF");
+
+    self->cached.symbol_andrest     = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&REST");
+    self->cached.symbol_andoptional = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&OPTIONAL");
+    self->cached.symbol_andkey      = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&KEY");
 
     LMud_Compiler_PushScope(self);
 }
@@ -315,6 +328,11 @@ void LMud_Compiler_DecreaseStackDepth(struct LMud_Compiler* self, LMud_Size dept
 void LMud_Compiler_EnableLexicalStuff(struct LMud_Compiler* self)
 {
     self->uses_lexical_stuff = true;
+}
+
+void LMud_Compiler_EnableVariadic(struct LMud_Compiler* self)
+{
+    self->variadic = true;
 }
 
 
@@ -383,6 +401,35 @@ void LMud_Compiler_AddArgument(struct LMud_Compiler* self, LMud_Any name)
     LMud_Compiler_BindRegister(self, name, LMud_BindingType_VARIABLE, reg);
 
     self->fixed_argument_count++;
+}
+
+void LMud_Compiler_AddOptionalArgument(struct LMud_Compiler* self, LMud_Any name, LMud_Any default_value)
+{
+    // TODO: Implement
+    (void) self;
+    (void) name;
+    (void) default_value;
+
+    LMud_Compiler_EnableVariadic(self);
+}
+
+void LMud_Compiler_AddKeyArgument(struct LMud_Compiler* self, LMud_Any name, LMud_Any default_value)
+{
+    // TODO: Implement
+    (void) self;
+    (void) name;
+    (void) default_value;
+
+    LMud_Compiler_EnableVariadic(self);
+}
+
+void LMud_Compiler_AddRestArgument(struct LMud_Compiler* self, LMud_Any name)
+{
+    // TODO: Implement
+    (void) self;
+    (void) name;
+
+    LMud_Compiler_EnableVariadic(self);
 }
 
 
@@ -559,6 +606,16 @@ void LMud_Compiler_WriteJumpIfNil(struct LMud_Compiler* self, LMud_CompilerLabel
     LMud_Compiler_WriteLabel(self, label);
 }
 
+
+void LMud_Compiler_WriteHasArgument(struct LMud_Compiler* self)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_HAS_ARGUMENT);
+}
+
+void LMud_Compiler_WritePopArgument(struct LMud_Compiler* self)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_POP_ARGUMENT);
+}
 
 void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant)
 {
@@ -1047,13 +1104,44 @@ void LMud_Compiler_CompileExpressions(struct LMud_Compiler* self, LMud_Any expre
 
 void LMud_Compiler_ProcessArgumentList(struct LMud_Compiler* self, LMud_Any arglist)
 {
-    LMud_Any  argument;
+    LMud_Any                argument;
+    enum LMud_ArgumentMode  mode;
 
+    mode = LMud_ArgumentMode_REQUIRED;
     while (LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), arglist))
     {
         argument = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arglist);
 
-        LMud_Compiler_AddArgument(self, argument);
+        if (LMud_Any_Eq(argument, self->cached.symbol_andrest))
+            mode = LMud_ArgumentMode_REST;
+        else if (LMud_Any_Eq(argument, self->cached.symbol_andoptional))
+            mode = LMud_ArgumentMode_OPTIONAL;
+        else if (LMud_Any_Eq(argument, self->cached.symbol_andkey))
+            mode = LMud_ArgumentMode_KEY;
+        else {
+            switch (mode)
+            {
+                case LMud_ArgumentMode_REQUIRED:
+                    LMud_Compiler_AddArgument(self, argument);
+                    break;
+
+                case LMud_ArgumentMode_OPTIONAL:
+                    LMud_Compiler_AddOptionalArgument(self, LMud_Lisp_Car(LMud_Compiler_GetLisp(self), argument), LMud_Lisp_Cadr(LMud_Compiler_GetLisp(self), argument));
+                    break;
+
+                case LMud_ArgumentMode_KEY:
+                    LMud_Compiler_AddKeyArgument(self, LMud_Lisp_Car(LMud_Compiler_GetLisp(self), argument), LMud_Lisp_Cadr(LMud_Compiler_GetLisp(self), argument));
+                    break;
+
+                case LMud_ArgumentMode_REST:
+                    LMud_Compiler_AddRestArgument(self, argument);
+                    break;
+
+                default:
+                    // TODO: Error
+                    break;
+            }
+        }
 
         arglist = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arglist);
     }
@@ -1070,7 +1158,7 @@ LMud_Any LMud_Compiler_Build(struct LMud_Compiler* self)
             .stack_size           = self->max_stack_depth,
             .register_count       = self->max_register_index, // We keep an increment of 1
             .lexicalized          = self->uses_lexical_stuff,
-            .variadic             = false, // TODO
+            .variadic             = self->variadic,
         },
         LMud_Lisp_MakeBytes_FromData(LMud_Compiler_GetLisp(self), self->bytecodes_fill, (const char*) self->bytecodes),
         LMud_Lisp_MakeArray_FromData(LMud_Compiler_GetLisp(self), self->constants_fill, self->constants)

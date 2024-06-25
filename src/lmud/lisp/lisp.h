@@ -70,6 +70,11 @@ LMud_Any LMud_Lisp_InternUpcase(struct LMud_Lisp* self, const char* name);
 
 LMud_Any LMud_Lisp_Car(struct LMud_Lisp* self, LMud_Any value);
 LMud_Any LMud_Lisp_Cdr(struct LMud_Lisp* self, LMud_Any value);
+LMud_Any LMud_Lisp_Caar(struct LMud_Lisp* self, LMud_Any value);
+LMud_Any LMud_Lisp_Cadr(struct LMud_Lisp* self, LMud_Any value);
+LMud_Any LMud_Lisp_Cdar(struct LMud_Lisp* self, LMud_Any value);
+LMud_Any LMud_Lisp_Cddr(struct LMud_Lisp* self, LMud_Any value);
+
 bool     LMud_Lisp_TakeNext(struct LMud_Lisp* self, LMud_Any* value, LMud_Any* result);
 bool     LMud_Lisp_Nth(struct LMud_Lisp* self, LMud_Any value, LMud_Size index, LMud_Any* result);
 

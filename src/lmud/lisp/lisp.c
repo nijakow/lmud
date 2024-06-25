@@ -272,6 +272,26 @@ LMud_Any LMud_Lisp_Cdr(struct LMud_Lisp* self, LMud_Any value)
     return ((struct LMud_Cons*) LMud_Any_AsPointer(value))->cdr;
 }
 
+LMud_Any LMud_Lisp_Caar(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Lisp_Car(self, LMud_Lisp_Car(self, value));
+}
+
+LMud_Any LMud_Lisp_Cadr(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Lisp_Car(self, LMud_Lisp_Cdr(self, value));
+}
+
+LMud_Any LMud_Lisp_Cdar(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Lisp_Cdr(self, LMud_Lisp_Car(self, value));
+}
+
+LMud_Any LMud_Lisp_Cddr(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Lisp_Cdr(self, LMud_Lisp_Cdr(self, value));
+}
+
 bool LMud_Lisp_Nth(struct LMud_Lisp* self, LMud_Any value, LMud_Size index, LMud_Any* result)
 {
     while (index > 0)

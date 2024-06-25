@@ -104,6 +104,7 @@ struct LMud_Compiler
     LMud_Size                       max_register_index;
     LMud_Size                       fixed_argument_count;
     bool                            uses_lexical_stuff;
+    bool                            variadic;
 
     struct
     {
@@ -120,6 +121,10 @@ struct LMud_Compiler
         LMud_Any                    symbol_flet;
         LMud_Any                    symbol_labels;
         LMud_Any                    symbol_if;
+
+        LMud_Any                    symbol_andrest;
+        LMud_Any                    symbol_andoptional;
+        LMud_Any                    symbol_andkey;
     }                               cached;
 };
 
@@ -149,6 +154,8 @@ void LMud_Compiler_PlaceLabel(struct LMud_Compiler* self, LMud_CompilerLabel lab
 void LMud_Compiler_WriteJump(struct LMud_Compiler* self, LMud_CompilerLabel label);
 void LMud_Compiler_WriteJumpIfNil(struct LMud_Compiler* self, LMud_CompilerLabel label);
 
+void LMud_Compiler_WriteHasArgument(struct LMud_Compiler* self);
+void LMud_Compiler_WritePopArgument(struct LMud_Compiler* self);
 void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant);
 void LMud_Compiler_WriteLambda(struct LMud_Compiler* self, LMud_Any lambda);
 void LMud_Compiler_WriteSymbolVariableLoad(struct LMud_Compiler* self, LMud_Any symbol);
