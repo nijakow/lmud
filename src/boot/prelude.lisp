@@ -62,6 +62,12 @@
    (defun tenth   (e)  (car (cdr (cdr (cdr (cdr (cdr (cdr (cdr (cdr (cdr e)))))))))))
    (defun rest    (e)  (cdr e))
 
+   (defmacro when (test &rest body)
+      (list 'if test (cons 'progn body) nil))
+   
+   (defmacro unless (test &rest body)
+      (list 'if test nil (cons 'progn body)))
+
    (defmacro cond (&rest clauses)
       (if clauses
           (list 'if
