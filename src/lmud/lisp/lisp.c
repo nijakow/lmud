@@ -483,6 +483,24 @@ bool LMud_Lisp_IntegerDiv2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_
     return true;
 }
 
+bool LMud_Lisp_IntegerMod2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
+{
+    LMud_Integer  a_value;
+    LMud_Integer  b_value;
+
+    (void) self;
+
+    if (!LMud_Any_IsInteger(a) || !LMud_Any_IsInteger(b))
+        return false;
+
+    a_value = LMud_Any_AsInteger(a);
+    b_value = LMud_Any_AsInteger(b);
+
+    *result = LMud_Any_FromInteger(a_value % b_value);
+
+    return true;
+}
+
 bool LMud_Lisp_IntegerNegate(struct LMud_Lisp* self, LMud_Any a, LMud_Any* result)
 {
     LMud_Integer  a_value;
@@ -653,13 +671,19 @@ bool LMud_Lisp_Div2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* re
     return LMud_Lisp_NumberDispatch(self, a, b, LMud_Lisp_Div2_Ratios, result);
 }
 
+bool LMud_Lisp_Mod2_Ratios(struct LMud_Lisp* self, LMud_Any n1, LMud_Any d1, LMud_Any n2, LMud_Any d2, LMud_Any* result)
+{
+    LMud_Any  numerator;
+    LMud_Any  denominator;
+    LMud_Any  adjusted_n1;
+    LMud_Any  adjusted_n2;
+
+    return LMud_Lisp_AdjustRatios(self, n1, d1, n2, d2, &adjusted_n1, &adjusted_n2, &denominator)
+        && LMud_Lisp_IntegerMod2(self, adjusted_n1, adjusted_n2, &numerator)
+        && LMud_Lisp_RatioOrInteger(self, numerator, denominator, result);
+}
+
 bool LMud_Lisp_Mod2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
 {
-    if (LMud_Any_IsInteger(a) && LMud_Any_IsInteger(b)) {
-        *result = LMud_Any_FromInteger(LMud_Any_AsInteger(a) % LMud_Any_AsInteger(b));
-        return true;
-    } else {
-        *result = LMud_Lisp_Nil(self);
-        return false;
-    }
+    return LMud_Lisp_NumberDispatch(self, a, b, LMud_Lisp_Mod2_Ratios, result);
 }
