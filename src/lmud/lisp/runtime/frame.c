@@ -55,7 +55,7 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
 
     for (index = 0; index < extra_argument_count; ++index)
     {
-        self->payload[function->info.fixed_argument_count + function->info.stack_size + index] = arguments[function->info.fixed_argument_count + index];
+        self->payload[function->info.register_count + function->info.stack_size + index] = arguments[function->info.fixed_argument_count + index];
     }
 }
 

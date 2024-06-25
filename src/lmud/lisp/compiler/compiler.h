@@ -154,6 +154,9 @@ void LMud_Compiler_PlaceLabel(struct LMud_Compiler* self, LMud_CompilerLabel lab
 void LMud_Compiler_WriteJump(struct LMud_Compiler* self, LMud_CompilerLabel label);
 void LMud_Compiler_WriteJumpIfNil(struct LMud_Compiler* self, LMud_CompilerLabel label);
 
+bool LMud_Compiler_WriteLoadRegister(struct LMud_Compiler* self, struct LMud_Register* reg);
+bool LMud_Compiler_WriteStoreRegister(struct LMud_Compiler* self, struct LMud_Register* reg);
+
 void LMud_Compiler_WriteHasArgument(struct LMud_Compiler* self);
 void LMud_Compiler_WritePopArgument(struct LMud_Compiler* self);
 void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant);

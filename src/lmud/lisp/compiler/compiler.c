@@ -405,12 +405,32 @@ void LMud_Compiler_AddArgument(struct LMud_Compiler* self, LMud_Any name)
 
 void LMud_Compiler_AddOptionalArgument(struct LMud_Compiler* self, LMud_Any name, LMud_Any default_value)
 {
-    // TODO: Implement
-    (void) self;
-    (void) name;
-    (void) default_value;
+    struct LMud_Register*  reg;
+    LMud_CompilerLabel     else_label;
+    LMud_CompilerLabel     end_label;
 
     LMud_Compiler_EnableVariadic(self);
+
+    LMud_Compiler_OpenLabel(self, &else_label);
+    LMud_Compiler_OpenLabel(self, &end_label);
+
+    {
+        reg = LMud_Compiler_AllocateRegister(self);
+
+        LMud_Compiler_WriteHasArgument(self);
+        LMud_Compiler_WriteJumpIfNil(self, else_label);
+        LMud_Compiler_WritePopArgument(self);
+        LMud_Compiler_WriteJump(self, end_label);
+        LMud_Compiler_PlaceLabel(self, else_label);
+        LMud_Compiler_Compile(self, default_value);
+        LMud_Compiler_PlaceLabel(self, end_label);
+
+        LMud_Compiler_BindRegister(self, name, LMud_BindingType_VARIABLE, reg);
+        LMud_Compiler_WriteStoreRegister(self, reg);
+    }
+    
+    LMud_Compiler_CloseLabel(self, else_label);
+    LMud_Compiler_CloseLabel(self, end_label);
 }
 
 void LMud_Compiler_AddKeyArgument(struct LMud_Compiler* self, LMud_Any name, LMud_Any default_value)
