@@ -109,6 +109,10 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
             fprintf(stream, "#<CLOSURE %p>", pointer);
         } else if (LMud_Lisp_IsBuiltinPointer(lisp, pointer)) {
             fprintf(stream, "#<BUILTIN %s %p>", ((struct LMud_Builtin*) pointer)->name, pointer);
+        } else if (LMud_Lisp_IsRatioPointer(lisp, pointer)) {
+            LMud_Lisp_Print(lisp, LMud_Ratio_Numerator((struct LMud_Ratio*) pointer), stream, escaped);
+            fprintf(stream, "/");
+            LMud_Lisp_Print(lisp, LMud_Ratio_Denominator((struct LMud_Ratio*) pointer), stream, escaped);
         } else {
             fprintf(stream, "#<?>");
         }

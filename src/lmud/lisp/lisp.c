@@ -84,6 +84,11 @@ bool LMud_Lisp_IsFunctionPointer(struct LMud_Lisp* self, void* object)
     return LMud_Types_IsFunction(LMud_Lisp_Types(self), object);
 }
 
+bool LMud_Lisp_IsRatioPointer(struct LMud_Lisp* self, void* object)
+{
+    return LMud_Types_IsRatio(LMud_Lisp_Types(self), object);
+}
+
 bool LMud_Lisp_IsStringPointer(struct LMud_Lisp* self, void* object)
 {
     return LMud_Types_IsString(LMud_Lisp_Types(self), object);
@@ -123,6 +128,11 @@ bool LMud_Lisp_IsCons(struct LMud_Lisp* self, LMud_Any value)
 bool LMud_Lisp_IsFunction(struct LMud_Lisp* self, LMud_Any value)
 {
     return LMud_Any_IsPointer(value) && LMud_Lisp_IsFunctionPointer(self, LMud_Any_AsPointer(value));
+}
+
+bool LMud_Lisp_IsRatio(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Any_IsPointer(value) && LMud_Lisp_IsRatioPointer(self, LMud_Any_AsPointer(value));
 }
 
 bool LMud_Lisp_IsString(struct LMud_Lisp* self, LMud_Any value)
@@ -198,6 +208,11 @@ LMud_Any LMud_Lisp_Cons(struct LMud_Lisp* self, LMud_Any car, LMud_Any cdr)
 LMud_Any LMud_Lisp_Function(struct LMud_Lisp* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants)
 {
     return LMud_Any_FromPointer(LMud_Objects_Function(&self->objects, info, bytecodes, constants));
+}
+
+LMud_Any LMud_Lisp_Ratio(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator)
+{
+    return LMud_Any_FromPointer(LMud_Objects_Ratio(&self->objects, numerator, denominator));
 }
 
 LMud_Any LMud_Lisp_String(struct LMud_Lisp* self, const char* text)
@@ -338,6 +353,82 @@ void LMud_Lisp_InstallBuiltin(struct LMud_Lisp* self, const char* name, LMud_Bui
 }
 
 
+bool LMud_Lisp_NumericEqual(struct LMud_Lisp* self, LMud_Any a, LMud_Any b)
+{
+    (void) self;
+    if (LMud_Any_IsInteger(a) && LMud_Any_IsInteger(b))
+        return LMud_Any_AsInteger(a) == LMud_Any_AsInteger(b);
+    else
+        return false;
+}
+
+bool LMud_Lisp_Gcd(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
+{
+    LMud_Integer  a_value;
+    LMud_Integer  b_value;
+    LMud_Integer  temp;
+
+    (void) self;
+
+    if (!LMud_Any_IsInteger(a) || !LMud_Any_IsInteger(b))
+        return false;
+
+    a_value = LMud_Any_AsInteger(a);
+    b_value = LMud_Any_AsInteger(b);
+
+    while (b_value != 0)
+    {
+        temp    = b_value;
+        b_value = a_value % b_value;
+        a_value = temp;
+    }
+
+    *result = LMud_Any_FromInteger(a_value);
+
+    return true;
+}
+
+bool LMud_Lisp_IntegerDiv2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
+{
+    LMud_Integer  a_value;
+    LMud_Integer  b_value;
+
+    (void) self;
+
+    if (!LMud_Any_IsInteger(a) || !LMud_Any_IsInteger(b))
+        return false;
+
+    a_value = LMud_Any_AsInteger(a);
+    b_value = LMud_Any_AsInteger(b);
+
+    *result = LMud_Any_FromInteger(a_value / b_value);
+
+    return true;
+}
+
+bool LMud_Lisp_RatioOrInteger(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator, LMud_Any* result)
+{
+    LMud_Any  gcd;
+    LMud_Any  new_numerator;
+    LMud_Any  new_denominator;
+
+    if (!LMud_Lisp_Gcd(self, numerator, denominator, &gcd))
+        return false;
+
+    /*
+     * TODO: Catch the results of these functions and return false if they fail.
+     */
+    LMud_Lisp_IntegerDiv2(self, numerator, gcd, &new_numerator);
+    LMud_Lisp_IntegerDiv2(self, denominator, gcd, &new_denominator);
+
+    if (LMud_Lisp_NumericEqual(self, new_denominator, LMud_Any_FromInteger(1))) {
+        *result = new_numerator;
+    } else {
+        *result = LMud_Lisp_Ratio(self, new_numerator, new_denominator);
+    }
+
+    return true;
+}
 
 bool LMud_Lisp_Add2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
 {
@@ -375,8 +466,7 @@ bool LMud_Lisp_Mul2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* re
 bool LMud_Lisp_Div2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
 {
     if (LMud_Any_IsInteger(a) && LMud_Any_IsInteger(b)) {
-        *result = LMud_Any_FromInteger(LMud_Any_AsInteger(a) / LMud_Any_AsInteger(b));
-        return true;
+        return LMud_Lisp_RatioOrInteger(self, a, b, result);
     } else {
         *result = LMud_Lisp_Nil(self);
         return false;

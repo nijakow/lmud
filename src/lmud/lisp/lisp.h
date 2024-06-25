@@ -33,6 +33,7 @@ bool LMud_Lisp_IsBytesPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsClosurePointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsConsPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsFunctionPointer(struct LMud_Lisp* self, void* object);
+bool LMud_Lisp_IsRatioPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsStringPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsSymbolPointer(struct LMud_Lisp* self, void* object);
 
@@ -42,6 +43,7 @@ bool LMud_Lisp_IsBytes(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsClosure(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsCons(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsFunction(struct LMud_Lisp* self, LMud_Any value);
+bool LMud_Lisp_IsRatio(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsString(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsSymbol(struct LMud_Lisp* self, LMud_Any value);
 
@@ -60,6 +62,7 @@ LMud_Any LMud_Lisp_MakeBytes_FromData(struct LMud_Lisp* self, LMud_Size size, co
 LMud_Any LMud_Lisp_Closure(struct LMud_Lisp* self, struct LMud_Function* function, struct LMud_Frame* lexical);
 LMud_Any LMud_Lisp_Cons(struct LMud_Lisp* self, LMud_Any car, LMud_Any cdr);
 LMud_Any LMud_Lisp_Function(struct LMud_Lisp* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants);
+LMud_Any LMud_Lisp_Ratio(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator);
 LMud_Any LMud_Lisp_String(struct LMud_Lisp* self, const char* text);
 LMud_Any LMud_Lisp_Intern(struct LMud_Lisp* self, const char* name);
 LMud_Any LMud_Lisp_InternUpcase(struct LMud_Lisp* self, const char* name);
@@ -79,6 +82,9 @@ bool LMud_Lisp_Compile(struct LMud_Lisp* self, LMud_Any expression, LMud_Any* re
 
 void LMud_Lisp_InstallBuiltin(struct LMud_Lisp* self, const char* name, LMud_BuiltinFunction function);
 
+bool LMud_Lisp_NumericEqual(struct LMud_Lisp* self, LMud_Any a, LMud_Any b);
+bool LMud_Lisp_Gcd(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result);
+bool LMud_Lisp_RatioOrInteger(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator, LMud_Any* result);
 bool LMud_Lisp_Add2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result);
 bool LMud_Lisp_Sub2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result);
 bool LMud_Lisp_Mul2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result);
