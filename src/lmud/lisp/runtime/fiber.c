@@ -43,6 +43,32 @@ void LMud_Fiber_SetAccumulator(struct LMud_Fiber* self, LMud_Any value)
     self->accumulator_count = 1;
 }
 
+void LMud_Fiber_Values(struct LMud_Fiber* self, LMud_Any* values, LMud_Size count)
+{
+    LMud_Size  i;
+
+    if (count == 0)
+        self->accumulator[0] = LMud_Lisp_Nil(self->lisp);
+    else {
+        for (i = 0; i < count; i++)
+        {
+            self->accumulator[i] = values[i];
+        }
+    }
+
+    self->accumulator_count = count;
+}
+
+LMud_Size LMud_Fiber_ValueCount(struct LMud_Fiber* self)
+{
+    return self->accumulator_count;
+}
+
+LMud_Any LMud_Fiber_GetValue(struct LMud_Fiber* self, LMud_Size index)
+{
+    return self->accumulator[index];
+}
+
 
 static void* LMud_Fiber_StackTop(struct LMud_Fiber* self)
 {

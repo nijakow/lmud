@@ -60,6 +60,11 @@ void LMud_Builtin_Apply(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size
     LMud_Fiber_Enter(fiber, function, args, index);
 }
 
+void LMud_Builtin_Values(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Fiber_Values(fiber, arguments, argument_count);
+}
+
 void LMud_Builtin_Consp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     /*
@@ -509,6 +514,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "HELLO-WORLD", LMud_Builtin_HelloWorld);
     LMud_Lisp_InstallBuiltin(lisp, "FUNCALL", LMud_Builtin_Funcall);
     LMud_Lisp_InstallBuiltin(lisp, "APPLY", LMud_Builtin_Apply);
+    LMud_Lisp_InstallBuiltin(lisp, "VALUES", LMud_Builtin_Values);
     LMud_Lisp_InstallBuiltin(lisp, "CONSP", LMud_Builtin_Consp);
     LMud_Lisp_InstallBuiltin(lisp, "SYMBOLP", LMud_Builtin_Symbolp);
     LMud_Lisp_InstallBuiltin(lisp, "GENSYM", LMud_Builtin_Gensym);

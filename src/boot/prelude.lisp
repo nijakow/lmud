@@ -36,8 +36,7 @@
       (list 'set-symbol-macro (list 'quote name)
             (cons 'lambda (cons args body)))))
 
-(eval '(progn
-
+(map1 #'eval '(
    (defun caar (e) (car (car e)))
    (defun cadr (e) (car (cdr e)))
    (defun cdar (e) (cdr (car e)))
@@ -101,9 +100,10 @@
       (while t
          (%princ "> ")
          (let ((expr (%read)))
-            (%princ "  ")
-            (%prin1 (eval expr)))
-         (%terpri)))
+            (dolist (e (multiple-value-list (eval expr)))
+               (%princ "  ")
+               (%princ e)
+               (%terpri)))))
 
    (repl)
 

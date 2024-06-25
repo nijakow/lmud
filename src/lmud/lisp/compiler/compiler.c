@@ -272,6 +272,7 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->cached.symbol_labels   = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LABELS");
     self->cached.symbol_if       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "IF");
     self->cached.symbol_while    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "WHILE");
+    self->cached.symbol_mvl      = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "MULTIPLE-VALUE-LIST");
 
     self->cached.symbol_andrest     = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&REST");
     self->cached.symbol_andoptional = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&OPTIONAL");
@@ -664,6 +665,11 @@ void LMud_Compiler_WritePopKeywordArgument(struct LMud_Compiler* self, LMud_Any 
 void LMud_Compiler_WriteConsRestArguments(struct LMud_Compiler* self)
 {
     LMud_Compiler_PushBytecode(self, LMud_Bytecode_CONS_REST_ARGUMENTS);
+}
+
+void LMud_Compiler_WriteMultipleValueList(struct LMud_Compiler* self)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_MULTIPLE_VALUE_LIST);
 }
 
 void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant)
@@ -1133,6 +1139,19 @@ void LMud_Compiler_CompileSpecialWhile(struct LMud_Compiler* self, LMud_Any argu
     LMud_Compiler_CloseLabel(self, end_label);
 }
 
+void LMud_Compiler_CompileSpecialMultipleValueList(struct LMud_Compiler* self, LMud_Any arguments)
+{
+    LMud_Any  expression;
+
+    /*
+     * TODO: Error if arguments is not a list of length 1
+     */
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &expression);
+
+    LMud_Compiler_Compile(self, expression);
+    LMud_Compiler_WriteMultipleValueList(self);
+}
+
 void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expression)
 {
     LMud_Any  function;
@@ -1154,6 +1173,7 @@ void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expre
     else if (LMud_Any_Eq(function, self->cached.symbol_labels))   LMud_Compiler_CompileSpecialLabels(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_if))       LMud_Compiler_CompileSpecialIf(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_while))    LMud_Compiler_CompileSpecialWhile(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_mvl))      LMud_Compiler_CompileSpecialMultipleValueList(self, arguments);      
     else LMud_Compiler_CompileFuncall(self, function, arguments);
 }
 

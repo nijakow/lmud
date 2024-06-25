@@ -122,6 +122,7 @@ struct LMud_Compiler
         LMud_Any                    symbol_labels;
         LMud_Any                    symbol_if;
         LMud_Any                    symbol_while;
+        LMud_Any                    symbol_mvl;
 
         LMud_Any                    symbol_andrest;
         LMud_Any                    symbol_andoptional;
@@ -162,6 +163,7 @@ void LMud_Compiler_WriteHasArgument(struct LMud_Compiler* self);
 void LMud_Compiler_WritePopArgument(struct LMud_Compiler* self);
 void LMud_Compiler_WritePopKeywordArgument(struct LMud_Compiler* self, LMud_Any keyword, LMud_CompilerLabel target);
 void LMud_Compiler_WriteConsRestArguments(struct LMud_Compiler* self);
+void LMud_Compiler_WriteMultipleValueList(struct LMud_Compiler* self);
 void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant);
 void LMud_Compiler_WriteLambda(struct LMud_Compiler* self, LMud_Any lambda);
 void LMud_Compiler_WriteSymbolVariableLoad(struct LMud_Compiler* self, LMud_Any symbol);
