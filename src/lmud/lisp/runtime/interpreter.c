@@ -161,6 +161,31 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
     {
         switch (LMud_InstructionStream_NextBytecode(&stream))
         {
+            case LMud_Bytecode_NOP:
+            {
+                break;
+            }
+
+            case LMud_Bytecode_HAS_ARGUMENT:
+            {
+                LMud_Interpreter_SetAccu(
+                    self,
+                    LMud_Lisp_Boolean(
+                        LMud_Interpreter_GetLisp(self),
+                        LMud_Frame_HasExtraArguments(self->fiber->top)
+                    )
+                );
+                break;
+            }
+
+            case LMud_Bytecode_POP_ARGUMENT:
+            {
+                if (!LMud_Frame_TakeExtraArgument(self->fiber->top, &value))
+                    value = LMud_Lisp_Nil(LMud_Interpreter_GetLisp(self));
+                LMud_Interpreter_SetAccu(self, value);
+                break;
+            }
+
             case LMud_Bytecode_CONSTANT:
             {
                 LMud_Interpreter_SetAccu(

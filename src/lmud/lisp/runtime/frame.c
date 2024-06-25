@@ -46,6 +46,7 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
     self->ip             = 0;
     self->sp             = function->info.register_count;
     self->ap             = function->info.register_count + function->info.stack_size + extra_argument_count;
+    self->ac             = function->info.register_count + function->info.stack_size;
 
     for (index = 0; index < function->info.fixed_argument_count; ++index)
     {
@@ -90,7 +91,22 @@ void LMud_Frame_RemoveReference(struct LMud_Frame* self, struct LMud_FrameRef* r
 
 LMud_Size LMud_Frame_RemainingExtraArgumentCount(struct LMud_Frame* self)
 {
-    return self->ap - (self->function->info.register_count + self->function->info.stack_size);
+    return self->ap - self->ac;
+}
+
+bool LMud_Frame_HasExtraArguments(struct LMud_Frame* self)
+{
+    return LMud_Frame_RemainingExtraArgumentCount(self) > 0;
+}
+
+bool LMud_Frame_TakeExtraArgument(struct LMud_Frame* self, LMud_Any* value)
+{
+    if (LMud_Frame_HasExtraArguments(self)) {
+        *value = self->payload[self->ac++];
+        return true;
+    } else {
+        return false;
+    }
 }
 
 

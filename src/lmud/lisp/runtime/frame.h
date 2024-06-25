@@ -27,6 +27,7 @@ struct LMud_Frame
     uint16_t               ip;
     uint8_t                sp;
     uint8_t                ap;
+    uint8_t                ac;
     LMud_Any               payload[];
 };
 
@@ -42,6 +43,8 @@ void LMud_Frame_Destroy(struct LMud_Frame* self);
 void LMud_Frame_RemoveReference(struct LMud_Frame* self, struct LMud_FrameRef* reference);
 
 LMud_Size LMud_Frame_RemainingExtraArgumentCount(struct LMud_Frame* self);
+bool      LMud_Frame_HasExtraArguments(struct LMud_Frame* self);
+bool      LMud_Frame_TakeExtraArgument(struct LMud_Frame* self, LMud_Any* value);
 
 LMud_Any LMud_Frame_GetRegister(struct LMud_Frame* self, LMud_Size index);
 void     LMud_Frame_SetRegister(struct LMud_Frame* self, LMud_Size index, LMud_Any value);
