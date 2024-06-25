@@ -3,6 +3,8 @@
 
 #include <lmud/lisp/base.h>
 #include <lmud/lisp/objects.h>
+#include <lmud/lisp/runtime/scheduler.h>
+
 
 struct LMud_Constants
 {
@@ -20,6 +22,7 @@ struct LMud_Lisp
 {
     struct LMud_Objects    objects;
     struct LMud_Constants  constants;
+    struct LMud_Scheduler  scheduler;
 };
 
 bool LMud_Lisp_Create(struct LMud_Lisp* self);
@@ -86,3 +89,5 @@ LMud_Any LMud_Lisp_QuoteFunction(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_Compile(struct LMud_Lisp* self, LMud_Any expression, LMud_Any* result);
 
 void LMud_Lisp_InstallBuiltin(struct LMud_Lisp* self, const char* name, LMud_BuiltinFunction function);
+
+void LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename);

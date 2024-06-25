@@ -8,7 +8,6 @@
 struct LMud
 {
     struct LMud_Lisp       lisp;
-    struct LMud_Scheduler  scheduler;
 };
 
 bool LMud_Create(struct LMud* self);

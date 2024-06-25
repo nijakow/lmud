@@ -1,6 +1,7 @@
 
 #include <lmud/lisp/builtins.h>
 #include <lmud/lisp/compiler/compiler.h>
+#include <lmud/lisp/io.h>
 #include <lmud/util/stringbuilder.h>
 
 #include "lisp.h"
@@ -39,11 +40,13 @@ void LMud_Constants_Destroy(struct LMud_Constants* self)
 bool LMud_Lisp_Create(struct LMud_Lisp* self)
 {
     return LMud_Objects_Create(&self->objects, self)
-        && LMud_Constants_Create(&self->constants, self);
+        && LMud_Constants_Create(&self->constants, self)
+        && LMud_Scheduler_Create(&self->scheduler, self);
 }
 
 void LMud_Lisp_Destroy(struct LMud_Lisp* self)
 {
+    LMud_Scheduler_Destroy(&self->scheduler);
     LMud_Constants_Destroy(&self->constants);
     LMud_Objects_Destroy(&self->objects);
 }
@@ -371,4 +374,31 @@ void LMud_Lisp_InstallBuiltin(struct LMud_Lisp* self, const char* name, LMud_Bui
     builtin = LMud_Lisp_Builtin(self, name, function);
 
     LMud_Symbol_SetFunction(symbol, builtin);
+}
+
+
+void LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename)
+{
+    struct LMud_InputStream  stream;
+    FILE*                    file;
+    LMud_Any                 program;
+
+    file = fopen(filename, "r");
+
+    if (file == NULL)
+        fprintf(stderr, "; Failed to open file: \"%s\"\n", filename);
+    else {
+        printf("; Loading file: \"%s\"...\n", filename);
+
+        LMud_InputStream_CreateFromFile(&stream, file);
+
+        while (LMud_Lisp_Read(self, &stream, &program))
+        {
+            printf(";   --> Read an expression\n");
+            // TODO
+        }
+
+        LMud_InputStream_Destroy(&stream);        
+        fclose(file);
+    }
 }

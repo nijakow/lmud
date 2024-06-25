@@ -144,29 +144,32 @@ bool LMud_Lisp_Read_IsBreakingChar(char c)
 }
 
 
-LMud_Any LMud_Lisp_ReadList(struct LMud_Lisp* lisp, struct LMud_InputStream* stream)
+bool LMud_Lisp_ReadList(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMud_Any* result)
 {
     LMud_Any  value;
+    LMud_Any  rest;
 
     LMud_InputStream_SkipIf(stream, &LMud_Lisp_Read_IsWhitespace);
 
     if (LMud_InputStream_CheckStr(stream, ". ")) {
-         value = LMud_Lisp_Read(lisp, stream);
-         if (!LMud_InputStream_CheckStr(stream, ")")) {
-            // TODO: Read error
+         if (!(LMud_Lisp_Read(lisp, stream, &value) && LMud_InputStream_CheckStr(stream, ")"))) {
+            return false;
          }
     } else if (LMud_InputStream_CheckStr(stream, ")")) {
         value = LMud_Lisp_Nil(lisp);
     } else {
-        value = LMud_Lisp_Read(lisp, stream);
+        if (!(LMud_Lisp_Read(lisp, stream, &value) && LMud_Lisp_ReadList(lisp, stream, &rest)))
+            return false;
         value = LMud_Lisp_Cons(
             lisp,
             value,
-            LMud_Lisp_ReadList(lisp, stream)
+            rest
         );
     }
 
-    return value;
+    *result = value;
+
+    return true;
 }
 
 
@@ -196,7 +199,7 @@ void LMud_Lisp_ReadEscaped(struct LMud_Lisp* lisp, struct LMud_InputStream* stre
     }
 }
 
-LMud_Any LMud_Lisp_ReadString(struct LMud_Lisp* lisp, struct LMud_InputStream* stream)
+bool LMud_Lisp_ReadString(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMud_Any* result)
 {
     struct LMud_StringBuilder  builder;
     LMud_Any                   value;
@@ -206,10 +209,12 @@ LMud_Any LMud_Lisp_ReadString(struct LMud_Lisp* lisp, struct LMud_InputStream* s
     value = LMud_Lisp_String(lisp, LMud_StringBuilder_GetStatic(&builder));
     LMud_StringBuilder_Destroy(&builder);
 
-    return value;
+    *result = value;
+
+    return true;
 }
 
-LMud_Any LMud_Lisp_ReadAtom(struct LMud_Lisp* lisp, struct LMud_InputStream* stream)
+bool LMud_Lisp_ReadAtom(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMud_Any* result)
 {
     char      buffer[LMud_SYMBOL_NAME_LENGTH + 1];
     char*     ptr;
@@ -238,31 +243,41 @@ LMud_Any LMud_Lisp_ReadAtom(struct LMud_Lisp* lisp, struct LMud_InputStream* str
     *(ptr++) = '\0';
 
     if (LMud_Lisp_ParseInt(lisp, buffer, &value)) {
-        return value;
+        *result = value;
     } else {
-        return LMud_Lisp_InternUpcase(lisp, buffer);
+        *result = LMud_Lisp_InternUpcase(lisp, buffer);
     }
+
+    return true;
 }
 
-LMud_Any LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream)
+bool LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMud_Any* result)
 {
     LMud_InputStream_SkipIf(stream, &LMud_Lisp_Read_IsWhitespace);
 
     if (LMud_InputStream_Eof(stream)) {
-        // TODO: Read error
-        return LMud_Lisp_Nil(lisp);
+        *result = LMud_Lisp_Nil(lisp);
+        return false;
     } else if (LMud_InputStream_CheckStr(stream, ";")) {
         LMud_InputStream_SkipIf(stream, &LMud_Lisp_Read_IsNotNewline);
-        return LMud_Lisp_Read(lisp, stream);
+        return LMud_Lisp_Read(lisp, stream, result);
     } else if (LMud_InputStream_CheckStr(stream, "#'")) {
-        return LMud_Lisp_QuoteFunction(lisp, LMud_Lisp_Read(lisp, stream));
+        if (LMud_Lisp_Read(lisp, stream, result)) {
+            *result = LMud_Lisp_QuoteFunction(lisp, *result);
+            return true;
+        }
     } else if (LMud_InputStream_CheckStr(stream, "'")) {
-        return LMud_Lisp_Quote(lisp, LMud_Lisp_Read(lisp, stream));
+        if (LMud_Lisp_Read(lisp, stream, result)) {
+            *result = LMud_Lisp_Quote(lisp, *result);
+            return true;
+        }
     } else if (LMud_InputStream_CheckStr(stream, "\"")) {
-        return LMud_Lisp_ReadString(lisp, stream);
+        return LMud_Lisp_ReadString(lisp, stream, result);
     } else if (LMud_InputStream_CheckStr(stream, "(")) {
-        return LMud_Lisp_ReadList(lisp, stream);
+        return LMud_Lisp_ReadList(lisp, stream, result);
     } else {
-        return LMud_Lisp_ReadAtom(lisp, stream);
+        return LMud_Lisp_ReadAtom(lisp, stream, result);
     }
+
+    return false;
 }
