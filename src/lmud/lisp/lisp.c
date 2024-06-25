@@ -18,6 +18,7 @@ bool LMud_Constants_Create(struct LMud_Constants* self, struct LMud_Lisp* lisp)
     LMud_Symbol_SetValue(LMud_Any_AsPointer(self->nil), self->nil);
     LMud_Symbol_SetFunction(LMud_Any_AsPointer(self->nil), self->nil);
     LMud_Symbol_SetMacro(LMud_Any_AsPointer(self->nil), self->nil);
+    LMud_Symbol_SetPlist(LMud_Any_AsPointer(self->nil), self->nil);
     self->t        = LMud_Lisp_Intern(lisp, "T");
     LMud_Symbol_MakeConstant(LMud_Any_AsPointer(self->nil));
     LMud_Symbol_MakeConstant(LMud_Any_AsPointer(self->t));

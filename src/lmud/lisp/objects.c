@@ -289,6 +289,7 @@ struct LMud_Symbol* LMud_Objects_Gensym(struct LMud_Objects* self)
             LMud_Lisp_Nil(self->lisp),
             LMud_Lisp_Nil(self->lisp),
             LMud_Lisp_Nil(self->lisp),
+            LMud_Lisp_Nil(self->lisp),
             LMud_Lisp_Nil(self->lisp)
         );
 
