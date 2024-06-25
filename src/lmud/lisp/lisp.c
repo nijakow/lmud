@@ -553,7 +553,7 @@ bool LMud_Lisp_Add2_Ratios(struct LMud_Lisp* self, LMud_Any n1, LMud_Any d1, LMu
     LMud_Any  adjusted_n2;
 
     return LMud_Lisp_AdjustRatios(self, n1, d1, n2, d2, &adjusted_n1, &adjusted_n2, &denominator)
-        && LMud_Lisp_Add2(self, adjusted_n1, adjusted_n2, &numerator)
+        && LMud_Lisp_IntegerAdd2(self, adjusted_n1, adjusted_n2, &numerator)
         && LMud_Lisp_RatioOrInteger(self, numerator, denominator, result);
 }
 
@@ -588,23 +588,15 @@ bool LMud_Lisp_Mul2_Ratios(struct LMud_Lisp* self, LMud_Any n1, LMud_Any d1, LMu
 {
     LMud_Any  numerator;
     LMud_Any  denominator;
-    LMud_Any  adjusted_n1;
-    LMud_Any  adjusted_n2;
 
-    return LMud_Lisp_AdjustRatios(self, n1, d1, n2, d2, &adjusted_n1, &adjusted_n2, &denominator)
-        && LMud_Lisp_Mul2(self, adjusted_n1, adjusted_n2, &numerator)
+    return LMud_Lisp_IntegerMul2(self, n1, n2, &numerator)
+        && LMud_Lisp_IntegerMul2(self, d1, d2, &denominator)
         && LMud_Lisp_RatioOrInteger(self, numerator, denominator, result);
 }
 
 bool LMud_Lisp_Mul2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
 {
-    if (LMud_Any_IsInteger(a) && LMud_Any_IsInteger(b)) {
-        *result = LMud_Any_FromInteger(LMud_Any_AsInteger(a) * LMud_Any_AsInteger(b));
-        return true;
-    } else {
-        *result = LMud_Lisp_Nil(self);
-        return false;
-    }
+    return LMud_Lisp_NumberDispatch(self, a, b, LMud_Lisp_Mul2_Ratios, result);
 }
 
 bool LMud_Lisp_Div2_Ratios(struct LMud_Lisp* self, LMud_Any n1, LMud_Any d1, LMud_Any n2, LMud_Any d2, LMud_Any* result)
@@ -614,12 +606,7 @@ bool LMud_Lisp_Div2_Ratios(struct LMud_Lisp* self, LMud_Any n1, LMud_Any d1, LMu
 
 bool LMud_Lisp_Div2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
 {
-    if (LMud_Any_IsInteger(a) && LMud_Any_IsInteger(b)) {
-        return LMud_Lisp_RatioOrInteger(self, a, b, result);
-    } else {
-        *result = LMud_Lisp_Nil(self);
-        return false;
-    }
+    return LMud_Lisp_NumberDispatch(self, a, b, LMud_Lisp_Div2_Ratios, result);
 }
 
 bool LMud_Lisp_Mod2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
