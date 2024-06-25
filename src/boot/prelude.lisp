@@ -127,6 +127,12 @@
       (let ((var  (car  info))
             (list (cadr info)))
          (list 'mapcar (list* 'lambda (list var) body) list)))
+   
+   (defun char=  (a b) (= (char-code a) (char-code b)))
+   (defun char<  (a b) (< (char-code a) (char-code b)))
+   (defun char>  (a b) (> (char-code a) (char-code b)))
+   (defun char<= (a b) (<= (char-code a) (char-code b)))
+   (defun char>= (a b) (>= (char-code a) (char-code b)))
 
    (defun repl ()
       (while t
