@@ -35,7 +35,7 @@ void LMud_Lisp_PrintArray(struct LMud_Lisp* lisp, struct LMud_Array* array, FILE
     LMud_Size  index;
     LMud_Size  size;
 
-    fprintf(stream, "#(");
+    fprintf(stream, "〈");
 
     default_value = LMud_Lisp_Nil(lisp);
     size          = LMud_Array_GetSize(array);
@@ -47,7 +47,7 @@ void LMud_Lisp_PrintArray(struct LMud_Lisp* lisp, struct LMud_Array* array, FILE
         LMud_Lisp_Print(lisp, LMud_Array_Aref(array, index, default_value), stream, escaped);
     }
 
-    fprintf(stream, ")");
+    fprintf(stream, "〉");
 }
 
 void LMud_Lisp_PrintBytes(struct LMud_Lisp* lisp, struct LMud_Bytes* bytes, FILE* stream)
@@ -57,7 +57,7 @@ void LMud_Lisp_PrintBytes(struct LMud_Lisp* lisp, struct LMud_Bytes* bytes, FILE
 
     (void) lisp;
 
-    fprintf(stream, "#[");
+    fprintf(stream, "⦑");
 
     size = LMud_Bytes_GetSize(bytes);
 
@@ -65,10 +65,10 @@ void LMud_Lisp_PrintBytes(struct LMud_Lisp* lisp, struct LMud_Bytes* bytes, FILE
     {
         if (index > 0)
             fprintf(stream, " ");
-        fprintf(stream, "%02X", (unsigned char) LMud_Bytes_At(bytes, index));
+        fprintf(stream, "%02x", (unsigned char) LMud_Bytes_At(bytes, index));
     }
 
-    fprintf(stream, "]");
+    fprintf(stream, "⦒");
 }
 
 void LMud_Lisp_PrintCharacter(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool escaped)
@@ -142,18 +142,18 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
             }
         } else if (LMud_Lisp_IsSymbolPointer(lisp, pointer)) {
             if (LMud_Symbol_IsGensym((struct LMud_Symbol*) pointer)) {
-                fprintf(stream, "#<GENSYM %p>", pointer);
+                fprintf(stream, "⦍GENSYM %p⦎", pointer);
             } else {
                 LMud_Lisp_Print(lisp, ((struct LMud_Symbol*) pointer)->name, stream, false);
             }
         } else if (LMud_Lisp_IsFunctionPointer(lisp, pointer)) {
-            fprintf(stream, "#<BYTE-COMPILED-FUNCTION %p :BYTECODES ", pointer);
+            fprintf(stream, "⦍BYTE-COMPILED-FUNCTION %p :BYTECODES ", pointer);
             LMud_Lisp_Print(lisp, LMud_Function_Bytecodes(pointer), stream, true);
             fprintf(stream, " :CONSTANTS ");
             LMud_Lisp_Print(lisp, LMud_Function_Constants(pointer), stream, true);
             fprintf(
                 stream,
-                " :STACK-SIZE %lu :REGISTER-COUNT %lu :FIXED-ARGUMENT-COUNT %lu :LEXICALIZED %s :VARIADIC %s>",
+                " :STACK-SIZE %lu :REGISTER-COUNT %lu :FIXED-ARGUMENT-COUNT %lu :LEXICALIZED %s :VARIADIC %s⦎",
                 ((struct LMud_Function*) pointer)->info.stack_size,
                 ((struct LMud_Function*) pointer)->info.register_count,
                 ((struct LMud_Function*) pointer)->info.fixed_argument_count,
@@ -161,18 +161,18 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
                 ((struct LMud_Function*) pointer)->info.variadic ? "T" : "NIL"
             );
         } else if (LMud_Lisp_IsClosurePointer(lisp, pointer)) {
-            fprintf(stream, "#<CLOSURE %p>", pointer);
+            fprintf(stream, "⦍CLOSURE %p⦎", pointer);
         } else if (LMud_Lisp_IsBuiltinPointer(lisp, pointer)) {
-            fprintf(stream, "#<BUILTIN %s %p>", ((struct LMud_Builtin*) pointer)->name, pointer);
+            fprintf(stream, "⦍BUILTIN %s %p⦎", ((struct LMud_Builtin*) pointer)->name, pointer);
         } else if (LMud_Lisp_IsRatioPointer(lisp, pointer)) {
             LMud_Lisp_Print(lisp, LMud_Ratio_Numerator((struct LMud_Ratio*) pointer), stream, escaped);
             fprintf(stream, "/");
             LMud_Lisp_Print(lisp, LMud_Ratio_Denominator((struct LMud_Ratio*) pointer), stream, escaped);
         } else {
-            fprintf(stream, "#<?>");
+            fprintf(stream, "⦍UNKNOWN %p⦎", pointer);
         }
     } else {
-        fprintf(stream, "#<?>");
+        fprintf(stream, "⦍UNKNOWN⦎");
     }
 }
 
