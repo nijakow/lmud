@@ -130,6 +130,11 @@
             (list (cadr info)))
          (list 'mapcar (list* 'lambda (list var) body) list)))
    
+   (defun member (item list)
+      (cond ((null list) nil)
+            ((eq item (car list)) list)
+            (t (member item (cdr list)))))
+
    (defun char=  (a b) (= (char-code a) (char-code b)))
    (defun char<  (a b) (< (char-code a) (char-code b)))
    (defun char>  (a b) (> (char-code a) (char-code b)))
@@ -138,7 +143,7 @@
 
    (defun repl ()
       (while t
-         (%princ "> ")
+         (%princ "⌨ ")
          (let ((expr (%read)))
             (dolist (e (multiple-value-list (eval expr)))
                (%princ "  ")

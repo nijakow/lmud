@@ -100,6 +100,23 @@ void LMud_Lisp_PrintCharacter(struct LMud_Lisp* lisp, LMud_Any object, FILE* str
     }
 }
 
+bool LMud_Lisp_IsQuoteClause(struct LMud_Lisp* lisp, LMud_Any object)
+{
+    return LMud_Lisp_IsCons(lisp, object)
+        && LMud_Lisp_IsSymbol(lisp, LMud_Lisp_Car(lisp, object))
+        && LMud_Any_Eq(LMud_Lisp_Car(lisp, object), lisp->constants.quote);
+}
+
+void LMud_Lisp_BeginPrintList(struct LMud_Lisp* lisp, LMud_Any list, FILE* stream, bool escaped)
+{
+    if (LMud_Lisp_IsQuoteClause(lisp, list)) {
+        fprintf(stream, "'");
+        LMud_Lisp_Print(lisp, LMud_Lisp_Cadr(lisp, list), stream, escaped);
+    } else {
+        LMud_Lisp_PrintList(lisp, list, stream, escaped);
+    }
+}
+
 void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool escaped)
 {
     void*  pointer;
@@ -112,7 +129,7 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
         pointer = LMud_Any_AsPointer(object);
 
         if (LMud_Lisp_IsConsPointer(lisp, pointer)) {
-            LMud_Lisp_PrintList(lisp, object, stream, escaped);
+            LMud_Lisp_BeginPrintList(lisp, object, stream, escaped);
         } else if (LMud_Lisp_IsArrayPointer(lisp, pointer)) {
             LMud_Lisp_PrintArray(lisp, pointer, stream, escaped);
         } else if (LMud_Lisp_IsBytesPointer(lisp, pointer)) {
