@@ -14,6 +14,50 @@ void LMud_Builtin_HelloWorld(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud
     printf("  Hello, world!\n");
 }
 
+void LMud_Builtin_Funcall(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Fiber_Enter(fiber, arguments[0], &arguments[1], argument_count - 1);
+}
+
+void LMud_Builtin_Apply(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any   function;
+    LMud_Any   iterator;
+    LMud_Size  extra_argument_count;
+    LMud_Size  index;
+
+    /*
+     * TODO: Check arguments.
+     */
+
+    function             = arguments[0];
+    extra_argument_count = 0;
+    iterator             = arguments[argument_count - 1];
+
+    while (LMud_Lisp_IsCons(fiber->lisp, iterator))
+    {
+        extra_argument_count++;
+        iterator = LMud_Lisp_Cdr(fiber->lisp, iterator);
+    }
+
+    LMud_Any  args[argument_count + extra_argument_count];
+
+    for (index = 0; index < argument_count - 2; index++)
+    {
+        args[index] = arguments[index + 1];
+    }
+
+    iterator = arguments[argument_count - 1];
+
+    while (LMud_Lisp_IsCons(fiber->lisp, iterator))
+    {
+        args[index++] = LMud_Lisp_Car(fiber->lisp, iterator);
+        iterator      = LMud_Lisp_Cdr(fiber->lisp, iterator);
+    }
+
+    LMud_Fiber_Enter(fiber, function, args, index);
+}
+
 void LMud_Builtin_SymbolValue(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     /*
@@ -172,7 +216,7 @@ void LMud_Builtin_Compile(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Si
      * TODO: Check arguments and whether the compilation was successful.
      */
     (void) argument_count;
-    
+
     LMud_Lisp_Compile(fiber->lisp, arguments[0], &result);
 
     LMud_Fiber_SetAccumulator(fiber, result);
@@ -182,6 +226,8 @@ void LMud_Builtin_Compile(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Si
 void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
 {
     LMud_Lisp_InstallBuiltin(lisp, "HELLO-WORLD", LMud_Builtin_HelloWorld);
+    LMud_Lisp_InstallBuiltin(lisp, "FUNCALL", LMud_Builtin_Funcall);
+    LMud_Lisp_InstallBuiltin(lisp, "APPLY", LMud_Builtin_Apply);
     LMud_Lisp_InstallBuiltin(lisp, "SYMBOL-VALUE", LMud_Builtin_SymbolValue);
     LMud_Lisp_InstallBuiltin(lisp, "SET-SYMBOL-VALUE", LMud_Builtin_SetSymbolValue);
     LMud_Lisp_InstallBuiltin(lisp, "SYMBOL-FUNCTION", LMud_Builtin_SymbolFunction);
