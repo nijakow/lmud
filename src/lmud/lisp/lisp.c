@@ -1,5 +1,6 @@
 
 #include <lmud/lisp/builtins.h>
+#include <lmud/lisp/compiler/compiler.h>
 #include <lmud/util/stringbuilder.h>
 
 #include "lisp.h"
@@ -300,6 +301,28 @@ LMud_Any LMud_Lisp_Quote(struct LMud_Lisp* self, LMud_Any value)
 LMud_Any LMud_Lisp_QuoteFunction(struct LMud_Lisp* self, LMud_Any value)
 {
     return LMud_Lisp_Cons(self, self->constants.function, LMud_Lisp_Cons(self, value, LMud_Lisp_Nil(self)));
+}
+
+
+bool LMud_Lisp_Compile(struct LMud_Lisp* self, LMud_Any expression, LMud_Any* result)
+{
+    struct LMud_CompilerSession  session;
+    struct LMud_Compiler         compiler;
+    LMud_Any                     function;
+
+    LMud_CompilerSession_Create(&session, self);
+    LMud_Compiler_Create(&compiler, &session);
+
+    LMud_Compiler_Compile(&compiler, expression);
+
+    function = LMud_Compiler_Build(&compiler);
+
+    LMud_Compiler_Destroy(&compiler);
+    LMud_CompilerSession_Destroy(&session);
+
+    *result = function;
+
+    return true;
 }
 
 

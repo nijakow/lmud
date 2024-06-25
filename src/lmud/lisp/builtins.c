@@ -164,6 +164,21 @@ void LMud_Builtin_Aref(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size 
 }
 
 
+void LMud_Builtin_Compile(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any  result;
+
+    /*
+     * TODO: Check arguments and whether the compilation was successful.
+     */
+    (void) argument_count;
+    
+    LMud_Lisp_Compile(fiber->lisp, arguments[0], &result);
+
+    LMud_Fiber_SetAccumulator(fiber, result);
+}
+
+
 void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
 {
     LMud_Lisp_InstallBuiltin(lisp, "HELLO-WORLD", LMud_Builtin_HelloWorld);
@@ -179,4 +194,5 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "LENGTH", LMud_Builtin_Length);
     LMud_Lisp_InstallBuiltin(lisp, "VECTOR", LMud_Builtin_Vector);
     LMud_Lisp_InstallBuiltin(lisp, "AREF", LMud_Builtin_Aref);
+    LMud_Lisp_InstallBuiltin(lisp, "COMPILE", LMud_Builtin_Compile);
 }

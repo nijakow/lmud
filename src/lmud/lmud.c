@@ -1,6 +1,5 @@
 
 #include <lmud/lisp/io.h>
-#include <lmud/lisp/compiler/compiler.h>
 #include <lmud/lisp/runtime/fiber.h>
 
 #include "lmud.h"
@@ -30,21 +29,9 @@ void LMud_Banner(struct LMud* self)
 
 LMud_Any LMud_TestCompile(struct LMud* self, LMud_Any expression)
 {
-    struct LMud_CompilerSession  session;
-    struct LMud_Compiler         compiler;
     LMud_Any                     function;
 
-    printf("; Compiling...\n");
-
-    LMud_CompilerSession_Create(&session, &self->lisp);
-    LMud_Compiler_Create(&compiler, &session);
-
-    LMud_Compiler_Compile(&compiler, expression);
-
-    function = LMud_Compiler_Build(&compiler);
-
-    LMud_Compiler_Destroy(&compiler);
-    LMud_CompilerSession_Destroy(&session);
+    LMud_Lisp_Compile(&self->lisp, expression, &function);
 
     return function;
 }
@@ -57,8 +44,6 @@ LMud_Any LMud_TestRun(struct LMud* self, LMud_Any function)
 
     scheduler = &self->scheduler;
     fiber     = LMud_Scheduler_SpawnFiber(scheduler);
-
-    printf("; Running...\n");
 
     LMud_Fiber_EnterThunk(fiber, function);
     LMud_Fiber_Tick(fiber);
@@ -84,9 +69,6 @@ void LMud_Test(struct LMud* self)
         fflush(stdout);
         value = LMud_Lisp_Read(lisp, &stream);
         value = LMud_TestCompile(self, value);
-        printf(";  ");
-        LMud_Lisp_Print(lisp, value, stdout, true);
-        putchar('\n');
         value = LMud_TestRun(self, value);
         printf("  ");
         LMud_Lisp_Print(lisp, value, stdout, true);
