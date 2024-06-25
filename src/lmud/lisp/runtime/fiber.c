@@ -12,6 +12,8 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp)
 {
     self->lisp          = lisp;
 
+    self->top           = NULL;
+
     self->stack         =  LMud_Alloc(1024 * 1024);
     self->stack_roof    = &self->stack[1024 * 1024];
     self->stack_pointer =  self->stack;
@@ -22,7 +24,7 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp)
 
 void LMud_Fiber_Destroy(struct LMud_Fiber* self)
 {
-    (void) self;
+    LMud_Free(self->stack);
 }
 
 bool LMud_Fiber_HasFrames(struct LMud_Fiber* self)

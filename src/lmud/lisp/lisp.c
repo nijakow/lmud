@@ -39,6 +39,8 @@ void LMud_Constants_Destroy(struct LMud_Constants* self)
 
 bool LMud_Lisp_Create(struct LMud_Lisp* self)
 {
+    LMud_InputStream_CreateFromFile(&self->standard_input, stdin);
+
     return LMud_Objects_Create(&self->objects, self)
         && LMud_Constants_Create(&self->constants, self)
         && LMud_Scheduler_Create(&self->scheduler, self);
@@ -49,6 +51,7 @@ void LMud_Lisp_Destroy(struct LMud_Lisp* self)
     LMud_Scheduler_Destroy(&self->scheduler);
     LMud_Constants_Destroy(&self->constants);
     LMud_Objects_Destroy(&self->objects);
+    LMud_InputStream_Destroy(&self->standard_input);
 }
 
 
@@ -394,8 +397,12 @@ void LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename)
 
         while (LMud_Lisp_Read(self, &stream, &program))
         {
-            printf(";   --> Read an expression\n");
-            // TODO
+            if (!LMud_Lisp_Compile(self, program, &program)) {
+                fprintf(stderr, ";   --> Failed to compile an expression!\n");
+                break;
+            } else {
+                LMud_Scheduler_BlockAndRunThunk(&self->scheduler, program, NULL);
+            }
         }
 
         LMud_InputStream_Destroy(&stream);        

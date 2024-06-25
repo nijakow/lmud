@@ -271,6 +271,7 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->cached.symbol_flet     = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FLET");
     self->cached.symbol_labels   = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LABELS");
     self->cached.symbol_if       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "IF");
+    self->cached.symbol_while    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "WHILE");
 
     self->cached.symbol_andrest     = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&REST");
     self->cached.symbol_andoptional = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&OPTIONAL");
@@ -1103,6 +1104,35 @@ void LMud_Compiler_CompileSpecialIf(struct LMud_Compiler* self, LMud_Any argumen
     LMud_Compiler_CloseLabel(self, end_label);
 }
 
+void LMud_Compiler_CompileSpecialWhile(struct LMud_Compiler* self, LMud_Any arguments)
+{
+    LMud_Any            condition;
+    LMud_Any            body;
+    LMud_CompilerLabel  start_label;
+    LMud_CompilerLabel  end_label;
+
+    condition = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
+    body      = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arguments);
+
+    LMud_Compiler_OpenLabel(self, &start_label);
+    LMud_Compiler_OpenLabel(self, &end_label);
+
+    LMud_Compiler_PlaceLabel(self, start_label);
+
+    LMud_Compiler_Compile(self, condition);
+
+    LMud_Compiler_WriteJumpIfNil(self, end_label);
+
+    LMud_Compiler_CompileExpressions(self, body);
+
+    LMud_Compiler_WriteJump(self, start_label);
+
+    LMud_Compiler_PlaceLabel(self, end_label);
+
+    LMud_Compiler_CloseLabel(self, start_label);
+    LMud_Compiler_CloseLabel(self, end_label);
+}
+
 void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expression)
 {
     LMud_Any  function;
@@ -1123,6 +1153,7 @@ void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expre
     else if (LMud_Any_Eq(function, self->cached.symbol_flet))     LMud_Compiler_CompileSpecialFlet(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_labels))   LMud_Compiler_CompileSpecialLabels(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_if))       LMud_Compiler_CompileSpecialIf(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_while))    LMud_Compiler_CompileSpecialWhile(self, arguments);
     else LMud_Compiler_CompileFuncall(self, function, arguments);
 }
 

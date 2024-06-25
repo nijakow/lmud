@@ -4,6 +4,7 @@
 #include <lmud/lisp/base.h>
 #include <lmud/lisp/objects.h>
 #include <lmud/lisp/runtime/scheduler.h>
+#include <lmud/util/stream.h>
 
 
 struct LMud_Constants
@@ -20,9 +21,10 @@ void LMud_Constants_Destroy(struct LMud_Constants* self);
 
 struct LMud_Lisp
 {
-    struct LMud_Objects    objects;
-    struct LMud_Constants  constants;
-    struct LMud_Scheduler  scheduler;
+    struct LMud_Objects      objects;
+    struct LMud_Constants    constants;
+    struct LMud_Scheduler    scheduler;
+    struct LMud_InputStream  standard_input;
 };
 
 bool LMud_Lisp_Create(struct LMud_Lisp* self);

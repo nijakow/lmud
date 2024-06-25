@@ -46,29 +46,10 @@ LMud_Any LMud_TestRun(struct LMud* self, LMud_Any function)
 void LMud_Test(struct LMud* self)
 {
     struct LMud_Lisp*        lisp;
-    struct LMud_InputStream  stream;
-    LMud_Any                 value;
 
     lisp = &self->lisp;
 
-    // LMud_Lisp_LoadFile(lisp, "../boot/prelude.lisp");
-
-    LMud_InputStream_CreateFromFile(&stream, stdin);
-
-    while (!LMud_InputStream_Eof(&stream))
-    {
-        printf("> ");
-        fflush(stdout);
-        if (!LMud_Lisp_Read(lisp, &stream, &value))
-            break;
-        value = LMud_TestCompile(self, value);
-        value = LMud_TestRun(self, value);
-        printf("  ");
-        LMud_Lisp_Print(lisp, value, stdout, true);
-        putchar('\n');
-    }
-
-    putchar('\n');
+    LMud_Lisp_LoadFile(lisp, "../boot/prelude.lisp");
 }
 
 void LMud_Main(struct LMud* self, int argc, char* argv[])

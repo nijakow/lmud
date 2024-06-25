@@ -38,6 +38,14 @@
 
 (eval '(progn
 
-   (defun square (x) (* x x))
+   (defun repl ()
+      (while t
+         (%princ "> ")
+         (let ((expr (%read)))
+            (%princ "  ")
+            (%prin1 (eval expr)))
+         (%terpri)))
+
+   (repl)
 
 ))

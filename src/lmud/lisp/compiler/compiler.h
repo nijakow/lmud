@@ -121,6 +121,7 @@ struct LMud_Compiler
         LMud_Any                    symbol_flet;
         LMud_Any                    symbol_labels;
         LMud_Any                    symbol_if;
+        LMud_Any                    symbol_while;
 
         LMud_Any                    symbol_andrest;
         LMud_Any                    symbol_andoptional;

@@ -31,6 +31,14 @@ struct LMud_Fiber* LMud_Scheduler_SpawnFiber(struct LMud_Scheduler* self)
     return fiber;
 }
 
+void LMud_Scheduler_RequestDeleteFiber(struct LMud_Scheduler* self, struct LMud_Fiber* fiber)
+{
+    (void) self;
+
+    LMud_Fiber_Destroy(fiber);
+    LMud_Free(fiber);
+}
+
 bool LMud_Scheduler_BlockAndRunThunk(struct LMud_Scheduler* self, LMud_Any thunk, LMud_Any* result)
 {
     struct LMud_Fiber*  fiber;
@@ -46,9 +54,7 @@ bool LMud_Scheduler_BlockAndRunThunk(struct LMud_Scheduler* self, LMud_Any thunk
     if (result != NULL)
         *result = LMud_Fiber_GetAccumulator(fiber);
 
-    /*
-     * TODO: Destroy the fiber.
-     */
+    LMud_Scheduler_RequestDeleteFiber(self, fiber);
 
     return true;
 }

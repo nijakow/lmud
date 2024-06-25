@@ -2,6 +2,7 @@
 #include <lmud/lisp/objects/builtin.h>
 #include <lmud/lisp/runtime/fiber.h>
 #include <lmud/lisp/math.h>
+#include <lmud/lisp/io.h>
 
 #include "builtins.h"
 
@@ -261,6 +262,53 @@ void LMud_Builtin_Compile(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Si
 }
 
 
+void LMud_Builtin_Read(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any  result;
+
+    (void) arguments;
+    (void) argument_count;
+
+    if (!LMud_Lisp_Read(fiber->lisp, &fiber->lisp->standard_input, &result))
+        result = LMud_Lisp_Nil(fiber->lisp);
+
+    LMud_Fiber_SetAccumulator(fiber, result);
+}
+
+void LMud_Builtin_Princ(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+
+    LMud_Lisp_Print(fiber->lisp, arguments[0], stdout, false);
+
+    LMud_Fiber_SetAccumulator(fiber, arguments[0]);
+}
+
+void LMud_Builtin_Prin1(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+
+    LMud_Lisp_Print(fiber->lisp, arguments[0], stdout, true);
+
+    LMud_Fiber_SetAccumulator(fiber, arguments[0]);
+}
+
+void LMud_Builtin_Terpri(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    (void) fiber;
+    (void) arguments;
+    (void) argument_count;
+
+    printf("\n");
+}
+
+
 void LMud_Builtin_Numerator(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     LMud_Any  result;
@@ -447,6 +495,10 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "VECTOR", LMud_Builtin_Vector);
     LMud_Lisp_InstallBuiltin(lisp, "AREF", LMud_Builtin_Aref);
     LMud_Lisp_InstallBuiltin(lisp, "%COMPILE", LMud_Builtin_Compile);
+    LMud_Lisp_InstallBuiltin(lisp, "%READ", LMud_Builtin_Read);
+    LMud_Lisp_InstallBuiltin(lisp, "%PRINC", LMud_Builtin_Princ);
+    LMud_Lisp_InstallBuiltin(lisp, "%PRIN1", LMud_Builtin_Prin1);
+    LMud_Lisp_InstallBuiltin(lisp, "%TERPRI", LMud_Builtin_Terpri);
     LMud_Lisp_InstallBuiltin(lisp, "NUMERATOR", LMud_Builtin_Numerator);
     LMud_Lisp_InstallBuiltin(lisp, "DENOMINATOR", LMud_Builtin_Denominator);
     LMud_Lisp_InstallBuiltin(lisp, "=", LMud_Builtin_NumericEqual);
