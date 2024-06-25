@@ -99,9 +99,10 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
             LMud_Lisp_Print(lisp, LMud_Function_Constants(pointer), stream, true);
             fprintf(
                 stream,
-                " :STACK-SIZE %lu :REGISTER-COUNT %lu :LEXICALIZED %s>",
+                " :STACK-SIZE %lu :REGISTER-COUNT %lu :FIXED-ARGUMENT-COUNT %lu :LEXICALIZED %s>",
                 ((struct LMud_Function*) pointer)->info.stack_size,
                 ((struct LMud_Function*) pointer)->info.register_count,
+                ((struct LMud_Function*) pointer)->info.fixed_argument_count,
                 ((struct LMud_Function*) pointer)->info.lexicalized ? "T" : "NIL"
             );
         } else if (LMud_Lisp_IsClosurePointer(lisp, pointer)) {

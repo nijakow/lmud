@@ -102,6 +102,7 @@ struct LMud_Compiler
     LMud_Size                       max_stack_depth;
     LMud_Size                       current_stack_depth;
     LMud_Size                       max_register_index;
+    LMud_Size                       fixed_argument_count;
     bool                            uses_lexical_stuff;
 
     struct
@@ -159,5 +160,7 @@ void LMud_Compiler_WriteCall(struct LMud_Compiler* self, LMud_Size arity);
 
 void LMud_Compiler_Compile(struct LMud_Compiler* self, LMud_Any expression);
 void LMud_Compiler_CompileExpressions(struct LMud_Compiler* self, LMud_Any expressions);
+
+void LMud_Compiler_ProcessArgumentList(struct LMud_Compiler* self, LMud_Any arglist);
 
 LMud_Any LMud_Compiler_Build(struct LMud_Compiler* self);

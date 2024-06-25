@@ -239,10 +239,11 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->labels          = NULL;
     self->registers       = NULL;
 
-    self->max_stack_depth     = 0;
-    self->current_stack_depth = 0;
-    self->max_register_index  = 0;
-    self->uses_lexical_stuff  = false;
+    self->max_stack_depth      = 0;
+    self->current_stack_depth  = 0;
+    self->max_register_index   = 0;
+    self->fixed_argument_count = 0;
+    self->uses_lexical_stuff   = false;
 
     self->cached.symbol_quote    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "QUOTE");
     self->cached.symbol_function = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FUNCTION");
@@ -363,6 +364,17 @@ void LMud_Compiler_BindRegister(struct LMud_Compiler* self, LMud_Any name, enum 
     }
 
     LMud_Binding_SetRegister(binding, reg);
+}
+
+void LMud_Compiler_AddArgument(struct LMud_Compiler* self, LMud_Any name)
+{
+    struct LMud_Register*  reg;
+
+    reg = LMud_Compiler_AllocateRegister(self);
+
+    LMud_Compiler_BindRegister(self, name, LMud_BindingType_VARIABLE, reg);
+
+    self->fixed_argument_count++;
 }
 
 
@@ -692,8 +704,7 @@ void LMud_Compiler_CompileLambda(struct LMud_Compiler* self, LMud_Any arglist, L
     LMud_Any              lambda;
 
     LMud_Compiler_Create_Lexical(&subcompiler, self);
-    // TODO: Compile the variable prologue.
-    (void) arglist;
+    LMud_Compiler_ProcessArgumentList(&subcompiler, arglist);
     LMud_Compiler_CompileExpressions(&subcompiler, body);
     lambda = LMud_Compiler_Build(&subcompiler);
     LMud_Compiler_Destroy(&subcompiler);
@@ -991,6 +1002,19 @@ void LMud_Compiler_CompileExpressions(struct LMud_Compiler* self, LMud_Any expre
     }
 }
 
+void LMud_Compiler_ProcessArgumentList(struct LMud_Compiler* self, LMud_Any arglist)
+{
+    LMud_Any  argument;
+
+    while (LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), arglist))
+    {
+        argument = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arglist);
+
+        LMud_Compiler_AddArgument(self, argument);
+
+        arglist = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arglist);
+    }
+}
 
 LMud_Any LMud_Compiler_Build(struct LMud_Compiler* self)
 {
@@ -999,7 +1023,7 @@ LMud_Any LMud_Compiler_Build(struct LMud_Compiler* self)
     return LMud_Lisp_Function(
         LMud_Compiler_GetLisp(self),
         (struct LMud_ArgInfo) {
-            .fixed_argument_count = 0, // TODO
+            .fixed_argument_count = self->fixed_argument_count,
             .stack_size           = self->max_stack_depth,
             .register_count       = self->max_register_index, // We keep an increment of 1
             .lexicalized          = self->uses_lexical_stuff,
