@@ -80,6 +80,9 @@
    (defmacro unless (test &rest body)
       (list 'if test nil (cons 'progn body)))
 
+   (defmacro until (test &rest body)
+      (list* 'while (list 'not test) body))
+
    (defmacro cond (&rest clauses)
       (if clauses
           (list 'if
@@ -103,6 +106,14 @@
                     (list 'if temp temp (cons 'or (cdr args)))))
               (car args))
           nil))
+
+   (defmacro dotimes (info &rest body)
+      (let ((var  (car  info))
+            (n    (cadr info)))
+         (list 'let (list (list var 0))
+            (list 'until (list '= var n)
+               (list* 'progn body)
+               (list 'setq var (list '+ var 1))))))
 
    (defmacro dolist (info &rest body)
       (let ((var  (gensym))
