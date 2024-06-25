@@ -28,16 +28,16 @@
 
 (set-symbol-macro 'defun
    (lambda (name args &rest body)
-      (list 'set-symbol-function name
-            (list 'lambda args
-                  (cons 'progn body)))))
+      (list 'set-symbol-function (list 'quote name)
+            (cons 'lambda (cons args body)))))
 
 (set-symbol-macro 'defmacro
    (lambda (name args &rest body)
-      (list 'set-symbol-function name
-            (list 'lambda args
-                  (cons 'macroexpand body)))))
+      (list 'set-symbol-macro (list 'quote name)
+            (cons 'lambda (cons args body)))))
 
 (eval '(progn
+
+   (defun square (x) (* x x))
 
 ))
