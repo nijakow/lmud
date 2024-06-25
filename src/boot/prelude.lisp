@@ -62,6 +62,18 @@
    (defun tenth   (e)  (car (cdr (cdr (cdr (cdr (cdr (cdr (cdr (cdr (cdr e)))))))))))
    (defun rest    (e)  (cdr e))
 
+   (defun null (e) (eq e nil))
+   (defun not  (e) (if e nil t))
+
+   (defun mapcar (function list &rest lists)
+      (if (not (consp list))
+          nil
+          (if (null lists)
+              (cons (funcall function (car list))
+                    (mapcar  function (cdr list)))
+              (cons (apply function (car list) (mapcar #'car lists))
+                    (apply #'mapcar function (cdr list) (mapcar #'cdr lists))))))
+
    (defmacro when (test &rest body)
       (list 'if test (cons 'progn body) nil))
    
@@ -91,8 +103,6 @@
                     (list 'if temp temp (cons 'or (cdr args)))))
               (car args))
           nil))
-
-   (defun not (e) (if e nil t))
 
    (defmacro dolist (info &rest body)
       (let ((var  (gensym))
