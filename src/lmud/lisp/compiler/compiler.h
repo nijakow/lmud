@@ -151,8 +151,10 @@ void LMud_Compiler_WriteJumpIfNil(struct LMud_Compiler* self, LMud_CompilerLabel
 
 void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant);
 void LMud_Compiler_WriteLambda(struct LMud_Compiler* self, LMud_Any lambda);
-void LMud_Compiler_WriteSymbolVariable(struct LMud_Compiler* self, LMud_Any symbol);
-void LMud_Compiler_WriteSymbolFunction(struct LMud_Compiler* self, LMud_Any symbol);
+void LMud_Compiler_WriteSymbolVariableLoad(struct LMud_Compiler* self, LMud_Any symbol);
+void LMud_Compiler_WriteSymbolVariableStore(struct LMud_Compiler* self, LMud_Any symbol);
+void LMud_Compiler_WriteSymbolFunctionLoad(struct LMud_Compiler* self, LMud_Any symbol);
+void LMud_Compiler_WriteSymbolFunctionStore(struct LMud_Compiler* self, LMud_Any symbol);
 void LMud_Compiler_WriteLoad(struct LMud_Compiler* self, LMud_Size depth, LMud_Size index);
 void LMud_Compiler_WriteStore(struct LMud_Compiler* self, LMud_Size depth, LMud_Size index);
 void LMud_Compiler_WritePush(struct LMud_Compiler* self);

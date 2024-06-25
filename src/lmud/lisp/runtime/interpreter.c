@@ -200,7 +200,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
-            case LMud_Bytecode_SYMBOL_VARIABLE:
+            case LMud_Bytecode_SYMBOL_VARIABLE_LOAD:
             {
                 value = LMud_InstructionStream_NextConstant(&stream);
 
@@ -221,7 +221,26 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
-            case LMud_Bytecode_SYMBOL_FUNCTION:
+            case LMud_Bytecode_SYMBOL_VARIABLE_STORE:
+            {
+                value = LMud_InstructionStream_NextConstant(&stream);
+
+                if (!LMud_Lisp_IsSymbol(LMud_Interpreter_GetLisp(self), value))
+                {
+                    /*
+                     * TODO
+                     */
+                }
+
+                LMud_Symbol_SetValue(
+                    (struct LMud_Symbol*) LMud_Any_AsPointer(value),
+                    LMud_Interpreter_GetAccu(self)
+                );
+
+                break;
+            }
+
+            case LMud_Bytecode_SYMBOL_FUNCTION_LOAD:
             {
                 value = LMud_InstructionStream_NextConstant(&stream);
 
@@ -237,6 +256,25 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 LMud_Interpreter_SetAccu(
                     self,
                     value
+                );
+
+                break;
+            }
+
+            case LMud_Bytecode_SYMBOL_FUNCTION_STORE:
+            {
+                value = LMud_InstructionStream_NextConstant(&stream);
+
+                if (!LMud_Lisp_IsSymbol(LMud_Interpreter_GetLisp(self), value))
+                {
+                    /*
+                     * TODO
+                     */
+                }
+
+                LMud_Symbol_SetFunction(
+                    (struct LMud_Symbol*) LMud_Any_AsPointer(value),
+                    LMud_Interpreter_GetAccu(self)
                 );
 
                 break;

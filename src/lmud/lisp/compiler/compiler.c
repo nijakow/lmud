@@ -5,6 +5,14 @@
 #include "compiler.h"
 
 
+enum LMud_VariableMode
+{
+    LMud_VariableMode_LOAD,
+    LMud_VariableMode_STORE
+};
+
+
+
 void LMud_Binding_Create(struct LMud_Binding* self, enum LMud_BindingType type, LMud_Any name)
 {
     self->next = NULL;
@@ -565,16 +573,56 @@ void LMud_Compiler_WriteLambda(struct LMud_Compiler* self, LMud_Any lambda)
 }
 
 
-void LMud_Compiler_WriteSymbolVariable(struct LMud_Compiler* self, LMud_Any symbol)
+void LMud_Compiler_WriteSymbolVariableLoad(struct LMud_Compiler* self, LMud_Any symbol)
 {
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SYMBOL_VARIABLE);
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SYMBOL_VARIABLE_LOAD);
     LMud_Compiler_PushConstant(self, symbol);
 }
 
-void LMud_Compiler_WriteSymbolFunction(struct LMud_Compiler* self, LMud_Any symbol)
+void LMud_Compiler_WriteSymbolVariableStore(struct LMud_Compiler* self, LMud_Any symbol)
 {
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SYMBOL_FUNCTION);
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SYMBOL_VARIABLE_STORE);
     LMud_Compiler_PushConstant(self, symbol);
+}
+
+void LMud_Compiler_WriteSymbolVariable(struct LMud_Compiler* self, LMud_Any symbol, enum LMud_VariableMode mode)
+{
+    switch (mode)
+    {
+        case LMud_VariableMode_LOAD:
+            LMud_Compiler_WriteSymbolVariableLoad(self, symbol);
+            break;
+
+        case LMud_VariableMode_STORE:
+            LMud_Compiler_WriteSymbolVariableStore(self, symbol);
+            break;
+    }
+}
+
+void LMud_Compiler_WriteSymbolFunctionLoad(struct LMud_Compiler* self, LMud_Any symbol)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SYMBOL_FUNCTION_LOAD);
+    LMud_Compiler_PushConstant(self, symbol);
+}
+
+void LMud_Compiler_WriteSymbolFunctionStore(struct LMud_Compiler* self, LMud_Any symbol)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SYMBOL_FUNCTION_STORE);
+    LMud_Compiler_PushConstant(self, symbol);
+}
+
+void LMud_Compiler_WriteSymbolFunction(struct LMud_Compiler* self, LMud_Any symbol, enum LMud_VariableMode mode)
+{
+    switch (mode)
+    {
+        case LMud_VariableMode_LOAD:
+            LMud_Compiler_WriteSymbolFunctionLoad(self, symbol);
+            break;
+
+        case LMud_VariableMode_STORE:
+            LMud_Compiler_WriteSymbolFunctionStore(self, symbol);
+            break;
+    }
 }
 
 void LMud_Compiler_WriteLoad(struct LMud_Compiler* self, LMud_Size depth, LMud_Size index)
@@ -647,11 +695,6 @@ void LMud_Compiler_CompileConstant(struct LMud_Compiler* self, LMud_Any expressi
     LMud_Compiler_WriteConstant(self, expression);
 }
 
-enum LMud_VariableMode
-{
-    LMud_VariableMode_LOAD,
-    LMud_VariableMode_STORE
-};
 
 void LMud_Compiler_CompileVariable(struct LMud_Compiler* self, LMud_Any expression, enum LMud_BindingType type, enum LMud_VariableMode mode)
 {
@@ -679,11 +722,11 @@ void LMud_Compiler_CompileVariable(struct LMud_Compiler* self, LMud_Any expressi
     switch (type)
     {
         case LMud_BindingType_VARIABLE: // TODO: Load vs. Store
-            LMud_Compiler_WriteSymbolVariable(self, expression);
+            LMud_Compiler_WriteSymbolVariable(self, expression, mode);
             break;
 
         case LMud_BindingType_FUNCTION: // TODO: Load vs. Store
-            LMud_Compiler_WriteSymbolFunction(self, expression);
+            LMud_Compiler_WriteSymbolFunction(self, expression, mode);
             break;
     }
 }
