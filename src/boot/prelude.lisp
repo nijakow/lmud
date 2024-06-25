@@ -89,6 +89,14 @@
 
    (defun not (e) (if e nil t))
 
+   (defmacro dolist (info &rest body)
+      (let ((var  (gensym))
+            (list (cadr info)))
+         (list 'let (list (list var list))
+            (list 'while (list 'consp var)
+               (list* 'let (list (list (car info) (list 'car var))) body)
+               (list 'setq var (list 'cdr var))))))
+
    (defun repl ()
       (while t
          (%princ "> ")
