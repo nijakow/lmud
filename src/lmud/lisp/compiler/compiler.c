@@ -458,11 +458,14 @@ void LMud_Compiler_AddKeyArgument(struct LMud_Compiler* self, LMud_Any name, LMu
 
 void LMud_Compiler_AddRestArgument(struct LMud_Compiler* self, LMud_Any name)
 {
-    // TODO: Implement
-    (void) self;
-    (void) name;
+    struct LMud_Register*  reg;
+
+    reg = LMud_Compiler_AllocateRegister(self);
 
     LMud_Compiler_EnableVariadic(self);
+    LMud_Compiler_WriteConsRestArguments(self);
+    LMud_Compiler_BindRegister(self, name, LMud_BindingType_VARIABLE, reg);
+    LMud_Compiler_WriteStoreRegister(self, reg);
 }
 
 
@@ -655,6 +658,11 @@ void LMud_Compiler_WritePopKeywordArgument(struct LMud_Compiler* self, LMud_Any 
     LMud_Compiler_PushBytecode(self, LMud_Bytecode_POP_KEYWORD_ARGUMENT);
     LMud_Compiler_PushConstant(self, keyword);
     LMud_Compiler_WriteLabel(self, target);
+}
+
+void LMud_Compiler_WriteConsRestArguments(struct LMud_Compiler* self)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_CONS_REST_ARGUMENTS);
 }
 
 void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant)

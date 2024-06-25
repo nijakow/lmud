@@ -99,6 +99,17 @@ bool LMud_Frame_HasExtraArguments(struct LMud_Frame* self)
     return LMud_Frame_RemainingExtraArgumentCount(self) > 0;
 }
 
+bool LMud_Frame_GetExtraArgument(struct LMud_Frame* self, LMud_Size index, LMud_Any* value)
+{
+    if (index < LMud_Frame_RemainingExtraArgumentCount(self)) {
+        if (value != NULL)
+            *value = self->payload[self->ac + index];
+        return true;
+    } else {
+        return false;
+    }
+}
+
 bool LMud_Frame_PeekExtraArgument(struct LMud_Frame* self, LMud_Any* value)
 {
     if (LMud_Frame_HasExtraArguments(self)) {

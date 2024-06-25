@@ -208,6 +208,22 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
+            case LMud_Bytecode_CONS_REST_ARGUMENTS:
+            {
+                value = LMud_Lisp_Nil(LMud_Interpreter_GetLisp(self));
+                index = LMud_Frame_RemainingExtraArgumentCount(self->fiber->top);
+
+                while (index --> 0)
+                {
+                    LMud_Frame_GetExtraArgument(self->fiber->top, index, &value2);
+                    value = LMud_Lisp_Cons(LMud_Interpreter_GetLisp(self), value2, value);
+                }
+
+                LMud_Interpreter_SetAccu(self, value);
+
+                break;
+            }
+
             case LMud_Bytecode_CONSTANT:
             {
                 LMud_Interpreter_SetAccu(
