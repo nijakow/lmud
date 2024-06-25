@@ -153,6 +153,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
     struct LMud_InstructionStream  stream;
     struct LMud_Frame*             lexical;
     LMud_Any                       value;
+    LMud_Any                       value2;
     LMud_Size                      index;
 
     LMud_InstructionStream_Create(&stream, self->fiber->top);
@@ -183,6 +184,27 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 if (!LMud_Frame_TakeExtraArgument(self->fiber->top, &value))
                     value = LMud_Lisp_Nil(LMud_Interpreter_GetLisp(self));
                 LMud_Interpreter_SetAccu(self, value);
+                break;
+            }
+
+            case LMud_Bytecode_POP_KEYWORD_ARGUMENT:
+            {
+                value = LMud_InstructionStream_NextConstant(&stream);
+                index = LMud_InstructionStream_NextJumpOffset(&stream);
+
+                if (LMud_Frame_PickKeywordArgument(self->fiber->top, value, &value2))
+                {
+                    /*
+                     * Set the accumulator to the value...
+                     */
+                    LMud_Interpreter_SetAccu(self, value2);
+
+                    /*
+                     * ...and jump to the target instruction.
+                     */
+                    LMud_InstructionStream_Jump(&stream, index);
+                }
+
                 break;
             }
 

@@ -44,7 +44,9 @@ void LMud_Frame_RemoveReference(struct LMud_Frame* self, struct LMud_FrameRef* r
 
 LMud_Size LMud_Frame_RemainingExtraArgumentCount(struct LMud_Frame* self);
 bool      LMud_Frame_HasExtraArguments(struct LMud_Frame* self);
+bool      LMud_Frame_PeekExtraArgument(struct LMud_Frame* self, LMud_Any* value);
 bool      LMud_Frame_TakeExtraArgument(struct LMud_Frame* self, LMud_Any* value);
+bool      LMud_Frame_PickKeywordArgument(struct LMud_Frame* self, LMud_Any key, LMud_Any* value);
 
 LMud_Any LMud_Frame_GetRegister(struct LMud_Frame* self, LMud_Size index);
 void     LMud_Frame_SetRegister(struct LMud_Frame* self, LMud_Size index, LMud_Any value);

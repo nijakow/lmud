@@ -99,16 +99,49 @@ bool LMud_Frame_HasExtraArguments(struct LMud_Frame* self)
     return LMud_Frame_RemainingExtraArgumentCount(self) > 0;
 }
 
-bool LMud_Frame_TakeExtraArgument(struct LMud_Frame* self, LMud_Any* value)
+bool LMud_Frame_PeekExtraArgument(struct LMud_Frame* self, LMud_Any* value)
 {
     if (LMud_Frame_HasExtraArguments(self)) {
-        *value = self->payload[self->ac++];
+        if (value != NULL)
+            *value = self->payload[self->ac];
         return true;
     } else {
         return false;
     }
 }
 
+bool LMud_Frame_TakeExtraArgument(struct LMud_Frame* self, LMud_Any* value)
+{
+    if (LMud_Frame_HasExtraArguments(self)) {
+        if (value != NULL)
+            *value = self->payload[self->ac];
+        self->ac++;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool LMud_Frame_PickKeywordArgument(struct LMud_Frame* self, LMud_Any key, LMud_Any* value)
+{
+    LMud_Size  index;
+
+    for (index = self->ac; index < self->ap; index += 2)
+    {
+        if (LMud_Any_Eq(self->payload[index], key))
+        {
+            if (index + 1 >= self->ap)
+                return false;
+            else {
+                if (value != NULL)
+                    *value = self->payload[index + 1];
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
 
 LMud_Any LMud_Frame_GetRegister(struct LMud_Frame* self, LMud_Size index)
 {

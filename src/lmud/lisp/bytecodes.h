@@ -9,6 +9,7 @@ enum LMud_Bytecode
     LMud_Bytecode_NOP,
     LMud_Bytecode_HAS_ARGUMENT,
     LMud_Bytecode_POP_ARGUMENT,
+    LMud_Bytecode_POP_KEYWORD_ARGUMENT,
     LMud_Bytecode_CONSTANT,
     LMud_Bytecode_LAMBDA,
     LMud_Bytecode_SYMBOL_VARIABLE_LOAD,

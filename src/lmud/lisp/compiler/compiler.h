@@ -159,6 +159,7 @@ bool LMud_Compiler_WriteStoreRegister(struct LMud_Compiler* self, struct LMud_Re
 
 void LMud_Compiler_WriteHasArgument(struct LMud_Compiler* self);
 void LMud_Compiler_WritePopArgument(struct LMud_Compiler* self);
+void LMud_Compiler_WritePopKeywordArgument(struct LMud_Compiler* self, LMud_Any keyword, LMud_CompilerLabel target);
 void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant);
 void LMud_Compiler_WriteLambda(struct LMud_Compiler* self, LMud_Any lambda);
 void LMud_Compiler_WriteSymbolVariableLoad(struct LMud_Compiler* self, LMud_Any symbol);

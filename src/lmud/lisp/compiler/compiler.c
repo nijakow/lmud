@@ -435,12 +435,25 @@ void LMud_Compiler_AddOptionalArgument(struct LMud_Compiler* self, LMud_Any name
 
 void LMud_Compiler_AddKeyArgument(struct LMud_Compiler* self, LMud_Any name, LMud_Any default_value)
 {
-    // TODO: Implement
-    (void) self;
-    (void) name;
-    (void) default_value;
+    struct LMud_Register*  reg;
+    LMud_CompilerLabel     continue_label;
 
     LMud_Compiler_EnableVariadic(self);
+
+    LMud_Compiler_OpenLabel(self, &continue_label);
+
+    {
+        reg = LMud_Compiler_AllocateRegister(self);
+
+        LMud_Compiler_WritePopKeywordArgument(self, name, continue_label); // TODO: Also check for the interned keyword argument
+        LMud_Compiler_Compile(self, default_value);
+        LMud_Compiler_PlaceLabel(self, continue_label);
+
+        LMud_Compiler_BindRegister(self, name, LMud_BindingType_VARIABLE, reg);
+        LMud_Compiler_WriteStoreRegister(self, reg);
+    }
+
+    LMud_Compiler_CloseLabel(self, continue_label);
 }
 
 void LMud_Compiler_AddRestArgument(struct LMud_Compiler* self, LMud_Any name)
@@ -635,6 +648,13 @@ void LMud_Compiler_WriteHasArgument(struct LMud_Compiler* self)
 void LMud_Compiler_WritePopArgument(struct LMud_Compiler* self)
 {
     LMud_Compiler_PushBytecode(self, LMud_Bytecode_POP_ARGUMENT);
+}
+
+void LMud_Compiler_WritePopKeywordArgument(struct LMud_Compiler* self, LMud_Any keyword, LMud_CompilerLabel target)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_POP_KEYWORD_ARGUMENT);
+    LMud_Compiler_PushConstant(self, keyword);
+    LMud_Compiler_WriteLabel(self, target);
 }
 
 void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant)
