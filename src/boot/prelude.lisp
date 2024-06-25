@@ -111,6 +111,11 @@
             (list 'while (list 'consp var)
                (list* 'let (list (list (car info) (list 'car var))) body)
                (list 'setq var (list 'cdr var))))))
+   
+   (defmacro domap (info &rest body)
+      (let ((var  (car  info))
+            (list (cadr info)))
+         (list 'mapcar (list* 'lambda (list var) body) list)))
 
    (defun repl ()
       (while t
