@@ -422,7 +422,7 @@ void LMud_Builtin_Denominator(struct LMud_Fiber* fiber, LMud_Any* arguments, LMu
     LMud_Fiber_SetAccumulator(fiber, result);
 }
 
-void LMud_Builtin_NumericEqual(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+static void LMud_Builtin_NumericComparison(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count, bool (*comparison)(struct LMud_Lisp*, LMud_Any, LMud_Any))
 {
     LMud_Any   value;
     LMud_Size  index;
@@ -434,14 +434,41 @@ void LMud_Builtin_NumericEqual(struct LMud_Fiber* fiber, LMud_Any* arguments, LM
 
     for (index = 1; index < argument_count; index++)
     {
-        if (!LMud_Lisp_NumericEqual(fiber->lisp, value, arguments[index]))
+        if (!comparison(fiber->lisp, value, arguments[index]))
         {
             LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
             return;
         }
+
+        value = arguments[index];
     }
 
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_T(fiber->lisp));
+}
+
+void LMud_Builtin_NumericEqual(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Builtin_NumericComparison(fiber, arguments, argument_count, LMud_Lisp_NumericEqual);
+}
+
+void LMud_Builtin_NumericLess(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Builtin_NumericComparison(fiber, arguments, argument_count, LMud_Lisp_NumericLess);
+}
+
+void LMud_Builtin_NumericLessEqual(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Builtin_NumericComparison(fiber, arguments, argument_count, LMud_Lisp_NumericLessEqual);
+}
+
+void LMud_Builtin_NumericGreater(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Builtin_NumericComparison(fiber, arguments, argument_count, LMud_Lisp_NumericGreater);
+}
+
+void LMud_Builtin_NumericGreaterEqual(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Builtin_NumericComparison(fiber, arguments, argument_count, LMud_Lisp_NumericGreaterEqual);
 }
 
 void LMud_Builtin_Plus(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -595,6 +622,10 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "NUMERATOR", LMud_Builtin_Numerator);
     LMud_Lisp_InstallBuiltin(lisp, "DENOMINATOR", LMud_Builtin_Denominator);
     LMud_Lisp_InstallBuiltin(lisp, "=", LMud_Builtin_NumericEqual);
+    LMud_Lisp_InstallBuiltin(lisp, "<", LMud_Builtin_NumericLess);
+    LMud_Lisp_InstallBuiltin(lisp, "<=", LMud_Builtin_NumericLessEqual);
+    LMud_Lisp_InstallBuiltin(lisp, ">", LMud_Builtin_NumericGreater);
+    LMud_Lisp_InstallBuiltin(lisp, ">=", LMud_Builtin_NumericGreaterEqual);
     LMud_Lisp_InstallBuiltin(lisp, "+", LMud_Builtin_Plus);
     LMud_Lisp_InstallBuiltin(lisp, "-", LMud_Builtin_Minus);
     LMud_Lisp_InstallBuiltin(lisp, "*", LMud_Builtin_Multiply);
