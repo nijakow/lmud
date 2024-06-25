@@ -1,4 +1,6 @@
 
+#include <lmud/util/memory.h>
+
 #include "utf8.h"
 
 
@@ -106,6 +108,17 @@ void LMud_Utf8_Decoder_Push(struct LMud_Utf8_Decoder* self, char byte)
     }
 }
 
+bool LMud_Utf8_Decoder_GetRune(struct LMud_Utf8_Decoder* self, LMud_Rune* rune)
+{
+    if (LMud_Utf8_Decoder_IsComplete(self))
+    {
+        *rune = self->current_rune;
+        return true;
+    }
+
+    return false;
+}
+
 
 LMud_Rune LMud_Rune_FromChar(char byte)
 {
@@ -144,4 +157,53 @@ LMud_Rune LMud_Utf8_LowerCase(LMud_Rune rune)
     }
 
     return rune;
+}
+
+bool LMud_Rune_ByName(const char* name, LMud_Rune* rune)
+{
+    struct LMud_Utf8_Decoder  decoder;
+    char*                     ptr;
+    LMud_Rune                 result;
+    bool                      success;
+
+    ptr     = (char*) name;
+    success = true;
+
+    if (LMud_CStr_EqualsIgnoreCase(ptr, "space"))
+        result = ' ';
+    else if (LMud_CStr_EqualsIgnoreCase(ptr, "newline"))
+        result = '\n';
+    else if (LMud_CStr_EqualsIgnoreCase(ptr, "return"))
+        result = '\r';
+    else if (LMud_CStr_EqualsIgnoreCase(ptr, "tab"))
+        result = '\t';
+    else {
+        LMud_Utf8_Decoder_Create(&decoder);
+        {
+            while (*ptr != '\0' && !LMud_Utf8_Decoder_IsComplete(&decoder))
+            {
+                LMud_Utf8_Decoder_Push(&decoder, *ptr);
+                ptr++;
+            }
+
+            success = LMud_Utf8_Decoder_GetRune(&decoder, &result) && (*ptr == '\0');
+        }
+        LMud_Utf8_Decoder_Destroy(&decoder);
+    }
+
+    *rune = result;
+
+    return success;
+}
+
+const char* LMud_Rune_Name(LMud_Rune rune)
+{
+    switch (rune)
+    {
+        case ' ':  return "Space";
+        case '\n': return "Newline";
+        case '\r': return "Return";
+        case '\t': return "Tab";
+        default:   return NULL;
+    }
 }

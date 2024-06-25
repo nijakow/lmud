@@ -32,6 +32,22 @@ LMud_Size LMud_CStr_Length(const char* str)
     else             return strlen(str);
 }
 
+bool LMud_CStr_Equals(const char* a, const char* b)
+{
+    if (a == NULL && b == NULL) return true;
+    if (a == NULL || b == NULL) return false;
+
+    return strcmp(a, b) == 0;
+}
+
+bool LMud_CStr_EqualsIgnoreCase(const char* a, const char* b)
+{
+    if (a == NULL && b == NULL) return true;
+    if (a == NULL || b == NULL) return false;
+
+    return strcasecmp(a, b) == 0;
+}
+
 char* LMud_Strdup(const char* str)
 {
     return strdup(str);

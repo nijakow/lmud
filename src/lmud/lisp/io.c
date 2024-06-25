@@ -1,6 +1,8 @@
 
 #include <lmud/lisp/lisp.h>
+#include <lmud/util/memory.h>
 #include <lmud/util/stringbuilder.h>
+#include <lmud/util/utf8.h>
 
 #include "io.h"
 
@@ -72,22 +74,19 @@ void LMud_Lisp_PrintBytes(struct LMud_Lisp* lisp, struct LMud_Bytes* bytes, FILE
 void LMud_Lisp_PrintCharacter(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool escaped)
 {
     struct LMud_Utf8_Encoder  encoder;
+    const char*               generic_name;
 
     (void) lisp;
 
     if (escaped) {
-        fprintf(stream, "#\\");
-        switch (LMud_Any_AsCharacter(object))
-        {
-            case '\n': fprintf(stream, "Newline"); break;
-            case '\r': fprintf(stream, "Return"); break;
-            case '\t': fprintf(stream, "Tab"); break;
-            case ' ':  fprintf(stream, "Space"); break;
-            default:
-                LMud_Utf8_Encoder_Create(&encoder, LMud_Any_AsCharacter(object));
-                fprintf(stream, "%s", LMud_Utf8_Encoder_AsString(&encoder));
-                LMud_Utf8_Encoder_Destroy(&encoder);
-                break;
+        generic_name = LMud_Rune_Name(LMud_Any_AsCharacter(object));
+
+        if (generic_name != NULL)
+            fprintf(stream, "#\\%s", generic_name);
+        else {
+            LMud_Utf8_Encoder_Create(&encoder, LMud_Any_AsCharacter(object));
+            fprintf(stream, "#\\%s", LMud_Utf8_Encoder_AsString(&encoder));
+            LMud_Utf8_Encoder_Destroy(&encoder);
         }
     } else {
         LMud_Utf8_Encoder_Create(&encoder, LMud_Any_AsCharacter(object));
@@ -247,6 +246,19 @@ bool LMud_Lisp_ReadString(struct LMud_Lisp* lisp, struct LMud_InputStream* strea
     return true;
 }
 
+void LMud_Lisp_ReadUntilBreakingChar(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, struct LMud_StringBuilder* builder)
+{
+    (void) lisp;
+
+    while (!LMud_InputStream_Eof(stream))
+    {
+        if (LMud_Lisp_Read_IsBreakingChar(LMud_InputStream_Get(stream)))
+            break;
+
+        LMud_StringBuilder_AppendChar(builder, LMud_InputStream_Read(stream));
+    }
+}
+
 bool LMud_Lisp_ReadAtom(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMud_Any* result)
 {
     char      buffer[LMud_SYMBOL_NAME_LENGTH + 1];
@@ -284,6 +296,29 @@ bool LMud_Lisp_ReadAtom(struct LMud_Lisp* lisp, struct LMud_InputStream* stream,
     return true;
 }
 
+bool LMud_Lisp_ReadCharacter(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMud_Any* result)
+{
+    struct LMud_StringBuilder  builder;
+    LMud_Rune                  rune;
+    char*                      ptr;
+    bool                       success;
+
+    success = false;
+
+    LMud_StringBuilder_Create(&builder);
+    {
+        LMud_Lisp_ReadUntilBreakingChar(lisp, stream, &builder);
+        ptr = (char*) LMud_StringBuilder_GetStatic(&builder);
+
+        success = LMud_Rune_ByName(ptr, &rune);
+    }
+    LMud_StringBuilder_Destroy(&builder);
+
+    *result = LMud_Any_FromCharacter(rune);
+
+    return success;
+}
+
 bool LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMud_Any* result)
 {
     LMud_InputStream_SkipIf(stream, &LMud_Lisp_Read_IsWhitespace);
@@ -304,6 +339,8 @@ bool LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMu
             *result = LMud_Lisp_Quote(lisp, *result);
             return true;
         }
+    } else if (LMud_InputStream_CheckStr(stream, "#\\")) {
+        return LMud_Lisp_ReadCharacter(lisp, stream, result);
     } else if (LMud_InputStream_CheckStr(stream, "\"")) {
         return LMud_Lisp_ReadString(lisp, stream, result);
     } else if (LMud_InputStream_CheckStr(stream, "(")) {

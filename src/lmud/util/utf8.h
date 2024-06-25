@@ -34,6 +34,8 @@ void LMud_Utf8_Decoder_Destroy(struct LMud_Utf8_Decoder* self);
 bool LMud_Utf8_Decoder_IsComplete(struct LMud_Utf8_Decoder* self);
 void LMud_Utf8_Decoder_Push(struct LMud_Utf8_Decoder* self, char byte);
 
+bool LMud_Utf8_Decoder_GetRune(struct LMud_Utf8_Decoder* self, LMud_Rune* rune);
+
 
 LMud_Rune    LMud_Rune_FromChar(char byte);
 LMud_Rune    LMud_Rune_FromInteger(LMud_Integer value);
@@ -42,3 +44,6 @@ LMud_Integer LMud_Rune_AsInteger(LMud_Rune rune);
 
 LMud_Rune LMud_Utf8_UpperCase(LMud_Rune rune);
 LMud_Rune LMud_Utf8_LowerCase(LMud_Rune rune);
+
+bool        LMud_Rune_ByName(const char* name, LMud_Rune* rune);
+const char* LMud_Rune_Name(LMud_Rune rune);
