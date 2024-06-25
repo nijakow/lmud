@@ -71,7 +71,12 @@ void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_SymbolTable* table
     self->function = function;
     self->macro    = macro;
 
-    LMud_Symbol_Link(self, table);
+    self->gensym   = false;
+
+    if (table != NULL)
+    {
+        LMud_Symbol_Link(self, table);
+    }
 }
 
 void LMud_Symbol_Destroy(struct LMud_Symbol* self)
@@ -109,6 +114,16 @@ void LMud_Symbol_LinkIntoList(struct LMud_Symbol* self, struct LMud_Symbol** lis
 void LMud_Symbol_Link(struct LMud_Symbol* self, struct LMud_SymbolTable* table)
 {
     LMud_Symbol_LinkIntoList(self, &table->symbols);
+}
+
+bool LMud_Symbol_IsGensym(struct LMud_Symbol* self)
+{
+    return self->gensym;
+}
+
+void LMud_Symbol_MakeGensym(struct LMud_Symbol* self)
+{
+    self->gensym = true;
 }
 
 const char* LMud_Symbol_Name(struct LMud_Symbol* self)

@@ -70,6 +70,24 @@
                 (cons 'progn (cdar clauses))
                 (cons 'cond (cdr clauses)))
           nil))
+   
+   (defmacro and (&rest args)
+      (if args
+          (if (cdr args)
+              (list 'if (car args) (cons 'and (cdr args)) nil)
+              (car args))
+          t))
+   
+   (defmacro or (&rest args)
+      (if args
+          (if (cdr args)
+              (let ((temp (gensym)))
+                 (list 'let (list (list temp (car args)))
+                    (list 'if temp temp (cons 'or (cdr args)))))
+              (car args))
+          nil))
+
+   (defun not (e) (if e nil t))
 
    (defun repl ()
       (while t

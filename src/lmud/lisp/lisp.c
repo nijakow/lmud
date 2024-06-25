@@ -250,6 +250,11 @@ LMud_Any LMud_Lisp_InternUpcase(struct LMud_Lisp* self, const char* name)
     return result;
 }
 
+LMud_Any LMud_Lisp_Gensym(struct LMud_Lisp* self)
+{
+    return LMud_Any_FromPointer(LMud_Objects_Gensym(&self->objects));
+}
+
 
 LMud_Any LMud_Lisp_Car(struct LMud_Lisp* self, LMud_Any value)
 {

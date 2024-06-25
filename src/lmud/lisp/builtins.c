@@ -78,6 +78,16 @@ void LMud_Builtin_Symbolp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Si
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsSymbol(fiber->lisp, arguments[0])));
 }
 
+void LMud_Builtin_Gensym(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) arguments;
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Gensym(fiber->lisp));
+}
+
 void LMud_Builtin_SymbolValue(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     /*
@@ -501,6 +511,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "APPLY", LMud_Builtin_Apply);
     LMud_Lisp_InstallBuiltin(lisp, "CONSP", LMud_Builtin_Consp);
     LMud_Lisp_InstallBuiltin(lisp, "SYMBOLP", LMud_Builtin_Symbolp);
+    LMud_Lisp_InstallBuiltin(lisp, "GENSYM", LMud_Builtin_Gensym);
     LMud_Lisp_InstallBuiltin(lisp, "SYMBOL-VALUE", LMud_Builtin_SymbolValue);
     LMud_Lisp_InstallBuiltin(lisp, "SET-SYMBOL-VALUE", LMud_Builtin_SetSymbolValue);
     LMud_Lisp_InstallBuiltin(lisp, "SYMBOL-FUNCTION", LMud_Builtin_SymbolFunction);

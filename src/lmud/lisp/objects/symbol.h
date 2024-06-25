@@ -30,6 +30,8 @@ struct LMud_Symbol
     LMud_Any             value;
     LMud_Any             function;
     LMud_Any             macro;
+
+    bool                 gensym;
 };
 
 void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_SymbolTable* table, LMud_Any name, LMud_Any value, LMud_Any function, LMud_Any macro);
@@ -38,6 +40,9 @@ void LMud_Symbol_Destroy(struct LMud_Symbol* self);
 void LMud_Symbol_Unlink(struct LMud_Symbol* self);
 void LMud_Symbol_LinkIntoList(struct LMud_Symbol* self, struct LMud_Symbol** list);
 void LMud_Symbol_Link(struct LMud_Symbol* self, struct LMud_SymbolTable* table);
+
+bool LMud_Symbol_IsGensym(struct LMud_Symbol* self);
+void LMud_Symbol_MakeGensym(struct LMud_Symbol* self);
 
 const char* LMud_Symbol_Name(struct LMud_Symbol* self);
 

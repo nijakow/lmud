@@ -91,7 +91,11 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
                 fprintf(stream, "%s", ((struct LMud_String*) pointer)->chars);
             }
         } else if (LMud_Lisp_IsSymbolPointer(lisp, pointer)) {
-            LMud_Lisp_Print(lisp, ((struct LMud_Symbol*) pointer)->name, stream, false);
+            if (LMud_Symbol_IsGensym((struct LMud_Symbol*) pointer)) {
+                fprintf(stream, "#<GENSYM %p>", pointer);
+            } else {
+                LMud_Lisp_Print(lisp, ((struct LMud_Symbol*) pointer)->name, stream, false);
+            }
         } else if (LMud_Lisp_IsFunctionPointer(lisp, pointer)) {
             fprintf(stream, "#<BYTE-COMPILED-FUNCTION %p :BYTECODES ", pointer);
             LMud_Lisp_Print(lisp, LMud_Function_Bytecodes(pointer), stream, true);

@@ -76,3 +76,4 @@ struct LMud_String* LMud_Objects_String(struct LMud_Objects* self, const char* t
 
 struct LMud_Symbol* LMud_Objects_PrimitiveIntern(struct LMud_Objects* self, const char* name);
 struct LMud_Symbol* LMud_Objects_Intern(struct LMud_Objects* self, const char* name);
+struct LMud_Symbol* LMud_Objects_Gensym(struct LMud_Objects* self);

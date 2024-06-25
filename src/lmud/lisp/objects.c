@@ -1,4 +1,5 @@
 
+#include <lmud/lisp/lisp.h>
 #include <lmud/util/memory.h>
 
 #include "objects.h"
@@ -272,4 +273,27 @@ struct LMud_Symbol* LMud_Objects_PrimitiveIntern(struct LMud_Objects* self, cons
 struct LMud_Symbol* LMud_Objects_Intern(struct LMud_Objects* self, const char* name)
 {
     return LMud_Objects_PrimitiveIntern(self, name);
+}
+
+struct LMud_Symbol* LMud_Objects_Gensym(struct LMud_Objects* self)
+{
+    struct LMud_Symbol*  symbol;
+
+    symbol = LMud_Objects_Allocate(self, &self->types.symbol, 0);
+
+    if (symbol != NULL)
+    {
+        LMud_Symbol_Create(
+            symbol,
+            NULL,
+            LMud_Lisp_Nil(self->lisp),
+            LMud_Lisp_Nil(self->lisp),
+            LMud_Lisp_Nil(self->lisp),
+            LMud_Lisp_Nil(self->lisp)
+        );
+
+        LMud_Symbol_MakeGensym(symbol);
+    }
+
+    return symbol;
 }
