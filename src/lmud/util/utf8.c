@@ -112,7 +112,8 @@ bool LMud_Utf8_Decoder_GetRune(struct LMud_Utf8_Decoder* self, LMud_Rune* rune)
 {
     if (LMud_Utf8_Decoder_IsComplete(self))
     {
-        *rune = self->current_rune;
+        if (rune != NULL)
+            *rune = self->current_rune;
         return true;
     }
 

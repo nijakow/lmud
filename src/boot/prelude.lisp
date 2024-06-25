@@ -109,9 +109,11 @@
 
    (defmacro dotimes (info &rest body)
       (let ((var  (car  info))
-            (n    (cadr info)))
-         (list 'let (list (list var 0))
-            (list 'until (list '= var n)
+            (n    (cadr info))
+            (nv   (gensym)))
+         (list 'let (list (list var 0)
+                          (list nv  n))
+            (list 'until (list '= var nv)
                (list* 'progn body)
                (list 'setq var (list '+ var 1))))))
 

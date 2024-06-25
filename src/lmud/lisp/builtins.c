@@ -266,6 +266,8 @@ void LMud_Builtin_Length(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
         LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(LMud_Array_GetSize(LMud_Any_AsPointer(sequence))));
     else if (LMud_Lisp_IsBytes(fiber->lisp, sequence))
         LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(LMud_Bytes_GetSize(LMud_Any_AsPointer(sequence))));
+    else if (LMud_Lisp_IsString(fiber->lisp, sequence))
+        LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(LMud_String_RuneLength(LMud_Any_AsPointer(sequence))));
     else if (LMud_Lisp_IsCons(fiber->lisp, sequence))
     {
         length = 0;

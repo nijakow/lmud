@@ -322,10 +322,12 @@ bool LMud_Lisp_Nth(struct LMud_Lisp* self, LMud_Any value, LMud_Size index, LMud
 bool LMud_Lisp_Aref(struct LMud_Lisp* self, LMud_Any object, LMud_Any index, LMud_Any* result)
 {
     LMud_Size  index_value;
+    LMud_Rune  rune;
 
     if (!LMud_Any_IsInteger(index))
         return false;
     
+    *result     = LMud_Lisp_Nil(self);
     index_value = LMud_Any_AsInteger(index);
 
     if (LMud_Lisp_IsArray(self, object)) {
@@ -334,8 +336,12 @@ bool LMud_Lisp_Aref(struct LMud_Lisp* self, LMud_Any object, LMud_Any index, LMu
     } else if (LMud_Lisp_IsBytes(self, object)) {
         *result = LMud_Bytes_Aref(LMud_Any_AsPointer(object), index_value);
         return true;
+    } else if (LMud_Lisp_IsString(self, object)) {
+        if (!LMud_String_RuneAt(LMud_Any_AsPointer(object), index_value, &rune))
+            return false;
+        *result = LMud_Any_FromCharacter(rune);
+        return true;
     } else {
-        *result = LMud_Lisp_Nil(self);
         return false;
     }
 }
