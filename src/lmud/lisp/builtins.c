@@ -1,6 +1,7 @@
 
 #include <lmud/lisp/objects/builtin.h>
 #include <lmud/lisp/runtime/fiber.h>
+#include <lmud/lisp/math.h>
 
 #include "builtins.h"
 
