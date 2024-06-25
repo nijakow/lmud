@@ -75,21 +75,26 @@ void LMud_Lisp_PrintCharacter(struct LMud_Lisp* lisp, LMud_Any object, FILE* str
 {
     struct LMud_Utf8_Encoder  encoder;
     const char*               generic_name;
+    LMud_Rune                 rune;
 
     (void) lisp;
 
+    rune = LMud_Any_AsCharacter(object);
+
     if (escaped) {
-        generic_name = LMud_Rune_Name(LMud_Any_AsCharacter(object));
+        generic_name = LMud_Rune_Name(rune);
 
         if (generic_name != NULL)
             fprintf(stream, "#\\%s", generic_name);
+        else if (!LMud_Rune_IsPrintable(rune))
+            fprintf(stream, "#\\U+%04X", rune);
         else {
-            LMud_Utf8_Encoder_Create(&encoder, LMud_Any_AsCharacter(object));
+            LMud_Utf8_Encoder_Create(&encoder, rune);
             fprintf(stream, "#\\%s", LMud_Utf8_Encoder_AsString(&encoder));
             LMud_Utf8_Encoder_Destroy(&encoder);
         }
     } else {
-        LMud_Utf8_Encoder_Create(&encoder, LMud_Any_AsCharacter(object));
+        LMud_Utf8_Encoder_Create(&encoder, rune);
         fprintf(stream, "%s", LMud_Utf8_Encoder_AsString(&encoder));
         LMud_Utf8_Encoder_Destroy(&encoder);
     }

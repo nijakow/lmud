@@ -47,3 +47,5 @@ LMud_Rune LMud_Utf8_LowerCase(LMud_Rune rune);
 
 bool        LMud_Rune_ByName(const char* name, LMud_Rune* rune);
 const char* LMud_Rune_Name(LMud_Rune rune);
+
+bool        LMud_Rune_IsPrintable(LMud_Rune rune);

@@ -207,3 +207,8 @@ const char* LMud_Rune_Name(LMud_Rune rune)
         default:   return NULL;
     }
 }
+
+bool LMud_Rune_IsPrintable(LMud_Rune rune)
+{
+    return (rune >= 0x20 && rune <= 0x7E) || (rune >= 0xA0);
+}
