@@ -21,11 +21,9 @@
 
 #define LMud_SYMBOL_NAME_LENGTH 1023
 
-
-typedef size_t LMud_Size;
-
-typedef int LMud_Integer;
-
+typedef size_t        LMud_Size;
+typedef int           LMud_Integer;
+typedef unsigned int  LMud_Rune;
 
 struct LMud_Lisp;
 struct LMud_Object;
