@@ -430,11 +430,52 @@ bool LMud_Lisp_RatioOrInteger(struct LMud_Lisp* self, LMud_Any numerator, LMud_A
     return true;
 }
 
+bool LMud_Lisp_Add2_Ratios(struct LMud_Lisp* self, LMud_Any n1, LMud_Any d1, LMud_Any n2, LMud_Any d2, LMud_Any* result)
+{
+    LMud_Any  numerator;
+    LMud_Any  denominator;
+    LMud_Any  adjusted_n1;
+    LMud_Any  adjusted_n2;
+
+    return LMud_Lisp_Mul2(self, d1, d2, &denominator)
+        && LMud_Lisp_Mul2(self, n1, d2, &adjusted_n1)
+        && LMud_Lisp_Mul2(self, n2, d1, &adjusted_n2)
+        && LMud_Lisp_Add2(self, adjusted_n1, adjusted_n2, &numerator)
+        && LMud_Lisp_RatioOrInteger(self, numerator, denominator, result);
+}
+
 bool LMud_Lisp_Add2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
 {
     if (LMud_Any_IsInteger(a) && LMud_Any_IsInteger(b)) {
         *result = LMud_Any_FromInteger(LMud_Any_AsInteger(a) + LMud_Any_AsInteger(b));
         return true;
+    } else if (LMud_Lisp_IsRatio(self, a) && LMud_Any_IsInteger(b)) {
+        return LMud_Lisp_Add2_Ratios(
+                    self,
+                    LMud_Ratio_Numerator(LMud_Any_AsPointer(a)),
+                    LMud_Ratio_Denominator(LMud_Any_AsPointer(a)),
+                    b,
+                    LMud_Any_FromInteger(1),
+                    result
+        );
+    } else if (LMud_Any_IsInteger(a) && LMud_Lisp_IsRatio(self, b)) {
+        return LMud_Lisp_Add2_Ratios(
+                    self,
+                    a,
+                    LMud_Any_FromInteger(1),
+                    LMud_Ratio_Numerator(LMud_Any_AsPointer(b)),
+                    LMud_Ratio_Denominator(LMud_Any_AsPointer(b)),
+                    result
+        );
+    } else if (LMud_Lisp_IsRatio(self, a) && LMud_Lisp_IsRatio(self, b)) {
+        return LMud_Lisp_Add2_Ratios(
+                    self,
+                    LMud_Ratio_Numerator(LMud_Any_AsPointer(a)),
+                    LMud_Ratio_Denominator(LMud_Any_AsPointer(a)),
+                    LMud_Ratio_Numerator(LMud_Any_AsPointer(b)),
+                    LMud_Ratio_Denominator(LMud_Any_AsPointer(b)),
+                    result
+        );
     } else {
         *result = LMud_Lisp_Nil(self);
         return false;
