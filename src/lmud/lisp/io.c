@@ -266,37 +266,22 @@ void LMud_Lisp_ReadUntilBreakingChar(struct LMud_Lisp* lisp, struct LMud_InputSt
 
 bool LMud_Lisp_ReadAtom(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMud_Any* result)
 {
-    char      buffer[LMud_SYMBOL_NAME_LENGTH + 1];
-    char*     ptr;
-    char*     end;
-    char      c;
-    LMud_Any  value;
+    struct LMud_StringBuilder  builder;
+    const char*                ptr;
+    LMud_Any                   value;
 
-    ptr = &buffer[0];
-    end = &buffer[sizeof(buffer) - 1];
-
-    while (!LMud_InputStream_Eof(stream))
+    LMud_StringBuilder_Create(&builder);
     {
-        if (ptr >= end)
-            break;
+        LMud_Lisp_ReadUntilBreakingChar(lisp, stream, &builder);
+        ptr = (char*) LMud_StringBuilder_GetStatic(&builder);
 
-        c = LMud_InputStream_Get(stream);
-
-        if (LMud_Lisp_Read_IsBreakingChar(c))
-            break;
-
-        LMud_InputStream_Advance(stream);
-
-        *(ptr++) = c;
+        if (LMud_Lisp_ParseInt(lisp, ptr, &value)) {
+            *result = value;
+        } else {
+            *result = LMud_Lisp_InternUpcase(lisp, ptr);
+        }
     }
-
-    *(ptr++) = '\0';
-
-    if (LMud_Lisp_ParseInt(lisp, buffer, &value)) {
-        *result = value;
-    } else {
-        *result = LMud_Lisp_InternUpcase(lisp, buffer);
-    }
+    LMud_StringBuilder_Destroy(&builder);
 
     return true;
 }
