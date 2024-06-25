@@ -223,6 +223,56 @@ void LMud_Builtin_Compile(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Si
 }
 
 
+void LMud_Builtin_Numerator(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any  result;
+
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+
+    result = LMud_Lisp_Numerator(fiber->lisp, arguments[0]);
+
+    LMud_Fiber_SetAccumulator(fiber, result);
+}
+
+void LMud_Builtin_Denominator(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any  result;
+
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+
+    result = LMud_Lisp_Denominator(fiber->lisp, arguments[0]);
+
+    LMud_Fiber_SetAccumulator(fiber, result);
+}
+
+void LMud_Builtin_NumericEqual(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any   value;
+    LMud_Size  index;
+
+    /*
+     * TODO: Check arguments.
+     */
+    value = arguments[0];
+
+    for (index = 1; index < argument_count; index++)
+    {
+        if (!LMud_Lisp_NumericEqual(fiber->lisp, value, arguments[index]))
+        {
+            LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
+            return;
+        }
+    }
+
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_T(fiber->lisp));
+}
+
 void LMud_Builtin_Plus(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     LMud_Any   result;
@@ -355,6 +405,9 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "VECTOR", LMud_Builtin_Vector);
     LMud_Lisp_InstallBuiltin(lisp, "AREF", LMud_Builtin_Aref);
     LMud_Lisp_InstallBuiltin(lisp, "COMPILE", LMud_Builtin_Compile);
+    LMud_Lisp_InstallBuiltin(lisp, "NUMERATOR", LMud_Builtin_Numerator);
+    LMud_Lisp_InstallBuiltin(lisp, "DENOMINATOR", LMud_Builtin_Denominator);
+    LMud_Lisp_InstallBuiltin(lisp, "=", LMud_Builtin_NumericEqual);
     LMud_Lisp_InstallBuiltin(lisp, "+", LMud_Builtin_Plus);
     LMud_Lisp_InstallBuiltin(lisp, "-", LMud_Builtin_Minus);
     LMud_Lisp_InstallBuiltin(lisp, "*", LMud_Builtin_Multiply);

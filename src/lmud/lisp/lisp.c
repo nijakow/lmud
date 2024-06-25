@@ -353,13 +353,35 @@ void LMud_Lisp_InstallBuiltin(struct LMud_Lisp* self, const char* name, LMud_Bui
 }
 
 
-bool LMud_Lisp_NumericEqual(struct LMud_Lisp* self, LMud_Any a, LMud_Any b)
+LMud_Any LMud_Lisp_Numerator(struct LMud_Lisp* self, LMud_Any value)
+{
+    if (LMud_Lisp_IsRatio(self, value))
+        return LMud_Ratio_Numerator(LMud_Any_AsPointer(value));
+    else
+        return value;
+}
+
+LMud_Any LMud_Lisp_Denominator(struct LMud_Lisp* self, LMud_Any value)
+{
+    if (LMud_Lisp_IsRatio(self, value))
+        return LMud_Ratio_Denominator(LMud_Any_AsPointer(value));
+    else
+        return LMud_Any_FromInteger(1);
+}
+
+bool LMud_Lisp_IntegerEqual(struct LMud_Lisp* self, LMud_Any a, LMud_Any b)
 {
     (void) self;
     if (LMud_Any_IsInteger(a) && LMud_Any_IsInteger(b))
         return LMud_Any_AsInteger(a) == LMud_Any_AsInteger(b);
     else
         return false;
+}
+
+bool LMud_Lisp_NumericEqual(struct LMud_Lisp* self, LMud_Any a, LMud_Any b)
+{
+    return LMud_Lisp_IntegerEqual(self, LMud_Lisp_Numerator(self, a), LMud_Lisp_Numerator(self, b))
+        && LMud_Lisp_IntegerEqual(self, LMud_Lisp_Denominator(self, a), LMud_Lisp_Denominator(self, b));
 }
 
 bool LMud_Lisp_Gcd(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
@@ -461,6 +483,22 @@ bool LMud_Lisp_IntegerDiv2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_
     return true;
 }
 
+bool LMud_Lisp_IntegerNegate(struct LMud_Lisp* self, LMud_Any a, LMud_Any* result)
+{
+    LMud_Integer  a_value;
+
+    (void) self;
+
+    if (!LMud_Any_IsInteger(a))
+        return false;
+
+    a_value = LMud_Any_AsInteger(a);
+
+    *result = LMud_Any_FromInteger(-a_value);
+
+    return true;
+}
+
 bool LMud_Lisp_RatioOrInteger(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator, LMud_Any* result)
 {
     LMud_Any  gcd;
@@ -475,6 +513,12 @@ bool LMud_Lisp_RatioOrInteger(struct LMud_Lisp* self, LMud_Any numerator, LMud_A
      */
     LMud_Lisp_IntegerDiv2(self, numerator, gcd, &new_numerator);
     LMud_Lisp_IntegerDiv2(self, denominator, gcd, &new_denominator);
+
+    // TODO
+    if (LMud_Any_IsInteger(new_denominator) && LMud_Any_AsInteger(new_denominator) < 0) {
+        LMud_Lisp_IntegerNegate(self, new_numerator, &new_numerator);
+        LMud_Lisp_IntegerNegate(self, new_denominator, &new_denominator);
+    }
 
     if (LMud_Lisp_NumericEqual(self, new_denominator, LMud_Any_FromInteger(1))) {
         *result = new_numerator;

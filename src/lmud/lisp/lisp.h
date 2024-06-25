@@ -82,7 +82,11 @@ bool LMud_Lisp_Compile(struct LMud_Lisp* self, LMud_Any expression, LMud_Any* re
 
 void LMud_Lisp_InstallBuiltin(struct LMud_Lisp* self, const char* name, LMud_BuiltinFunction function);
 
+
+LMud_Any LMud_Lisp_Numerator(struct LMud_Lisp* self, LMud_Any value);
+LMud_Any LMud_Lisp_Denominator(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_NumericEqual(struct LMud_Lisp* self, LMud_Any a, LMud_Any b);
+
 bool LMud_Lisp_Gcd(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result);
 bool LMud_Lisp_RatioOrInteger(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator, LMud_Any* result);
 bool LMud_Lisp_Add2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result);
