@@ -90,6 +90,11 @@ bool LMud_Lisp_IsConsPointer(struct LMud_Lisp* self, void* object)
     return LMud_Types_IsCons(LMud_Lisp_Types(self), object);
 }
 
+bool LMud_Lisp_IsCustomPointer(struct LMud_Lisp* self, void* object)
+{
+    return LMud_Types_IsCustom(LMud_Lisp_Types(self), object);
+}
+
 bool LMud_Lisp_IsFunctionPointer(struct LMud_Lisp* self, void* object)
 {
     return LMud_Types_IsFunction(LMud_Lisp_Types(self), object);
@@ -139,6 +144,11 @@ bool LMud_Lisp_IsClosure(struct LMud_Lisp* self, LMud_Any value)
 bool LMud_Lisp_IsCons(struct LMud_Lisp* self, LMud_Any value)
 {
     return LMud_Any_IsPointer(value) && LMud_Lisp_IsConsPointer(self, LMud_Any_AsPointer(value));
+}
+
+bool LMud_Lisp_IsCustom(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Any_IsPointer(value) && LMud_Lisp_IsCustomPointer(self, LMud_Any_AsPointer(value));
 }
 
 bool LMud_Lisp_IsFunction(struct LMud_Lisp* self, LMud_Any value)
@@ -224,6 +234,11 @@ LMud_Any LMud_Lisp_Closure(struct LMud_Lisp* self, struct LMud_Function* functio
 LMud_Any LMud_Lisp_Cons(struct LMud_Lisp* self, LMud_Any car, LMud_Any cdr)
 {
     return LMud_Any_FromPointer(LMud_Objects_Cons(&self->objects, car, cdr));
+}
+
+LMud_Any LMud_Lisp_Custom(struct LMud_Lisp* self, LMud_Any meta, LMud_Any* slots, LMud_Size size)
+{
+    return LMud_Any_FromPointer(LMud_Objects_Custom(&self->objects, meta, slots, size));
 }
 
 LMud_Any LMud_Lisp_Function(struct LMud_Lisp* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants)

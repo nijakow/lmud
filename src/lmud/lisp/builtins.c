@@ -254,6 +254,60 @@ void LMud_Builtin_Rplacd(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
     LMud_Fiber_SetAccumulator(fiber, arguments[1]);
 }
 
+void LMud_Builtin_Customp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsCustom(fiber->lisp, arguments[0])));
+}
+
+void LMud_Builtin_MakeCustom(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check argument count, must be at least 1.
+     */
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Custom(fiber->lisp, arguments[0], &arguments[1], argument_count - 1));
+}
+
+void LMud_Builtin_CustomMeta(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Custom_Meta(LMud_Any_AsPointer(arguments[0])));
+}
+
+void LMud_Builtin_CustomSize(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(LMud_Custom_Size(LMud_Any_AsPointer(arguments[0]))));
+}
+
+void LMud_Builtin_CustomAt(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Custom_At(LMud_Any_AsPointer(arguments[0]), LMud_Any_AsInteger(arguments[1])));
+}
+
+void LMud_Builtin_CustomSet(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Custom_Set(LMud_Any_AsPointer(arguments[0]), LMud_Any_AsInteger(arguments[1]), arguments[2]);
+    LMud_Fiber_SetAccumulator(fiber, arguments[2]);
+}
+
 void LMud_Builtin_Eq(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     LMud_Size  index;
@@ -701,6 +755,12 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "CDR", LMud_Builtin_Cdr);
     LMud_Lisp_InstallBuiltin(lisp, "RPLACA", LMud_Builtin_Rplaca);
     LMud_Lisp_InstallBuiltin(lisp, "RPLACD", LMud_Builtin_Rplacd);
+    LMud_Lisp_InstallBuiltin(lisp, "%CUSTOMP", LMud_Builtin_Customp);
+    LMud_Lisp_InstallBuiltin(lisp, "%MAKE-CUSTOM", LMud_Builtin_MakeCustom);
+    LMud_Lisp_InstallBuiltin(lisp, "%CUSTOM-META", LMud_Builtin_CustomMeta);
+    LMud_Lisp_InstallBuiltin(lisp, "%CUSTOM-SIZE", LMud_Builtin_CustomSize);
+    LMud_Lisp_InstallBuiltin(lisp, "%CUSTOM-AT", LMud_Builtin_CustomAt);
+    LMud_Lisp_InstallBuiltin(lisp, "%CUSTOM-SET", LMud_Builtin_CustomSet);
     LMud_Lisp_InstallBuiltin(lisp, "EQ", LMud_Builtin_Eq);
     LMud_Lisp_InstallBuiltin(lisp, "LIST", LMud_Builtin_List);
     LMud_Lisp_InstallBuiltin(lisp, "LIST*", LMud_Builtin_ListStar);

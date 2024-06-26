@@ -12,6 +12,7 @@ void LMud_Types_Create(struct LMud_Types* self)
     self->bytes.base_size    = sizeof(struct LMud_Bytes);
     self->closure.base_size  = sizeof(struct LMud_Closure);
     self->cons.base_size     = sizeof(struct LMud_Cons);
+    self->custom.base_size   = sizeof(struct LMud_Custom);
     self->function.base_size = sizeof(struct LMud_Function);
     self->package.base_size  = sizeof(struct LMud_Package);
     self->ratio.base_size    = sizeof(struct LMud_Ratio);
@@ -47,6 +48,11 @@ bool LMud_Types_IsClosure(struct LMud_Types* self, void* object)
 bool LMud_Types_IsCons(struct LMud_Types* self, void* object)
 {
     return LMud_Type_TypeCheck(&self->cons, object);
+}
+
+bool LMud_Types_IsCustom(struct LMud_Types* self, void* object)
+{
+    return LMud_Type_TypeCheck(&self->custom, object);
 }
 
 bool LMud_Types_IsFunction(struct LMud_Types* self, void* object)
@@ -214,6 +220,20 @@ struct LMud_Cons* LMud_Objects_Cons(struct LMud_Objects* self, LMud_Any car, LMu
     }
 
     return cons;
+}
+
+struct LMud_Custom* LMud_Objects_Custom(struct LMud_Objects* self, LMud_Any meta, LMud_Any* slots, LMud_Size size)
+{
+    struct LMud_Custom*  custom;
+
+    custom = LMud_Objects_Allocate(self, &self->types.custom, size * sizeof(LMud_Any));
+
+    if (custom != NULL)
+    {
+        LMud_Custom_Create(custom, meta, slots, size);
+    }
+
+    return custom;
 }
 
 struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants)

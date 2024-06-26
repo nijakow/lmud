@@ -8,6 +8,7 @@
 #include <lmud/lisp/objects/bytes.h>
 #include <lmud/lisp/objects/closure.h>
 #include <lmud/lisp/objects/cons.h>
+#include <lmud/lisp/objects/custom.h>
 #include <lmud/lisp/objects/function.h>
 #include <lmud/lisp/objects/package.h>
 #include <lmud/lisp/objects/ratio.h>
@@ -22,6 +23,7 @@ struct LMud_Types
     struct LMud_Type     bytes;
     struct LMud_Type     closure;
     struct LMud_Type     cons;
+    struct LMud_Type     custom;
     struct LMud_Type     function;
     struct LMud_Type     package;
     struct LMud_Type     ratio;
@@ -37,6 +39,7 @@ bool LMud_Types_IsBuiltin(struct LMud_Types* self, void* object);
 bool LMud_Types_IsBytes(struct LMud_Types* self, void* object);
 bool LMud_Types_IsClosure(struct LMud_Types* self, void* object);
 bool LMud_Types_IsCons(struct LMud_Types* self, void* object);
+bool LMud_Types_IsCustom(struct LMud_Types* self, void* object);
 bool LMud_Types_IsFunction(struct LMud_Types* self, void* object);
 bool LMud_Types_IsPackage(struct LMud_Types* self, void* object);
 bool LMud_Types_IsRatio(struct LMud_Types* self, void* object);
@@ -59,26 +62,18 @@ struct LMud_Lisp* LMud_Objects_GetLisp(struct LMud_Objects* self);
 
 void* LMud_Objects_Allocate(struct LMud_Objects* self, struct LMud_Type* type, LMud_Size extra);
 
-struct LMud_Array*  LMud_Objects_MakeArray(struct LMud_Objects* self, LMud_Size size, LMud_Any fill);
-struct LMud_Array*  LMud_Objects_MakeArray_FromData(struct LMud_Objects* self, LMud_Size size, LMud_Any* data);
-
-struct LMud_Builtin* LMud_Objects_Builtin(struct LMud_Objects* self, const char* name, LMud_BuiltinFunction function);
-
-struct LMud_Bytes*  LMud_Objects_MakeBytes(struct LMud_Objects* self, LMud_Size size);
-struct LMud_Bytes*  LMud_Objects_MakeBytes_FromData(struct LMud_Objects* self, LMud_Size size, const char* data);
-
-struct LMud_Closure* LMud_Objects_Closure(struct LMud_Objects* self, struct LMud_Function* function, struct LMud_Frame* lexical);
-
-struct LMud_Cons*   LMud_Objects_Cons(struct LMud_Objects* self, LMud_Any car, LMud_Any cdr);
-
+struct LMud_Array*    LMud_Objects_MakeArray(struct LMud_Objects* self, LMud_Size size, LMud_Any fill);
+struct LMud_Array*    LMud_Objects_MakeArray_FromData(struct LMud_Objects* self, LMud_Size size, LMud_Any* data);
+struct LMud_Builtin*  LMud_Objects_Builtin(struct LMud_Objects* self, const char* name, LMud_BuiltinFunction function);
+struct LMud_Bytes*    LMud_Objects_MakeBytes(struct LMud_Objects* self, LMud_Size size);
+struct LMud_Bytes*    LMud_Objects_MakeBytes_FromData(struct LMud_Objects* self, LMud_Size size, const char* data);
+struct LMud_Closure*  LMud_Objects_Closure(struct LMud_Objects* self, struct LMud_Function* function, struct LMud_Frame* lexical);
+struct LMud_Cons*     LMud_Objects_Cons(struct LMud_Objects* self, LMud_Any car, LMud_Any cdr);
+struct LMud_Custom*   LMud_Objects_Custom(struct LMud_Objects* self, LMud_Any meta, LMud_Any* slots, LMud_Size size);
 struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants);
-
-struct LMud_Package* LMud_Objects_Package(struct LMud_Objects* self, LMud_Any name);
-
-struct LMud_Ratio*  LMud_Objects_Ratio(struct LMud_Objects* self, LMud_Any numerator, LMud_Any denominator);
-
-struct LMud_String* LMud_Objects_String(struct LMud_Objects* self, const char* text);
-
-struct LMud_Symbol* LMud_Objects_PrimitiveIntern(struct LMud_Objects* self, struct LMud_Package* package, const char* name);
-struct LMud_Symbol* LMud_Objects_Intern(struct LMud_Objects* self, struct LMud_Package* package, const char* name);
-struct LMud_Symbol* LMud_Objects_Gensym(struct LMud_Objects* self);
+struct LMud_Package*  LMud_Objects_Package(struct LMud_Objects* self, LMud_Any name);
+struct LMud_Ratio*    LMud_Objects_Ratio(struct LMud_Objects* self, LMud_Any numerator, LMud_Any denominator);
+struct LMud_String*   LMud_Objects_String(struct LMud_Objects* self, const char* text);
+struct LMud_Symbol*   LMud_Objects_PrimitiveIntern(struct LMud_Objects* self, struct LMud_Package* package, const char* name);
+struct LMud_Symbol*   LMud_Objects_Intern(struct LMud_Objects* self, struct LMud_Package* package, const char* name);
+struct LMud_Symbol*   LMud_Objects_Gensym(struct LMud_Objects* self);

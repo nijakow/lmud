@@ -195,6 +195,8 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
             fprintf(stream, "⦍PACKAGE :NAME ");
             LMud_Lisp_Print(lisp, LMud_Package_Name((struct LMud_Package*) pointer), stream, true);
             fprintf(stream, "⦎");
+        } else if (LMud_Lisp_IsCustomPointer(lisp, pointer)) {
+            fprintf(stream, "⦍CUSTOM %p⦎", pointer);
         } else {
             fprintf(stream, "⦍UNKNOWN %p⦎", pointer);
         }
