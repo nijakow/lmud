@@ -265,6 +265,7 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->cached.symbol_quote    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "QUOTE");
     self->cached.symbol_function = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FUNCTION");
     self->cached.symbol_lambda   = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LAMBDA");
+    self->cached.symbol_block    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "BLOCK");
     self->cached.symbol_progn    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "PROGN");
     self->cached.symbol_setq     = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "SETQ");
     self->cached.symbol_let      = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LET");
@@ -966,6 +967,25 @@ void LMud_Compiler_CompileSpecialLambda(struct LMud_Compiler* self, LMud_Any arg
     LMud_Compiler_CompileLambda(self, arglist, body);
 }
 
+void LMud_Compiler_CompileSpecialBlock(struct LMud_Compiler* self, LMud_Any arguments)
+{
+    LMud_Any  name;
+    LMud_Any  body;
+
+    /*
+     * TODO: Error if name is not a symbol.
+     */
+
+    name = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
+    body = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arguments);
+
+    LMud_Compiler_PushScope(self);
+    {
+        LMud_Compiler_CompileExpressions(self, body);
+    }
+    LMud_Compiler_PopScope(self);
+}
+
 void LMud_Compiler_CompileSpecialProgn(struct LMud_Compiler* self, LMud_Any arguments)
 {
     LMud_Compiler_CompileExpressions(self, arguments);
@@ -1210,6 +1230,7 @@ void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expre
          if (LMud_Any_Eq(function, self->cached.symbol_quote))    LMud_Compiler_CompileSpecialQuote(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_function)) LMud_Compiler_CompileSpecialFunction(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_lambda))   LMud_Compiler_CompileSpecialLambda(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_block))    LMud_Compiler_CompileSpecialBlock(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_progn))    LMud_Compiler_CompileSpecialProgn(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_setq))     LMud_Compiler_CompileSpecialSetq(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_let))      LMud_Compiler_CompileSpecialLet(self, arguments);

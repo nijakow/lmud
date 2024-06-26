@@ -115,6 +115,7 @@ struct LMud_Compiler
         LMud_Any                    symbol_quote;
         LMud_Any                    symbol_function;
         LMud_Any                    symbol_lambda;
+        LMud_Any                    symbol_block;
         LMud_Any                    symbol_progn;
         LMud_Any                    symbol_setq;
         LMud_Any                    symbol_let;
