@@ -8,15 +8,17 @@
 
 struct LMud_Fiber
 {
-    struct LMud_Lisp*   lisp;
+    struct LMud_Lisp*      lisp;
 
-    struct LMud_Frame*  top;
-    char*               stack;
-    char*               stack_roof;
-    char*               stack_pointer;
+    struct LMud_Frame*     top;
+    char*                  stack;
+    char*                  stack_roof;
+    char*                  stack_pointer;
 
-    LMud_Size           accumulator_count;
-    LMud_Any            accumulator[LMud_Fiber_MAX_ACCUMULATORS];
+    LMud_Size              accumulator_count;
+    LMud_Any               accumulator[LMud_Fiber_MAX_ACCUMULATORS];
+
+    struct LMud_FrameList  floating_frames;
 };
 
 void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp);

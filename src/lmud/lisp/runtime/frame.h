@@ -30,6 +30,7 @@ struct LMud_Frame
     uint8_t                sp;
     uint8_t                ap;
     uint8_t                ac;
+    bool                   in_ship;
     LMud_Any               payload[];
 };
 
@@ -42,6 +43,10 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
 void LMud_Frame_Destroy(struct LMud_Frame* self);
 void LMud_Frame_Move(struct LMud_Frame* self, struct LMud_Frame* location);
 
+bool LMud_Frame_ShouldBeMovedToShip(struct LMud_Frame* self);
+bool LMud_Frame_IsReadyForShipDeletion(struct LMud_Frame* self);
+
+bool LMud_Frame_HasPendingReferences(struct LMud_Frame* self);
 void LMud_Frame_RemoveReference(struct LMud_Frame* self, struct LMud_FrameRef* reference);
 
 LMud_Size LMud_Frame_PayloadSizeInAnys(struct LMud_Frame* self);
@@ -88,3 +93,5 @@ struct LMud_FrameList
 
 void LMud_FrameList_Create(struct LMud_FrameList* self);
 void LMud_FrameList_Destroy(struct LMud_FrameList* self);
+
+struct LMud_FrameShip* LMud_FrameList_Insert(struct LMud_FrameList* self, struct LMud_Frame* frame);

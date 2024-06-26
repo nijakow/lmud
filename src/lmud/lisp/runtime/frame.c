@@ -49,6 +49,7 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
 {
     LMud_Size  index;
 
+    self->references     = NULL;
     self->previous       = previous;
     self->child          = NULL;
     
@@ -59,6 +60,7 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
     self->sp             = function->info.register_count;
     self->ap             = function->info.register_count + function->info.stack_size + extra_argument_count;
     self->ac             = function->info.register_count + function->info.stack_size;
+    self->in_ship        = false;
 
     for (index = 0; index < function->info.fixed_argument_count; ++index)
     {
@@ -99,6 +101,21 @@ void LMud_Frame_Move(struct LMud_Frame* self, struct LMud_Frame* location)
     }
 }
 
+bool LMud_Frame_ShouldBeMovedToShip(struct LMud_Frame* self)
+{
+    return !self->in_ship && self->references != NULL;
+}
+
+bool LMud_Frame_IsReadyForShipDeletion(struct LMud_Frame* self)
+{
+    return self->in_ship && self->references == NULL && self->child == NULL;
+}
+
+bool LMud_Frame_HasPendingReferences(struct LMud_Frame* self)
+{
+    return self->references != NULL;
+}
+
 void LMud_Frame_RemoveReference(struct LMud_Frame* self, struct LMud_FrameRef* reference)
 {
     struct LMud_FrameRef**  current;
@@ -120,6 +137,10 @@ void LMud_Frame_RemoveReference(struct LMud_Frame* self, struct LMud_FrameRef* r
      * TODO: If the reference count drops to zero and if we are heap-allocated,
      *       we should free ourselves.
      */
+    if (LMud_Frame_IsReadyForShipDeletion(self))
+    {
+        printf("[Note]: Frame/Ship %p would have been freed here.\n", self);
+    }
 }
 
 
@@ -238,6 +259,8 @@ void LMud_FrameShip_Create(struct LMud_FrameShip* self, struct LMud_Frame* frame
     self->next = NULL;
 
     LMud_Frame_Move(frame, &self->frame);
+    
+    self->frame.in_ship = true;
 }
 
 void LMud_FrameShip_Destroy(struct LMud_FrameShip* self)
@@ -298,4 +321,18 @@ void LMud_FrameList_Destroy(struct LMud_FrameList* self)
     {
         LMud_FrameShip_Delete(self->frames);
     }
+}
+
+struct LMud_FrameShip* LMud_FrameList_Insert(struct LMud_FrameList* self, struct LMud_Frame* frame)
+{
+    struct LMud_FrameShip*  ship;
+
+    ship = LMud_FrameShip_New(frame);
+
+    if (ship != NULL)
+    {
+        LMud_FrameShip_Link(ship, &self->frames);
+    }
+
+    return ship;
 }

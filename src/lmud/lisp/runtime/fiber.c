@@ -20,10 +20,13 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp)
 
     self->accumulator_count = 1;
     self->accumulator[0]    = LMud_Lisp_Nil(lisp);
+
+    LMud_FrameList_Create(&self->floating_frames);
 }
 
 void LMud_Fiber_Destroy(struct LMud_Fiber* self)
 {
+    LMud_FrameList_Destroy(&self->floating_frames);
     LMud_Free(self->stack);
 }
 
@@ -93,7 +96,7 @@ struct LMud_Frame* LMud_Fiber_PushFrame(struct LMud_Fiber* self, struct LMud_Fun
         self->top->child = frame;
     }
 
-    self->top        = frame;
+    self->top = frame;
 
     return frame;
 }
@@ -112,6 +115,13 @@ void LMud_Fiber_PopFrame(struct LMud_Fiber* self)
 
     if (self->top != NULL) {
         self->top->child = NULL;
+    }
+
+    if (LMud_Frame_ShouldBeMovedToShip(frame)) {
+        printf("[Note]: Frame %p is moved to a ship.\n", frame);
+        LMud_FrameList_Insert(&self->floating_frames, frame);
+    } else {
+        LMud_Frame_Destroy(frame);
     }
 }
 
