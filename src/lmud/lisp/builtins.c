@@ -416,6 +416,29 @@ void LMud_Builtin_Length(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
         LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(0));
 }
 
+void LMud_Builtin_Bytesp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsBytes(fiber->lisp, arguments[0])));
+}
+
+void LMud_Builtin_Bytes(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Size           index;
+    char                data[argument_count];
+
+    for (index = 0; index < argument_count; index++)
+    {
+        data[index] = LMud_Any_AsInteger(arguments[index]);
+    }
+
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_MakeBytes_FromData(fiber->lisp, argument_count, data));
+}
+
+
 void LMud_Builtin_Vectorp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     /*
@@ -492,6 +515,33 @@ void LMud_Builtin_Aset(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size 
 
     LMud_Lisp_Aset(fiber->lisp, arguments[0], arguments[1], arguments[2]);
     LMud_Fiber_SetAccumulator(fiber, arguments[2]);
+}
+
+void LMud_Builtin_BytecodeFunctionp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsFunction(fiber->lisp, arguments[0])));
+}
+
+void LMud_Builtin_FunctionBytecodes(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Function_Bytecodes(LMud_Any_AsPointer(arguments[0])));
+}
+
+void LMud_Builtin_FunctionConstants(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Function_Constants(LMud_Any_AsPointer(arguments[0])));
 }
 
 void LMud_Builtin_Compile(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -836,8 +886,13 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-SIZE", LMud_Builtin_CustomSize);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-AT", LMud_Builtin_CustomAt);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-SET", LMud_Builtin_CustomSet);
-    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%COMPILE", LMud_Builtin_Compile);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "BYTESP", LMud_Builtin_Bytesp);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "BYTES", LMud_Builtin_Bytes);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%ASET", LMud_Builtin_Aset);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%COMPILE", LMud_Builtin_Compile);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%BYTECODE-FUNCTION-P", LMud_Builtin_BytecodeFunctionp);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%FUNCTION-BYTECODES", LMud_Builtin_FunctionBytecodes);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%FUNCTION-CONSTANTS", LMud_Builtin_FunctionConstants);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRIN1", LMud_Builtin_Prin1);

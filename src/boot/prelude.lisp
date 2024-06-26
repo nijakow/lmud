@@ -350,6 +350,9 @@
    ;;;    Non-standard conversions
    ;;;
 
+   (defun conversions:vectoric-p (e)
+      (or (vectorp e) (stringp e) (lmud.int:bytesp e)))
+
    (defun conversions:->bool (e)
       (if e t nil))
 
@@ -366,6 +369,9 @@
    (defun conversions:list->string (list)
       (apply #'string list))
    
+   (defun conversions:list->bytes (list)
+      (apply #'lmud.int:bytes list))
+   
    (defun conversions:string->list (string)
       (conversions:sequence->list string))
    
@@ -375,16 +381,22 @@
    (defun conversions:string->vector (string)
       (conversions:list->vector (conversions:string->list string)))
    
+   (defun conversions:bytes->vector (bytes)
+      (conversions:list->vector (conversions:sequence->list bytes)))
+   
+   (defun conversions:sequence->bytes (sequence)
+      (conversions:list->bytes (conversions:sequence->list sequence)))
+
    (defun conversions:->list (e)
       (cond ((listp e) e)
-            ((vectorp e) (conversions:sequence->list e))
-            ((stringp e) (conversions:string->list e))
+            ((conversions:vectoric-p e) (conversions:sequence->list e))
             (t (lmud.util:simple-error "Cannot convert to list!"))))
 
    (defun conversions:->vector (e)
-      (cond ((vectorp e) e)
-            ((listp e)   (conversions:list->vector e))
-            ((stringp e) (conversions:string->vector e))
+      (cond ((vectorp e)         e)
+            ((listp e)           (conversions:list->vector e))
+            ((stringp e)         (conversions:string->vector e))
+            ((lmud.int:bytesp e) (conversions:bytes->vector e))
             (t (lmud.util:simple-error "Cannot convert to vector!"))))
    
    (defun conversions:->string (e)
@@ -392,6 +404,12 @@
             ((listp e)   (conversions:list->string e))
             ((vectorp e) (conversions:sequence->string e))
             (t (lmud.util:simple-error "Cannot convert to string!"))))
+   
+   (defun conversions:->bytes (e)
+      (cond ((lmud.int:bytesp e)        e)
+            ((listp e)                  (conversions:list->bytes    e))
+            ((conversions:vectoric-p e) (conversions:sequence->bytes e))
+            (t (lmud.util:simple-error "Cannot convert to bytes!"))))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
