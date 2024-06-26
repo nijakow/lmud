@@ -163,6 +163,16 @@
    (defun char<= (a b) (<= (char-code a) (char-code b)))
    (defun char>= (a b) (>= (char-code a) (char-code b)))
 
+   (defun sequence->list (sequence)
+      (let ((list '())
+            (len  (length sequence)))
+         (dotimes (i len)
+            (setq list (cons (aref sequence (- len i 1)) list)))
+         list))
+   
+   (defun string->list (string)
+      (sequence->list string))
+
    (defun repl ()
       (while t
          (%princ "⍝ ")
