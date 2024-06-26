@@ -476,23 +476,14 @@
    (defun tos.int:rebuild-class-layout (class)
       (let* ((layout (conversions:->vector (lmud.int:%custom-at class 3)))
              (slots (lmud.int:%custom-at class 3))
-             (slot-names (domap (slot slots) (lmud.int:%custom-at slot 0)))
              (constructor-source
                (let ((class-var (gensym)))
                   (list 'lambda (list* class-var '&key
-                                    (domap (name slot-names)
-                                       (list name nil)))
+                                    (domap (slot slots)
+                                       (list (lmud.int:%custom-at slot 0)
+                                             (lmud.int:%custom-at slot 1))))
                      (list* 'lmud.int:%make-custom class-var
-                        (domap (name slot-names) name))))))
-         (lmud.dummy::%princ "Rebuilding class layout: ")
-         (lmud.dummy::%prin1 class)
-         (lmud.dummy::%terpri)
-         (lmud.dummy::%princ "  Slot names: ")
-         (lmud.dummy::%prin1 slot-names)
-         (lmud.dummy::%terpri)
-         (lmud.dummy::%princ "  Constructor: ")
-         (lmud.dummy::%prin1 constructor-source)
-         (lmud.dummy::%terpri)
+                        (domap (slot slots) (lmud.int:%custom-at slot 0)))))))
          (setf (lmud.int:%custom-at class 1) layout)
          (setf (lmud.int:%custom-at class 0) (eval constructor-source)))
       class)
@@ -507,8 +498,8 @@
 
    (defparameter tos.int:<slot>
       (tos.int:make-class :constructor
-         (lambda (class &key name)
-            (lmud.int:%make-custom class name))))
+         (lambda (class &key name default-value)
+            (lmud.int:%make-custom class name default-value))))
 
    (defun tos.int:make-instance (class &rest params)
       (apply (lmud.int:%custom-at class 0) class params))
@@ -520,13 +511,14 @@
             (tos.int:make-instance tos.int:<slot> :name 'slots)))
    
    (tos.int:class-add-slots tos.int:<slot>
-      (list (tos.int:make-instance tos.int:<slot> :name 'name)))
+      (list (tos.int:make-instance tos.int:<slot> :name 'name)
+            (tos.int:make-instance tos.int:<slot> :name 'default-value)))
    
    (defparameter <point>
       (tos.int:make-class :slots
-         (list (tos.int:make-instance tos.int:<slot> :name 'x)
-               (tos.int:make-instance tos.int:<slot> :name 'y))))
-   (defparameter *my-point* (tos.int:make-instance <point> :x 42 :y 12))
+         (list (tos.int:make-instance tos.int:<slot> :name 'x :default-value 42)
+               (tos.int:make-instance tos.int:<slot> :name 'y :default-value 22))))
+   (defparameter *my-point* (tos.int:make-instance <point>))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
