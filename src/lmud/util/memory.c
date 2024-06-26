@@ -52,3 +52,8 @@ char* LMud_Strdup(const char* str)
 {
     return strdup(str);
 }
+
+void LMud_CopyMemory(void* dest, const void* src, LMud_Size size)
+{
+    memcpy(dest, src, size);
+}

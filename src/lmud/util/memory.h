@@ -12,3 +12,5 @@ bool      LMud_CStr_Equals(const char* a, const char* b);
 bool      LMud_CStr_EqualsIgnoreCase(const char* a, const char* b);
 
 char* LMud_Strdup(const char* str);
+
+void LMud_CopyMemory(void* dest, const void* src, LMud_Size size);
