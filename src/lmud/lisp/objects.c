@@ -80,8 +80,7 @@ bool LMud_Objects_Create(struct LMud_Objects* self, struct LMud_Lisp* lisp)
     self->lisp    = lisp;
 
     self->objects = NULL;
-    
-    LMud_SymbolTable_Create(&self->symbols);
+
     LMud_Types_Create(&self->types);
 
     return true;
@@ -90,7 +89,6 @@ bool LMud_Objects_Create(struct LMud_Objects* self, struct LMud_Lisp* lisp)
 void LMud_Objects_Destroy(struct LMud_Objects* self)
 {
     LMud_Types_Destroy(&self->types);
-    LMud_SymbolTable_Destroy(&self->symbols);
 }
 
 
@@ -285,14 +283,14 @@ struct LMud_String* LMud_Objects_String(struct LMud_Objects* self, const char* t
 }
 
 
-struct LMud_Symbol* LMud_Objects_PrimitiveIntern(struct LMud_Objects* self, const char* name)
+struct LMud_Symbol* LMud_Objects_PrimitiveIntern(struct LMud_Objects* self, struct LMud_Package* package, const char* name)
 {
-    return LMud_SymbolTable_Intern(&self->symbols, self, name);
+    return LMud_SymbolTable_Intern(LMud_Package_GetSymbolTable(package), self, name);
 }
 
-struct LMud_Symbol* LMud_Objects_Intern(struct LMud_Objects* self, const char* name)
+struct LMud_Symbol* LMud_Objects_Intern(struct LMud_Objects* self, struct LMud_Package* package, const char* name)
 {
-    return LMud_Objects_PrimitiveIntern(self, name);
+    return LMud_Objects_PrimitiveIntern(self, package, name);
 }
 
 struct LMud_Symbol* LMud_Objects_Gensym(struct LMud_Objects* self)

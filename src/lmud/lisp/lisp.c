@@ -246,12 +246,18 @@ LMud_Any LMud_Lisp_String(struct LMud_Lisp* self, const char* text)
     return LMud_Any_FromPointer(LMud_Objects_String(&self->objects, text));
 }
 
-LMud_Any LMud_Lisp_Intern(struct LMud_Lisp* self, const char* name)
+LMud_Any LMud_Lisp_InternInPackage(struct LMud_Lisp* self, LMud_Any package, const char* name)
 {
-    return LMud_Any_FromPointer(LMud_Objects_Intern(&self->objects, name));
+    assert(LMud_Lisp_IsPackage(self, package));
+    return LMud_Any_FromPointer(LMud_Objects_Intern(&self->objects, LMud_Any_AsPointer(package), name));
 }
 
-LMud_Any LMud_Lisp_InternUpcase(struct LMud_Lisp* self, const char* name)
+LMud_Any LMud_Lisp_Intern(struct LMud_Lisp* self, const char* name)
+{
+    return LMud_Lisp_InternInPackage(self, self->constants.default_package, name);
+}
+
+LMud_Any LMud_Lisp_InternUpcaseInPackage(struct LMud_Lisp* self, LMud_Any package, const char* name)
 {
     struct LMud_StringBuilder  builder;
     LMud_Any                   result;
@@ -262,11 +268,16 @@ LMud_Any LMud_Lisp_InternUpcase(struct LMud_Lisp* self, const char* name)
     for (index = 0; name[index] != '\0'; index++)
         LMud_StringBuilder_AppendChar(&builder, toupper(name[index]));
 
-    result = LMud_Lisp_Intern(self, LMud_StringBuilder_GetStatic(&builder));
+    result = LMud_Lisp_InternInPackage(self, package, LMud_StringBuilder_GetStatic(&builder));
 
     LMud_StringBuilder_Destroy(&builder);
 
     return result;
+}
+
+LMud_Any LMud_Lisp_InternUpcase(struct LMud_Lisp* self, const char* name)
+{
+    return LMud_Lisp_InternUpcaseInPackage(self, self->constants.default_package, name);
 }
 
 LMud_Any LMud_Lisp_Gensym(struct LMud_Lisp* self)
@@ -403,7 +414,7 @@ void LMud_Lisp_InstallBuiltin(struct LMud_Lisp* self, const char* name, LMud_Bui
     struct LMud_Symbol*  symbol;
     LMud_Any             builtin;
 
-    symbol  = LMud_Objects_Intern(&self->objects, name);
+    symbol  = LMud_Any_AsPointer(LMud_Lisp_Intern(self, name));
     builtin = LMud_Lisp_Builtin(self, name, function);
 
     LMud_Symbol_SetFunction(symbol, builtin);

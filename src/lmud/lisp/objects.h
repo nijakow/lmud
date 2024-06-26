@@ -48,7 +48,6 @@ struct LMud_Objects
 {
     struct LMud_Lisp*        lisp;
     struct LMud_Object*      objects;
-    struct LMud_SymbolTable  symbols;
     struct LMud_Types        types;
 };
 
@@ -79,6 +78,6 @@ struct LMud_Ratio*  LMud_Objects_Ratio(struct LMud_Objects* self, LMud_Any numer
 
 struct LMud_String* LMud_Objects_String(struct LMud_Objects* self, const char* text);
 
-struct LMud_Symbol* LMud_Objects_PrimitiveIntern(struct LMud_Objects* self, const char* name);
-struct LMud_Symbol* LMud_Objects_Intern(struct LMud_Objects* self, const char* name);
+struct LMud_Symbol* LMud_Objects_PrimitiveIntern(struct LMud_Objects* self, struct LMud_Package* package, const char* name);
+struct LMud_Symbol* LMud_Objects_Intern(struct LMud_Objects* self, struct LMud_Package* package, const char* name);
 struct LMud_Symbol* LMud_Objects_Gensym(struct LMud_Objects* self);
