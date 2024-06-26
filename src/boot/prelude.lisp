@@ -514,11 +514,27 @@
       (list (tos.int:make-instance tos.int:<slot> :name 'name)
             (tos.int:make-instance tos.int:<slot> :name 'default-value)))
    
-   (defparameter <point>
-      (tos.int:make-class :slots
-         (list (tos.int:make-instance tos.int:<slot> :name 'x :default-value 42)
-               (tos.int:make-instance tos.int:<slot> :name 'y :default-value 22))))
-   (defparameter *my-point* (tos.int:make-instance <point>))
+   (defun tos.int:construct-class (name superclasses slot-descriptions)
+      (let ((slots (domap (slot-description slot-descriptions)
+                                    (apply (lambda (name &key initform)
+                                             (tos.int:make-instance tos.int:<slot> :name name :default-value initform))
+                                           slot-description))))
+         (tos.int:make-class :superclasses superclasses
+                             :slots        slots)))
+
+   (defun tos.int:defclass-execute (name superclasses slot-descriptions)
+      (set-symbol-value name (tos.int:construct-class name superclasses slot-descriptions)))
+
+   (defmacro tos:defclass (name superclasses slot-descriptions)
+      (list 'tos.int:defclass-execute (list 'quote name)
+                                      (list* 'list superclasses)
+                                      (list 'quote slot-descriptions)))
+   
+   (tos:defclass <point> ()
+      ((x :initform 0)
+       (y :initform 0)))
+   
+   (defvar *my-point* (tos.int:make-instance <point>))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
