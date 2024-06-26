@@ -500,7 +500,7 @@
              (layout (conversions:->vector slots))
              (inheritance-chain (apply #'append
                                        (domap (superclass (tos.int:%class-superclasses class))
-                                          (tos.int:%class-inheritance-chain superclass))))
+                                          (cons superclass (tos.int:%class-inheritance-chain superclass)))))
              (constructor-source
                (let ((class-var (gensym)))
                   (list 'lambda (list* class-var '&key
@@ -571,6 +571,15 @@
        (y :initform 0)))
    
    (defvar *my-point* (tos.int:make-instance <point>))
+
+   (tos:defclass <a> () ())
+   (tos:defclass <b> () ())
+   (tos:defclass <c> () ())
+   (tos:defclass <d> () ())
+
+   (tos:defclass <e> (<a> <b>) ())
+   (tos:defclass <f> (<b> <c>) ())
+   (tos:defclass <g> (<e> <f>) ())
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
