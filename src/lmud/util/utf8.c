@@ -142,10 +142,95 @@ LMud_Integer LMud_Rune_AsInteger(LMud_Rune rune)
 }
 
 
+struct LMud_CaseTableEntry
+{
+    LMud_Rune  lower;
+    LMud_Rune  upper;
+};
+
+struct LMud_CaseTableEntry LMud_RUNE_CASE_TABLE[] =
+{
+    { .lower = L'ß', .upper = L'ẞ' },
+    { .lower = L'à', .upper = L'À' },
+    { .lower = L'á', .upper = L'Á' },
+    { .lower = L'â', .upper = L'Â' },
+    { .lower = L'ã', .upper = L'Ã' },
+    { .lower = L'ä', .upper = L'Ä' },
+    { .lower = L'å', .upper = L'Å' },
+    { .lower = L'æ', .upper = L'Æ' },
+    { .lower = L'ç', .upper = L'Ç' },
+    { .lower = L'è', .upper = L'È' },
+    { .lower = L'é', .upper = L'É' },
+    { .lower = L'ê', .upper = L'Ê' },
+    { .lower = L'ë', .upper = L'Ë' },
+    { .lower = L'ì', .upper = L'Ì' },
+    { .lower = L'í', .upper = L'Í' },
+    { .lower = L'î', .upper = L'Î' },
+    { .lower = L'ï', .upper = L'Ï' },
+    { .lower = L'ð', .upper = L'Ð' },
+    { .lower = L'ñ', .upper = L'Ñ' },
+    { .lower = L'ò', .upper = L'Ò' },
+    { .lower = L'ó', .upper = L'Ó' },
+    { .lower = L'ô', .upper = L'Ô' },
+    { .lower = L'õ', .upper = L'Õ' },
+    { .lower = L'ö', .upper = L'Ö' },
+    { .lower = L'ø', .upper = L'Ø' },
+    { .lower = L'ù', .upper = L'Ù' },
+    { .lower = L'ú', .upper = L'Ú' },
+    { .lower = L'û', .upper = L'Û' },
+    { .lower = L'ü', .upper = L'Ü' },
+    { .lower = L'ý', .upper = L'Ý' },
+    { .lower = L'þ', .upper = L'Þ' },
+    { .lower = L'ā', .upper = L'Ā' },
+    { .lower = L'ă', .upper = L'Ă' },
+    { .lower = L'ą', .upper = L'Ą' },
+    { .lower = L'ć', .upper = L'Ć' },
+    { .lower = L'ĉ', .upper = L'Ĉ' },
+    { .lower = L'ċ', .upper = L'Ċ' },
+    { .lower = L'č', .upper = L'Č' },
+    { .lower = L'ď', .upper = L'Ď' },
+    { .lower = L'đ', .upper = L'Đ' },
+    { .lower = L'ē', .upper = L'Ē' },
+    { .lower = L'ĕ', .upper = L'Ĕ' },
+    { .lower = L'ė', .upper = L'Ė' },
+    { .lower = L'ę', .upper = L'Ę' },
+    { .lower = L'ě', .upper = L'Ě' },
+    { .lower = L'ĝ', .upper = L'Ĝ' },
+    { .lower = L'ğ', .upper = L'Ğ' },
+    { .lower = L'ġ', .upper = L'Ġ' },
+    { .lower = L'ģ', .upper = L'Ģ' },
+    { .lower = L'ĥ', .upper = L'Ĥ' },
+    { .lower = L'ħ', .upper = L'Ħ' },
+    { .lower = L'ĩ', .upper = L'Ĩ' },
+    { .lower = L'ī', .upper = L'Ī' },
+    { .lower = L'ĭ', .upper = L'Ĭ' },
+    { .lower = L'į', .upper = L'Į' },
+    { .lower = L'ı', .upper = L'İ' },
+    { .lower = L'ĳ', .upper = L'Ĳ' },
+    { .lower = L'ą', .upper = L'Ą' },
+    { .lower = L'ę', .upper = L'Ę' },
+    { .lower = L'ł', .upper = L'Ł' },
+    { .lower = L'ń', .upper = L'Ń' },
+    { .lower = L'ó', .upper = L'Ó' },
+    { .lower = L'ś', .upper = L'Ś' },
+    { .lower = L'ź', .upper = L'Ź' },
+    { .lower = L'ż', .upper = L'Ż' },
+};
+
+
 LMud_Rune LMud_Rune_UpperCase(LMud_Rune rune)
 {
+    LMud_Size  index;
+
     if (rune >= 0x61 && rune <= 0x7A) {
         return rune - 0x20;
+    }
+
+    for (index = 0; index < sizeof(LMud_RUNE_CASE_TABLE) / sizeof(struct LMud_CaseTableEntry); index++)
+    {
+        if (rune == LMud_RUNE_CASE_TABLE[index].lower) {
+            return LMud_RUNE_CASE_TABLE[index].upper;
+        }
     }
 
     return rune;
@@ -153,8 +238,17 @@ LMud_Rune LMud_Rune_UpperCase(LMud_Rune rune)
 
 LMud_Rune LMud_Rune_LowerCase(LMud_Rune rune)
 {
+    LMud_Size  index;
+
     if (rune >= 0x41 && rune <= 0x5A) {
         return rune + 0x20;
+    }
+
+    for (index = 0; index < sizeof(LMud_RUNE_CASE_TABLE) / sizeof(struct LMud_CaseTableEntry); index++)
+    {
+        if (rune == LMud_RUNE_CASE_TABLE[index].upper) {
+            return LMud_RUNE_CASE_TABLE[index].lower;
+        }
     }
 
     return rune;
