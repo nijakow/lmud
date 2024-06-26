@@ -316,6 +316,7 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->cached.symbol_return_from = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "RETURN-FROM");
 
     self->cached.symbol_andrest     = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&REST");
+    self->cached.symbol_andbody     = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&BODY");
     self->cached.symbol_andoptional = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&OPTIONAL");
     self->cached.symbol_andkey      = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&KEY");
 
@@ -1364,6 +1365,8 @@ void LMud_Compiler_ProcessArgumentList(struct LMud_Compiler* self, LMud_Any argl
         argument = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arglist);
 
         if (LMud_Any_Eq(argument, self->cached.symbol_andrest))
+            mode = LMud_ArgumentMode_REST;
+        else if (LMud_Any_Eq(argument, self->cached.symbol_andbody))
             mode = LMud_ArgumentMode_REST;
         else if (LMud_Any_Eq(argument, self->cached.symbol_andoptional))
             mode = LMud_ArgumentMode_OPTIONAL;

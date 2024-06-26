@@ -52,6 +52,12 @@
    (defmacro return (&rest args)
       (list* 'return-from 'nil args))
    
+   (defmacro let* (bindings &rest body)
+      (if (endp bindings)
+          (cons 'progn body)
+          (list 'let (list (car bindings))
+             (cons 'let* (cons (cdr bindings) body)))))
+   
    (defmacro defvar (name value)
       (list 'set-symbol-value (list 'quote name) value))
    
@@ -465,7 +471,7 @@
          (lmud.int:%custom-at object slot-index)))
    
    (defun tos.int:rebuild-class-layout (class)
-      (let ((layout (conversions:->vector (lmud.int:%custom-at class 3))))
+      (let* ((layout (conversions:->vector (lmud.int:%custom-at class 3))))
          (setf (lmud.int:%custom-at class 1) layout))
       class)
    

@@ -146,6 +146,7 @@ struct LMud_Compiler
         LMud_Any                    symbol_return_from;
 
         LMud_Any                    symbol_andrest;
+        LMud_Any                    symbol_andbody;
         LMud_Any                    symbol_andoptional;
         LMud_Any                    symbol_andkey;
     }                               cached;
