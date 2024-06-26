@@ -487,6 +487,20 @@
          (conversions:->list result)))
 
 
+   (defmacro destructuring-bind (lambda-list expression &body forms)
+      (let ((let-expressions '())
+            (expr-sym (gensym)))
+         (labels ((generate-let (expr func)
+                     (cond ((null expr) nil)
+                           ((consp expr)
+                            (generate-let (car expr) #'(lambda (e) (list 'car (funcall func e))))
+                            (generate-let (cdr expr) #'(lambda (e) (list 'cdr (funcall func e)))))
+                           ((symbolp expr) (push (list expr (funcall func expr-sym)) let-expressions)))))
+               (generate-let lambda-list #'identity)
+               (list 'let (list (list expr-sym expression))
+                  (list* 'let (reverse let-expressions)
+                     forms)))))
+
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
    ;;;    The Type- and Object System

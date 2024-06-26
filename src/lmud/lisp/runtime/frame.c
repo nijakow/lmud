@@ -93,12 +93,22 @@ void LMud_Frame_Move(struct LMud_Frame* self, struct LMud_Frame* location)
     location->references = NULL;
 
     /*
+     * Also, our lexical reference needs to be updated.
+     */
+    LMud_FrameRef_Create(&location->lexical, self->lexical.frame);
+
+    /*
      * Transfer all references to the new frame.
      */
     while (self->references != NULL)
     {
         LMud_FrameRef_Transfer(self->references, location);
     }
+
+    /*
+     * And destroy the old frame.
+     */
+    LMud_Frame_Destroy(self);
 }
 
 bool LMud_Frame_ShouldBeMovedToShip(struct LMud_Frame* self)
@@ -293,7 +303,7 @@ struct LMud_FrameShip* LMud_FrameShip_New(struct LMud_Frame* frame)
 {
     struct LMud_FrameShip*  self;
 
-    self = LMud_Alloc(sizeof(struct LMud_FrameShip));
+    self = LMud_Alloc(sizeof(struct LMud_FrameShip) + LMud_Frame_PayloadSizeInBytes(frame));
 
     if (self != NULL)
     {
