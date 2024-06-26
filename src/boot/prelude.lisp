@@ -451,7 +451,10 @@
 
    (defun tos.int:make-class (&key (constructor nil) (superclasses nil) (slots nil))
       (let ((instance (lmud.int:%make-custom tos.int:<class> constructor nil superclasses slots)))
-         (tos.int:rebuild-class-layout instance)))
+         (tos.int:rebuild-class-layout instance)
+         (when constructor
+            (setf (lmud.int:%custom-at instance 0) constructor))
+         instance))
    
    (defun tos.int:class-instance-slot-index-by-name (class name)
       (let ((allslots (lmud.int:%custom-at class 1)))
@@ -471,8 +474,27 @@
          (lmud.int:%custom-at object slot-index)))
    
    (defun tos.int:rebuild-class-layout (class)
-      (let* ((layout (conversions:->vector (lmud.int:%custom-at class 3))))
-         (setf (lmud.int:%custom-at class 1) layout))
+      (let* ((layout (conversions:->vector (lmud.int:%custom-at class 3)))
+             (slots (lmud.int:%custom-at class 3))
+             (slot-names (domap (slot slots) (lmud.int:%custom-at slot 0)))
+             (constructor-source
+               (let ((class-var (gensym)))
+                  (list 'lambda (list* class-var '&key
+                                    (domap (name slot-names)
+                                       (list name nil)))
+                     (list* 'lmud.int:%make-custom class-var
+                        (domap (name slot-names) name))))))
+         (lmud.dummy::%princ "Rebuilding class layout: ")
+         (lmud.dummy::%prin1 class)
+         (lmud.dummy::%terpri)
+         (lmud.dummy::%princ "  Slot names: ")
+         (lmud.dummy::%prin1 slot-names)
+         (lmud.dummy::%terpri)
+         (lmud.dummy::%princ "  Constructor: ")
+         (lmud.dummy::%prin1 constructor-source)
+         (lmud.dummy::%terpri)
+         (setf (lmud.int:%custom-at class 1) layout)
+         (setf (lmud.int:%custom-at class 0) (eval constructor-source)))
       class)
    
    (defun tos.int:class-add-slots (class slots)
@@ -503,9 +525,7 @@
    (defparameter <point>
       (tos.int:make-class :slots
          (list (tos.int:make-instance tos.int:<slot> :name 'x)
-               (tos.int:make-instance tos.int:<slot> :name 'y))
-         :constructor (lambda (class &key x y)
-                        (lmud.int:%make-custom class x y))))
+               (tos.int:make-instance tos.int:<slot> :name 'y))))
    (defparameter *my-point* (tos.int:make-instance <point> :x 42 :y 12))
 
 
