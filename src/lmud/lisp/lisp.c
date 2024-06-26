@@ -248,8 +248,21 @@ LMud_Any LMud_Lisp_String(struct LMud_Lisp* self, const char* text)
 
 LMud_Any LMud_Lisp_InternInPackage(struct LMud_Lisp* self, LMud_Any package, const char* name)
 {
+    struct LMud_Symbol*  symbol;
+
     assert(LMud_Lisp_IsPackage(self, package));
-    return LMud_Any_FromPointer(LMud_Objects_Intern(&self->objects, LMud_Any_AsPointer(package), name));
+
+    symbol = LMud_Objects_Intern(&self->objects, LMud_Any_AsPointer(package), name);
+
+    /*
+     * If we are interning a symbol in the KEYWORD package, we make it a self-referencing constant.
+     */
+    if (LMud_Any_Eq(package, self->constants.keyword_package))
+    {
+        LMud_Symbol_MakeConstant(symbol);
+    }
+
+    return LMud_Any_FromPointer(symbol);
 }
 
 LMud_Any LMud_Lisp_Intern(struct LMud_Lisp* self, const char* name)
@@ -278,6 +291,22 @@ LMud_Any LMud_Lisp_InternUpcaseInPackage(struct LMud_Lisp* self, LMud_Any packag
 LMud_Any LMud_Lisp_InternUpcase(struct LMud_Lisp* self, const char* name)
 {
     return LMud_Lisp_InternUpcaseInPackage(self, self->constants.default_package, name);
+}
+
+LMud_Any LMud_Lisp_InternKeyword(struct LMud_Lisp* self, const char* name)
+{
+    return LMud_Lisp_InternInPackage(self, self->constants.keyword_package, name);
+}
+
+LMud_Any LMud_Lisp_InternKeywordUpcase(struct LMud_Lisp* self, const char* name)
+{
+    return LMud_Lisp_InternUpcaseInPackage(self, self->constants.keyword_package, name);
+}
+
+LMud_Any LMud_Lisp_ReinternAsKeyword(struct LMud_Lisp* self, LMud_Any symbol)
+{
+    assert(LMud_Lisp_IsSymbol(self, symbol));
+    return LMud_Lisp_InternKeyword(self, LMud_Symbol_Name(LMud_Any_AsPointer(symbol)));
 }
 
 LMud_Any LMud_Lisp_Gensym(struct LMud_Lisp* self)

@@ -326,6 +326,23 @@ bool LMud_Lisp_ReadAtom(struct LMud_Lisp* lisp, struct LMud_InputStream* stream,
     return true;
 }
 
+bool LMud_Lisp_ReadKeyword(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMud_Any* result)
+{
+    struct LMud_StringBuilder  builder;
+    LMud_Any                   value;
+
+    LMud_StringBuilder_Create(&builder);
+    {
+        LMud_Lisp_ReadUntilBreakingChar(lisp, stream, &builder);
+        value = LMud_Lisp_InternKeywordUpcase(lisp, LMud_StringBuilder_GetStatic(&builder));
+    }
+    LMud_StringBuilder_Destroy(&builder);
+
+    *result = value;
+
+    return true;
+}
+
 bool LMud_Lisp_ReadCharacter(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMud_Any* result)
 {
     struct LMud_StringBuilder  builder;
@@ -375,6 +392,8 @@ bool LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMu
         return LMud_Lisp_ReadString(lisp, stream, result);
     } else if (LMud_InputStream_CheckStr(stream, "(")) {
         return LMud_Lisp_ReadList(lisp, stream, result);
+    } else if (LMud_InputStream_CheckStr(stream, ":")) {
+        return LMud_Lisp_ReadKeyword(lisp, stream, result);
     } else {
         return LMud_Lisp_ReadAtom(lisp, stream, result);
     }

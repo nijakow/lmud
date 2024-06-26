@@ -437,8 +437,11 @@ void LMud_Compiler_AddOptionalArgument(struct LMud_Compiler* self, LMud_Any name
 
 void LMud_Compiler_AddKeyArgument(struct LMud_Compiler* self, LMud_Any name, LMud_Any default_value)
 {
+    LMud_Any               keyword_name;
     struct LMud_Register*  reg;
     LMud_CompilerLabel     continue_label;
+
+    keyword_name = LMud_Lisp_ReinternAsKeyword(LMud_Compiler_GetLisp(self), name);
 
     LMud_Compiler_EnableVariadic(self);
 
@@ -447,7 +450,8 @@ void LMud_Compiler_AddKeyArgument(struct LMud_Compiler* self, LMud_Any name, LMu
     {
         reg = LMud_Compiler_AllocateRegister(self);
 
-        LMud_Compiler_WritePopKeywordArgument(self, name, continue_label); // TODO: Also check for the interned keyword argument
+        LMud_Compiler_WritePopKeywordArgument(self, name, continue_label);
+        LMud_Compiler_WritePopKeywordArgument(self, keyword_name, continue_label);
         LMud_Compiler_Compile(self, default_value);
         LMud_Compiler_PlaceLabel(self, continue_label);
 

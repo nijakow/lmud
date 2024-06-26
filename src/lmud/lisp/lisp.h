@@ -77,6 +77,9 @@ LMud_Any LMud_Lisp_Ratio(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any de
 LMud_Any LMud_Lisp_String(struct LMud_Lisp* self, const char* text);
 LMud_Any LMud_Lisp_Intern(struct LMud_Lisp* self, const char* name);
 LMud_Any LMud_Lisp_InternUpcase(struct LMud_Lisp* self, const char* name);
+LMud_Any LMud_Lisp_InternKeyword(struct LMud_Lisp* self, const char* name);
+LMud_Any LMud_Lisp_InternKeywordUpcase(struct LMud_Lisp* self, const char* name);
+LMud_Any LMud_Lisp_ReinternAsKeyword(struct LMud_Lisp* self, LMud_Any symbol);
 LMud_Any LMud_Lisp_Gensym(struct LMud_Lisp* self);
 
 
