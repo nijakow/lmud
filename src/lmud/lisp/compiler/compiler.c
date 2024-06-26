@@ -333,6 +333,16 @@ void LMud_Compiler_EnableLexicalStuff(struct LMud_Compiler* self)
     self->uses_lexical_stuff = true;
 }
 
+void LMud_Compiler_EnableLexicalStuffUntil(struct LMud_Compiler* self, struct LMud_Compiler* until)
+{
+    struct LMud_Compiler*  compiler;
+
+    for (compiler = self; compiler != until; compiler = compiler->lexical)
+    {
+        LMud_Compiler_EnableLexicalStuff(compiler);
+    }
+}
+
 void LMud_Compiler_EnableVariadic(struct LMud_Compiler* self)
 {
     self->variadic = true;
@@ -508,8 +518,24 @@ bool LMud_Compiler_IdentifyRegister(struct LMud_Compiler* self, struct LMud_Regi
         {
             if (the_reg == reg)
             {
+                if (our_depth > 0)
+                {
+                    /*
+                    * We are referencing a register from a different lexical scope.
+                    * This means that the runtime will have to reference down the
+                    * lexical links of the stack frames to find the register.
+                    * 
+                    * These links are only established if the functions are labeled
+                    * as "using lexical stuff". So in order to make the reference
+                    * work, we need to enable the "using lexical stuff" flag for
+                    * all the compilers up to the one that defines the register.
+                    */
+                    LMud_Compiler_EnableLexicalStuffUntil(self, compiler);
+                }
+
                 *depth = our_depth;
                 *index = the_reg->index;
+
                 return true;
             }
         }
