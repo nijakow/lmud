@@ -3,6 +3,7 @@
 #include <lmud/util/memory.h>
 #include <lmud/util/stringbuilder.h>
 #include <lmud/util/utf8.h>
+#include <lmud/util/vt100.h>
 
 #include "io.h"
 
@@ -128,7 +129,7 @@ void LMud_Lisp_PrintSymbol(struct LMud_Lisp* lisp, LMud_Any symbol, FILE* stream
     package       = LMud_Symbol_Package(symbol_object);
 
     if (LMud_Symbol_IsGensym(symbol_object)) {
-        fprintf(stream, "⦍GENSYM %p⦎", symbol_object);
+        fprintf(stream, "⦍" LMud_VT100_Underline "GENSYM" LMud_VT100_Normal " %p⦎", symbol_object);
     } else {
         if (LMud_Lisp_IsPackage(lisp, package)) {
             if (LMud_Any_Eq(package, lisp->constants.default_package)) {
@@ -170,7 +171,7 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
         } else if (LMud_Lisp_IsSymbolPointer(lisp, pointer)) {
             LMud_Lisp_PrintSymbol(lisp, object, stream, escaped);
         } else if (LMud_Lisp_IsFunctionPointer(lisp, pointer)) {
-            fprintf(stream, "⦍BYTE-COMPILED-FUNCTION %p :BYTECODES ", pointer);
+            fprintf(stream, "⦍" LMud_VT100_Underline "BYTE-COMPILED-FUNCTION" LMud_VT100_Normal " %p :BYTECODES ", pointer);
             LMud_Lisp_Print(lisp, LMud_Function_Bytecodes(pointer), stream, true);
             fprintf(stream, " :CONSTANTS ");
             LMud_Lisp_Print(lisp, LMud_Function_Constants(pointer), stream, true);
@@ -184,24 +185,24 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
                 ((struct LMud_Function*) pointer)->info.variadic ? "T" : "NIL"
             );
         } else if (LMud_Lisp_IsClosurePointer(lisp, pointer)) {
-            fprintf(stream, "⦍CLOSURE %p⦎", pointer);
+            fprintf(stream, "⦍" LMud_VT100_Underline "CLOSURE" LMud_VT100_Normal " %p⦎", pointer);
         } else if (LMud_Lisp_IsBuiltinPointer(lisp, pointer)) {
-            fprintf(stream, "⦍MACHINE-CODE-FUNCTION :NAME %s⦎", ((struct LMud_Builtin*) pointer)->name);
+            fprintf(stream, "⦍" LMud_VT100_Underline "MACHINE-CODE-FUNCTION" LMud_VT100_Normal " :NAME %s⦎", ((struct LMud_Builtin*) pointer)->name);
         } else if (LMud_Lisp_IsRatioPointer(lisp, pointer)) {
             LMud_Lisp_Print(lisp, LMud_Ratio_Numerator((struct LMud_Ratio*) pointer), stream, escaped);
             fprintf(stream, "/");
             LMud_Lisp_Print(lisp, LMud_Ratio_Denominator((struct LMud_Ratio*) pointer), stream, escaped);
         } else if (LMud_Lisp_IsPackagePointer(lisp, pointer)) {
-            fprintf(stream, "⦍PACKAGE :NAME ");
+            fprintf(stream, "⦍" LMud_VT100_Underline "PACKAGE" LMud_VT100_Normal " :NAME ");
             LMud_Lisp_Print(lisp, LMud_Package_Name((struct LMud_Package*) pointer), stream, true);
             fprintf(stream, "⦎");
         } else if (LMud_Lisp_IsCustomPointer(lisp, pointer)) {
-            fprintf(stream, "⦍CUSTOM %p⦎", pointer);
+            fprintf(stream, "⦍" LMud_VT100_Underline "CUSTOM" LMud_VT100_Normal " %p⦎", pointer);
         } else {
-            fprintf(stream, "⦍UNKNOWN %p⦎", pointer);
+            fprintf(stream, "⦍" LMud_VT100_Underline "UNKNOWN" LMud_VT100_Normal " %p⦎", pointer);
         }
     } else {
-        fprintf(stream, "⦍UNKNOWN⦎");
+        fprintf(stream, "⦍" LMud_VT100_Underline "UNKNOWN" LMud_VT100_Normal "⦎");
     }
 }
 

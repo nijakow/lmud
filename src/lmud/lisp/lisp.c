@@ -3,6 +3,7 @@
 #include <lmud/lisp/compiler/compiler.h>
 #include <lmud/lisp/io.h>
 #include <lmud/util/stringbuilder.h>
+#include <lmud/util/vt100.h>
 
 #include "lisp.h"
 
@@ -546,16 +547,16 @@ void LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename)
     file = fopen(filename, "r");
 
     if (file == NULL)
-        fprintf(stderr, "; Failed to open file: \"%s\"\n", filename);
+        fprintf(stderr, LMud_VT100_Italic "; " LMud_VT100_Red "Failed to open file: \"%s\"" LMud_VT100_Normal "\n", filename);
     else {
-        printf("; Loading file: \"%s\"...\n", filename);
+        printf(LMud_VT100_Italic "; Loading file: \"%s\"..." LMud_VT100_Normal "\n", filename);
 
         LMud_InputStream_CreateFromFile(&stream, file);
 
         while (LMud_Lisp_Read(self, &stream, &program))
         {
             if (!LMud_Lisp_Compile(self, program, &program)) {
-                fprintf(stderr, ";   --> Failed to compile an expression!\n");
+                fprintf(stderr, LMud_VT100_Italic ";   " LMud_VT100_Red "--> Failed to compile an expression!" LMud_VT100_Normal "\n");
                 break;
             } else {
                 LMud_Scheduler_BlockAndRunThunk(&self->scheduler, program, NULL);

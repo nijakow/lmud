@@ -4,6 +4,7 @@
 #include <lmud/lisp/objects/function.h>
 #include <lmud/lisp/runtime/interpreter.h>
 #include <lmud/util/memory.h>
+#include <lmud/util/vt100.h>
 
 #include "fiber.h"
 
@@ -180,7 +181,7 @@ void LMud_Fiber_PerformReturn(struct LMud_Fiber* self)
 
 void LMud_Fiber_PerformError(struct LMud_Fiber* self, const char* message)
 {
-    printf("  Error: %s\n", message);
+    printf(LMud_VT100_Italic "; " LMud_VT100_Red LMud_VT100_Blink "Error: %s" LMud_VT100_Normal "\n", message);
     LMud_Fiber_Unwind(self);
 }
 
