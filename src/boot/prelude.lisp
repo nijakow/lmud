@@ -212,12 +212,25 @@
       (let ((var  (car  info))
             (list (cadr info)))
          (list 'mapcar (list* 'lambda (list var) body) list)))
+   
+   (defmacro dosequence (info &rest body)
+      (let ((var  (car  info))
+            (seq  (gensym))
+            (i    (gensym)))
+         (list 'let (list (list seq (cadr info)))
+            (list 'dotimes (list i (list 'length seq))
+               (list* 'let (list (list var (list 'aref seq i))) body)))))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
    ;;;    List Operations
    ;;;
+
+   (defun copy-list (list)
+      (if (consp list)
+          (cons (car list) (copy-list (cdr list)))
+          (cdr list)))
 
    (defun member (item list)
       (cond ((null list) nil)
@@ -411,6 +424,7 @@
    (defmacro decf (place)
       (list 'setf place (list '- place 1)))
 
+
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
    ;;;    The Type- and Object System
@@ -422,15 +436,71 @@
    (defun (setf lmud.int:%custom-at) (value object index)
       (list 'lmud.int:%custom-set object index value))
 
-   (defparameter tos.int:<class> (lmud.int:%make-custom nil nil nil nil))
+   (defparameter tos.int:<class> (lmud.int:%make-custom nil nil nil nil nil))
 
    (setf (lmud.int:%custom-meta tos.int:<class>) tos.int:<class>)
 
-   (defun tos.int:make-class (&key (superclasses nil) (slots nil))
-      (let ((all-slots (conversions:->vector slots)))
-         (lmud.int:%make-custom tos.int:<class> superclasses slots all-slots)))
+   (defun tos.int:default-constructor (class)
+      (lmud.int:%make-custom class))
+
+   (defun tos.int:make-class (&key (constructor nil) (superclasses nil) (slots nil))
+      (let ((instance (lmud.int:%make-custom tos.int:<class> constructor nil superclasses slots)))
+         (tos.int:rebuild-class-layout instance)))
    
-   (defparameter tos.int:<slot> (tos.int:make-class))
+   (defun tos.int:class-instance-slot-index-by-name (class name)
+      (let ((allslots (lmud.int:%custom-at class 1)))
+         (dotimes (i (length allslots))
+            (let ((slot (aref allslots i)))
+               (if (eq name (lmud.int:%custom-at slot 0))
+                   (return i)))))
+      nil)
+   
+   (defun tos.int:class-of (object)
+      (lmud.int:%custom-meta object))
+
+   (defun tos.int:slot-value-by-name (object slot-name)
+      (let ((slot-index (tos.int:class-instance-slot-index-by-name (tos.int:class-of object) slot-name)))
+         (when (null slot-index)
+            (lmud.util:simple-error "Slot not found!"))
+         (lmud.int:%custom-at object slot-index)))
+   
+   (defun tos.int:rebuild-class-layout (class)
+      (let ((layout (conversions:->vector (lmud.int:%custom-at class 3))))
+         (setf (lmud.int:%custom-at class 1) layout))
+      class)
+   
+   (defun tos.int:class-add-slots (class slots)
+      (setf (lmud.int:%custom-at class 3)
+            (append (lmud.int:%custom-at class 3) (copy-list slots)))
+      (tos.int:rebuild-class-layout class))
+   
+   (defun tos.int:class-add-slot (class slot)
+      (tos.int:class-add-slots class (list slot)))
+
+   (defparameter tos.int:<slot>
+      (tos.int:make-class :constructor
+         (lambda (class &key name)
+            (lmud.int:%make-custom class name))))
+
+   (defun tos.int:make-instance (class &rest params)
+      (apply (lmud.int:%custom-at class 0) class params))
+   
+   (tos.int:class-add-slots tos.int:<class>
+      (list (tos.int:make-instance tos.int:<slot> :name 'constructor)
+            (tos.int:make-instance tos.int:<slot> :name 'layout)
+            (tos.int:make-instance tos.int:<slot> :name 'superclasses)
+            (tos.int:make-instance tos.int:<slot> :name 'slots)))
+   
+   (tos.int:class-add-slots tos.int:<slot>
+      (list (tos.int:make-instance tos.int:<slot> :name 'name)))
+   
+   (defparameter <point>
+      (tos.int:make-class :slots
+         (list (tos.int:make-instance tos.int:<slot> :name 'x)
+               (tos.int:make-instance tos.int:<slot> :name 'y))
+         :constructor (lambda (class &key x y)
+                        (lmud.int:%make-custom class x y))))
+   (defparameter *my-point* (tos.int:make-instance <point> :x 42 :y 12))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
