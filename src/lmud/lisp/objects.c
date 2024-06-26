@@ -77,9 +77,10 @@ bool LMud_Types_IsSymbol(struct LMud_Types* self, void* object)
 
 bool LMud_Objects_Create(struct LMud_Objects* self, struct LMud_Lisp* lisp)
 {
-    self->lisp    = lisp;
+    self->lisp     = lisp;
 
-    self->objects = NULL;
+    self->objects  = NULL;
+    self->packages = NULL;
 
     LMud_Types_Create(&self->types);
 
@@ -238,6 +239,7 @@ struct LMud_Package* LMud_Objects_Package(struct LMud_Objects* self, LMud_Any na
     if (package != NULL)
     {
         LMud_Package_Create(package, name);
+        LMud_Package_Link(package, &self->packages);
     }
 
     return package;

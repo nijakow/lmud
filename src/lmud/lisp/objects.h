@@ -48,6 +48,7 @@ struct LMud_Objects
 {
     struct LMud_Lisp*        lisp;
     struct LMud_Object*      objects;
+    struct LMud_Package*     packages;
     struct LMud_Types        types;
 };
 

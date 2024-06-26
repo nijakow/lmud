@@ -4,14 +4,35 @@
 
 void LMud_Package_Create(struct LMud_Package* self, LMud_Any name)
 {
+    self->prev = NULL;
+    self->next = NULL;
     self->name = name;
     LMud_SymbolTable_Create(&self->symbols);
 }
 
 void LMud_Package_Destroy(struct LMud_Package* self)
 {
+    LMud_Package_Unlink(self);
     LMud_SymbolTable_Destroy(&self->symbols);
 }
+
+void LMud_Package_Link(struct LMud_Package* self, struct LMud_Package** list)
+{
+    self->prev = list;
+    self->next = *list;
+    if (self->next != NULL)
+        self->next->prev = &self->next;
+    *list = self;
+}
+
+void LMud_Package_Unlink(struct LMud_Package* self)
+{
+    if (self->next != NULL)
+        self->next->prev = self->prev;
+    if (self->prev != NULL)
+        *self->prev = self->next;
+}
+
 
 LMud_Any LMud_Package_Name(struct LMud_Package* self)
 {

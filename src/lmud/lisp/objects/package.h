@@ -8,12 +8,18 @@ struct LMud_Package
 {
     struct LMud_Object       _;
 
+    struct LMud_Package**    prev;
+    struct LMud_Package*     next;
+
     LMud_Any                 name;
     struct LMud_SymbolTable  symbols;
 };
 
 void LMud_Package_Create(struct LMud_Package* self, LMud_Any name);
 void LMud_Package_Destroy(struct LMud_Package* self);
+
+void LMud_Package_Link(struct LMud_Package* self, struct LMud_Package** list);
+void LMud_Package_Unlink(struct LMud_Package* self);
 
 LMud_Any LMud_Package_Name(struct LMud_Package* self);
 
