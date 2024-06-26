@@ -1,9 +1,9 @@
 
-(set-symbol-function 'map1
+(set-symbol-function 'lmud.int:map1
    (lambda (function list)
       (if list
           (cons (funcall function (car list))
-                (map1 function (cdr list))))))
+                (lmud.int:map1 function (cdr list))))))
 
 (set-symbol-function 'macroexpand
    (lambda (expression)
@@ -15,7 +15,7 @@
                 (if (if (symbolp head)
                         (if (symbol-macro head) t))
                     (macroexpand (apply (symbol-macro head) args))
-                    (map1 #'macroexpand expression))))
+                    (lmud.int:map1 #'macroexpand expression))))
            expression)))
 
 (set-symbol-function 'compile
@@ -36,7 +36,7 @@
       (list 'set-symbol-macro (list 'quote name)
             (list 'lambda args (list* 'block name body)))))
 
-(map1 #'eval '(
+(lmud.int:map1 #'eval '(
    (defmacro return (&rest args)
       (list* 'return-from 'nil args))
 
@@ -166,27 +166,27 @@
    (defun char<= (a b) (<= (char-code a) (char-code b)))
    (defun char>= (a b) (>= (char-code a) (char-code b)))
 
-   (defun sequence->list (sequence)
+   (defun conversions:sequence->list (sequence)
       (let ((list '())
             (len  (length sequence)))
          (dotimes (i len)
             (setq list (cons (aref sequence (- len i 1)) list)))
          list))
    
-   (defun list->vector (list)
+   (defun conversions:list->vector (list)
       (apply #'vector list))
    
-   (defun list->string (list)
+   (defun conversions:list->string (list)
       (apply #'string list))
    
-   (defun string->list (string)
-      (sequence->list string))
+   (defun conversions:string->list (string)
+      (conversions:sequence->list string))
    
-   (defun sequence->string (sequence)
-      (list->string (sequence->list sequence)))
+   (defun conversions:sequence->string (sequence)
+      (conversions:list->string (conversions:sequence->list sequence)))
    
-   (defun string->vector (string)
-      (list->vector (string->list string)))
+   (defun conversions:string->vector (string)
+      (conversions:list->vector (conversions:string->list string)))
 
    (defun lmud.bootstrap::repl ()
       (while t
