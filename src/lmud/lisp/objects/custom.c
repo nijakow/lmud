@@ -39,10 +39,12 @@ LMud_Size LMud_Custom_Size(struct LMud_Custom* self)
 
 LMud_Any LMud_Custom_At(struct LMud_Custom* self, LMud_Size index)
 {
+    assert(index < self->size);
     return self->slots[index];
 }
 
 void LMud_Custom_Set(struct LMud_Custom* self, LMud_Size index, LMud_Any value)
 {
+    assert(index < self->size);
     self->slots[index] = value;
 }

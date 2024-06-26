@@ -20,7 +20,8 @@
 
 (set-symbol-function 'compile
    (lambda (expression)
-      (lmud.int::%compile (macroexpand expression))))
+      (let ((expanded (macroexpand expression)))
+         (lmud.int::%compile expanded))))
 
 (set-symbol-function 'eval
    (lambda (expression)
@@ -447,25 +448,41 @@
    (defun (setf lmud.int:%custom-at) (value object index)
       (list 'lmud.int:%custom-set object index value))
 
-   (defparameter tos.int:<class> (lmud.int:%make-custom nil nil nil nil nil))
+   (defun tos.int:%class-constructor       (class) (lmud.int:%custom-at class 0))
+   (defun tos.int:%class-layout            (class) (lmud.int:%custom-at class 1))
+   (defun tos.int:%class-inheritance-chain (class) (lmud.int:%custom-at class 2))
+   (defun tos.int:%class-superclasses      (class) (lmud.int:%custom-at class 3))
+   (defun tos.int:%class-slots             (class) (lmud.int:%custom-at class 4))
+
+   (defun (setf tos.int:%class-constructor)       (value class) (list 'lmud.int:%custom-set class 0 value))
+   (defun (setf tos.int:%class-layout)            (value class) (list 'lmud.int:%custom-set class 1 value))
+   (defun (setf tos.int:%class-inheritance-chain) (value class) (list 'lmud.int:%custom-set class 2 value))
+   (defun (setf tos.int:%class-superclasses)      (value class) (list 'lmud.int:%custom-set class 3 value))
+   (defun (setf tos.int:%class-slots)             (value class) (list 'lmud.int:%custom-set class 4 value))
+
+   (defun tos.int:%slot-name          (slot) (lmud.int:%custom-at slot 0))
+   (defun tos.int:%slot-default-value (slot) (lmud.int:%custom-at slot 1))
+
+   (defun (setf tos.int:%slot-name)          (value slot) (list 'lmud.int:%custom-set slot 0 value))
+   (defun (setf tos.int:%slot-default-value) (value slot) (list 'lmud.int:%custom-set slot 1 value))
+
+
+   (defparameter tos.int:<class> (lmud.int:%make-custom nil nil nil nil nil nil))
 
    (setf (lmud.int:%custom-meta tos.int:<class>) tos.int:<class>)
 
-   (defun tos.int:default-constructor (class)
-      (lmud.int:%make-custom class))
-
    (defun tos.int:make-class (&key (constructor nil) (superclasses nil) (slots nil))
-      (let ((instance (lmud.int:%make-custom tos.int:<class> constructor nil superclasses slots)))
+      (let ((instance (lmud.int:%make-custom tos.int:<class> constructor nil nil superclasses slots)))
          (tos.int:rebuild-class-layout instance)
          (when constructor
-            (setf (lmud.int:%custom-at instance 0) constructor))
+            (setf (tos.int:%class-constructor instance) constructor))
          instance))
    
    (defun tos.int:class-instance-slot-index-by-name (class name)
-      (let ((allslots (lmud.int:%custom-at class 1)))
+      (let ((allslots (tos.int:%class-layout class)))
          (dotimes (i (length allslots))
             (let ((slot (aref allslots i)))
-               (if (eq name (lmud.int:%custom-at slot 0))
+               (if (eq name (tos.int:%slot-name slot))
                    (return i)))))
       nil)
    
@@ -477,25 +494,30 @@
          (when (null slot-index)
             (lmud.util:simple-error "Slot not found!"))
          (lmud.int:%custom-at object slot-index)))
-   
+
    (defun tos.int:rebuild-class-layout (class)
-      (let* ((layout (conversions:->vector (lmud.int:%custom-at class 3)))
-             (slots (lmud.int:%custom-at class 3))
+      (let* ((slots  (tos.int:%class-slots class))
+             (layout (conversions:->vector slots))
+             (inheritance-chain (apply #'append
+                                       (domap (superclass (tos.int:%class-superclasses class))
+                                          (tos.int:%class-inheritance-chain superclass))))
              (constructor-source
                (let ((class-var (gensym)))
                   (list 'lambda (list* class-var '&key
                                     (domap (slot slots)
-                                       (list (lmud.int:%custom-at slot 0)
-                                             (lmud.int:%custom-at slot 1))))
+                                       (list (tos.int:%slot-name          slot)
+                                             (tos.int:%slot-default-value slot))))
                      (list* 'lmud.int:%make-custom class-var
-                        (domap (slot slots) (lmud.int:%custom-at slot 0)))))))
-         (setf (lmud.int:%custom-at class 1) layout)
-         (setf (lmud.int:%custom-at class 0) (eval constructor-source)))
+                        (domap (slot slots) (tos.int:%slot-name slot)))))))
+         (setf (tos.int:%class-constructor       class) (eval constructor-source))
+         (setf (tos.int:%class-layout            class) layout)
+         (setf (tos.int:%class-inheritance-chain class) inheritance-chain))
       class)
    
    (defun tos.int:class-add-slots (class slots)
-      (setf (lmud.int:%custom-at class 3)
-            (append (lmud.int:%custom-at class 3) (copy-list slots)))
+      (setf (tos.int:%class-slots class)
+            (append (tos.int:%class-slots class)
+                    (copy-list slots)))
       (tos.int:rebuild-class-layout class))
    
    (defun tos.int:class-add-slot (class slot)
@@ -507,11 +529,12 @@
             (lmud.int:%make-custom class name default-value))))
 
    (defun tos.int:make-instance (class &rest params)
-      (apply (lmud.int:%custom-at class 0) class params))
+      (apply (tos.int:%class-constructor class) class params))
    
    (tos.int:class-add-slots tos.int:<class>
       (list (tos.int:make-instance tos.int:<slot> :name 'constructor)
             (tos.int:make-instance tos.int:<slot> :name 'layout)
+            (tos.int:make-instance tos.int:<slot> :name 'inheritance-chain)
             (tos.int:make-instance tos.int:<slot> :name 'superclasses)
             (tos.int:make-instance tos.int:<slot> :name 'slots)))
    
