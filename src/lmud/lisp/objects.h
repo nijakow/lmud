@@ -73,7 +73,7 @@ struct LMud_Cons*   LMud_Objects_Cons(struct LMud_Objects* self, LMud_Any car, L
 
 struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants);
 
-struct LMud_Package* LMud_Objects_Package(struct LMud_Objects* self);
+struct LMud_Package* LMud_Objects_Package(struct LMud_Objects* self, LMud_Any name);
 
 struct LMud_Ratio*  LMud_Objects_Ratio(struct LMud_Objects* self, LMud_Any numerator, LMud_Any denominator);
 

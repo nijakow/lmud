@@ -231,7 +231,7 @@ struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LM
     return function;
 }
 
-struct LMud_Package* LMud_Objects_Package(struct LMud_Objects* self)
+struct LMud_Package* LMud_Objects_Package(struct LMud_Objects* self, LMud_Any name)
 {
     struct LMud_Package*  package;
 
@@ -239,7 +239,7 @@ struct LMud_Package* LMud_Objects_Package(struct LMud_Objects* self)
 
     if (package != NULL)
     {
-        LMud_Package_Create(package);
+        LMud_Package_Create(package, name);
     }
 
     return package;

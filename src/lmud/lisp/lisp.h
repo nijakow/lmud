@@ -9,6 +9,9 @@
 
 struct LMud_Constants
 {
+    LMud_Any  default_package;
+    LMud_Any  keyword_package;
+
     LMud_Any  nil;
     LMud_Any  t;
     LMud_Any  quote;
@@ -69,7 +72,7 @@ LMud_Any LMud_Lisp_MakeBytes_FromData(struct LMud_Lisp* self, LMud_Size size, co
 LMud_Any LMud_Lisp_Closure(struct LMud_Lisp* self, struct LMud_Function* function, struct LMud_Frame* lexical);
 LMud_Any LMud_Lisp_Cons(struct LMud_Lisp* self, LMud_Any car, LMud_Any cdr);
 LMud_Any LMud_Lisp_Function(struct LMud_Lisp* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants);
-LMud_Any LMud_Lisp_Package(struct LMud_Lisp* self);
+LMud_Any LMud_Lisp_Package(struct LMud_Lisp* self, LMud_Any name);
 LMud_Any LMud_Lisp_Ratio(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator);
 LMud_Any LMud_Lisp_String(struct LMud_Lisp* self, const char* text);
 LMud_Any LMud_Lisp_Intern(struct LMud_Lisp* self, const char* name);

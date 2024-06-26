@@ -9,6 +9,9 @@
 
 bool LMud_Constants_Create(struct LMud_Constants* self, struct LMud_Lisp* lisp)
 {
+    self->default_package = LMud_Lisp_Package(lisp, LMud_Lisp_String(lisp, "LISP"));
+    self->keyword_package = LMud_Lisp_Package(lisp, LMud_Lisp_String(lisp, "KEYWORD"));
+
     /*
      * We have a bit of a chicken-and-egg problem here. We need to create the
      * NIL and T symbols, but we need to have the lisp object to initialize
@@ -228,9 +231,9 @@ LMud_Any LMud_Lisp_Function(struct LMud_Lisp* self, struct LMud_ArgInfo info, LM
     return LMud_Any_FromPointer(LMud_Objects_Function(&self->objects, info, bytecodes, constants));
 }
 
-LMud_Any LMud_Lisp_Package(struct LMud_Lisp* self)
+LMud_Any LMud_Lisp_Package(struct LMud_Lisp* self, LMud_Any name)
 {
-    return LMud_Any_FromPointer(LMud_Objects_Package(&self->objects));
+    return LMud_Any_FromPointer(LMud_Objects_Package(&self->objects, name));
 }
 
 LMud_Any LMud_Lisp_Ratio(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator)
