@@ -199,7 +199,7 @@
       (cond ((null list1) nil)
             ((member (car list1) list2) (cons (car list1) (intersection (cdr list1) list2)))
             (t (intersection (cdr list1) list2))))
-   
+
    (defun reduce (function sequence &key (from-end nil)
                                          (initial-value (if from-end
                                                             (prog1 (last sequence) (setq sequence (butlast sequence)))
@@ -214,6 +214,14 @@
              (dolist (item sequence)
                 (setq result (funcall function result item)))
              result)))
+
+   (defun lmud.util:append2 (l1 l2)
+      (if (endp l1)
+          l2
+          (cons (car l1) (lmud.util:append2 (cdr l1) l2))))
+   
+   (defun append (&rest lists)
+      (reduce #'lmud.util:append2 lists))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
