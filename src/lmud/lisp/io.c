@@ -307,7 +307,11 @@ void LMud_Lisp_ReadUntilBreakingChar(struct LMud_Lisp* lisp, struct LMud_InputSt
 bool LMud_Lisp_ReadAtom(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMud_Any* result)
 {
     struct LMud_StringBuilder  builder;
+    struct LMud_StringBuilder  builder2;
     const char*                ptr;
+    const char*                end_first_half;
+    const char*                second_half;
+    LMud_Any                   package;
     LMud_Any                   value;
 
     LMud_StringBuilder_Create(&builder);
@@ -318,7 +322,17 @@ bool LMud_Lisp_ReadAtom(struct LMud_Lisp* lisp, struct LMud_InputStream* stream,
         if (LMud_Lisp_ParseInt(lisp, ptr, &value)) {
             *result = value;
         } else {
-            *result = LMud_Lisp_InternUpcase(lisp, ptr);
+            if (LMud_CStr_FindAndPartition(ptr, "::", &end_first_half, &second_half) || LMud_CStr_FindAndPartition(ptr, ":", &end_first_half, &second_half)) {
+                LMud_StringBuilder_Create(&builder2);
+                {
+                    LMud_StringBuilder_AppendSlice(&builder2, ptr, end_first_half);
+                    package = LMud_Lisp_PackageByNameUpcase(lisp, LMud_StringBuilder_GetStatic(&builder2));
+                    *result = LMud_Lisp_InternUpcaseInPackage(lisp, package, second_half);
+                }
+                LMud_StringBuilder_Destroy(&builder2);
+            } else {
+                *result = LMud_Lisp_InternUpcase(lisp, ptr);
+            }
         }
     }
     LMud_StringBuilder_Destroy(&builder);

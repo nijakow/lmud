@@ -234,6 +234,14 @@ struct LMud_Package* LMud_Objects_Package(struct LMud_Objects* self, LMud_Any na
 {
     struct LMud_Package*  package;
 
+    for (package = self->packages; package != NULL; package = package->next)
+    {
+        if (LMud_Lisp_IsString(self->lisp, package->name) && LMud_CStr_Equals(LMud_String_Chars(LMud_Any_AsPointer(package->name)), LMud_String_Chars(LMud_Any_AsPointer(name))))
+        {
+            return package;
+        }
+    }
+
     package = LMud_Objects_Allocate(self, &self->types.package, 0);
 
     if (package != NULL)

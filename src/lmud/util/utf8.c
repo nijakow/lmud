@@ -142,7 +142,7 @@ LMud_Integer LMud_Rune_AsInteger(LMud_Rune rune)
 }
 
 
-LMud_Rune LMud_Utf8_UpperCase(LMud_Rune rune)
+LMud_Rune LMud_Rune_UpperCase(LMud_Rune rune)
 {
     if (rune >= 0x61 && rune <= 0x7A) {
         return rune - 0x20;
@@ -151,7 +151,7 @@ LMud_Rune LMud_Utf8_UpperCase(LMud_Rune rune)
     return rune;
 }
 
-LMud_Rune LMud_Utf8_LowerCase(LMud_Rune rune)
+LMud_Rune LMud_Rune_LowerCase(LMud_Rune rune)
 {
     if (rune >= 0x41 && rune <= 0x5A) {
         return rune + 0x20;

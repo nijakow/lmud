@@ -73,8 +73,12 @@ LMud_Any LMud_Lisp_Closure(struct LMud_Lisp* self, struct LMud_Function* functio
 LMud_Any LMud_Lisp_Cons(struct LMud_Lisp* self, LMud_Any car, LMud_Any cdr);
 LMud_Any LMud_Lisp_Function(struct LMud_Lisp* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants);
 LMud_Any LMud_Lisp_Package(struct LMud_Lisp* self, LMud_Any name);
+LMud_Any LMud_Lisp_PackageByName(struct LMud_Lisp* self, const char* name);
+LMud_Any LMud_Lisp_PackageByNameUpcase(struct LMud_Lisp* self, const char* name);
 LMud_Any LMud_Lisp_Ratio(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator);
 LMud_Any LMud_Lisp_String(struct LMud_Lisp* self, const char* text);
+LMud_Any LMud_Lisp_InternInPackage(struct LMud_Lisp* self, LMud_Any package, const char* name);
+LMud_Any LMud_Lisp_InternUpcaseInPackage(struct LMud_Lisp* self, LMud_Any package, const char* name);
 LMud_Any LMud_Lisp_Intern(struct LMud_Lisp* self, const char* name);
 LMud_Any LMud_Lisp_InternUpcase(struct LMud_Lisp* self, const char* name);
 LMud_Any LMud_Lisp_InternKeyword(struct LMud_Lisp* self, const char* name);

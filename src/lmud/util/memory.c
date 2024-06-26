@@ -48,6 +48,23 @@ bool LMud_CStr_EqualsIgnoreCase(const char* a, const char* b)
     return strcasecmp(a, b) == 0;
 }
 
+bool LMud_CStr_FindAndPartition(const char* cstr, const char* separator, const char** end, const char** after)
+{
+    const char*  found;
+
+    found = strstr(cstr, separator);
+
+    if (found == NULL)
+    {
+        return false;
+    }
+
+    *end   = found;
+    *after = found + strlen(separator);
+
+    return true;
+}
+
 char* LMud_Strdup(const char* str)
 {
     return strdup(str);

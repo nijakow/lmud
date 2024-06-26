@@ -1,5 +1,6 @@
 
 #include <lmud/util/memory.h>
+#include <lmud/util/utf8.h>
 
 #include "stringbuilder.h"
 
@@ -45,6 +46,20 @@ void LMud_StringBuilder_AppendChar(struct LMud_StringBuilder* self, char c)
     self->data[self->fill]   = '\0';
 }
 
+void LMud_StringBuilder_AppendRune(struct LMud_StringBuilder* self, LMud_Rune rune)
+{
+    struct LMud_Utf8_Encoder  encoder;
+
+    LMud_Utf8_Encoder_Create(&encoder, rune);
+    LMud_StringBuilder_AppendCStr(self, LMud_Utf8_Encoder_AsString(&encoder));
+    LMud_Utf8_Encoder_Destroy(&encoder);
+}
+
+void LMud_StringBuilder_AppendRune_Uppercased(struct LMud_StringBuilder* self, LMud_Rune rune)
+{
+    LMud_StringBuilder_AppendRune(self, LMud_Rune_UpperCase(rune));
+}
+
 void LMud_StringBuilder_AppendCStr(struct LMud_StringBuilder* self, const char* chars)
 {
     LMud_Size  index;
@@ -55,5 +70,36 @@ void LMud_StringBuilder_AppendCStr(struct LMud_StringBuilder* self, const char* 
         {
             LMud_StringBuilder_AppendChar(self, chars[index]);
         }
+    }
+}
+
+void LMud_StringBuilder_AppendCStr_Uppercased(struct LMud_StringBuilder* self, const char* chars)
+{
+    struct LMud_Utf8_Decoder  decoder;
+    LMud_Size                 index;
+    LMud_Rune                 rune;
+
+    LMud_Utf8_Decoder_Create(&decoder);
+    {
+        for (index = 0; chars[index] != '\0'; index++)
+        {
+            LMud_Utf8_Decoder_Push(&decoder, chars[index]);
+
+            if (LMud_Utf8_Decoder_GetRune(&decoder, &rune))
+            {
+                LMud_StringBuilder_AppendRune(self, LMud_Rune_UpperCase(rune));
+            }
+        }
+    }
+    LMud_Utf8_Decoder_Destroy(&decoder);
+}
+
+void LMud_StringBuilder_AppendSlice(struct LMud_StringBuilder* self, const char* begin, const char* end)
+{
+    LMud_Size  index;
+
+    for (index = 0; begin + index < end; index++)
+    {
+        LMud_StringBuilder_AppendChar(self, begin[index]);
     }
 }

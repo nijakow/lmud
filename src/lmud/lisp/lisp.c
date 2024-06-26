@@ -236,6 +236,24 @@ LMud_Any LMud_Lisp_Package(struct LMud_Lisp* self, LMud_Any name)
     return LMud_Any_FromPointer(LMud_Objects_Package(&self->objects, name));
 }
 
+LMud_Any LMud_Lisp_PackageByName(struct LMud_Lisp* self, const char* name)
+{
+    return LMud_Any_FromPointer(LMud_Objects_Package(&self->objects, LMud_Lisp_String(self, name)));
+}
+
+LMud_Any LMud_Lisp_PackageByNameUpcase(struct LMud_Lisp* self, const char* name)
+{
+    struct LMud_StringBuilder  builder;
+    LMud_Any                   result;
+
+    LMud_StringBuilder_Create(&builder);
+    LMud_StringBuilder_AppendCStr_Uppercased(&builder, name);
+    result = LMud_Lisp_PackageByName(self, LMud_StringBuilder_GetStatic(&builder));
+    LMud_StringBuilder_Destroy(&builder);
+
+    return result;
+}
+
 LMud_Any LMud_Lisp_Ratio(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator)
 {
     return LMud_Any_FromPointer(LMud_Objects_Ratio(&self->objects, numerator, denominator));
@@ -274,15 +292,10 @@ LMud_Any LMud_Lisp_InternUpcaseInPackage(struct LMud_Lisp* self, LMud_Any packag
 {
     struct LMud_StringBuilder  builder;
     LMud_Any                   result;
-    LMud_Size                  index;
 
     LMud_StringBuilder_Create(&builder);
-
-    for (index = 0; name[index] != '\0'; index++)
-        LMud_StringBuilder_AppendChar(&builder, toupper(name[index]));
-
+    LMud_StringBuilder_AppendCStr_Uppercased(&builder, name);
     result = LMud_Lisp_InternInPackage(self, package, LMud_StringBuilder_GetStatic(&builder));
-
     LMud_StringBuilder_Destroy(&builder);
 
     return result;

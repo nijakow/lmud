@@ -42,8 +42,8 @@ LMud_Rune    LMud_Rune_FromInteger(LMud_Integer value);
 char         LMud_Rune_AsChar(LMud_Rune rune);
 LMud_Integer LMud_Rune_AsInteger(LMud_Rune rune);
 
-LMud_Rune LMud_Utf8_UpperCase(LMud_Rune rune);
-LMud_Rune LMud_Utf8_LowerCase(LMud_Rune rune);
+LMud_Rune LMud_Rune_UpperCase(LMud_Rune rune);
+LMud_Rune LMud_Rune_LowerCase(LMud_Rune rune);
 
 bool        LMud_Rune_ByName(const char* name, LMud_Rune* rune);
 const char* LMud_Rune_Name(LMud_Rune rune);
