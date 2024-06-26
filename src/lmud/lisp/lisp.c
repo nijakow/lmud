@@ -92,6 +92,11 @@ bool LMud_Lisp_IsFunctionPointer(struct LMud_Lisp* self, void* object)
     return LMud_Types_IsFunction(LMud_Lisp_Types(self), object);
 }
 
+bool LMud_Lisp_IsPackagePointer(struct LMud_Lisp* self, void* object)
+{
+    return LMud_Types_IsPackage(LMud_Lisp_Types(self), object);
+}
+
 bool LMud_Lisp_IsRatioPointer(struct LMud_Lisp* self, void* object)
 {
     return LMud_Types_IsRatio(LMud_Lisp_Types(self), object);
@@ -136,6 +141,11 @@ bool LMud_Lisp_IsCons(struct LMud_Lisp* self, LMud_Any value)
 bool LMud_Lisp_IsFunction(struct LMud_Lisp* self, LMud_Any value)
 {
     return LMud_Any_IsPointer(value) && LMud_Lisp_IsFunctionPointer(self, LMud_Any_AsPointer(value));
+}
+
+bool LMud_Lisp_IsPackage(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Any_IsPointer(value) && LMud_Lisp_IsPackagePointer(self, LMud_Any_AsPointer(value));
 }
 
 bool LMud_Lisp_IsRatio(struct LMud_Lisp* self, LMud_Any value)
@@ -216,6 +226,11 @@ LMud_Any LMud_Lisp_Cons(struct LMud_Lisp* self, LMud_Any car, LMud_Any cdr)
 LMud_Any LMud_Lisp_Function(struct LMud_Lisp* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants)
 {
     return LMud_Any_FromPointer(LMud_Objects_Function(&self->objects, info, bytecodes, constants));
+}
+
+LMud_Any LMud_Lisp_Package(struct LMud_Lisp* self)
+{
+    return LMud_Any_FromPointer(LMud_Objects_Package(&self->objects));
 }
 
 LMud_Any LMud_Lisp_Ratio(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator)

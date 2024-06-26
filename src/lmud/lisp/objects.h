@@ -9,6 +9,7 @@
 #include <lmud/lisp/objects/closure.h>
 #include <lmud/lisp/objects/cons.h>
 #include <lmud/lisp/objects/function.h>
+#include <lmud/lisp/objects/package.h>
 #include <lmud/lisp/objects/ratio.h>
 #include <lmud/lisp/objects/string.h>
 #include <lmud/lisp/objects/symbol.h>
@@ -22,6 +23,7 @@ struct LMud_Types
     struct LMud_Type     closure;
     struct LMud_Type     cons;
     struct LMud_Type     function;
+    struct LMud_Type     package;
     struct LMud_Type     ratio;
     struct LMud_Type     string;
     struct LMud_Type     symbol;
@@ -36,6 +38,7 @@ bool LMud_Types_IsBytes(struct LMud_Types* self, void* object);
 bool LMud_Types_IsClosure(struct LMud_Types* self, void* object);
 bool LMud_Types_IsCons(struct LMud_Types* self, void* object);
 bool LMud_Types_IsFunction(struct LMud_Types* self, void* object);
+bool LMud_Types_IsPackage(struct LMud_Types* self, void* object);
 bool LMud_Types_IsRatio(struct LMud_Types* self, void* object);
 bool LMud_Types_IsString(struct LMud_Types* self, void* object);
 bool LMud_Types_IsSymbol(struct LMud_Types* self, void* object);
@@ -69,6 +72,8 @@ struct LMud_Closure* LMud_Objects_Closure(struct LMud_Objects* self, struct LMud
 struct LMud_Cons*   LMud_Objects_Cons(struct LMud_Objects* self, LMud_Any car, LMud_Any cdr);
 
 struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants);
+
+struct LMud_Package* LMud_Objects_Package(struct LMud_Objects* self);
 
 struct LMud_Ratio*  LMud_Objects_Ratio(struct LMud_Objects* self, LMud_Any numerator, LMud_Any denominator);
 

@@ -13,6 +13,7 @@ void LMud_Types_Create(struct LMud_Types* self)
     self->closure.base_size  = sizeof(struct LMud_Closure);
     self->cons.base_size     = sizeof(struct LMud_Cons);
     self->function.base_size = sizeof(struct LMud_Function);
+    self->package.base_size  = sizeof(struct LMud_Package);
     self->ratio.base_size    = sizeof(struct LMud_Ratio);
     self->string.base_size   = sizeof(struct LMud_String);
     self->symbol.base_size   = sizeof(struct LMud_Symbol);
@@ -51,6 +52,11 @@ bool LMud_Types_IsCons(struct LMud_Types* self, void* object)
 bool LMud_Types_IsFunction(struct LMud_Types* self, void* object)
 {
     return LMud_Type_TypeCheck(&self->function, object);
+}
+
+bool LMud_Types_IsPackage(struct LMud_Types* self, void* object)
+{
+    return LMud_Type_TypeCheck(&self->package, object);
 }
 
 bool LMud_Types_IsRatio(struct LMud_Types* self, void* object)
@@ -223,6 +229,20 @@ struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LM
     }
 
     return function;
+}
+
+struct LMud_Package* LMud_Objects_Package(struct LMud_Objects* self)
+{
+    struct LMud_Package*  package;
+
+    package = LMud_Objects_Allocate(self, &self->types.package, 0);
+
+    if (package != NULL)
+    {
+        LMud_Package_Create(package);
+    }
+
+    return package;
 }
 
 struct LMud_Ratio* LMud_Objects_Ratio(struct LMud_Objects* self, LMud_Any numerator, LMud_Any denominator)
