@@ -186,7 +186,7 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
         } else if (LMud_Lisp_IsClosurePointer(lisp, pointer)) {
             fprintf(stream, "⦍CLOSURE %p⦎", pointer);
         } else if (LMud_Lisp_IsBuiltinPointer(lisp, pointer)) {
-            fprintf(stream, "⦍BUILTIN %s %p⦎", ((struct LMud_Builtin*) pointer)->name, pointer);
+            fprintf(stream, "⦍MACHINE-CODE-FUNCTION :NAME %s⦎", ((struct LMud_Builtin*) pointer)->name);
         } else if (LMud_Lisp_IsRatioPointer(lisp, pointer)) {
             LMud_Lisp_Print(lisp, LMud_Ratio_Numerator((struct LMud_Ratio*) pointer), stream, escaped);
             fprintf(stream, "/");
