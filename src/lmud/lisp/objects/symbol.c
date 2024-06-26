@@ -18,7 +18,7 @@ void LMud_SymbolTable_Destroy(struct LMud_SymbolTable* self)
     }
 }
 
-struct LMud_Symbol* LMud_SymbolTable_Intern(struct LMud_SymbolTable* self, struct LMud_Objects* objects, const char* name)
+struct LMud_Symbol* LMud_SymbolTable_Intern(struct LMud_SymbolTable* self, struct LMud_Objects* objects, const char* name, LMud_Any package)
 {
     struct LMud_Symbol*  symbol;
 
@@ -37,6 +37,7 @@ struct LMud_Symbol* LMud_SymbolTable_Intern(struct LMud_SymbolTable* self, struc
         LMud_Symbol_Create(
             symbol,
             self,
+            package,
             LMud_Any_FromPointer(LMud_Objects_String(objects, name)),
             LMud_Lisp_Nil(LMud_Objects_GetLisp(objects)),
             LMud_Lisp_Nil(LMud_Objects_GetLisp(objects)),
@@ -61,12 +62,13 @@ void LMud_SymbolTable_Dump(struct LMud_SymbolTable* self)
 }
 
 
-void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_SymbolTable* table, LMud_Any name, LMud_Any value, LMud_Any function, LMud_Any macro, LMud_Any plist)
+void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_SymbolTable* table, LMud_Any package, LMud_Any name, LMud_Any value, LMud_Any function, LMud_Any macro, LMud_Any plist)
 {
     self->prev = NULL;
     self->next = NULL;
 
-    self->name = name;
+    self->package = package;
+    self->name    = name;
 
     self->value    = value;
     self->function = function;
@@ -127,6 +129,11 @@ bool LMud_Symbol_IsGensym(struct LMud_Symbol* self)
 void LMud_Symbol_MakeGensym(struct LMud_Symbol* self)
 {
     self->gensym = true;
+}
+
+LMud_Any LMud_Symbol_Package(struct LMud_Symbol* self)
+{
+    return self->package;
 }
 
 const char* LMud_Symbol_Name(struct LMud_Symbol* self)

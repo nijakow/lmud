@@ -15,4 +15,6 @@ struct LMud_Package
 void LMud_Package_Create(struct LMud_Package* self, LMud_Any name);
 void LMud_Package_Destroy(struct LMud_Package* self);
 
+LMud_Any LMud_Package_Name(struct LMud_Package* self);
+
 struct LMud_SymbolTable* LMud_Package_GetSymbolTable(struct LMud_Package* self);

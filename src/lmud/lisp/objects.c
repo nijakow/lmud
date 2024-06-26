@@ -285,7 +285,7 @@ struct LMud_String* LMud_Objects_String(struct LMud_Objects* self, const char* t
 
 struct LMud_Symbol* LMud_Objects_PrimitiveIntern(struct LMud_Objects* self, struct LMud_Package* package, const char* name)
 {
-    return LMud_SymbolTable_Intern(LMud_Package_GetSymbolTable(package), self, name);
+    return LMud_SymbolTable_Intern(LMud_Package_GetSymbolTable(package), self, name, LMud_Any_FromPointer(package));
 }
 
 struct LMud_Symbol* LMud_Objects_Intern(struct LMud_Objects* self, struct LMud_Package* package, const char* name)
@@ -304,6 +304,7 @@ struct LMud_Symbol* LMud_Objects_Gensym(struct LMud_Objects* self)
         LMud_Symbol_Create(
             symbol,
             NULL,
+            LMud_Lisp_Nil(self->lisp),
             LMud_Lisp_Nil(self->lisp),
             LMud_Lisp_Nil(self->lisp),
             LMud_Lisp_Nil(self->lisp),

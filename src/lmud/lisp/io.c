@@ -117,6 +117,33 @@ void LMud_Lisp_BeginPrintList(struct LMud_Lisp* lisp, LMud_Any list, FILE* strea
     }
 }
 
+void LMud_Lisp_PrintSymbol(struct LMud_Lisp* lisp, LMud_Any symbol, FILE* stream, bool escaped)
+{
+    LMud_Any             package;
+    struct LMud_Symbol*  symbol_object;
+
+    (void) escaped;
+
+    symbol_object = LMud_Any_AsPointer(symbol);
+    package       = LMud_Symbol_Package(symbol_object);
+
+    if (LMud_Symbol_IsGensym(symbol_object)) {
+        fprintf(stream, "⦍GENSYM %p⦎", symbol_object);
+    } else {
+        if (LMud_Lisp_IsPackage(lisp, package)) {
+            if (LMud_Any_Eq(package, lisp->constants.default_package)) {
+                // Do nothing
+            } else if (LMud_Any_Eq(package, lisp->constants.keyword_package)) {
+                fprintf(stream, ":");
+            } else {
+                LMud_Lisp_Print(lisp, LMud_Package_Name(LMud_Any_AsPointer(package)), stream, false);
+                fprintf(stream, "::");
+            }
+        }
+        fprintf(stream, "%s", LMud_Symbol_Name(symbol_object));
+    }
+}
+
 void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool escaped)
 {
     void*  pointer;
@@ -141,11 +168,7 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
                 fprintf(stream, "%s", ((struct LMud_String*) pointer)->chars);
             }
         } else if (LMud_Lisp_IsSymbolPointer(lisp, pointer)) {
-            if (LMud_Symbol_IsGensym((struct LMud_Symbol*) pointer)) {
-                fprintf(stream, "⦍GENSYM %p⦎", pointer);
-            } else {
-                LMud_Lisp_Print(lisp, ((struct LMud_Symbol*) pointer)->name, stream, false);
-            }
+            LMud_Lisp_PrintSymbol(lisp, object, stream, escaped);
         } else if (LMud_Lisp_IsFunctionPointer(lisp, pointer)) {
             fprintf(stream, "⦍BYTE-COMPILED-FUNCTION %p :BYTECODES ", pointer);
             LMud_Lisp_Print(lisp, LMud_Function_Bytecodes(pointer), stream, true);
