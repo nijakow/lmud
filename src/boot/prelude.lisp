@@ -487,6 +487,11 @@
          (conversions:->list result)))
 
 
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
+   ;;;    Binding and Destructuring
+   ;;;
+
    (defmacro destructuring-bind (lambda-list expression &body forms)
       (let ((let-expressions '())
             (expr-sym (gensym)))
@@ -500,6 +505,11 @@
                (list 'let (list (list expr-sym expression))
                   (list* 'let (reverse let-expressions)
                      forms)))))
+
+   (defmacro multiple-value-bind (lambda-list expression &body forms)
+      (list* 'destructuring-bind lambda-list
+             (list 'multiple-value-list expression)
+             forms))
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
