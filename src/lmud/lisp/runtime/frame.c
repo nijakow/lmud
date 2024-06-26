@@ -93,11 +93,6 @@ void LMud_Frame_Move(struct LMud_Frame* self, struct LMud_Frame* location)
     location->references = NULL;
 
     /*
-     * Also, our lexical reference needs to be updated.
-     */
-    LMud_FrameRef_Create(&location->lexical, self->lexical.frame);
-
-    /*
      * Transfer all references to the new frame.
      */
     while (self->references != NULL)
