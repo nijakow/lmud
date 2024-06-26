@@ -238,6 +238,12 @@
       (if (consp list)
           (cons (car list) (copy-list (cdr list)))
           (cdr list)))
+   
+   (defun reverse (list)
+      (let ((result nil))
+         (dolist (item list)
+            (setq result (cons item result)))
+         result))
 
    (defun member (item list)
       (cond ((null list) nil)
@@ -606,15 +612,31 @@
       (conversions:->bool
          (member class1 (tos.int:%class-inheritance-chain class2))))
 
+   (defmacro tos.int:defclass (name superclasses slot-descriptions)
+      (list 'tos.int:defclass-execute (list 'quote name)
+                                      (list* 'list superclasses)
+                                      (list 'quote slot-descriptions)))
+   
+   (tos.int:defclass tos.int:<t> () ())
+
+   (tos.int:defclass tos.int:<generic-function> ()
+      ((dispatch-table)))
+   
+   (defun tos.int:extract-typed-args (arglist)
+      (cond ((endp arglist) nil)
+            ((member (car arglist) '(&optional &key &rest &body)) nil)
+            ((not (consp (car arglist)))
+             (cons (list (car arglist) tos.int:<t>)
+                   (tos.int:extract-typed-args (cdr arglist))))
+            (t (cons (car arglist) (tos.int:extract-typed-args (cdr arglist))))))
+
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
    ;;; These are the public TOS macros
    ;;;
 
    (defmacro tos:defclass (name superclasses slot-descriptions)
-      (list 'tos.int:defclass-execute (list 'quote name)
-                                      (list* 'list superclasses)
-                                      (list 'quote slot-descriptions)))
+      (list 'tos.int:defclass name superclasses slot-descriptions))
    
    (defun tos:class-of (object)
       (tos.int:class-of object))
