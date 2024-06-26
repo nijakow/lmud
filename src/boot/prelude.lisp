@@ -467,24 +467,21 @@
    ;;;    Sorting
    ;;;
 
-   (defun lmud.util:vector-bubble-sort (vector predicate &key (key #'identity))
-      (let ((n (length vector)))
-         (while t
-            (let ((swapped nil))
-               (dotimes (j (- n 1))
-                  (let ((a (aref vector j))
-                        (b (aref vector (+ j 1))))
-                     (when (funcall predicate (funcall key b) (funcall key a))
-                        (setf (aref vector j) b)
-                        (setf (aref vector (+ j 1)) a)
-                        (setq swapped t))))
-               (unless swapped (return vector))))
-         vector))
+   (defun lmud.util:insertion-step (entry list predicate &key (key #'identity))
+      (let ((value (funcall key entry)))
+         (cond ((endp list) (list entry))
+               ((funcall predicate value (funcall key (car list)))
+                (cons entry list))
+               (t (cons (car list) (lmud.util:insertion-step entry (cdr list) predicate :key key))))))
+
+   (defun lmud.util:insertion-sort (list predicate &key (key #'identity))
+      (let ((lst '()))
+         (dolist (entry list)
+            (setq lst (lmud.util:insertion-step entry lst predicate :key key)))
+         lst))
 
    (defun sort (sequence predicate &key (key #'identity))
-      (let ((result (lmud.util:vector-bubble-sort (conversions:->vector sequence) predicate :key key))
-            (result-list nil))
-         (conversions:->list result)))
+      (lmud.util:insertion-sort sequence predicate :key key))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -573,6 +570,12 @@
          (when (null slot-index)
             (lmud.util:simple-error "Slot not found!"))
          (lmud.int:%custom-at object slot-index)))
+   
+   (defun tos.int:set-slot-value-by-name (object slot-name value)
+      (let ((slot-index (tos.int:class-instance-slot-index-by-name (tos.int:class-of object) slot-name)))
+         (when (null slot-index)
+            (lmud.util:simple-error "Slot not found!"))
+         (setf (lmud.int:%custom-at object slot-index) value)))
 
    (defun tos.int:rebuild-class-layout (class)
       (let* ((slots  (tos.int:%class-slots class))
@@ -636,6 +639,9 @@
       (conversions:->bool
          (member class1 (tos.int:%class-inheritance-chain class2))))
 
+   (defun tos.int:specific-> (class1 class2)
+      (tos.int:specific-< class2 class1))
+
    (defmacro tos.int:defclass (name superclasses slot-descriptions)
       (list 'tos.int:defclass-execute (list 'quote name)
                                       (list* 'list superclasses)
@@ -646,6 +652,32 @@
    (tos.int:defclass tos.int:<generic-function> ()
       ((dispatch-table)))
    
+   (defun tos.int:%defclass-dispatch-table (gf)
+      (tos.int:slot-value-by-name gf 'dispatch-table))
+   
+   (defun (setf tos.int:%defclass-dispatch-table) (value gf)
+      (list 'tos.int:set-slot-value-by-name gf ''dispatch-table value))
+
+   (defun tos.int:typed-arglist-equal-arity-specific-> (t1 t2)
+      (cond ((endp t1) nil)
+            ((endp t2) (lmud.util:simple-error "Arity mismatch!"))
+            (t (let ((a (cdar t1))
+                     (b (cdar t2)))
+                  (or (tos.int:specific-> a b)
+                      (and (not (tos.int:specific-> b a))
+                           (tos.int:typed-arglist-equal-arity-specific-> (cdr t1) (cdr t2))))))))
+
+   (defun tos.int:typed-arglist-specific-> (t1 t2)
+      (let ((l1 (length t1))
+            (l2 (length t2)))
+         (cond ((> l1 l2) t)
+               ((< l1 l2) nil)
+               (t (tos.int:typed-arglist-equal-arity-specific-> t1 t2)))))
+   
+   (defun tos.int:generic-function-add-method (gf fixed-args flexible-args lambda)
+      ;; TODO
+      ())
+
    (defun tos.int:extract-typed-args (arglist)
       (cond ((endp arglist) (values nil nil))
             ((member (car arglist) '(&optional &key &rest &body)) (values nil arglist))
@@ -682,6 +714,21 @@
    (tos:defclass <e> (<a> <b>) ())
    (tos:defclass <f> (<b> <c>) ())
    (tos:defclass <g> (<e> <f>) ())
+
+   (lmud.dummy::%prin1
+      (sort (list (list)
+                  (list (cons 'a <a>))
+                  (list (cons 'b <c>))
+                  (list (cons 'c <c>))
+                  (list (cons 'd <d>))
+                  (list (cons 'e <e>))
+                  (list (cons 'f <f>))
+                  (list (cons 'g <g>))
+                  (list (cons 'a <a>) (cons 'g <g>))
+                  (list (cons 'e <e>) (cons 'f <f>))
+                  (list (cons 'a <a>) (cons 'b <b>)))
+            #'tos.int:typed-arglist-specific->))
+   (lmud.dummy::%terpri)
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
