@@ -20,7 +20,7 @@
 
 (set-symbol-function 'compile
    (lambda (expression)
-      (%compile (macroexpand expression))))
+      (lmud.int::%compile (macroexpand expression))))
 
 (set-symbol-function 'eval
    (lambda (expression)
@@ -188,15 +188,15 @@
    (defun string->vector (string)
       (list->vector (string->list string)))
 
-   (defun repl ()
+   (defun lmud.bootstrap::repl ()
       (while t
-         (%princ "⍝ ")
-         (let ((expr (%read)))
+         (lmud.dummy::%princ "⍝ ")
+         (let ((expr (lmud.dummy::%read)))
             (dolist (e (multiple-value-list (eval expr)))
-               (%princ "  ")
-               (%prin1 e)
-               (%terpri)))))
+               (lmud.dummy::%princ "  ")
+               (lmud.dummy::%prin1 e)
+               (lmud.dummy::%terpri)))))
 
-   (repl)
+   (lmud.bootstrap::repl)
 
 ))

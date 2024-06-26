@@ -331,6 +331,16 @@ LMud_Any LMud_Lisp_InternKeywordUpcase(struct LMud_Lisp* self, const char* name)
     return LMud_Lisp_InternUpcaseInPackage(self, self->constants.keyword_package, name);
 }
 
+LMud_Any LMud_Lisp_EasyIntern(struct LMud_Lisp* self, const char* package_name, const char* name)
+{
+    return LMud_Lisp_InternInPackage(self, LMud_Lisp_PackageByName(self, package_name), name);
+}
+
+LMud_Any LMud_Lisp_EasyUpcaseIntern(struct LMud_Lisp* self, const char* package_name, const char* name)
+{
+    return LMud_Lisp_InternUpcaseInPackage(self, LMud_Lisp_PackageByNameUpcase(self, package_name), name);
+}
+
 LMud_Any LMud_Lisp_ReinternAsKeyword(struct LMud_Lisp* self, LMud_Any symbol)
 {
     assert(LMud_Lisp_IsSymbol(self, symbol));
@@ -490,6 +500,17 @@ void LMud_Lisp_InstallBuiltin(struct LMud_Lisp* self, const char* name, LMud_Bui
     LMud_Any             builtin;
 
     symbol  = LMud_Any_AsPointer(LMud_Lisp_Intern(self, name));
+    builtin = LMud_Lisp_Builtin(self, name, function);
+
+    LMud_Symbol_SetFunction(symbol, builtin);
+}
+
+void LMud_Lisp_InstallPackagedBuiltin(struct LMud_Lisp* self, const char* package_name, const char* name, LMud_BuiltinFunction function)
+{
+    struct LMud_Symbol*  symbol;
+    LMud_Any             builtin;
+
+    symbol  = LMud_Any_AsPointer(LMud_Lisp_EasyIntern(self, package_name, name));
     builtin = LMud_Lisp_Builtin(self, name, function);
 
     LMud_Symbol_SetFunction(symbol, builtin);

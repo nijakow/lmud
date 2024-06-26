@@ -86,6 +86,8 @@ LMud_Any LMud_Lisp_Intern(struct LMud_Lisp* self, const char* name);
 LMud_Any LMud_Lisp_InternUpcase(struct LMud_Lisp* self, const char* name);
 LMud_Any LMud_Lisp_InternKeyword(struct LMud_Lisp* self, const char* name);
 LMud_Any LMud_Lisp_InternKeywordUpcase(struct LMud_Lisp* self, const char* name);
+LMud_Any LMud_Lisp_EasyIntern(struct LMud_Lisp* self, const char* package_name, const char* name);
+LMud_Any LMud_Lisp_EasyUpcaseIntern(struct LMud_Lisp* self, const char* package_name, const char* name);
 LMud_Any LMud_Lisp_ReinternAsKeyword(struct LMud_Lisp* self, LMud_Any symbol);
 LMud_Any LMud_Lisp_Gensym(struct LMud_Lisp* self);
 
@@ -111,5 +113,6 @@ LMud_Any LMud_Lisp_QuoteFunction(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_Compile(struct LMud_Lisp* self, LMud_Any expression, LMud_Any* result);
 
 void LMud_Lisp_InstallBuiltin(struct LMud_Lisp* self, const char* name, LMud_BuiltinFunction function);
+void LMud_Lisp_InstallPackagedBuiltin(struct LMud_Lisp* self, const char* package_name, const char* name, LMud_BuiltinFunction function);
 
 void LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename);

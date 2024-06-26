@@ -731,7 +731,6 @@ void LMud_Builtin_Modulo(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
 
 void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
 {
-    LMud_Lisp_InstallBuiltin(lisp, "HELLO-WORLD", LMud_Builtin_HelloWorld);
     LMud_Lisp_InstallBuiltin(lisp, "FUNCALL", LMud_Builtin_Funcall);
     LMud_Lisp_InstallBuiltin(lisp, "APPLY", LMud_Builtin_Apply);
     LMud_Lisp_InstallBuiltin(lisp, "VALUES", LMud_Builtin_Values);
@@ -755,12 +754,6 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "CDR", LMud_Builtin_Cdr);
     LMud_Lisp_InstallBuiltin(lisp, "RPLACA", LMud_Builtin_Rplaca);
     LMud_Lisp_InstallBuiltin(lisp, "RPLACD", LMud_Builtin_Rplacd);
-    LMud_Lisp_InstallBuiltin(lisp, "%CUSTOMP", LMud_Builtin_Customp);
-    LMud_Lisp_InstallBuiltin(lisp, "%MAKE-CUSTOM", LMud_Builtin_MakeCustom);
-    LMud_Lisp_InstallBuiltin(lisp, "%CUSTOM-META", LMud_Builtin_CustomMeta);
-    LMud_Lisp_InstallBuiltin(lisp, "%CUSTOM-SIZE", LMud_Builtin_CustomSize);
-    LMud_Lisp_InstallBuiltin(lisp, "%CUSTOM-AT", LMud_Builtin_CustomAt);
-    LMud_Lisp_InstallBuiltin(lisp, "%CUSTOM-SET", LMud_Builtin_CustomSet);
     LMud_Lisp_InstallBuiltin(lisp, "EQ", LMud_Builtin_Eq);
     LMud_Lisp_InstallBuiltin(lisp, "LIST", LMud_Builtin_List);
     LMud_Lisp_InstallBuiltin(lisp, "LIST*", LMud_Builtin_ListStar);
@@ -768,11 +761,6 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "VECTOR", LMud_Builtin_Vector);
     LMud_Lisp_InstallBuiltin(lisp, "STRING", LMud_Builtin_String);
     LMud_Lisp_InstallBuiltin(lisp, "AREF", LMud_Builtin_Aref);
-    LMud_Lisp_InstallBuiltin(lisp, "%COMPILE", LMud_Builtin_Compile);
-    LMud_Lisp_InstallBuiltin(lisp, "%READ", LMud_Builtin_Read);
-    LMud_Lisp_InstallBuiltin(lisp, "%PRINC", LMud_Builtin_Princ);
-    LMud_Lisp_InstallBuiltin(lisp, "%PRIN1", LMud_Builtin_Prin1);
-    LMud_Lisp_InstallBuiltin(lisp, "%TERPRI", LMud_Builtin_Terpri);
     LMud_Lisp_InstallBuiltin(lisp, "CHARACTERP", LMud_Builtin_Characterp);
     LMud_Lisp_InstallBuiltin(lisp, "CHAR-CODE", LMud_Builtin_CharCode);
     LMud_Lisp_InstallBuiltin(lisp, "CODE-CHAR", LMud_Builtin_CodeChar);
@@ -788,4 +776,17 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "*", LMud_Builtin_Multiply);
     LMud_Lisp_InstallBuiltin(lisp, "/", LMud_Builtin_Divide);
     LMud_Lisp_InstallBuiltin(lisp, "MOD", LMud_Builtin_Modulo);
+
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.TEST", "HELLO-WORLD", LMud_Builtin_HelloWorld);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOMP", LMud_Builtin_Customp);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%MAKE-CUSTOM", LMud_Builtin_MakeCustom);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-META", LMud_Builtin_CustomMeta);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-SIZE", LMud_Builtin_CustomSize);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-AT", LMud_Builtin_CustomAt);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-SET", LMud_Builtin_CustomSet);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%COMPILE", LMud_Builtin_Compile);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRIN1", LMud_Builtin_Prin1);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%TERPRI", LMud_Builtin_Terpri);
 }
