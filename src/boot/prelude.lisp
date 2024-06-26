@@ -373,6 +373,23 @@
                     (lmud.util:simple-error "Setf expects a symbol!"))))
             (t (list 'setq place value))))
 
+   (defun (setf car) (value cons) (list 'rplaca cons value))
+   (defun (setf cdr) (value cons) (list 'rplacd cons value))
+
+   (defmacro push (item place)
+      (list 'setf place (list 'cons item place)))
+   
+   (defmacro pop (place)
+      (let ((temp (gensym)))
+         (list 'let (list (list temp place))
+            (list 'setf place (list 'cdr temp))
+            (list 'car temp))))
+   
+   (defmacro incf (place)
+      (list 'setf place (list '+ place 1)))
+   
+   (defmacro decf (place)
+      (list 'setf place (list '- place 1)))
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
