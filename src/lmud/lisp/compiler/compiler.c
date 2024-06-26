@@ -301,19 +301,19 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->uses_lexical_stuff   = false;
     self->variadic             = false;
 
-    self->cached.symbol_quote    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "QUOTE");
-    self->cached.symbol_function = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FUNCTION");
-    self->cached.symbol_lambda   = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LAMBDA");
-    self->cached.symbol_block    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "BLOCK");
-    self->cached.symbol_progn    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "PROGN");
-    self->cached.symbol_setq     = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "SETQ");
-    self->cached.symbol_let      = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LET");
-    self->cached.symbol_flet     = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FLET");
-    self->cached.symbol_labels   = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LABELS");
-    self->cached.symbol_if       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "IF");
-    self->cached.symbol_while    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "WHILE");
-    self->cached.symbol_mvl      = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "MULTIPLE-VALUE-LIST");
-    self->cached.symbol_return   = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "RETURN");
+    self->cached.symbol_quote       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "QUOTE");
+    self->cached.symbol_function    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FUNCTION");
+    self->cached.symbol_lambda      = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LAMBDA");
+    self->cached.symbol_block       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "BLOCK");
+    self->cached.symbol_progn       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "PROGN");
+    self->cached.symbol_setq        = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "SETQ");
+    self->cached.symbol_let         = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LET");
+    self->cached.symbol_flet        = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FLET");
+    self->cached.symbol_labels      = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LABELS");
+    self->cached.symbol_if          = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "IF");
+    self->cached.symbol_while       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "WHILE");
+    self->cached.symbol_mvl         = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "MULTIPLE-VALUE-LIST");
+    self->cached.symbol_return_from = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "RETURN-FROM");
 
     self->cached.symbol_andrest     = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&REST");
     self->cached.symbol_andoptional = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&OPTIONAL");
@@ -434,6 +434,21 @@ void LMud_Compiler_EndBlock(struct LMud_Compiler* self)
     LMud_Compiler_PopScope(self);
 }
 
+bool LMud_Compiler_FindBlock(struct LMud_Compiler* self, LMud_Any name, struct LMud_ScopeBlockInfo** block_info)
+{
+    struct LMud_Scope*  scope;
+
+    for (scope = self->scopes; scope != NULL; scope = scope->surrounding)
+    {
+        if (scope->block_info != NULL && LMud_Any_Eq(scope->block_info->name, name))
+        {
+            *block_info = scope->block_info;
+            return true;
+        }
+    }
+
+    return false;
+}
 
 bool LMud_Compiler_FindBinding(struct LMud_Compiler* self, LMud_Any name, enum LMud_BindingType type, struct LMud_Binding** binding)
 {
@@ -951,8 +966,10 @@ void LMud_Compiler_CompileLambda(struct LMud_Compiler* self, LMud_Any arglist, L
     LMud_Any              lambda;
 
     LMud_Compiler_Create_Lexical(&subcompiler, self);
+    LMud_Compiler_BeginBlock(&subcompiler, LMud_Lisp_Nil(LMud_Compiler_GetLisp(self)));
     LMud_Compiler_ProcessArgumentList(&subcompiler, arglist);
     LMud_Compiler_CompileExpressions(&subcompiler, body);
+    LMud_Compiler_EndBlock(&subcompiler);
     lambda = LMud_Compiler_Build(&subcompiler);
     LMud_Compiler_Destroy(&subcompiler);
 
@@ -1263,18 +1280,27 @@ void LMud_Compiler_CompileSpecialMultipleValueList(struct LMud_Compiler* self, L
     LMud_Compiler_WriteMultipleValueList(self);
 }
 
-void LMud_Compiler_CompileSpecialReturn(struct LMud_Compiler* self, LMud_Any arguments)
+void LMud_Compiler_CompileSpecialReturnFrom(struct LMud_Compiler* self, LMud_Any arguments)
 {
-    LMud_Any  retval;
+    LMud_Any                     name;
+    LMud_Any                     retval;
+    struct LMud_ScopeBlockInfo*  block_info;
 
     /*
-     * TODO: Error if arguments is not a list of length 1
+     * TODO: Error if arguments is not a list of length 2
      */
-    retval = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &name);
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &retval);
+
+    /*
+     * TODO: Error if the block does not exist
+     */
+    assert(LMud_Compiler_FindBlock(self, name, &block_info));
 
     LMud_Compiler_Compile(self, retval);
-    LMud_Compiler_WriteReturn(self);
+    LMud_Compiler_WriteJump(self, block_info->end_label);
 }
+
 
 void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expression)
 {
@@ -1287,19 +1313,19 @@ void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expre
     /*
      * Handle special forms
      */
-         if (LMud_Any_Eq(function, self->cached.symbol_quote))    LMud_Compiler_CompileSpecialQuote(self, arguments);
-    else if (LMud_Any_Eq(function, self->cached.symbol_function)) LMud_Compiler_CompileSpecialFunction(self, arguments);
-    else if (LMud_Any_Eq(function, self->cached.symbol_lambda))   LMud_Compiler_CompileSpecialLambda(self, arguments);
-    else if (LMud_Any_Eq(function, self->cached.symbol_block))    LMud_Compiler_CompileSpecialBlock(self, arguments);
-    else if (LMud_Any_Eq(function, self->cached.symbol_progn))    LMud_Compiler_CompileSpecialProgn(self, arguments);
-    else if (LMud_Any_Eq(function, self->cached.symbol_setq))     LMud_Compiler_CompileSpecialSetq(self, arguments);
-    else if (LMud_Any_Eq(function, self->cached.symbol_let))      LMud_Compiler_CompileSpecialLet(self, arguments);
-    else if (LMud_Any_Eq(function, self->cached.symbol_flet))     LMud_Compiler_CompileSpecialFlet(self, arguments);
-    else if (LMud_Any_Eq(function, self->cached.symbol_labels))   LMud_Compiler_CompileSpecialLabels(self, arguments);
-    else if (LMud_Any_Eq(function, self->cached.symbol_if))       LMud_Compiler_CompileSpecialIf(self, arguments);
-    else if (LMud_Any_Eq(function, self->cached.symbol_while))    LMud_Compiler_CompileSpecialWhile(self, arguments);
-    else if (LMud_Any_Eq(function, self->cached.symbol_mvl))      LMud_Compiler_CompileSpecialMultipleValueList(self, arguments);
-    else if (LMud_Any_Eq(function, self->cached.symbol_return))   LMud_Compiler_CompileSpecialReturn(self, arguments);
+         if (LMud_Any_Eq(function, self->cached.symbol_quote))       LMud_Compiler_CompileSpecialQuote(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_function))    LMud_Compiler_CompileSpecialFunction(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_lambda))      LMud_Compiler_CompileSpecialLambda(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_block))       LMud_Compiler_CompileSpecialBlock(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_progn))       LMud_Compiler_CompileSpecialProgn(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_setq))        LMud_Compiler_CompileSpecialSetq(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_let))         LMud_Compiler_CompileSpecialLet(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_flet))        LMud_Compiler_CompileSpecialFlet(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_labels))      LMud_Compiler_CompileSpecialLabels(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_if))          LMud_Compiler_CompileSpecialIf(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_while))       LMud_Compiler_CompileSpecialWhile(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_mvl))         LMud_Compiler_CompileSpecialMultipleValueList(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_return_from)) LMud_Compiler_CompileSpecialReturnFrom(self, arguments);
     else LMud_Compiler_CompileFuncall(self, function, arguments);
 }
 

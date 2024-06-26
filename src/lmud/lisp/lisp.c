@@ -441,7 +441,9 @@ bool LMud_Lisp_Compile(struct LMud_Lisp* self, LMud_Any expression, LMud_Any* re
     LMud_CompilerSession_Create(&session, self);
     LMud_Compiler_Create(&compiler, &session);
 
+    LMud_Compiler_BeginBlock(&compiler, LMud_Lisp_Nil(self));
     LMud_Compiler_Compile(&compiler, expression);
+    LMud_Compiler_EndBlock(&compiler);
 
     function = LMud_Compiler_Build(&compiler);
 

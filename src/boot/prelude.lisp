@@ -37,6 +37,9 @@
             (list 'lambda args (list* 'block name body)))))
 
 (map1 #'eval '(
+   (defmacro return (&rest args)
+      (list* 'return-from 'nil args))
+
    (defun caar (e) (car (car e)))
    (defun cadr (e) (car (cdr e)))
    (defun cdar (e) (cdr (car e)))

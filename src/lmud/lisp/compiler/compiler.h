@@ -143,7 +143,7 @@ struct LMud_Compiler
         LMud_Any                    symbol_if;
         LMud_Any                    symbol_while;
         LMud_Any                    symbol_mvl;
-        LMud_Any                    symbol_return;
+        LMud_Any                    symbol_return_from;
 
         LMud_Any                    symbol_andrest;
         LMud_Any                    symbol_andoptional;
@@ -160,6 +160,9 @@ struct LMud_Lisp* LMud_Compiler_GetLisp(struct LMud_Compiler* self);
 
 void LMud_Compiler_PushScope(struct LMud_Compiler* self);
 void LMud_Compiler_PopScope(struct LMud_Compiler* self);
+
+void LMud_Compiler_BeginBlock(struct LMud_Compiler* self, LMud_Any name);
+void LMud_Compiler_EndBlock(struct LMud_Compiler* self);
 
 struct LMud_Register* LMud_Compiler_AllocateRegister(struct LMud_Compiler* self);
 
