@@ -34,7 +34,7 @@
 (set-symbol-macro 'defmacro
    (lambda (name args &rest body)
       (list 'set-symbol-macro (list 'quote name)
-            (list* 'lambda args body))))
+            (list 'lambda args (list* 'block name body)))))
 
 (map1 #'eval '(
    (defun caar (e) (car (car e)))
