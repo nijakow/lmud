@@ -123,6 +123,7 @@ struct LMud_Compiler
         LMud_Any                    symbol_if;
         LMud_Any                    symbol_while;
         LMud_Any                    symbol_mvl;
+        LMud_Any                    symbol_return;
 
         LMud_Any                    symbol_andrest;
         LMud_Any                    symbol_andoptional;
