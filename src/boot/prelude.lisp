@@ -134,6 +134,28 @@
       (cond ((null list) nil)
             ((eq item (car list)) list)
             (t (member item (cdr list)))))
+   
+   (defun assoc (item alist)
+      (dolist (pair alist)
+         (if (eq item (car pair))
+             (return pair)))
+      nil)
+   
+   (defun get (symbol property)
+      (let ((plist (symbol-plist symbol)))
+         (while (consp plist)
+            (if (eq property (car plist))
+                (return (cadr plist))
+                (setq plist (cddr plist))))))
+   
+   (defun put (symbol property value)
+      (let ((plist (symbol-plist symbol)))
+         (while (consp plist)
+            (if (eq property (car plist))
+                (progn (rplaca (cdr plist) value)
+                       (return))
+                (setq plist (cddr plist))))
+         (set-symbol-plist symbol (list* property value (symbol-plist symbol)))))
 
    (defun char=  (a b) (= (char-code a) (char-code b)))
    (defun char<  (a b) (< (char-code a) (char-code b)))

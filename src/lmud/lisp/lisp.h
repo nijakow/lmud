@@ -90,6 +90,9 @@ LMud_Any LMud_Lisp_Cadr(struct LMud_Lisp* self, LMud_Any value);
 LMud_Any LMud_Lisp_Cdar(struct LMud_Lisp* self, LMud_Any value);
 LMud_Any LMud_Lisp_Cddr(struct LMud_Lisp* self, LMud_Any value);
 
+bool LMud_Lisp_Rplaca(struct LMud_Lisp* self, LMud_Any cons, LMud_Any value);
+bool LMud_Lisp_Rplacd(struct LMud_Lisp* self, LMud_Any cons, LMud_Any value);
+
 bool     LMud_Lisp_TakeNext(struct LMud_Lisp* self, LMud_Any* value, LMud_Any* result);
 bool     LMud_Lisp_Nth(struct LMud_Lisp* self, LMud_Any value, LMud_Size index, LMud_Any* result);
 

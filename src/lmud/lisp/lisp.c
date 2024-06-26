@@ -362,6 +362,22 @@ LMud_Any LMud_Lisp_Cddr(struct LMud_Lisp* self, LMud_Any value)
     return LMud_Lisp_Cdr(self, LMud_Lisp_Cdr(self, value));
 }
 
+bool LMud_Lisp_Rplaca(struct LMud_Lisp* self, LMud_Any cons, LMud_Any value)
+{
+    if (!LMud_Lisp_IsCons(self, cons))
+        return false;
+    ((struct LMud_Cons*) LMud_Any_AsPointer(cons))->car = value;
+    return true;
+}
+
+bool LMud_Lisp_Rplacd(struct LMud_Lisp* self, LMud_Any cons, LMud_Any value)
+{
+    if (!LMud_Lisp_IsCons(self, cons))
+        return false;
+    ((struct LMud_Cons*) LMud_Any_AsPointer(cons))->cdr = value;
+    return true;
+}
+
 bool LMud_Lisp_Nth(struct LMud_Lisp* self, LMud_Any value, LMud_Size index, LMud_Any* result)
 {
     while (index > 0)

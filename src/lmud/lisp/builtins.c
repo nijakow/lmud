@@ -196,6 +196,26 @@ void LMud_Builtin_Cdr(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size a
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Cdr(fiber->lisp, arguments[0]));
 }
 
+void LMud_Builtin_Rplaca(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Lisp_Rplaca(fiber->lisp, arguments[0], arguments[1]);
+    LMud_Fiber_SetAccumulator(fiber, arguments[1]);
+}
+
+void LMud_Builtin_Rplacd(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Lisp_Rplacd(fiber->lisp, arguments[0], arguments[1]);
+    LMud_Fiber_SetAccumulator(fiber, arguments[1]);
+}
+
 void LMud_Builtin_Eq(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     LMud_Size  index;
@@ -607,6 +627,8 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "CONS", LMud_Builtin_Cons);
     LMud_Lisp_InstallBuiltin(lisp, "CAR", LMud_Builtin_Car);
     LMud_Lisp_InstallBuiltin(lisp, "CDR", LMud_Builtin_Cdr);
+    LMud_Lisp_InstallBuiltin(lisp, "RPLACA", LMud_Builtin_Rplaca);
+    LMud_Lisp_InstallBuiltin(lisp, "RPLACD", LMud_Builtin_Rplacd);
     LMud_Lisp_InstallBuiltin(lisp, "EQ", LMud_Builtin_Eq);
     LMud_Lisp_InstallBuiltin(lisp, "LIST", LMud_Builtin_List);
     LMud_Lisp_InstallBuiltin(lisp, "LIST*", LMud_Builtin_ListStar);
