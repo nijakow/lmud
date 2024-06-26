@@ -170,8 +170,20 @@
             (setq list (cons (aref sequence (- len i 1)) list)))
          list))
    
+   (defun list->vector (list)
+      (apply #'vector list))
+   
+   (defun list->string (list)
+      (apply #'string list))
+   
    (defun string->list (string)
       (sequence->list string))
+   
+   (defun sequence->string (sequence)
+      (list->string (sequence->list sequence)))
+   
+   (defun string->vector (string)
+      (list->vector (string->list string)))
 
    (defun repl ()
       (while t

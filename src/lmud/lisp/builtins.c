@@ -3,6 +3,8 @@
 #include <lmud/lisp/runtime/fiber.h>
 #include <lmud/lisp/math.h>
 #include <lmud/lisp/io.h>
+#include <lmud/util/stringbuilder.h>
+#include <lmud/util/utf8.h>
 
 #include "builtins.h"
 
@@ -307,6 +309,36 @@ void LMud_Builtin_Length(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
 void LMud_Builtin_Vector(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_MakeArray_FromData(fiber->lisp, argument_count, arguments));
+}
+
+void LMud_Builtin_String(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    struct LMud_StringBuilder  builder;
+    struct LMud_Utf8_Encoder   encoder;
+    LMud_Any                   result;
+    LMud_Size                  index;
+
+    /*
+     * TODO: Check arguments.
+     */
+
+    LMud_StringBuilder_Create(&builder);
+    {
+        for (index = 0; index < argument_count; index++)
+        {
+            if (!LMud_Any_IsCharacter(arguments[index]))
+                continue;
+            
+            LMud_Utf8_Encoder_Create(&encoder, LMud_Any_AsCharacter(arguments[index]));
+            LMud_StringBuilder_AppendCStr(&builder, LMud_Utf8_Encoder_AsString(&encoder));
+            LMud_Utf8_Encoder_Destroy(&encoder);
+        }
+
+        result = LMud_Lisp_String(fiber->lisp, LMud_StringBuilder_GetStatic(&builder));
+    }
+    LMud_StringBuilder_Destroy(&builder);
+
+    LMud_Fiber_SetAccumulator(fiber, result);
 }
 
 void LMud_Builtin_Aref(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -634,6 +666,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "LIST*", LMud_Builtin_ListStar);
     LMud_Lisp_InstallBuiltin(lisp, "LENGTH", LMud_Builtin_Length);
     LMud_Lisp_InstallBuiltin(lisp, "VECTOR", LMud_Builtin_Vector);
+    LMud_Lisp_InstallBuiltin(lisp, "STRING", LMud_Builtin_String);
     LMud_Lisp_InstallBuiltin(lisp, "AREF", LMud_Builtin_Aref);
     LMud_Lisp_InstallBuiltin(lisp, "%COMPILE", LMud_Builtin_Compile);
     LMud_Lisp_InstallBuiltin(lisp, "%READ", LMud_Builtin_Read);
