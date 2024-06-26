@@ -436,6 +436,11 @@
    ;;;    The Type- and Object System
    ;;;
 
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
+   ;;; TOS internals
+   ;;;
+
    (defun (setf lmud.int:%custom-meta) (value object)
       (list 'lmud.int:%custom-set-meta object value))
    
@@ -525,10 +530,18 @@
    (defun tos.int:defclass-execute (name superclasses slot-descriptions)
       (set-symbol-value name (tos.int:construct-class name superclasses slot-descriptions)))
 
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
+   ;;; These are the public TOS macros
+   ;;;
+
    (defmacro tos:defclass (name superclasses slot-descriptions)
       (list 'tos.int:defclass-execute (list 'quote name)
                                       (list* 'list superclasses)
                                       (list 'quote slot-descriptions)))
+   
+   (defun tos:class-of (object)
+      (tos.int:class-of object))
    
    (tos:defclass <point> ()
       ((x :initform 0)
