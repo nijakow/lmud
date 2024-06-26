@@ -79,10 +79,11 @@
    ;;;    Predicates and Primitives
    ;;;
 
-   (defun null (e) (eq e nil))
-   (defun not  (e) (if e nil t))
-   (defun endp (e) (null e))
-   (defun atom (e) (not (consp e)))
+   (defun null  (e) (eq e nil))
+   (defun not   (e) (if e nil t))
+   (defun endp  (e) (null e))
+   (defun listp (e) (if (null e) t (consp e)))
+   (defun atom  (e) (not (consp e)))
 
    (defun identity (e) e)
 
@@ -350,6 +351,25 @@
    
    (defun conversions:string->vector (string)
       (conversions:list->vector (conversions:string->list string)))
+   
+   (defun conversions:->list (e)
+      (cond ((listp e) e)
+            ((vectorp e) (conversions:sequence->list e))
+            ((stringp e) (conversions:string->list e))
+            (t (lmud.util:simple-error "Cannot convert to list!"))))
+
+   (defun conversions:->vector (e)
+      (cond ((vectorp e) e)
+            ((listp e)   (conversions:list->vector e))
+            ((stringp e) (conversions:string->vector e))
+            (t (lmud.util:simple-error "Cannot convert to vector!"))))
+   
+   (defun conversions:->string (e)
+      (cond ((stringp e) e)
+            ((listp e)   (conversions:list->string e))
+            ((vectorp e) (conversions:sequence->string e))
+            (t (lmud.util:simple-error "Cannot convert to string!"))))
+
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
@@ -396,7 +416,21 @@
    ;;;    The Type- and Object System
    ;;;
 
-   (defparameter tos:*metaclass* (lmud.int:%make-custom nil))
+   (defun (setf lmud.int:%custom-meta) (value object)
+      (list 'lmud.int:%custom-set-meta object value))
+   
+   (defun (setf lmud.int:%custom-at) (value object index)
+      (list 'lmud.int:%custom-set object index value))
+
+   (defparameter tos.int:<class> (lmud.int:%make-custom nil nil nil nil))
+
+   (setf (lmud.int:%custom-meta tos.int:<class>) tos.int:<class>)
+
+   (defun tos.int:make-class (&key (superclasses nil) (slots nil))
+      (let ((all-slots (conversions:->vector slots)))
+         (lmud.int:%make-custom tos.int:<class> superclasses slots all-slots)))
+   
+   (defparameter tos.int:<slot> (tos.int:make-class))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
