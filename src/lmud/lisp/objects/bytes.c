@@ -31,3 +31,11 @@ LMud_Any LMud_Bytes_Aref(struct LMud_Bytes* self, LMud_Size index)
 {
     return LMud_Any_FromInteger(LMud_Bytes_At(self, index));
 }
+
+bool LMud_Bytes_Aset(struct LMud_Bytes* self, LMud_Size index, LMud_Any value)
+{
+    if (index >= LMud_Bytes_GetSize(self))
+        return false;
+    self->data[index] = LMud_Any_AsInteger(value);
+    return true;
+}

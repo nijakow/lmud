@@ -350,6 +350,9 @@
    ;;;    Non-standard conversions
    ;;;
 
+   (defun conversions:->bool (e)
+      (if e t nil))
+
    (defun conversions:sequence->list (sequence)
       (let ((list '())
             (len  (length sequence)))
@@ -416,6 +419,9 @@
    (defun (setf car) (value cons) (list 'rplaca cons value))
    (defun (setf cdr) (value cons) (list 'rplacd cons value))
 
+   (defun (setf aref) (value vector index)
+      (list 'lmud.int:%aset vector index value))
+
    (defmacro push (item place)
       (list 'setf place (list 'cons item place)))
    
@@ -430,6 +436,31 @@
    
    (defmacro decf (place)
       (list 'setf place (list '- place 1)))
+
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
+   ;;;    Sorting
+   ;;;
+
+   (defun lmud.util:vector-bubble-sort (vector predicate &key (key #'identity))
+      (let ((n (length vector)))
+         (while t
+            (let ((swapped nil))
+               (dotimes (j (- n 1))
+                  (let ((a (aref vector j))
+                        (b (aref vector (+ j 1))))
+                     (when (funcall predicate (funcall key b) (funcall key a))
+                        (setf (aref vector j) b)
+                        (setf (aref vector (+ j 1)) a)
+                        (setq swapped t))))
+               (unless swapped (return vector))))
+         vector))
+
+   (defun sort (sequence predicate &key (key #'identity))
+      (let ((result (lmud.util:vector-bubble-sort (conversions:->vector sequence) predicate :key key))
+            (result-list nil))
+         (conversions:->list result)))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -552,6 +583,10 @@
 
    (defun tos.int:defclass-execute (name superclasses slot-descriptions)
       (set-symbol-value name (tos.int:construct-class name superclasses slot-descriptions)))
+
+   (defun tos.int:specific-< (class1 class2)
+      (conversions:->bool
+         (member class1 (tos.int:%class-inheritance-chain class2))))
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;

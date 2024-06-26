@@ -48,3 +48,11 @@ LMud_Any LMud_Array_Aref(struct LMud_Array* self, LMud_Size index, LMud_Any defa
         return default_value;
     return self->data[index];
 }
+
+bool LMud_Array_Aset(struct LMud_Array* self, LMud_Size index, LMud_Any value)
+{
+    if (index >= LMud_Array_GetSize(self))
+        return false;
+    self->data[index] = value;
+    return true;
+}

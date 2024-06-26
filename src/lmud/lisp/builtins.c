@@ -483,6 +483,16 @@ void LMud_Builtin_Aref(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size 
     LMud_Fiber_SetAccumulator(fiber, result);
 }
 
+void LMud_Builtin_Aset(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments and the return value of `LMud_Lisp_Aset`.
+     */
+    (void) argument_count;
+
+    LMud_Lisp_Aset(fiber->lisp, arguments[0], arguments[1], arguments[2]);
+    LMud_Fiber_SetAccumulator(fiber, arguments[2]);
+}
 
 void LMud_Builtin_Compile(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
@@ -827,6 +837,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-AT", LMud_Builtin_CustomAt);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-SET", LMud_Builtin_CustomSet);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%COMPILE", LMud_Builtin_Compile);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%ASET", LMud_Builtin_Aset);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRIN1", LMud_Builtin_Prin1);

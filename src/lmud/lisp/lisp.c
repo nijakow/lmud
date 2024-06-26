@@ -458,6 +458,26 @@ bool LMud_Lisp_Aref(struct LMud_Lisp* self, LMud_Any object, LMud_Any index, LMu
     }
 }
 
+bool LMud_Lisp_Aset(struct LMud_Lisp* self, LMud_Any object, LMud_Any index, LMud_Any value)
+{
+    LMud_Size  index_value;
+
+    if (!LMud_Any_IsInteger(index))
+        return false;
+    
+    index_value = LMud_Any_AsInteger(index);
+
+    if (LMud_Lisp_IsArray(self, object)) {
+        LMud_Array_Aset(LMud_Any_AsPointer(object), index_value, value);
+        return true;
+    } else if (LMud_Lisp_IsBytes(self, object)) {
+        LMud_Bytes_Aset(LMud_Any_AsPointer(object), index_value, value);
+        return true;
+    } else {
+        return false;
+    }
+}
+
 
 LMud_Any LMud_Lisp_Quote(struct LMud_Lisp* self, LMud_Any value)
 {
