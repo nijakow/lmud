@@ -319,7 +319,7 @@ LMud_Any LMud_Lisp_InternKeywordUpcase(struct LMud_Lisp* self, const char* name)
 LMud_Any LMud_Lisp_ReinternAsKeyword(struct LMud_Lisp* self, LMud_Any symbol)
 {
     assert(LMud_Lisp_IsSymbol(self, symbol));
-    return LMud_Lisp_InternKeyword(self, LMud_Symbol_Name(LMud_Any_AsPointer(symbol)));
+    return LMud_Lisp_InternKeyword(self, LMud_Symbol_NameChars(LMud_Any_AsPointer(symbol)));
 }
 
 LMud_Any LMud_Lisp_Gensym(struct LMud_Lisp* self)

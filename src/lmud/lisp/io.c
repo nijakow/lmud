@@ -140,7 +140,7 @@ void LMud_Lisp_PrintSymbol(struct LMud_Lisp* lisp, LMud_Any symbol, FILE* stream
                 fprintf(stream, "::");
             }
         }
-        fprintf(stream, "%s", LMud_Symbol_Name(symbol_object));
+        fprintf(stream, "%s", LMud_Symbol_NameChars(symbol_object));
     }
 }
 
@@ -191,6 +191,10 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
             LMud_Lisp_Print(lisp, LMud_Ratio_Numerator((struct LMud_Ratio*) pointer), stream, escaped);
             fprintf(stream, "/");
             LMud_Lisp_Print(lisp, LMud_Ratio_Denominator((struct LMud_Ratio*) pointer), stream, escaped);
+        } else if (LMud_Lisp_IsPackagePointer(lisp, pointer)) {
+            fprintf(stream, "⦍PACKAGE :NAME ");
+            LMud_Lisp_Print(lisp, LMud_Package_Name((struct LMud_Package*) pointer), stream, true);
+            fprintf(stream, "⦎");
         } else {
             fprintf(stream, "⦍UNKNOWN %p⦎", pointer);
         }

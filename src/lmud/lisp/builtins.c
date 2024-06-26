@@ -67,15 +67,6 @@ void LMud_Builtin_Values(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
     LMud_Fiber_Values(fiber, arguments, argument_count);
 }
 
-void LMud_Builtin_Consp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
-{
-    /*
-     * TODO: Check arguments.
-     */
-    (void) argument_count;
-    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsCons(fiber->lisp, arguments[0])));
-}
-
 void LMud_Builtin_Symbolp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     /*
@@ -93,6 +84,24 @@ void LMud_Builtin_Gensym(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
     (void) arguments;
     (void) argument_count;
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Gensym(fiber->lisp));
+}
+
+void LMud_Builtin_SymbolPackage(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Symbol_Package(LMud_Any_AsPointer(arguments[0])));
+}
+
+void LMud_Builtin_SymbolName(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Symbol_Name(LMud_Any_AsPointer(arguments[0])));
 }
 
 void LMud_Builtin_SymbolValue(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -169,6 +178,33 @@ void LMud_Builtin_SetSymbolPlist(struct LMud_Fiber* fiber, LMud_Any* arguments, 
     (void) argument_count;
     LMud_Symbol_SetPlist(LMud_Any_AsPointer(arguments[0]), arguments[1]);
     LMud_Fiber_SetAccumulator(fiber, arguments[1]);
+}
+
+void LMud_Builtin_Packagep(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsPackage(fiber->lisp, arguments[0])));
+}
+
+void LMud_Builtin_PackageName(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Package_Name(LMud_Any_AsPointer(arguments[0])));
+}
+
+void LMud_Builtin_Consp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsCons(fiber->lisp, arguments[0])));
 }
 
 void LMud_Builtin_Cons(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -645,9 +681,10 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "FUNCALL", LMud_Builtin_Funcall);
     LMud_Lisp_InstallBuiltin(lisp, "APPLY", LMud_Builtin_Apply);
     LMud_Lisp_InstallBuiltin(lisp, "VALUES", LMud_Builtin_Values);
-    LMud_Lisp_InstallBuiltin(lisp, "CONSP", LMud_Builtin_Consp);
     LMud_Lisp_InstallBuiltin(lisp, "SYMBOLP", LMud_Builtin_Symbolp);
     LMud_Lisp_InstallBuiltin(lisp, "GENSYM", LMud_Builtin_Gensym);
+    LMud_Lisp_InstallBuiltin(lisp, "SYMBOL-PACKAGE", LMud_Builtin_SymbolPackage);
+    LMud_Lisp_InstallBuiltin(lisp, "SYMBOL-NAME", LMud_Builtin_SymbolName);
     LMud_Lisp_InstallBuiltin(lisp, "SYMBOL-VALUE", LMud_Builtin_SymbolValue);
     LMud_Lisp_InstallBuiltin(lisp, "SET-SYMBOL-VALUE", LMud_Builtin_SetSymbolValue);
     LMud_Lisp_InstallBuiltin(lisp, "SYMBOL-FUNCTION", LMud_Builtin_SymbolFunction);
@@ -656,6 +693,9 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "SET-SYMBOL-MACRO", LMud_Builtin_SetSymbolMacro);
     LMud_Lisp_InstallBuiltin(lisp, "SYMBOL-PLIST", LMud_Builtin_SymbolPlist);
     LMud_Lisp_InstallBuiltin(lisp, "SET-SYMBOL-PLIST", LMud_Builtin_SetSymbolPlist);
+    LMud_Lisp_InstallBuiltin(lisp, "PACKAGEP", LMud_Builtin_Packagep);
+    LMud_Lisp_InstallBuiltin(lisp, "PACKAGE-NAME", LMud_Builtin_PackageName);
+    LMud_Lisp_InstallBuiltin(lisp, "CONSP", LMud_Builtin_Consp);
     LMud_Lisp_InstallBuiltin(lisp, "CONS", LMud_Builtin_Cons);
     LMud_Lisp_InstallBuiltin(lisp, "CAR", LMud_Builtin_Car);
     LMud_Lisp_InstallBuiltin(lisp, "CDR", LMud_Builtin_Cdr);

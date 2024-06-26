@@ -48,7 +48,8 @@ bool LMud_Symbol_IsGensym(struct LMud_Symbol* self);
 void LMud_Symbol_MakeGensym(struct LMud_Symbol* self);
 
 LMud_Any    LMud_Symbol_Package(struct LMud_Symbol* self);
-const char* LMud_Symbol_Name(struct LMud_Symbol* self);
+LMud_Any    LMud_Symbol_Name(struct LMud_Symbol* self);
+const char* LMud_Symbol_NameChars(struct LMud_Symbol* self);
 
 LMud_Any    LMud_Symbol_Value(struct LMud_Symbol* self);
 LMud_Any    LMud_Symbol_Function(struct LMud_Symbol* self);

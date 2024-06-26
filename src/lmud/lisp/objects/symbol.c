@@ -57,7 +57,7 @@ void LMud_SymbolTable_Dump(struct LMud_SymbolTable* self)
 
     for (symbol = self->symbols; symbol != NULL; symbol = symbol->next)
     {
-        printf(" - %s\n", LMud_Symbol_Name(symbol));
+        printf(" - %s\n", LMud_Symbol_NameChars(symbol));
     }
 }
 
@@ -136,7 +136,12 @@ LMud_Any LMud_Symbol_Package(struct LMud_Symbol* self)
     return self->package;
 }
 
-const char* LMud_Symbol_Name(struct LMud_Symbol* self)
+LMud_Any LMud_Symbol_Name(struct LMud_Symbol* self)
+{
+    return self->name;
+}
+
+const char* LMud_Symbol_NameChars(struct LMud_Symbol* self)
 {
     return LMud_String_Chars((struct LMud_String*) LMud_Any_AsPointer(self->name));
 }
