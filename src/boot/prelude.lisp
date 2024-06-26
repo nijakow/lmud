@@ -674,9 +674,17 @@
                ((< l1 l2) nil)
                (t (tos.int:typed-arglist-equal-arity-specific-> t1 t2)))))
    
-   (defun tos.int:generic-function-add-method (gf fixed-args flexible-args lambda)
-      ;; TODO
-      ())
+   (defun tos.int:generic-function-resort-methods (gf)
+      (setf (tos.int:%defclass-dispatch-table gf)
+            (sort (tos.int:%defclass-dispatch-table gf)
+                  #'tos.int:typed-arglist-specific->
+                  :key #'car))
+      gf)
+
+   (defun tos.int:generic-function-add-method (gf fixed-args lambda)
+      ;; TODO: Check for duplicate methods, replace them
+      (push (cons fixed-args lambda) (tos.int:%defclass-dispatch-table gf))
+      (tos.int:generic-function-resort-methods gf))
 
    (defun tos.int:extract-typed-args (arglist)
       (cond ((endp arglist) (values nil nil))
