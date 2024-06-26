@@ -7,6 +7,10 @@
 
 
 struct LMud_Register;
+struct LMud_CompilerLabelInfo;
+
+
+typedef struct LMud_CompilerLabelInfo* LMud_CompilerLabel;
 
 
 enum LMud_BindingType
@@ -31,10 +35,25 @@ struct LMud_Register* LMud_Binding_GetRegister(struct LMud_Binding* self);
 void                  LMud_Binding_SetRegister(struct LMud_Binding* self, struct LMud_Register* reg);
 
 
+
+struct LMud_ScopeBlockInfo
+{
+    LMud_Any            name;
+    LMud_CompilerLabel  end_label;
+};
+
+void LMud_ScopeBlockInfo_Create(struct LMud_ScopeBlockInfo* self, LMud_Any name, LMud_CompilerLabel end_label);
+void LMud_ScopeBlockInfo_Destroy(struct LMud_ScopeBlockInfo* self);
+
+struct LMud_ScopeBlockInfo* LMud_ScopeBlockInfo_New(LMud_Any name, LMud_CompilerLabel end_label);
+void                        LMud_ScopeBlockInfo_Delete(struct LMud_ScopeBlockInfo* self);
+
+
 struct LMud_Scope
 {
-    struct LMud_Scope*    surrounding;
-    struct LMud_Binding*  bindings;
+    struct LMud_Scope*           surrounding;
+    struct LMud_ScopeBlockInfo*  block_info;
+    struct LMud_Binding*         bindings;
 };
 
 void LMud_Scope_Create(struct LMud_Scope* self, struct LMud_Scope* surrounding);
@@ -131,8 +150,6 @@ struct LMud_Compiler
         LMud_Any                    symbol_andkey;
     }                               cached;
 };
-
-typedef struct LMud_CompilerLabelInfo* LMud_CompilerLabel;
 
 void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSession* session);
 void LMud_Compiler_Create_Lexical(struct LMud_Compiler* self, struct LMud_Compiler* lexical);

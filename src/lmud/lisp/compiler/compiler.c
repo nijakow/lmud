@@ -53,15 +53,54 @@ void LMud_Binding_SetRegister(struct LMud_Binding* self, struct LMud_Register* r
 
 
 
+void LMud_ScopeBlockInfo_Create(struct LMud_ScopeBlockInfo* self, LMud_Any name, LMud_CompilerLabel end_label)
+{
+    self->name      = name;
+    self->end_label = end_label;
+}
+
+void LMud_ScopeBlockInfo_Destroy(struct LMud_ScopeBlockInfo* self)
+{
+    (void) self;
+}
+
+struct LMud_ScopeBlockInfo* LMud_ScopeBlockInfo_New(LMud_Any name, LMud_CompilerLabel end_label)
+{
+    struct LMud_ScopeBlockInfo*  self;
+
+    self = LMud_Alloc(sizeof(struct LMud_ScopeBlockInfo));
+
+    if (self != NULL)
+    {
+        LMud_ScopeBlockInfo_Create(self, name, end_label);
+    }
+
+    return self;
+}
+
+void LMud_ScopeBlockInfo_Delete(struct LMud_ScopeBlockInfo* self)
+{
+    LMud_ScopeBlockInfo_Destroy(self);
+    LMud_Free(self);
+}
+
+
+
 void LMud_Scope_Create(struct LMud_Scope* self, struct LMud_Scope* surrounding)
 {
     self->surrounding = surrounding;
+    self->block_info  = NULL;
     self->bindings    = NULL;
 }
 
 void LMud_Scope_Destroy(struct LMud_Scope* self)
 {
     struct LMud_Binding*  binding;
+
+    if (self->block_info != NULL)
+    {
+        LMud_ScopeBlockInfo_Delete(self->block_info);
+    }
 
     while (self->bindings != NULL)
     {
@@ -370,8 +409,29 @@ void LMud_Compiler_PopScope(struct LMud_Compiler* self)
     scope        = self->scopes;
     self->scopes = scope->surrounding;
 
+    if (scope->block_info != NULL)
+    {
+        LMud_Compiler_CloseLabel(self, scope->block_info->end_label);
+    }
+
     LMud_Scope_Destroy(scope);
     LMud_Free(scope);
+}
+
+void LMud_Compiler_BeginBlock(struct LMud_Compiler* self, LMud_Any name)
+{
+    LMud_CompilerLabel  end_label;
+
+    LMud_Compiler_PushScope(self);
+    LMud_Compiler_OpenLabel(self, &end_label);
+
+    self->scopes->block_info = LMud_ScopeBlockInfo_New(name, end_label);
+}
+
+void LMud_Compiler_EndBlock(struct LMud_Compiler* self)
+{
+    LMud_Compiler_PlaceLabel(self, self->scopes->block_info->end_label);
+    LMud_Compiler_PopScope(self);
 }
 
 
@@ -979,11 +1039,11 @@ void LMud_Compiler_CompileSpecialBlock(struct LMud_Compiler* self, LMud_Any argu
     name = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
     body = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arguments);
 
-    LMud_Compiler_PushScope(self);
+    LMud_Compiler_BeginBlock(self, name);
     {
         LMud_Compiler_CompileExpressions(self, body);
     }
-    LMud_Compiler_PopScope(self);
+    LMud_Compiler_EndBlock(self);
 }
 
 void LMud_Compiler_CompileSpecialProgn(struct LMud_Compiler* self, LMud_Any arguments)
