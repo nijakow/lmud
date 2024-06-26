@@ -143,7 +143,7 @@
 
    (defun repl ()
       (while t
-         (%princ "⌨ ")
+         (%princ "⍝ ")
          (let ((expr (%read)))
             (dolist (e (multiple-value-list (eval expr)))
                (%princ "  ")
