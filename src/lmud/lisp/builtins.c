@@ -18,6 +18,16 @@ void LMud_Builtin_HelloWorld(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud
     printf("  Hello, world!\n");
 }
 
+void LMud_Builtin_Quit(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    (void) fiber;
+    (void) arguments;
+    (void) argument_count;
+
+    printf("\n<<QUIT BUILTIN WAS TRIGGERED>>\n");
+    exit(0);
+}
+
 void LMud_Builtin_Funcall(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     LMud_Fiber_Enter(fiber, arguments[0], &arguments[1], argument_count - 1);
@@ -278,6 +288,16 @@ void LMud_Builtin_CustomMeta(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud
      */
     (void) argument_count;
     LMud_Fiber_SetAccumulator(fiber, LMud_Custom_Meta(LMud_Any_AsPointer(arguments[0])));
+}
+
+void LMud_Builtin_CustomSetMeta(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Custom_SetMeta(LMud_Any_AsPointer(arguments[0]), arguments[1]);
+    LMud_Fiber_SetAccumulator(fiber, arguments[1]);
 }
 
 void LMud_Builtin_CustomSize(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -778,9 +798,11 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "MOD", LMud_Builtin_Modulo);
 
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.TEST", "HELLO-WORLD", LMud_Builtin_HelloWorld);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%QUIT", LMud_Builtin_Quit);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOMP", LMud_Builtin_Customp);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%MAKE-CUSTOM", LMud_Builtin_MakeCustom);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-META", LMud_Builtin_CustomMeta);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-SET-META", LMud_Builtin_CustomSetMeta);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-SIZE", LMud_Builtin_CustomSize);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-AT", LMud_Builtin_CustomAt);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-SET", LMud_Builtin_CustomSet);

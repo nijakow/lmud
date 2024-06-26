@@ -28,8 +28,14 @@
 
 (set-symbol-macro 'defun
    (lambda (name args &rest body)
-      (list 'set-symbol-function (list 'quote name)
-            (list 'lambda args (list* 'block name body)))))
+      (if (if (consp name) (if (eq (car name) 'setf) t))
+          ;; Setf defun
+          (progn (setq name (car (cdr name)))
+                 (list 'lmud.int:set-setf-expander-function (list 'quote name)
+                       (list 'lambda args (list* 'block name body))))
+          ;; Normal defun
+          (list 'set-symbol-function (list 'quote name)
+                (list 'lambda args (list* 'block name body))))))
 
 (set-symbol-macro 'defmacro
    (lambda (name args &rest body)
@@ -37,8 +43,35 @@
             (list 'lambda args (list* 'block name body)))))
 
 (lmud.util:map1 #'eval '(
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
+   ;;;    Base Macros
+   ;;;
+
    (defmacro return (&rest args)
       (list* 'return-from 'nil args))
+   
+   (defmacro defvar (name value)
+      (list 'set-symbol-value (list 'quote name) value))
+   
+   (defmacro defparameter (name value)
+      (list 'set-symbol-value (list 'quote name) value))
+   
+   (defmacro defconstant (name value)
+      (list 'set-symbol-value (list 'quote name) value))
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
+   ;;;    Error Handling
+   ;;;
+
+   (defun lmud.util:simple-error (&optional (message nil))
+      (lmud.dummy::%terpri)
+      (lmud.dummy::%princ "Error: ")
+      (lmud.dummy::%princ message)
+      (lmud.dummy::%terpri)
+      (lmud.int::%quit))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -317,6 +350,36 @@
    
    (defun conversions:string->vector (string)
       (conversions:list->vector (conversions:string->list string)))
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
+   ;;;    Setf
+   ;;;
+
+   (defun lmud.int:get-setf-expander-function (symbol)
+      (get symbol 'lmud.int:setf-expander-function))
+   
+   (defun lmud.int:set-setf-expander-function (symbol function)
+      (put symbol 'lmud.int:setf-expander-function function))
+   
+   (defmacro setf (place value)
+      (cond ((consp place)
+             (let ((head (car place))
+                   (args (cdr place)))
+                (if (symbolp head)
+                    (if (lmud.int:get-setf-expander-function head)
+                        (apply (lmud.int:get-setf-expander-function head) value args)
+                        (lmud.util:simple-error "Undefined setf expander!"))
+                    (lmud.util:simple-error "Setf expects a symbol!"))))
+            (t (list 'setq place value))))
+
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
+   ;;;    The Type- and Object System
+   ;;;
+
+   (defparameter tos:*metaclass* (lmud.int:%make-custom nil))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -27,6 +27,11 @@ LMud_Any  LMud_Custom_Meta(struct LMud_Custom* self)
     return self->meta;
 }
 
+void LMud_Custom_SetMeta(struct LMud_Custom* self, LMud_Any meta)
+{
+    self->meta = meta;
+}
+
 LMud_Size LMud_Custom_Size(struct LMud_Custom* self)
 {
     return self->size;
