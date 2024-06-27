@@ -188,6 +188,18 @@ LMud_Any* LMud_Frame_ExtraArgumentRef(struct LMud_Frame* self, LMud_Size index)
     return &self->payload[self->function->info.register_count + self->function->info.stack_size + index];
 }
 
+LMud_Any* LMud_Frame_GivenArgumentRef(struct LMud_Frame* self, LMud_Size index)
+{
+    LMud_Size  fixed_count;
+
+    fixed_count = LMud_Frame_FixedArgumentCount(self);
+
+    if (index < fixed_count)
+        return LMud_Frame_FixedArgumentRef(self, index);
+    else
+        return LMud_Frame_ExtraArgumentRef(self, index - fixed_count);
+}
+
 
 LMud_Size LMud_Frame_RemainingExtraArgumentCount(struct LMud_Frame* self)
 {

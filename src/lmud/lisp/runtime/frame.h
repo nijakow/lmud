@@ -58,6 +58,7 @@ LMud_Size LMud_Frame_GivenArgumentCount(struct LMud_Frame* self);
 
 LMud_Any* LMud_Frame_FixedArgumentRef(struct LMud_Frame* self, LMud_Size index);
 LMud_Any* LMud_Frame_ExtraArgumentRef(struct LMud_Frame* self, LMud_Size index);
+LMud_Any* LMud_Frame_GivenArgumentRef(struct LMud_Frame* self, LMud_Size index);
 
 LMud_Size LMud_Frame_RemainingExtraArgumentCount(struct LMud_Frame* self);
 bool      LMud_Frame_HasExtraArguments(struct LMud_Frame* self);
