@@ -652,10 +652,10 @@
    (tos.int:defclass tos.int:<generic-function> ()
       ((dispatch-table)))
    
-   (defun tos.int:%defclass-dispatch-table (gf)
+   (defun tos.int:%generic-function-dispatch-table (gf)
       (tos.int:slot-value-by-name gf 'dispatch-table))
    
-   (defun (setf tos.int:%defclass-dispatch-table) (value gf)
+   (defun (setf tos.int:%generic-function-dispatch-table) (value gf)
       (list 'tos.int:set-slot-value-by-name gf ''dispatch-table value))
 
    (defun tos.int:typed-arglist-equal-arity-specific-> (t1 t2)
@@ -675,15 +675,15 @@
                (t (tos.int:typed-arglist-equal-arity-specific-> t1 t2)))))
    
    (defun tos.int:generic-function-resort-methods (gf)
-      (setf (tos.int:%defclass-dispatch-table gf)
-            (sort (tos.int:%defclass-dispatch-table gf)
+      (setf (tos.int:%generic-function-dispatch-table gf)
+            (sort (tos.int:%generic-function-dispatch-table gf)
                   #'tos.int:typed-arglist-specific->
                   :key #'car))
       gf)
 
    (defun tos.int:generic-function-add-method (gf fixed-args lambda)
       ;; TODO: Check for duplicate methods, replace them
-      (push (cons fixed-args lambda) (tos.int:%defclass-dispatch-table gf))
+      (push (cons fixed-args lambda) (tos.int:%generic-function-dispatch-table gf))
       (tos.int:generic-function-resort-methods gf))
 
    (defun tos.int:extract-typed-args (arglist)
@@ -696,6 +696,17 @@
                                     (list (car arglist) tos.int:<t>))
                                 typed)
                            untyped)))))
+   
+   (defmacro tos.int:defmethod-on-generic-function (gf args &body body)
+      (multiple-value-bind (typed-args untyped-args)
+            (tos.int:extract-typed-args args)
+         (let ((real-arglist (append (mapcar #'car typed-args) untyped-args)))
+            (list 'tos.int:generic-function-add-method
+                     gf
+                     (list* 'list
+                            (domap (argdef typed-args)
+                               (list 'cons (list 'quote (car argdef)) (list* 'progn (cdr argdef)))))
+                     (list* 'lambda real-arglist body)))))
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
@@ -723,19 +734,37 @@
    (tos:defclass <f> (<b> <c>) ())
    (tos:defclass <g> (<e> <f>) ())
 
-   (lmud.dummy::%prin1
-      (sort (list (list)
-                  (list (cons 'a <a>))
-                  (list (cons 'b <c>))
-                  (list (cons 'c <c>))
-                  (list (cons 'd <d>))
-                  (list (cons 'e <e>))
-                  (list (cons 'f <f>))
-                  (list (cons 'g <g>))
-                  (list (cons 'a <a>) (cons 'g <g>))
-                  (list (cons 'e <e>) (cons 'f <f>))
-                  (list (cons 'a <a>) (cons 'b <b>)))
-            #'tos.int:typed-arglist-specific->))
+   (defparameter *the-gf* (tos.int:make-instance tos.int:<generic-function>))
+
+   (tos.int:defmethod-on-generic-function *the-gf* (a b)
+      (lmud.dummy::%princ "a b: ")
+      (lmud.dummy::%prin1 a)
+      (lmud.dummy::%princ " ")
+      (lmud.dummy::%prin1 b)
+      (lmud.dummy::%terpri))
+   
+   (tos.int:defmethod-on-generic-function *the-gf* ((a <point>) b)
+      (lmud.dummy::%princ "(a <point>) b: ")
+      (lmud.dummy::%prin1 a)
+      (lmud.dummy::%princ " ")
+      (lmud.dummy::%prin1 b)
+      (lmud.dummy::%terpri))
+   
+   (tos.int:defmethod-on-generic-function *the-gf* (a (b <point>))
+      (lmud.dummy::%princ "a (b <point>): ")
+      (lmud.dummy::%prin1 a)
+      (lmud.dummy::%princ " ")
+      (lmud.dummy::%prin1 b)
+      (lmud.dummy::%terpri))
+   
+   (tos.int:defmethod-on-generic-function *the-gf* ((a <point>) (b <point>))
+      (lmud.dummy::%princ "(a <point>) (b <point>): ")
+      (lmud.dummy::%prin1 a)
+      (lmud.dummy::%princ " ")
+      (lmud.dummy::%prin1 b)
+      (lmud.dummy::%terpri))
+
+   (lmud.dummy::%prin1 (tos.int:%generic-function-dispatch-table *the-gf*))
    (lmud.dummy::%terpri)
 
 
