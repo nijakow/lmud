@@ -1,4 +1,5 @@
 
+#include <lmud/lisp/gc.h>
 #include <lmud/util/memory.h>
 
 #include "custom.h"
@@ -20,6 +21,18 @@ void LMud_Custom_Create(struct LMud_Custom* self, LMud_Any meta, LMud_Any* slots
 void LMud_Custom_Destroy(struct LMud_Custom* self)
 {
     LMud_Free(self->slots);
+}
+
+void LMud_Custom_Mark(struct LMud_GC* gc, struct LMud_Custom* self)
+{
+    LMud_Size  index;
+
+    LMud_GC_MarkAny(gc, self->meta);
+
+    for (index = 0; index < self->size; index++)
+    {
+        LMud_GC_MarkAny(gc, self->slots[index]);
+    }
 }
 
 LMud_Any  LMud_Custom_Meta(struct LMud_Custom* self)

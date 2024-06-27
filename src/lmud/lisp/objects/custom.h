@@ -12,6 +12,7 @@ struct LMud_Custom
 
 void LMud_Custom_Create(struct LMud_Custom* self, LMud_Any meta, LMud_Any* slots, LMud_Size size);
 void LMud_Custom_Destroy(struct LMud_Custom* self);
+void LMud_Custom_Mark(struct LMud_GC* gc, struct LMud_Custom* self);
 
 LMud_Any  LMud_Custom_Meta(struct LMud_Custom* self);
 void      LMud_Custom_SetMeta(struct LMud_Custom* self, LMud_Any meta);

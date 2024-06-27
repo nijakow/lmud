@@ -1,4 +1,6 @@
 
+#include <lmud/lisp/gc.h>
+
 #include "ratio.h"
 
 void LMud_Ratio_Create(struct LMud_Ratio* self, LMud_Any numerator, LMud_Any denominator)
@@ -10,6 +12,12 @@ void LMud_Ratio_Create(struct LMud_Ratio* self, LMud_Any numerator, LMud_Any den
 void LMud_Ratio_Destroy(struct LMud_Ratio* self)
 {
     (void) self;
+}
+
+void LMud_Ratio_Mark(struct LMud_GC* gc, struct LMud_Ratio* self)
+{
+    LMud_GC_MarkAny(gc, self->numerator);
+    LMud_GC_MarkAny(gc, self->denominator);
 }
 
 LMud_Any LMud_Ratio_Numerator(struct LMud_Ratio* self)

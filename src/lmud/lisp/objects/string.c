@@ -1,4 +1,5 @@
 
+#include <lmud/lisp/gc.h>
 #include <lmud/util/memory.h>
 #include <lmud/util/utf8.h>
 
@@ -12,6 +13,12 @@ void LMud_String_Create(struct LMud_String* self, const char* chars)
 
 void LMud_String_Destroy(struct LMud_String* self)
 {
+    (void) self;
+}
+
+void LMud_String_Mark(struct LMud_GC* gc, struct LMud_String* self)
+{
+    (void) gc;
     (void) self;
 }
 

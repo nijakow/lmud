@@ -2,6 +2,7 @@
 #include <lmud/lisp/lisp.h>
 #include <lmud/lisp/objects.h>
 #include <lmud/lisp/objects/string.h>
+#include <lmud/lisp/gc.h>
 
 #include "symbol.h"
 
@@ -15,6 +16,16 @@ void LMud_SymbolTable_Destroy(struct LMud_SymbolTable* self)
     while (self->symbols != NULL)
     {
         LMud_Symbol_Unlink(self->symbols);
+    }
+}
+
+void LMud_SymbolTable_Mark(struct LMud_GC* gc, struct LMud_SymbolTable* self)
+{
+    struct LMud_Symbol*  symbol;
+
+    for (symbol = self->symbols; symbol != NULL; symbol = symbol->next)
+    {
+        LMud_GC_MarkObject(gc, symbol);
     }
 }
 
@@ -87,6 +98,16 @@ void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_SymbolTable* table
 void LMud_Symbol_Destroy(struct LMud_Symbol* self)
 {
     LMud_Symbol_Unlink(self);
+}
+
+void LMud_Symbol_Mark(struct LMud_GC* gc, struct LMud_Symbol* self)
+{
+    LMud_GC_MarkAny(gc, self->package);
+    LMud_GC_MarkAny(gc, self->name);
+    LMud_GC_MarkAny(gc, self->value);
+    LMud_GC_MarkAny(gc, self->function);
+    LMud_GC_MarkAny(gc, self->macro);
+    LMud_GC_MarkAny(gc, self->plist);
 }
 
 

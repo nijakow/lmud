@@ -1,4 +1,6 @@
 
+#include <lmud/lisp/gc.h>
+
 #include "array.h"
 
 void LMud_Array_Create_Overallocated(struct LMud_Array* self, LMud_Size size, LMud_Any fill)
@@ -30,6 +32,16 @@ void LMud_Array_Create_OverallocatedFromData(struct LMud_Array* self, LMud_Size 
 void LMud_Array_Destroy(struct LMud_Array* self)
 {
     (void) self;
+}
+
+void LMud_Array_Mark(struct LMud_GC* gc, struct LMud_Array* self)
+{
+    LMud_Size  index;
+
+    for (index = 0; index < LMud_Array_GetSize(self); index++)
+    {
+        LMud_GC_MarkAny(gc, self->data[index]);
+    }
 }
 
 LMud_Size LMud_Array_GetSize(struct LMud_Array* self)

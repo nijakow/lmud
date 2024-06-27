@@ -15,6 +15,7 @@ struct LMud_Package
 
 void LMud_Package_Create(struct LMud_Package* self, LMud_Any name);
 void LMud_Package_Destroy(struct LMud_Package* self);
+void LMud_Package_Mark(struct LMud_GC* gc, struct LMud_Package* self);
 
 void LMud_Package_Link(struct LMud_Package* self, struct LMud_Package** list);
 void LMud_Package_Unlink(struct LMud_Package* self);

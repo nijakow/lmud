@@ -7,9 +7,10 @@ typedef void (*LMud_BuiltinFunction)(struct LMud_Fiber* fiber, LMud_Any* argumen
 
 struct LMud_Builtin
 {
-    char*                name;
-    LMud_BuiltinFunction function;
+    char*                 name;
+    LMud_BuiltinFunction  function;
 };
 
 void LMud_Builtin_Create(struct LMud_Builtin* self, const char* name, LMud_BuiltinFunction function);
 void LMud_Builtin_Destroy(struct LMud_Builtin* self);
+void LMud_Builtin_Mark(struct LMud_GC* gc, struct LMud_Builtin* self);

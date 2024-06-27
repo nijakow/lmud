@@ -1,4 +1,6 @@
 
+#include <lmud/lisp/gc.h>
+
 #include "package.h"
 
 
@@ -14,6 +16,12 @@ void LMud_Package_Destroy(struct LMud_Package* self)
 {
     LMud_Package_Unlink(self);
     LMud_SymbolTable_Destroy(&self->symbols);
+}
+
+void LMud_Package_Mark(struct LMud_GC* gc, struct LMud_Package* self)
+{
+    LMud_GC_MarkAny(gc, self->name);
+    LMud_SymbolTable_Mark(gc, &self->symbols);
 }
 
 void LMud_Package_Link(struct LMud_Package* self, struct LMud_Package** list)

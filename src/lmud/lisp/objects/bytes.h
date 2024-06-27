@@ -12,6 +12,7 @@ struct LMud_Bytes
 
 void LMud_Bytes_Create_Overallocated(struct LMud_Bytes* self, LMud_Size size);
 void LMud_Bytes_Destroy(struct LMud_Bytes* self);
+void LMud_Bytes_Mark(struct LMud_GC* gc, struct LMud_Bytes* self);
 
 LMud_Size LMud_Bytes_GetSize(struct LMud_Bytes* self);
 char*     LMud_Bytes_GetData(struct LMud_Bytes* self);

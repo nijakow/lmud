@@ -1,4 +1,5 @@
 
+#include <lmud/lisp/gc.h>
 #include <lmud/util/memory.h>
 
 #include "builtin.h"
@@ -12,4 +13,10 @@ void LMud_Builtin_Create(struct LMud_Builtin* self, const char* name, LMud_Built
 void LMud_Builtin_Destroy(struct LMud_Builtin* self)
 {
     LMud_Free(self->name);
+}
+
+void LMud_Builtin_Mark(struct LMud_GC* gc, struct LMud_Builtin* self)
+{
+    (void) gc;
+    (void) self;
 }
