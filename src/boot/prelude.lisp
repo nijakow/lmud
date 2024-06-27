@@ -586,8 +586,8 @@
                 (when (tos.int:%class-funcall-dispatcher superclass)
                    (return (tos.int:%class-funcall-dispatcher superclass)))))))
    
-   (defun tos.int:funcall-dispatcher (object &rest args)
-      (apply (tos.int:funcall-dispatcher-of object) object args))
+   (defun tos.int:funcall-dispatcher (object &ignore-rest)
+      (lmud.int:funcall-forward (tos.int:funcall-dispatcher-of object)))
    
    (lmud.int:%set-custom-dispatcher-function #'tos.int:funcall-dispatcher)
 
@@ -711,15 +711,16 @@
                   #'tos.int:typed-arglist-specific->
                   :key #'car))
       (let ((dispatcher-source
-               (list 'lambda '(&rest args-as-list)
+               (list 'lambda '(&ignore-rest)
                      (list* 'cond
                         (domap (clause (tos.int:%generic-function-dispatch-table gf))
                            (list (list* 'and
-                                    (let ((nested-clause 'args-as-list))
+                                    (list '= '(lmud.int:%given-argument-count) (length (car clause)))
+                                    (let ((arg-index 0))
                                        (domap (arg (car clause))
-                                          (prog1 (list 'tos.int:instancep (list 'car nested-clause) (cdr arg))
-                                             (setq nested-clause (list 'cdr nested-clause))))))
-                                 (list 'apply (cdr clause) 'args-as-list)))))))
+                                          (prog1 (list 'tos.int:instancep (list 'lmud.int:%given-argument-ref arg-index) (cdr arg))
+                                             (incf arg-index)))))
+                                 (list 'lmud.int:funcall-forward (cdr clause))))))))
          (setf (tos.int:%generic-function-dispatch-function gf)
                (eval dispatcher-source)))
       gf)

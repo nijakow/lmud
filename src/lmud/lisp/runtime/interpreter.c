@@ -210,6 +210,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
             case LMud_Bytecode_CONS_REST_ARGUMENTS:
             {
+                printf("Consing rest arguments!\n");
                 value = LMud_Lisp_Nil(LMud_Interpreter_GetLisp(self));
                 index = LMud_Frame_RemainingExtraArgumentCount(self->fiber->top);
 
