@@ -735,7 +735,7 @@
 
    (defun tos.int:extract-typed-args (arglist)
       (cond ((endp arglist) (values nil nil))
-            ((member (car arglist) '(&optional &key &rest &body)) (values nil arglist))
+            ((member (car arglist) '(&optional &key &rest &body &ignore-rest)) (values nil arglist))
             (t (multiple-value-bind (typed untyped)
                      (tos.int:extract-typed-args (cdr arglist))
                   (values (cons (if (consp (car arglist))

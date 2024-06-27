@@ -86,7 +86,11 @@ struct LMud_Frame* LMud_Fiber_PushFrame(struct LMud_Fiber* self, struct LMud_Fun
 
     extra_args = argument_count - function->info.fixed_argument_count;
 
-    // TODO: Handle variadic functions.
+    if (extra_args > 0 && !function->info.variadic) {
+        LMud_Fiber_PerformError(self, "Function is not variadic!.");
+        assert(false);
+        return NULL;
+    }
     
     frame               = LMud_Fiber_StackTop(self);
     self->stack_pointer = self->stack_pointer + sizeof(struct LMud_Frame) + (function->info.register_count + function->info.stack_size + extra_args) * sizeof(LMud_Any);

@@ -17,6 +17,7 @@ enum LMud_ArgumentMode
     LMud_ArgumentMode_OPTIONAL,
     LMud_ArgumentMode_KEY,
     LMud_ArgumentMode_REST,
+    LMud_ArgumentMode_IGNORE_REST,
 };
 
 
@@ -315,10 +316,11 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->cached.symbol_mvl         = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "MULTIPLE-VALUE-LIST");
     self->cached.symbol_return_from = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "RETURN-FROM");
 
-    self->cached.symbol_andrest     = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&REST");
-    self->cached.symbol_andbody     = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&BODY");
-    self->cached.symbol_andoptional = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&OPTIONAL");
-    self->cached.symbol_andkey      = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&KEY");
+    self->cached.symbol_andrest       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&REST");
+    self->cached.symbol_andbody       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&BODY");
+    self->cached.symbol_andoptional   = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&OPTIONAL");
+    self->cached.symbol_andkey        = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&KEY");
+    self->cached.symbol_andignorerest = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&IGNORE-REST");
 
     LMud_Compiler_PushScope(self);
 }
@@ -1424,7 +1426,15 @@ void LMud_Compiler_ProcessArgumentList(struct LMud_Compiler* self, LMud_Any argl
             mode = LMud_ArgumentMode_OPTIONAL;
         else if (LMud_Any_Eq(argument, self->cached.symbol_andkey))
             mode = LMud_ArgumentMode_KEY;
-        else {
+        else if (LMud_Any_Eq(argument, self->cached.symbol_andignorerest)) {
+            mode = LMud_ArgumentMode_IGNORE_REST;
+            /*
+             * We need to make sure that we are variadic, otherwise any
+             * extra arguments passed to us will result in an error by
+             * the runtime.
+             */
+            LMud_Compiler_EnableVariadic(self);
+        } else {
             switch (mode)
             {
                 case LMud_ArgumentMode_REQUIRED:
@@ -1442,9 +1452,15 @@ void LMud_Compiler_ProcessArgumentList(struct LMud_Compiler* self, LMud_Any argl
                 case LMud_ArgumentMode_REST:
                     LMud_Compiler_AddRestArgument(self, argument);
                     break;
+                
+                case LMud_ArgumentMode_IGNORE_REST:
+                    // TODO: Error
+                    assert(false);
+                    break;
 
                 default:
                     // TODO: Error
+                    assert(false);
                     break;
             }
         }
