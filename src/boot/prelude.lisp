@@ -711,7 +711,7 @@
                   #'tos.int:typed-arglist-specific->
                   :key #'car))
       (let ((dispatcher-source
-               (list 'lambda '(args-as-list)
+               (list 'lambda '(&rest args-as-list)
                      (list* 'cond
                         (domap (clause (tos.int:%generic-function-dispatch-table gf))
                            (list (list* 'and
@@ -729,8 +729,8 @@
       (push (cons fixed-args lambda) (tos.int:%generic-function-dispatch-table gf))
       (tos.int:generic-function-resort-methods gf))
    
-   (defun tos.int:generic-function-invoke (gf &rest args)
-      (funcall (tos.int:%generic-function-dispatch-function gf) args))
+   (defun tos.int:generic-function-invoke (gf &ignore-rest)
+      (lmud.int:funcall-forward-rest (tos.int:%generic-function-dispatch-function gf)))
    (setf (tos.int:%class-funcall-dispatcher tos.int:<generic-function>) #'tos.int:generic-function-invoke)
 
    (defun tos.int:extract-typed-args (arglist)
@@ -781,9 +781,9 @@
    (tos:defclass <f> (<b> <c>) ())
    (tos:defclass <g> (<e> <f>) ())
 
-   (defparameter *the-gf* (tos.int:make-instance tos.int:<generic-function>))
+   (set-symbol-function 'the-gf (tos.int:make-instance tos.int:<generic-function>))
 
-   (tos.int:defmethod-on-generic-function *the-gf* (a b)
+   (tos.int:defmethod-on-generic-function #'the-gf (a b)
       (lmud.dummy::%princ "a b: ")
       (lmud.dummy::%prin1 a)
       (lmud.dummy::%princ " ")
@@ -791,7 +791,7 @@
       (lmud.dummy::%terpri)
       (values))
    
-   (tos.int:defmethod-on-generic-function *the-gf* ((a <point>) b)
+   (tos.int:defmethod-on-generic-function #'the-gf ((a <point>) b)
       (lmud.dummy::%princ "(a <point>) b: ")
       (lmud.dummy::%prin1 a)
       (lmud.dummy::%princ " ")
@@ -799,7 +799,7 @@
       (lmud.dummy::%terpri)
       (values))
    
-   (tos.int:defmethod-on-generic-function *the-gf* (a (b <point>))
+   (tos.int:defmethod-on-generic-function #'the-gf (a (b <point>))
       (lmud.dummy::%princ "a (b <point>): ")
       (lmud.dummy::%prin1 a)
       (lmud.dummy::%princ " ")
@@ -807,7 +807,7 @@
       (lmud.dummy::%terpri)
       (values))
    
-   (tos.int:defmethod-on-generic-function *the-gf* ((a <point>) (b <point>))
+   (tos.int:defmethod-on-generic-function #'the-gf ((a <point>) (b <point>))
       (lmud.dummy::%princ "(a <point>) (b <point>): ")
       (lmud.dummy::%prin1 a)
       (lmud.dummy::%princ " ")
@@ -822,7 +822,7 @@
    (defun a () (tos.int:make-instance tos.int:<t>))
 
    (defun f (a b)
-      (funcall *the-gf* a b))
+      (the-gf a b))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
