@@ -26,15 +26,22 @@ bool LMud_Net_OpenV6(struct LMud_Net* self, const char* address, LMud_Port port)
     return LMud_Servers_OpenV6(&self->servers, address, port);
 }
 
-void LMud_Net_RegisterClientFileDescriptor(struct LMud_Net* self, int fd)
+bool LMud_Net_RegisterClientFileDescriptor(struct LMud_Net* self, int fd, bool close_on_error)
 {
-    (void) self;
-    (void) fd;
+    if (close_on_error) {
+        return LMud_Connections_RegisterFileDescriptorOrClose(&self->connections, fd);
+    } else {
+        return LMud_Connections_RegisterFileDescriptor(&self->connections, fd);
+    }
 }
 
-void LMud_Net_RegisterClientSocket(struct LMud_Net* self, LMud_Socket socket)
+bool LMud_Net_RegisterClientSocket(struct LMud_Net* self, LMud_Socket socket, bool close_on_error)
 {
-    LMud_Net_RegisterClientFileDescriptor(self, socket);
+    /*
+     * Since LMud_Socket is just an alias for int, we can just forward
+     * our socket to LMud_Net_RegisterClientFileDescriptor.
+     */
+    return LMud_Net_RegisterClientFileDescriptor(self, socket, close_on_error);
 }
 
 void LMud_Net_Tick(struct LMud_Net* self)

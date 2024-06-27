@@ -73,6 +73,32 @@ void LMud_Connections_Destroy(struct LMud_Connections* self)
     }
 }
 
+bool LMud_Connections_RegisterFileDescriptor(struct LMud_Connections* self, int fd)
+{
+    struct LMud_Connection*  connection;
+
+    connection = LMud_Alloc(sizeof(struct LMud_Connection));
+
+    if (connection != NULL)
+    {
+        LMud_Connection_Create(connection, fd);
+        LMud_Connection_Link(connection, &self->connections);
+    }
+
+    return connection != NULL;
+}
+
+bool LMud_Connections_RegisterFileDescriptorOrClose(struct LMud_Connections* self, int fd)
+{
+    if (LMud_Connections_RegisterFileDescriptor(self, fd))
+        return true;
+    else
+    {
+        close(fd);
+        return false;
+    }
+}
+
 void LMud_Connections_RegisterOnSelector(struct LMud_Connections* self, struct LMud_Selector* selector)
 {
     struct LMud_Connection*  connection;

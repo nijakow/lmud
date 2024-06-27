@@ -118,7 +118,7 @@ static void LMud_Servers_HandleReadByIndex(struct LMud_Servers* self, LMud_Size 
     LMud_Inet_AcceptInfo_Create(&info);
     {
         if (LMud_Inet_Accept(self->fds[index], &info)) {
-            LMud_Net_RegisterClientSocket(self->net, LMud_Inet_AcceptInfo_GetSocket(&info));
+            LMud_Net_RegisterClientSocket(self->net, LMud_Inet_AcceptInfo_GetSocket(&info), true);
         }
     }
     LMud_Inet_AcceptInfo_Destroy(&info);
