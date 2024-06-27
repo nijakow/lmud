@@ -13,3 +13,5 @@ struct LMud_Net
 
 void LMud_Net_Create(struct LMud_Net* self);
 void LMud_Net_Destroy(struct LMud_Net* self);
+
+void LMud_Net_Tick(struct LMud_Net* self);

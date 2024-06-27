@@ -15,3 +15,5 @@ void LMud_Servers_Create(struct LMud_Servers* self);
 void LMud_Servers_Destroy(struct LMud_Servers* self);
 
 void LMud_Servers_RegisterOnSelector(struct LMud_Servers* self, struct LMud_Selector* selector);
+
+void LMud_Servers_Tick(struct LMud_Servers* self, struct LMud_Selector* selector);

@@ -32,3 +32,21 @@ void LMud_Servers_RegisterOnSelector(struct LMud_Servers* self, struct LMud_Sele
         LMud_Selector_AddExcept(selector, self->fds[index]);
     }
 }
+
+void LMud_Servers_Tick(struct LMud_Servers* self, struct LMud_Selector* selector)
+{
+    LMud_Size  index;
+
+    for (index = 0; index < self->fill; ++index)
+    {
+        if (LMud_Selector_IsRead(selector, self->fds[index]))
+        {
+            // Handle read
+        }
+
+        if (LMud_Selector_IsExcept(selector, self->fds[index]))
+        {
+            // Handle exception
+        }
+    }
+}

@@ -39,6 +39,19 @@ void LMud_Connection_RegisterOnSelector(struct LMud_Connection* self, struct LMu
     LMud_Selector_AddExcept(selector, self->fd);
 }
 
+void LMud_Connection_Tick(struct LMud_Connection* self, struct LMud_Selector* selector)
+{
+    if (LMud_Selector_IsRead(selector, self->fd))
+    {
+        // Handle read
+    }
+
+    if (LMud_Selector_IsExcept(selector, self->fd))
+    {
+        // Handle exception
+    }
+}
+
 
 static void LMud_Connections_DeleteConnection(struct LMud_Connections* self, struct LMud_Connection* connection)
 {
@@ -67,5 +80,15 @@ void LMud_Connections_RegisterOnSelector(struct LMud_Connections* self, struct L
     for (connection = self->connections; connection != NULL; connection = connection->next)
     {
         LMud_Connection_RegisterOnSelector(connection, selector);
+    }
+}
+
+void LMud_Connections_Tick(struct LMud_Connections* self, struct LMud_Selector* selector)
+{
+    struct LMud_Connection*  connection;
+
+    for (connection = self->connections; connection != NULL; connection = connection->next)
+    {
+        LMud_Connection_Tick(connection, selector);
     }
 }

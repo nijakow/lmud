@@ -30,3 +30,5 @@ void LMud_Connections_Create(struct LMud_Connections* self);
 void LMud_Connections_Destroy(struct LMud_Connections* self);
 
 void LMud_Connections_RegisterOnSelector(struct LMud_Connections* self, struct LMud_Selector* selector);
+
+void LMud_Connections_Tick(struct LMud_Connections* self, struct LMud_Selector* selector);
