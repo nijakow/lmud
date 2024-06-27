@@ -16,6 +16,28 @@ void LMud_Net_Destroy(struct LMud_Net* self)
     LMud_Servers_Destroy(&self->servers);
 }
 
+bool LMud_Net_OpenV4(struct LMud_Net* self, const char* address, LMud_Port port)
+{
+    // TODO
+
+    (void) self;
+    (void) address;
+    (void) port;
+
+    return false;
+}
+
+bool LMud_Net_OpenV6(struct LMud_Net* self, const char* address, LMud_Port port)
+{
+    // TODO
+
+    (void) self;
+    (void) address;
+    (void) port;
+
+    return false;
+}
+
 void LMud_Net_Tick(struct LMud_Net* self)
 {
     struct LMud_Selector  selector;

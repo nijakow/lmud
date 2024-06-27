@@ -35,6 +35,8 @@ typedef size_t        LMud_Size;
 typedef int           LMud_Integer;
 typedef unsigned int  LMud_Rune;
 
+typedef uint16_t      LMud_Port;
+
 
 struct LMud_Lisp;
 struct LMud_Header;
