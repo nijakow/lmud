@@ -595,13 +595,15 @@ void LMud_Lisp_Tick(struct LMud_Lisp* self)
 }
 
 
-void LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename)
+LMud_Any LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename)
 {
     struct LMud_InputStream  stream;
     FILE*                    file;
     LMud_Any                 program;
+    LMud_Any                 result;
 
-    file = fopen(filename, "r");
+    file   = fopen(filename, "r");
+    result = LMud_Lisp_Nil(self);
 
     if (file == NULL)
         fprintf(stderr, LMud_VT100_Italic "; " LMud_VT100_Red "Failed to open file: \"%s\"" LMud_VT100_Normal "\n", filename);
@@ -616,11 +618,13 @@ void LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename)
                 fprintf(stderr, LMud_VT100_Italic ";   " LMud_VT100_Red "--> Failed to compile an expression!" LMud_VT100_Normal "\n");
                 break;
             } else {
-                LMud_Scheduler_BlockAndRunThunk(&self->scheduler, program, NULL);
+                LMud_Scheduler_BlockAndRunThunk(&self->scheduler, program, &result);
             }
         }
 
         LMud_InputStream_Destroy(&stream);        
         fclose(file);
     }
+
+    return result;
 }

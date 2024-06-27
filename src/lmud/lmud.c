@@ -41,6 +41,14 @@ void LMud_Tick(struct LMud* self)
     LMud_Lisp_Tick(&self->lisp);
 }
 
+void LMud_Loop(struct LMud* self)
+{
+    while (true)
+    {
+        LMud_Tick(self);
+    }
+}
+
 void LMud_Banner(struct LMud* self)
 {
     (void) self;
