@@ -58,7 +58,7 @@ void LMud_GC_MarkObject(struct LMud_GC* self, void* object)
     {
         LMud_Header_SetGCBits(header, LMud_GCBits_Grey);
         LMud_Header_SetLink(header, self->pending);
-        self->pending   = header;
+        self->pending = header;
     }
 }
 
@@ -122,7 +122,10 @@ static void LMud_GC_Collect(struct LMud_GC* self)
     struct LMud_Header**  next;
     struct LMud_Header*   header;
 
-    for (iterator = &self->lisp->objects.objects; *iterator != NULL; iterator = next)
+    iterator = &self->lisp->objects.objects;
+    next     = iterator;
+
+    while (*iterator != NULL)
     {
         header = *iterator;
 
@@ -146,6 +149,8 @@ static void LMud_GC_Collect(struct LMud_GC* self)
                 assert(false);  // Should not happen
                 break;
         }
+
+        iterator = next;
     }
 }
 
@@ -154,9 +159,22 @@ static void LMud_GC_MarkRoots(struct LMud_GC* self)
     LMud_Lisp_Mark(self, self->lisp);
 }
 
+static void LMud_GC_InitialBookeeping(struct LMud_GC* self)
+{
+    (void) self;
+}
+
+static void LMud_GC_FinalBookeeping(struct LMud_GC* self)
+{
+    LMud_Objects_ClearGcAllocationCounter(&self->lisp->objects);
+    LMud_TrimMalloc();
+}
+
 void LMud_GC_Run(struct LMud_GC* self)
 {
+    LMud_GC_InitialBookeeping(self);
     LMud_GC_MarkRoots(self);
     LMud_GC_Loop(self);
     LMud_GC_Collect(self);
+    LMud_GC_FinalBookeeping(self);
 }

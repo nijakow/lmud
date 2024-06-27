@@ -98,7 +98,8 @@ bool LMud_Objects_Create(struct LMud_Objects* self, struct LMud_Lisp* lisp)
     self->objects  = NULL;
     self->packages = NULL;
 
-    self->bytes_allocated = 0;
+    self->bytes_allocated          = 0;
+    self->bytes_allocated_since_gc = 0;
 
     LMud_Types_Create(&self->types);
 
@@ -114,6 +115,17 @@ void LMud_Objects_Destroy(struct LMud_Objects* self)
 struct LMud_Lisp* LMud_Objects_GetLisp(struct LMud_Objects* self)
 {
     return self->lisp;
+}
+
+
+LMud_Size LMud_Objects_GetGcAllocationCounter(struct LMud_Objects* self)
+{
+    return self->bytes_allocated_since_gc;
+}
+
+void LMud_Objects_ClearGcAllocationCounter(struct LMud_Objects* self)
+{
+    self->bytes_allocated_since_gc = 0;
 }
 
 
@@ -139,9 +151,10 @@ static void LMud_Objects_AfterAllocate(struct LMud_Objects* self, void* object)
     header = LMud_ToHeader(object);
     size   = header->type->size_func(object) + sizeof(struct LMud_Header);
 
-    self->bytes_allocated += size;
+    self->bytes_allocated          += size;
+    self->bytes_allocated_since_gc += size;
     
-    // printf("%8zu Allocated %zu bytes for %s\n", self->bytes_allocated, size, header->type->name);
+    // printf("%8zu Allocated %zu bytes for %s\n", self->bytes_allocated_since_gc, size, header->type->name);
 }
 
 struct LMud_Array*  LMud_Objects_MakeArray(struct LMud_Objects* self, LMud_Size size, LMud_Any fill)

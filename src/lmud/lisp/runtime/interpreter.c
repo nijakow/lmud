@@ -148,6 +148,12 @@ struct LMud_Frame* LMud_Interpreter_LexicalFrame(struct LMud_Interpreter* self, 
 #define LMud_Interpreter_Restore(self) \
     LMud_InstructionStream_Restore(&stream, self->fiber->top)
 
+#define TERMINATE \
+    { \
+        LMud_Fiber_Terminate(self->fiber); \
+        goto end; \
+    }
+
 void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 {
     struct LMud_InstructionStream  stream;
@@ -155,10 +161,13 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
     LMud_Any                       value;
     LMud_Any                       value2;
     LMud_Size                      index;
+    LMud_Size                      steps_remaining;
+
+    steps_remaining = 1024;
 
     LMud_InstructionStream_Create(&stream, self->fiber->top);
 
-    while (true)
+    while (steps_remaining --> 0)
     {
         switch (LMud_InstructionStream_NextBytecode(&stream))
         {
@@ -428,7 +437,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 LMud_Interpreter_Flush(self);
                 LMud_Fiber_PerformReturn(self->fiber);
                 if (!LMud_Fiber_HasFrames(self->fiber))
-                    goto end;
+                    TERMINATE;
                 LMud_Interpreter_Restore(self);
                 break;
             }
@@ -437,7 +446,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
             {
                 LMud_Interpreter_Flush(self);
                 LMud_Fiber_PerformError(self->fiber, "Invalid bytecode!");
-                goto end;
+                TERMINATE;
             }
         }
     }

@@ -1,5 +1,6 @@
 
 #include <lmud/lisp/gc.h>
+#include <lmud/lisp/lisp.h>
 #include <lmud/lisp/runtime/fiber.h>
 #include <lmud/util/memory.h>
 
@@ -62,7 +63,12 @@ bool LMud_Scheduler_BlockAndRunThunk(struct LMud_Scheduler* self, LMud_Any thunk
         return false;
 
     LMud_Fiber_EnterThunk(fiber, thunk);
-    LMud_Fiber_Tick(fiber);
+    
+    while (!LMud_Fiber_HasTerminated(fiber))
+    {
+        LMud_Fiber_Tick(fiber);
+        LMud_Lisp_PeriodicInterrupt(self->lisp);
+    }
 
     if (result != NULL)
         *result = LMud_Fiber_GetAccumulator(fiber);

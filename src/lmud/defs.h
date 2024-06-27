@@ -20,6 +20,7 @@
 #define LMud_RELEASE_NAME "Patchy Phoenix"
 
 #define LMud_ENABLE_COMPRESSED_ANYS
+#define LMud_ENABLE_MALLOC_TRIM
 
 
 typedef size_t        LMud_Size;

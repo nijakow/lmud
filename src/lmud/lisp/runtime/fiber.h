@@ -22,6 +22,8 @@ struct LMud_Fiber
     LMud_Any               accumulator[LMud_Fiber_MAX_ACCUMULATORS];
 
     struct LMud_FrameList  floating_frames;
+
+    bool                   terminated;
 };
 
 void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp);
@@ -30,6 +32,9 @@ void LMud_Fiber_Mark(struct LMud_GC* gc, struct LMud_Fiber* self);
 
 void LMud_Fiber_Link(struct LMud_Fiber* self, struct LMud_Fiber** list);
 void LMud_Fiber_Unlink(struct LMud_Fiber* self);
+
+bool LMud_Fiber_HasTerminated(struct LMud_Fiber* self);
+void LMud_Fiber_Terminate(struct LMud_Fiber* self);
 
 bool LMud_Fiber_HasFrames(struct LMud_Fiber* self);
 

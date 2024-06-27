@@ -581,6 +581,15 @@ void LMud_Lisp_GarbageCollect(struct LMud_Lisp* self, struct LMud_GCStats* stats
 }
 
 
+void LMud_Lisp_PeriodicInterrupt(struct LMud_Lisp* self)
+{
+    if (LMud_Objects_GetGcAllocationCounter(&self->objects) >= (16 * 1024 * 1024))
+    {
+        LMud_Lisp_GarbageCollect(self, NULL);
+    }
+}
+
+
 void LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename)
 {
     struct LMud_InputStream  stream;

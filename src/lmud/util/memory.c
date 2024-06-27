@@ -25,6 +25,13 @@ void LMud_Free(void* ptr)
     }
 }
 
+void LMud_TrimMalloc()
+{
+#ifdef LMud_ENABLE_MALLOC_TRIM
+    malloc_trim(0);
+#endif
+}
+
 
 LMud_Size LMud_CStr_Length(const char* str)
 {

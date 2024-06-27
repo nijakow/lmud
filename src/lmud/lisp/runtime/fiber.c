@@ -27,6 +27,8 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp)
     self->accumulator[0]    = LMud_Lisp_Nil(lisp);
 
     LMud_FrameList_Create(&self->floating_frames);
+
+    self->terminated = false;
 }
 
 void LMud_Fiber_Destroy(struct LMud_Fiber* self)
@@ -70,6 +72,16 @@ void LMud_Fiber_Unlink(struct LMud_Fiber* self)
     self->next = NULL;
 }
 
+
+bool LMud_Fiber_HasTerminated(struct LMud_Fiber* self)
+{
+    return self->terminated;
+}
+
+void LMud_Fiber_Terminate(struct LMud_Fiber* self)
+{
+    self->terminated = true;
+}
 
 bool LMud_Fiber_HasFrames(struct LMud_Fiber* self)
 {

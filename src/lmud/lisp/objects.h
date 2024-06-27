@@ -53,13 +53,18 @@ struct LMud_Objects
     struct LMud_Header*      objects;
     struct LMud_Package*     packages;
     struct LMud_Types        types;
+
     LMud_Size                bytes_allocated;
+    LMud_Size                bytes_allocated_since_gc;
 };
 
 bool LMud_Objects_Create(struct LMud_Objects* self, struct LMud_Lisp* lisp);
 void LMud_Objects_Destroy(struct LMud_Objects* self);
 
 struct LMud_Lisp* LMud_Objects_GetLisp(struct LMud_Objects* self);
+
+LMud_Size LMud_Objects_GetGcAllocationCounter(struct LMud_Objects* self);
+void      LMud_Objects_ClearGcAllocationCounter(struct LMud_Objects* self);
 
 void* LMud_Objects_Allocate(struct LMud_Objects* self, struct LMud_Type* type, LMud_Size extra);
 
