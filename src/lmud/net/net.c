@@ -18,24 +18,12 @@ void LMud_Net_Destroy(struct LMud_Net* self)
 
 bool LMud_Net_OpenV4(struct LMud_Net* self, const char* address, LMud_Port port)
 {
-    // TODO
-
-    (void) self;
-    (void) address;
-    (void) port;
-
-    return false;
+    return LMud_Servers_OpenV4(&self->servers, address, port);
 }
 
 bool LMud_Net_OpenV6(struct LMud_Net* self, const char* address, LMud_Port port)
 {
-    // TODO
-
-    (void) self;
-    (void) address;
-    (void) port;
-
-    return false;
+    return LMud_Servers_OpenV6(&self->servers, address, port);
 }
 
 void LMud_Net_RegisterClientFileDescriptor(struct LMud_Net* self, int fd)

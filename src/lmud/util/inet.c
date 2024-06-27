@@ -42,7 +42,7 @@ bool LMud_Inet_OpenServerV4(const char* address, LMud_Port port, LMud_Socket* th
     return true;
 }
 
-bool LMud_Inet_OpenV6(const char* address, LMud_Port port, LMud_Socket* the_socket)
+bool LMud_Inet_OpenServerV6(const char* address, LMud_Port port, LMud_Socket* the_socket)
 {
     struct sockaddr_in6  addr;
     int                  sock;

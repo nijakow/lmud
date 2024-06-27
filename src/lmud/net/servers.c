@@ -25,6 +25,70 @@ void LMud_Servers_Destroy(struct LMud_Servers* self)
     LMud_Free(self->fds);
 }
 
+static bool LMud_Servers_EnsureCapacity(struct LMud_Servers* self, LMud_Size capacity)
+{
+    LMud_Size     new_alloc;
+    LMud_Socket*  new_fds;
+
+    if (self->alloc >= capacity)
+        return true;
+    
+    new_alloc = self->alloc * 2;
+
+    if (new_alloc < capacity)
+        new_alloc = capacity;
+    
+    new_fds = LMud_Realloc(self->fds, new_alloc * sizeof(LMud_Socket));
+
+    if (new_fds == NULL)
+        return false;
+    
+    self->fds   = new_fds;
+    self->alloc = new_alloc;
+
+    return true;
+}
+
+static bool LMud_Servers_PushSocket(struct LMud_Servers* self, LMud_Socket socket)
+{
+    if (!LMud_Servers_EnsureCapacity(self, self->fill + 1))
+        return false;
+    
+    self->fds[self->fill++] = socket;
+
+    return true;    
+}
+
+static void LMud_Servers_PushSocketOrClose(struct LMud_Servers* self, LMud_Socket socket)
+{
+    if (!LMud_Servers_PushSocket(self, socket))
+        LMud_Inet_Close(socket);
+}
+
+bool LMud_Servers_OpenV4(struct LMud_Servers* self, const char* address, LMud_Port port)
+{
+    LMud_Socket  socket;
+
+    if (LMud_Inet_OpenServerV4(address, port, &socket)) {
+        LMud_Servers_PushSocketOrClose(self, socket);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+bool LMud_Servers_OpenV6(struct LMud_Servers* self, const char* address, LMud_Port port)
+{
+    LMud_Socket  socket;
+
+    if (LMud_Inet_OpenServerV6(address, port, &socket)) {
+        LMud_Servers_PushSocketOrClose(self, socket);
+        return true;
+    } else {
+        return false;
+    }
+}
+
 void LMud_Servers_RegisterOnSelector(struct LMud_Servers* self, struct LMud_Selector* selector)
 {
     LMud_Size  index;
