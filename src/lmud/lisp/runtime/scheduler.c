@@ -77,3 +77,9 @@ bool LMud_Scheduler_BlockAndRunThunk(struct LMud_Scheduler* self, LMud_Any thunk
 
     return true;
 }
+
+void LMud_Scheduler_Tick(struct LMud_Scheduler* self)
+{
+    // TODO
+    (void) self;
+}

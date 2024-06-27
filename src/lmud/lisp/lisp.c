@@ -589,6 +589,11 @@ void LMud_Lisp_PeriodicInterrupt(struct LMud_Lisp* self)
     }
 }
 
+void LMud_Lisp_Tick(struct LMud_Lisp* self)
+{
+    LMud_Scheduler_Tick(&self->scheduler);
+}
+
 
 void LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename)
 {

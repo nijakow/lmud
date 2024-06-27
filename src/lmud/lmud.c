@@ -7,12 +7,27 @@
 
 bool LMud_Create(struct LMud* self)
 {
-    return LMud_Lisp_Create(&self->lisp);
+    return LMud_Net_Create(&self->net)
+        && LMud_Lisp_Create(&self->lisp);
 }
 
 void LMud_Destroy(struct LMud* self)
 {
     LMud_Lisp_Destroy(&self->lisp);
+    LMud_Net_Destroy(&self->net);
+}
+
+void LMud_SignalInterrupt(struct LMud* self)
+{
+    (void) self;
+    printf("\nInterrupted.\n");
+    exit(0);
+}
+
+void LMud_Tick(struct LMud* self)
+{
+    LMud_Net_Tick(&self->net);
+    LMud_Lisp_Tick(&self->lisp);
 }
 
 void LMud_Banner(struct LMud* self)

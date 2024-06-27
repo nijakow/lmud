@@ -4,10 +4,12 @@
 #include "net.h"
 
 
-void LMud_Net_Create(struct LMud_Net* self)
+bool LMud_Net_Create(struct LMud_Net* self)
 {
     LMud_Servers_Create(&self->servers, self);
     LMud_Connections_Create(&self->connections);
+    
+    return true;
 }
 
 void LMud_Net_Destroy(struct LMud_Net* self)

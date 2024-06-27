@@ -11,7 +11,7 @@ struct LMud_Net
     struct LMud_Connections  connections;
 };
 
-void LMud_Net_Create(struct LMud_Net* self);
+bool LMud_Net_Create(struct LMud_Net* self);
 void LMud_Net_Destroy(struct LMud_Net* self);
 
 bool LMud_Net_OpenV4(struct LMud_Net* self, const char* address, LMud_Port port);
