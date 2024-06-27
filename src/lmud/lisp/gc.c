@@ -54,10 +54,10 @@ void LMud_GC_MarkObject(struct LMud_GC* self, void* object)
 
     header = LMud_ToHeader(object);
 
-    if (header->bits.gc == LMud_GCBits_White)
+    if (LMud_Header_GetGCBits(header) == LMud_GCBits_White)
     {
-        header->bits.gc = LMud_GCBits_Grey;
-        header->link    = self->pending;
+        LMud_Header_SetGCBits(header, LMud_GCBits_Grey);
+        LMud_Header_SetLink(header, self->pending);
         self->pending   = header;
     }
 }
@@ -96,8 +96,8 @@ static bool LMud_GC_PopPending(struct LMud_GC* self, struct LMud_Header** header
         return false;
     else {
         next          = self->pending;
-        self->pending = self->pending->link;
-        next->link    = NULL;
+        self->pending = LMud_Header_GetLink(self->pending);
+        LMud_Header_SetLink(next, NULL);
         *header       = next;
         return true;
     }
@@ -110,8 +110,8 @@ static void LMud_GC_Loop(struct LMud_GC* self)
 
     while (LMud_GC_PopPending(self, &header))
     {
-        object          = LMud_Header_ToObject(header);
-        header->bits.gc = LMud_GCBits_Black;
+        object = LMud_Header_ToObject(header);
+        LMud_Header_SetGCBits(header, LMud_GCBits_Black);
         header->type->marker(self, object);
     }
 }
@@ -126,7 +126,7 @@ static void LMud_GC_Collect(struct LMud_GC* self)
     {
         header = *iterator;
 
-        switch (header->bits.gc)
+        switch (LMud_Header_GetGCBits(header))
         {
             case LMud_GCBits_White:
                 *iterator = header->next;
@@ -136,8 +136,8 @@ static void LMud_GC_Collect(struct LMud_GC* self)
                 break;
 
             case LMud_GCBits_Black:
-                header->bits.gc = LMud_GCBits_White;
-                next            = &header->next;
+                LMud_Header_SetGCBits(header, LMud_GCBits_White);
+                next = &header->next;
                 self->stats.objects_kept++;
                 break;
             

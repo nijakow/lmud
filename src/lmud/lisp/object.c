@@ -35,6 +35,28 @@ void* LMud_Header_ToObject(struct LMud_Header* header)
     return header + 1;
 }
 
+
+struct LMud_Header* LMud_Header_GetLink(struct LMud_Header* self)
+{
+    return self->link;
+}
+
+void LMud_Header_SetLink(struct LMud_Header* self, struct LMud_Header* link)
+{
+    self->link = link;
+}
+
+enum LMud_GCBits LMud_Header_GetGCBits(struct LMud_Header* self)
+{
+    return self->bits.gc;
+}
+
+void LMud_Header_SetGCBits(struct LMud_Header* self, enum LMud_GCBits gc_bits)
+{
+    self->bits.gc = gc_bits;
+}
+
+
 bool LMud_Type_TypeCheckHeader(struct LMud_Type* self, struct LMud_Header* header)
 {
     return header->type == self;
