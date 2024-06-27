@@ -11,8 +11,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <ctype.h>
+
+// Networking stuff
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 
 #define LMud_VERSION "0.1"
@@ -26,6 +33,7 @@
 typedef size_t        LMud_Size;
 typedef int           LMud_Integer;
 typedef unsigned int  LMud_Rune;
+
 
 struct LMud_Lisp;
 struct LMud_Header;
