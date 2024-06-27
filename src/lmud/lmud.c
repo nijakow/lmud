@@ -7,6 +7,7 @@
 
 bool LMud_Create(struct LMud* self)
 {
+    self->running = true;
     return LMud_Net_Create(&self->net)
         && LMud_Lisp_Create(&self->lisp);
 }
@@ -43,7 +44,7 @@ void LMud_Tick(struct LMud* self)
 
 void LMud_Loop(struct LMud* self)
 {
-    while (true)
+    while (self->running)
     {
         LMud_Tick(self);
     }

@@ -10,6 +10,7 @@ struct LMud
 {
     struct LMud_Net   net;
     struct LMud_Lisp  lisp;
+    bool              running;
 };
 
 bool LMud_Create(struct LMud* self);
