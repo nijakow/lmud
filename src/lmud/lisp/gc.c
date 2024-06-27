@@ -40,7 +40,7 @@ void LMud_GC_FetchStats(struct LMud_GC* self, struct LMud_GCStats* stats)
     }
 }
 
-void LMud_GC_MarkAny(struct LMud_GC* self, struct LMud_Any any)
+void LMud_GC_MarkAny(struct LMud_GC* self, LMud_Any any)
 {
     if (LMud_Any_IsPointer(any))
     {

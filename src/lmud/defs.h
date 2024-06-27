@@ -19,6 +19,9 @@
 #define LMud_VERSION_EXTRA "alpha"
 #define LMud_RELEASE_NAME "Patchy Phoenix"
 
+#define LMud_ENABLE_COMPRESSED_ANYS
+
+
 typedef size_t        LMud_Size;
 typedef int           LMud_Integer;
 typedef unsigned int  LMud_Rune;

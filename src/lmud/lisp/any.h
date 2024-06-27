@@ -12,6 +12,13 @@ typedef enum LMud_AnyType
     LMud_AnyType_CHARACTER,
 } LMud_AnyType;
 
+
+#ifdef LMud_ENABLE_COMPRESSED_ANYS
+
+typedef uintptr_t LMud_Any;
+
+#else
+
 typedef union LMud_AnyValue
 {
     void*         pointer;
@@ -24,6 +31,8 @@ typedef struct LMud_Any
     LMud_AnyValue  value;
     LMud_AnyType   type;
 } LMud_Any;
+
+#endif
 
 
 LMud_AnyType LMud_Any_GetType(LMud_Any any);
