@@ -664,7 +664,8 @@
           (tos.int:strict-subclassp class parent-class)))
    
    (defun tos.int:instancep (object class)
-      (tos.int:subclassp (tos.int:class-of object) class))
+      (and (lmud.int:%customp object)
+           (tos.int:subclassp (tos.int:class-of object) class)))
 
    (defmacro tos.int:defclass (name superclasses slot-descriptions)
       (list 'tos.int:defclass-execute (list 'quote name)
@@ -756,16 +757,29 @@
                                (list 'cons (list 'quote (car argdef)) (list* 'progn (cdr argdef)))))
                      (list* 'lambda real-arglist body)))))
 
+   (defun tos.int:ensure-generic-function (symbol)
+      (let ((value (symbol-function symbol)))
+         (if (tos.int:instancep value tos.int:<generic-function>)
+             value
+             (progn (when (not (null value))
+                       (lmud.util:simple-error "Symbol already bound to a non-generic-function!"))
+                    (let ((gf (tos.int:make-instance tos.int:<generic-function>)))
+                       (set-symbol-function symbol gf)
+                       gf)))))
+
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
    ;;; These are the public TOS macros
    ;;;
 
+   (defun tos:class-of (object)
+      (tos.int:class-of object))
+   
    (defmacro tos:defclass (name superclasses slot-descriptions)
       (list 'tos.int:defclass name superclasses slot-descriptions))
    
-   (defun tos:class-of (object)
-      (tos.int:class-of object))
+   (defmacro tos:defmethod (name args &body body)
+      (list* 'tos.int:defmethod-on-generic-function (list 'tos.int:ensure-generic-function (list 'quote name)) args body))
    
    (tos:defclass <point> (tos.int:<t>)
       ((x :initform 0)
@@ -782,9 +796,7 @@
    (tos:defclass <f> (<b> <c>) ())
    (tos:defclass <g> (<e> <f>) ())
 
-   (set-symbol-function 'the-gf (tos.int:make-instance tos.int:<generic-function>))
-
-   (tos.int:defmethod-on-generic-function #'the-gf (a b)
+   (tos:defmethod the-gf (a b)
       (lmud.dummy::%princ "a b: ")
       (lmud.dummy::%prin1 a)
       (lmud.dummy::%princ " ")
@@ -792,7 +804,7 @@
       (lmud.dummy::%terpri)
       (values))
    
-   (tos.int:defmethod-on-generic-function #'the-gf ((a <point>) b)
+   (tos:defmethod the-gf ((a <point>) b)
       (lmud.dummy::%princ "(a <point>) b: ")
       (lmud.dummy::%prin1 a)
       (lmud.dummy::%princ " ")
@@ -800,7 +812,7 @@
       (lmud.dummy::%terpri)
       (values))
    
-   (tos.int:defmethod-on-generic-function #'the-gf (a (b <point>))
+   (tos:defmethod the-gf (a (b <point>))
       (lmud.dummy::%princ "a (b <point>): ")
       (lmud.dummy::%prin1 a)
       (lmud.dummy::%princ " ")
@@ -808,7 +820,7 @@
       (lmud.dummy::%terpri)
       (values))
    
-   (tos.int:defmethod-on-generic-function #'the-gf ((a <point>) (b <point>))
+   (tos:defmethod the-gf ((a <point>) (b <point>))
       (lmud.dummy::%princ "(a <point>) (b <point>): ")
       (lmud.dummy::%prin1 a)
       (lmud.dummy::%princ " ")
