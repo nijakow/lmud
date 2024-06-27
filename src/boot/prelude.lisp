@@ -719,7 +719,7 @@
    (defun tos:class-of (object)
       (tos.int:class-of object))
    
-   (tos:defclass <point> ()
+   (tos:defclass <point> (tos.int:<t>)
       ((x :initform 0)
        (y :initform 0)))
    
