@@ -9,13 +9,13 @@ bool LMud_Header_Create(struct LMud_Header* self, struct LMud_Objects* objects, 
 {
     (void) objects;
 
-    self->bits.gc    = LMud_GCBits_White;
-
     self->next       = objects->objects;
     objects->objects = self;
 
-    self->link = NULL;
     self->type = type;
+
+    LMud_Header_SetLink(self, NULL);
+    LMud_Header_SetGCBits(self, LMud_GCBits_White);
 
     return true;
 }
@@ -38,22 +38,22 @@ void* LMud_Header_ToObject(struct LMud_Header* header)
 
 struct LMud_Header* LMud_Header_GetLink(struct LMud_Header* self)
 {
-    return self->link;
+    return (struct LMud_Header*) (((uintptr_t) self->link) & ~((uintptr_t) 0x03));
 }
 
 void LMud_Header_SetLink(struct LMud_Header* self, struct LMud_Header* link)
 {
-    self->link = link;
+    self->link = (struct LMud_Header*) (((uintptr_t) link) | (((uintptr_t) self->link) & 0x03));
 }
 
 enum LMud_GCBits LMud_Header_GetGCBits(struct LMud_Header* self)
 {
-    return self->bits.gc;
+    return (enum LMud_GCBits) (((uintptr_t) self->link) & 0x03);
 }
 
 void LMud_Header_SetGCBits(struct LMud_Header* self, enum LMud_GCBits gc_bits)
 {
-    self->bits.gc = gc_bits;
+    self->link = (struct LMud_Header*) ((((uintptr_t) self->link) & ~((uintptr_t) 0x03)) | ((uintptr_t) gc_bits));
 }
 
 

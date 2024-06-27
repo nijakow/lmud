@@ -18,14 +18,8 @@ struct LMud_Type
 };
 
 
-struct LMud_Bits
-{
-    unsigned int gc : 2;
-};
-
 struct LMud_Header
 {
-    struct LMud_Bits     bits;
     struct LMud_Header*  next;
     struct LMud_Header*  link;
     struct LMud_Type*    type;
