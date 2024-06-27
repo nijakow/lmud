@@ -6,7 +6,7 @@
 
 void LMud_Net_Create(struct LMud_Net* self)
 {
-    LMud_Servers_Create(&self->servers);
+    LMud_Servers_Create(&self->servers, self);
     LMud_Connections_Create(&self->connections);
 }
 
@@ -36,6 +36,17 @@ bool LMud_Net_OpenV6(struct LMud_Net* self, const char* address, LMud_Port port)
     (void) port;
 
     return false;
+}
+
+void LMud_Net_RegisterClientFileDescriptor(struct LMud_Net* self, int fd)
+{
+    (void) self;
+    (void) fd;
+}
+
+void LMud_Net_RegisterClientSocket(struct LMud_Net* self, LMud_Socket socket)
+{
+    LMud_Net_RegisterClientFileDescriptor(self, socket);
 }
 
 void LMud_Net_Tick(struct LMud_Net* self)

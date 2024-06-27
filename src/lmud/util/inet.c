@@ -2,7 +2,7 @@
 #include "inet.h"
 
 
-bool LMud_Inet_OpenServerV4(const char* address, LMud_Port port, int* fd)
+bool LMud_Inet_OpenServerV4(const char* address, LMud_Port port, LMud_Socket* the_socket)
 {
     struct sockaddr_in  addr;
     int                 sock;
@@ -37,12 +37,12 @@ bool LMud_Inet_OpenServerV4(const char* address, LMud_Port port, int* fd)
         return false;
     }
 
-    *fd = sock;
+    *the_socket = sock;
 
     return true;
 }
 
-bool LMud_Inet_OpenV6(const char* address, LMud_Port port, int* fd)
+bool LMud_Inet_OpenV6(const char* address, LMud_Port port, LMud_Socket* the_socket)
 {
     struct sockaddr_in6  addr;
     int                  sock;
@@ -77,7 +77,7 @@ bool LMud_Inet_OpenV6(const char* address, LMud_Port port, int* fd)
         return false;
     }
 
-    *fd = sock;
+    *the_socket = sock;
 
     return true;
 }
@@ -85,7 +85,7 @@ bool LMud_Inet_OpenV6(const char* address, LMud_Port port, int* fd)
 
 void LMud_Inet_AcceptInfo_Create(struct LMud_Inet_AcceptInfo* self)
 {
-    self->fd      = -1;
+    self->socket  = -1;
     self->addrlen = sizeof(self->addr);
 }
 
@@ -94,15 +94,20 @@ void LMud_Inet_AcceptInfo_Destroy(struct LMud_Inet_AcceptInfo* self)
     (void) self;
 }
 
-bool LMud_Inet_Accept(int fd, struct LMud_Inet_AcceptInfo* info)
+LMud_Socket LMud_Inet_AcceptInfo_GetSocket(struct LMud_Inet_AcceptInfo* self)
 {
-    info->fd = accept(fd, (struct sockaddr*) &info->addr, &info->addrlen);
+    return self->socket;
+}
 
-    return info->fd != -1;
+bool LMud_Inet_Accept(LMud_Socket socket, struct LMud_Inet_AcceptInfo* info)
+{
+    info->socket = accept(socket, (struct sockaddr*) &info->addr, &info->addrlen);
+
+    return info->socket != -1;
 }
 
 
-void LMud_Inet_Close(int fd)
+void LMud_Inet_Close(LMud_Socket socket)
 {
-    close(fd);
+    close(socket);
 }
