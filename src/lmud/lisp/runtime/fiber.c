@@ -36,6 +36,9 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp)
     self->prev          = NULL;
     self->next          = NULL;
 
+    self->queue_prev    = NULL;
+    self->queue_next    = NULL;
+
     self->top           = NULL;
 
     self->stack         =  LMud_Alloc(1024 * 1024);
