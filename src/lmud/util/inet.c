@@ -82,6 +82,26 @@ bool LMud_Inet_OpenV6(const char* address, LMud_Port port, int* fd)
     return true;
 }
 
+
+void LMud_Inet_AcceptInfo_Create(struct LMud_Inet_AcceptInfo* self)
+{
+    self->fd      = -1;
+    self->addrlen = sizeof(self->addr);
+}
+
+void LMud_Inet_AcceptInfo_Destroy(struct LMud_Inet_AcceptInfo* self)
+{
+    (void) self;
+}
+
+bool LMud_Inet_Accept(int fd, struct LMud_Inet_AcceptInfo* info)
+{
+    info->fd = accept(fd, (struct sockaddr*) &info->addr, &info->addrlen);
+
+    return info->fd != -1;
+}
+
+
 void LMud_Inet_Close(int fd)
 {
     close(fd);
