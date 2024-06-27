@@ -1,4 +1,5 @@
 
+#include <lmud/lisp/gc.h>
 #include <lmud/lisp/runtime/fiber.h>
 #include <lmud/util/memory.h>
 
@@ -14,6 +15,15 @@ bool LMud_Scheduler_Create(struct LMud_Scheduler* self, struct LMud_Lisp* lisp)
 void LMud_Scheduler_Destroy(struct LMud_Scheduler* self)
 {
     (void) self;
+}
+
+void LMud_Scheduler_Mark(struct LMud_GC* gc, struct LMud_Scheduler* self)
+{
+    struct LMud_Fiber*  fiber;
+
+    (void) self;
+    (void) gc;
+    (void) fiber;
 }
 
 

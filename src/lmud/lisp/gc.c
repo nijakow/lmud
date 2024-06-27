@@ -125,7 +125,7 @@ static void LMud_GC_Collect(struct LMud_GC* self)
 
 static void LMud_GC_MarkRoots(struct LMud_GC* self)
 {
-    (void) self;
+    LMud_Lisp_Mark(self, self->lisp);
 }
 
 void LMud_GC_Run(struct LMud_GC* self)

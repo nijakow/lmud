@@ -22,6 +22,7 @@ struct LMud_Constants
 
 bool LMud_Constants_Create(struct LMud_Constants* self, struct LMud_Lisp* lisp);
 void LMud_Constants_Destroy(struct LMud_Constants* self);
+void LMud_Constants_Mark(struct LMud_GC* gc, struct LMud_Constants* self);
 
 
 struct LMud_Lisp
@@ -34,6 +35,7 @@ struct LMud_Lisp
 
 bool LMud_Lisp_Create(struct LMud_Lisp* self);
 void LMud_Lisp_Destroy(struct LMud_Lisp* self);
+void LMud_Lisp_Mark(struct LMud_GC* gc, struct LMud_Lisp* self);
 
 struct LMud_Types* LMud_Lisp_Types(struct LMud_Lisp* self);
 

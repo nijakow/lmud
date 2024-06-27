@@ -1,6 +1,7 @@
 
 #include <lmud/lisp/builtins.h>
 #include <lmud/lisp/compiler/compiler.h>
+#include <lmud/lisp/gc.h>
 #include <lmud/lisp/io.h>
 #include <lmud/util/stringbuilder.h>
 #include <lmud/util/vt100.h>
@@ -42,6 +43,17 @@ void LMud_Constants_Destroy(struct LMud_Constants* self)
     (void) self;
 }
 
+void LMud_Constants_Mark(struct LMud_GC* gc, struct LMud_Constants* self)
+{
+    LMud_GC_MarkAny(gc, self->default_package);
+    LMud_GC_MarkAny(gc, self->keyword_package);
+    LMud_GC_MarkAny(gc, self->nil);
+    LMud_GC_MarkAny(gc, self->t);
+    LMud_GC_MarkAny(gc, self->quote);
+    LMud_GC_MarkAny(gc, self->function);
+    LMud_GC_MarkAny(gc, self->custom_dispatcher_function);
+}
+
 
 
 bool LMud_Lisp_Create(struct LMud_Lisp* self)
@@ -59,6 +71,12 @@ void LMud_Lisp_Destroy(struct LMud_Lisp* self)
     LMud_Constants_Destroy(&self->constants);
     LMud_Objects_Destroy(&self->objects);
     LMud_InputStream_Destroy(&self->standard_input);
+}
+
+void LMud_Lisp_Mark(struct LMud_GC* gc, struct LMud_Lisp* self)
+{
+    LMud_Constants_Mark(gc, &self->constants);
+    LMud_Scheduler_Mark(gc, &self->scheduler);
 }
 
 
