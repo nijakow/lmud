@@ -8,7 +8,7 @@
 struct LMud_Net
 {
     struct LMud_Servers      servers;
-    struct LMud_Connection*  connections;
+    struct LMud_Connections  connections;
 };
 
 void LMud_Net_Create(struct LMud_Net* self);

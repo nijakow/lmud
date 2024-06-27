@@ -21,3 +21,14 @@ void LMud_Servers_Destroy(struct LMud_Servers* self)
 
     LMud_Free(self->fds);
 }
+
+void LMud_Servers_RegisterOnSelector(struct LMud_Servers* self, struct LMud_Selector* selector)
+{
+    LMud_Size  index;
+
+    for (index = 0; index < self->fill; ++index)
+    {
+        LMud_Selector_AddRead(selector, self->fds[index]);
+        LMud_Selector_AddExcept(selector, self->fds[index]);
+    }
+}
