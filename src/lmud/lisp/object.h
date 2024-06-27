@@ -2,7 +2,7 @@
 #pragma once
 
 #include <lmud/defs.h>
-
+#include <lmud/decls.h>
 
 typedef LMud_Size (*LMud_SizeFunc)(void* object);
 typedef void      (*LMud_MarkFunc)(struct LMud_GC* gc, void* object);

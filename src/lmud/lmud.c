@@ -17,11 +17,22 @@ void LMud_Destroy(struct LMud* self)
     LMud_Net_Destroy(&self->net);
 }
 
-void LMud_SignalInterrupt(struct LMud* self)
+void LMud_SignalInterrupt(struct LMud* self, int signal)
 {
     (void) self;
+    (void) signal;
+
     printf("\nInterrupted.\n");
-    exit(0);
+
+    switch (signal)
+    {
+        case SIGINT:
+        case SIGTERM:
+            exit(0);
+            break;
+        default:
+            break;
+    }
 }
 
 void LMud_Tick(struct LMud* self)
@@ -38,24 +49,6 @@ void LMud_Banner(struct LMud* self)
     printf("  LMud v%s %s '%s'\n", LMud_VERSION, LMud_VERSION_EXTRA, LMud_RELEASE_NAME);
     printf("  Copyright (c) 2024 nijakow\n");
     printf("\n");
-}
-
-LMud_Any LMud_TestCompile(struct LMud* self, LMud_Any expression)
-{
-    LMud_Any                     function;
-
-    LMud_Lisp_Compile(&self->lisp, expression, &function);
-
-    return function;
-}
-
-LMud_Any LMud_TestRun(struct LMud* self, LMud_Any function)
-{
-    LMud_Any  result;
-
-    LMud_Scheduler_BlockAndRunThunk(&self->lisp.scheduler, function, &result);
-
-    return result;
 }
 
 void LMud_Test(struct LMud* self)

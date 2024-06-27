@@ -15,6 +15,8 @@
 
 #include <ctype.h>
 
+#include <signal.h>
+
 // Networking stuff
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -37,13 +39,3 @@ typedef unsigned int  LMud_Rune;
 
 typedef uint16_t      LMud_Port;
 typedef int           LMud_Socket;
-
-
-struct LMud_Lisp;
-struct LMud_Header;
-struct LMud_Objects;
-struct LMud_Fiber;
-struct LMud_Frame;
-struct LMud_GC;
-struct LMud_GCStats;
-struct LMud_Net;
