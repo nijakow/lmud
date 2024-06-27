@@ -957,6 +957,16 @@ void LMud_Builtin_GarbageCollect(struct LMud_Fiber* fiber, LMud_Any* arguments, 
     LMud_Fiber_Values(fiber, values, sizeof(values) / sizeof(values[0]));
 }
 
+void LMud_Builtin_KickstartTask(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Lisp_Kickstart(fiber->lisp, arguments[0]);
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
+}
+
 
 void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
 {
@@ -1031,6 +1041,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%FUNCTION-BYTECODES", LMud_Builtin_FunctionBytecodes);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%FUNCTION-CONSTANTS", LMud_Builtin_FunctionConstants);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "GARBAGE-COLLECT", LMud_Builtin_GarbageCollect);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "KICKSTART-TASK", LMud_Builtin_KickstartTask);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRIN1", LMud_Builtin_Prin1);

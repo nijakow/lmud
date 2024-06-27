@@ -163,7 +163,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
     LMud_Size                      index;
     LMud_Size                      steps_remaining;
 
-    steps_remaining = 1024;
+    steps_remaining = 64 * 1024;
 
     LMud_InstructionStream_Create(&stream, self->fiber->top);
 
