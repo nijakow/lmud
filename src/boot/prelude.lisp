@@ -246,7 +246,7 @@
          result))
 
    (defun member (item list)
-      (cond ((null list) nil)
+      (cond ((endp list) nil)
             ((eq item (car list)) list)
             (t (member item (cdr list)))))
    

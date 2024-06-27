@@ -63,7 +63,7 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
     self->ac             = function->info.register_count + function->info.stack_size;
     self->in_ship        = false;
 
-    for (index = 0; index < function->info.fixed_argument_count; ++index)
+    for (index = 0; index < function->info.fixed_argument_count; index++)
     {
         self->payload[index] = arguments[index];
     }
