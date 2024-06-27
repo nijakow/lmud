@@ -624,8 +624,8 @@
          (lambda (class &key name default-value)
             (lmud.int:%make-custom class name default-value))))
 
-   (defun tos.int:make-instance (class &rest params)
-      (apply (tos.int:%class-constructor class) class params))
+   (defun tos.int:make-instance (class &ignore-rest)
+      (lmud.int:funcall-forward (tos.int:%class-constructor class)))
    
    (tos.int:class-add-slots tos.int:<class>
       (list (tos.int:make-instance tos.int:<slot> :name 'constructor)
@@ -781,61 +781,8 @@
    (defmacro tos:defmethod (name args &body body)
       (list* 'tos.int:defmethod-on-generic-function (list 'tos.int:ensure-generic-function (list 'quote name)) args body))
    
-   (tos:defclass <point> (tos.int:<t>)
-      ((x :initform 0)
-       (y :initform 0)))
-   
-   (defvar *my-point* (tos.int:make-instance <point>))
-
-   (tos:defclass <a> () ())
-   (tos:defclass <b> () ())
-   (tos:defclass <c> () ())
-   (tos:defclass <d> () ())
-
-   (tos:defclass <e> (<a> <b>) ())
-   (tos:defclass <f> (<b> <c>) ())
-   (tos:defclass <g> (<e> <f>) ())
-
-   (tos:defmethod the-gf (a b)
-      (lmud.dummy::%princ "a b: ")
-      (lmud.dummy::%prin1 a)
-      (lmud.dummy::%princ " ")
-      (lmud.dummy::%prin1 b)
-      (lmud.dummy::%terpri)
-      (values))
-   
-   (tos:defmethod the-gf ((a <point>) b)
-      (lmud.dummy::%princ "(a <point>) b: ")
-      (lmud.dummy::%prin1 a)
-      (lmud.dummy::%princ " ")
-      (lmud.dummy::%prin1 b)
-      (lmud.dummy::%terpri)
-      (values))
-   
-   (tos:defmethod the-gf (a (b <point>))
-      (lmud.dummy::%princ "a (b <point>): ")
-      (lmud.dummy::%prin1 a)
-      (lmud.dummy::%princ " ")
-      (lmud.dummy::%prin1 b)
-      (lmud.dummy::%terpri)
-      (values))
-   
-   (tos:defmethod the-gf ((a <point>) (b <point>))
-      (lmud.dummy::%princ "(a <point>) (b <point>): ")
-      (lmud.dummy::%prin1 a)
-      (lmud.dummy::%princ " ")
-      (lmud.dummy::%prin1 b)
-      (lmud.dummy::%terpri)
-      (values))
-   
-   (defun point (a b)
-      (tos.int:make-instance <point> :x a :y b))
-   
-   (defun p () (point 0 0))
-   (defun a () (tos.int:make-instance tos.int:<t>))
-
-   (defun f (a b)
-      (the-gf a b))
+   (defun tos:make-instance (class &ignore-rest)
+      (lmud.int:funcall-forward #'tos.int:make-instance))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
