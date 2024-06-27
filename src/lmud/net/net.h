@@ -3,9 +3,11 @@
 
 #include <lmud/defs.h>
 #include <lmud/net/connection.h>
+#include <lmud/net/servers.h>
 
 struct LMud_Net
 {
+    struct LMud_Servers      servers;
     struct LMud_Connection*  connections;
 };
 

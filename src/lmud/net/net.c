@@ -14,6 +14,7 @@ static void LMud_Net_DeleteConnection(struct LMud_Net* self, struct LMud_Connect
 
 void LMud_Net_Create(struct LMud_Net* self)
 {
+    LMud_Servers_Create(&self->servers);
     self->connections = NULL;
 }
 
@@ -23,4 +24,6 @@ void LMud_Net_Destroy(struct LMud_Net* self)
     {
         LMud_Net_DeleteConnection(self, self->connections);
     }
+
+    LMud_Servers_Destroy(&self->servers);
 }
