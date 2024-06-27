@@ -77,6 +77,26 @@ void LMud_Builtin_Values(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
     LMud_Fiber_Values(fiber, arguments, argument_count);
 }
 
+void LMud_Builtin_GetCustomDispatcherFunction(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) arguments;
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_CustomDispatcherFunction(fiber->lisp));
+}
+
+void LMud_Builtin_SetCustomDispatcherFunction(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Lisp_SetCustomDispatcherFunction(fiber->lisp, arguments[0]);
+    LMud_Fiber_SetAccumulator(fiber, arguments[0]);
+}
+
 void LMud_Builtin_Symbolp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     /*
@@ -879,6 +899,8 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
 
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.TEST", "HELLO-WORLD", LMud_Builtin_HelloWorld);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%QUIT", LMud_Builtin_Quit);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-DISPATCHER-FUNCTION", LMud_Builtin_GetCustomDispatcherFunction);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%SET-CUSTOM-DISPATCHER-FUNCTION", LMud_Builtin_SetCustomDispatcherFunction);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOMP", LMud_Builtin_Customp);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%MAKE-CUSTOM", LMud_Builtin_MakeCustom);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-META", LMud_Builtin_CustomMeta);
