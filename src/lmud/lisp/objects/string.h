@@ -5,8 +5,6 @@
 
 struct LMud_String
 {
-    struct LMud_Object  _;
-
     char*               chars;
     char                payload[];
 };

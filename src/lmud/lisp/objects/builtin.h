@@ -7,8 +7,6 @@ typedef void (*LMud_BuiltinFunction)(struct LMud_Fiber* fiber, LMud_Any* argumen
 
 struct LMud_Builtin
 {
-    struct LMud_Object  _;
-
     char*                name;
     LMud_BuiltinFunction function;
 };

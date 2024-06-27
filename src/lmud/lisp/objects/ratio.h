@@ -5,8 +5,6 @@
 
 struct LMud_Ratio
 {
-    struct LMud_Object  _;
-
     LMud_Any            numerator;
     LMud_Any            denominator;
 };

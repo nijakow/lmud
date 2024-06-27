@@ -27,57 +27,57 @@ void LMud_Types_Destroy(struct LMud_Types* self)
 
 bool LMud_Types_IsArray(struct LMud_Types* self, void* object)
 {
-    return LMud_Type_TypeCheck(&self->array, object);
+    return LMud_Type_TypeCheckObject(&self->array, object);
 }
 
 bool LMud_Types_IsBuiltin(struct LMud_Types* self, void* object)
 {
-    return LMud_Type_TypeCheck(&self->builtin, object);
+    return LMud_Type_TypeCheckObject(&self->builtin, object);
 }
 
 bool LMud_Types_IsBytes(struct LMud_Types* self, void* object)
 {
-    return LMud_Type_TypeCheck(&self->bytes, object);
+    return LMud_Type_TypeCheckObject(&self->bytes, object);
 }
 
 bool LMud_Types_IsClosure(struct LMud_Types* self, void* object)
 {
-    return LMud_Type_TypeCheck(&self->closure, object);
+    return LMud_Type_TypeCheckObject(&self->closure, object);
 }
 
 bool LMud_Types_IsCons(struct LMud_Types* self, void* object)
 {
-    return LMud_Type_TypeCheck(&self->cons, object);
+    return LMud_Type_TypeCheckObject(&self->cons, object);
 }
 
 bool LMud_Types_IsCustom(struct LMud_Types* self, void* object)
 {
-    return LMud_Type_TypeCheck(&self->custom, object);
+    return LMud_Type_TypeCheckObject(&self->custom, object);
 }
 
 bool LMud_Types_IsFunction(struct LMud_Types* self, void* object)
 {
-    return LMud_Type_TypeCheck(&self->function, object);
+    return LMud_Type_TypeCheckObject(&self->function, object);
 }
 
 bool LMud_Types_IsPackage(struct LMud_Types* self, void* object)
 {
-    return LMud_Type_TypeCheck(&self->package, object);
+    return LMud_Type_TypeCheckObject(&self->package, object);
 }
 
 bool LMud_Types_IsRatio(struct LMud_Types* self, void* object)
 {
-    return LMud_Type_TypeCheck(&self->ratio, object);
+    return LMud_Type_TypeCheckObject(&self->ratio, object);
 }
 
 bool LMud_Types_IsString(struct LMud_Types* self, void* object)
 {
-    return LMud_Type_TypeCheck(&self->string, object);
+    return LMud_Type_TypeCheckObject(&self->string, object);
 }
 
 bool LMud_Types_IsSymbol(struct LMud_Types* self, void* object)
 {
-    return LMud_Type_TypeCheck(&self->symbol, object);
+    return LMud_Type_TypeCheckObject(&self->symbol, object);
 }
 
 
@@ -107,16 +107,16 @@ struct LMud_Lisp* LMud_Objects_GetLisp(struct LMud_Objects* self)
 
 void* LMud_Objects_Allocate(struct LMud_Objects* self, struct LMud_Type* type, LMud_Size extra)
 {
-    struct LMud_Object*  object;
+    struct LMud_Header*  object;
 
-    object = LMud_Alloc(type->base_size + extra);
+    object = LMud_Alloc(sizeof(struct LMud_Header) + type->base_size + extra);
 
     if (object != NULL)
     {
-        LMud_Object_Create(object, self, type);
+        LMud_Header_Create(object, self, type);
     }
 
-    return object;
+    return LMud_Header_ToObject(object);
 }
 
 

@@ -20,8 +20,6 @@ void LMud_SymbolTable_Dump(struct LMud_SymbolTable* self);
 
 struct LMud_Symbol
 {
-    struct LMud_Object   _;
-
     struct LMud_Symbol** prev;
     struct LMud_Symbol*  next;
 

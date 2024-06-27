@@ -5,8 +5,6 @@
 
 struct LMud_Cons
 {
-    struct LMud_Object  _;
-
     LMud_Any            car;
     LMud_Any            cdr;
 };

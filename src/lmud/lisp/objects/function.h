@@ -15,8 +15,6 @@ struct LMud_ArgInfo
 
 struct LMud_Function
 {
-    struct LMud_Object   _;
-
     struct LMud_ArgInfo  info;
 
     LMud_Any             bytecodes;

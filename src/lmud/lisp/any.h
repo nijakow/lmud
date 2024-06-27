@@ -14,9 +14,9 @@ typedef enum LMud_AnyType
 
 typedef union LMud_AnyValue
 {
-    struct LMud_Object*  pointer;
-    LMud_Integer         integer;
-    LMud_Rune            character;
+    void*         pointer;
+    LMud_Integer  integer;
+    LMud_Rune     character;
 } LMud_AnyValue;
 
 typedef struct LMud_Any

@@ -5,8 +5,6 @@
 
 struct LMud_Bytes
 {
-    struct LMud_Object  _;
-
     LMud_Size           size;
     char*               data;
     char                payload[];

@@ -5,8 +5,6 @@
 
 struct LMud_Custom
 {
-    struct LMud_Object  _;
-
     LMud_Any            meta;
     LMud_Size           size;
     LMud_Any*           slots;

@@ -6,8 +6,6 @@
 
 struct LMud_Package
 {
-    struct LMud_Object       _;
-
     struct LMud_Package**    prev;
     struct LMud_Package*     next;
 

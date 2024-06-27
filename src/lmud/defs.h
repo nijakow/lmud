@@ -26,7 +26,7 @@ typedef int           LMud_Integer;
 typedef unsigned int  LMud_Rune;
 
 struct LMud_Lisp;
-struct LMud_Object;
+struct LMud_Header;
 struct LMud_Objects;
 struct LMud_Fiber;
 struct LMud_Frame;

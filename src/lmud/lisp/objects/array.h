@@ -5,8 +5,6 @@
 
 struct LMud_Array
 {
-    struct LMud_Object  _;
-
     LMud_Size           size;
     LMud_Any*           data;
     LMud_Any            payload[];
