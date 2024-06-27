@@ -110,6 +110,12 @@ void LMud_Symbol_Mark(struct LMud_GC* gc, struct LMud_Symbol* self)
     LMud_GC_MarkAny(gc, self->plist);
 }
 
+LMud_Size LMud_Symbol_CalculateSizeInBytes(struct LMud_Symbol* self)
+{
+    (void) self;
+    return sizeof(struct LMud_Symbol);
+}
+
 
 void LMud_Symbol_Unlink(struct LMud_Symbol* self)
 {

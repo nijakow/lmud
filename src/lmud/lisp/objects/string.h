@@ -5,6 +5,7 @@
 
 struct LMud_String
 {
+    LMud_Size           byte_size;
     char*               chars;
     char                payload[];
 };
@@ -12,6 +13,7 @@ struct LMud_String
 void LMud_String_Create(struct LMud_String* self, const char* chars);
 void LMud_String_Destroy(struct LMud_String* self);
 void LMud_String_Mark(struct LMud_GC* gc, struct LMud_String* self);
+LMud_Size LMud_String_CalculateSizeInBytes(struct LMud_String* self);
 
 const char* LMud_String_Chars(struct LMud_String* self);
 

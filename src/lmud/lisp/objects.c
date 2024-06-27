@@ -8,6 +8,7 @@
 #define LMud_Types_CreateType(struct_name, name) \
     { \
         self->name.base_size  = sizeof(struct struct_name); \
+        self->name.size_func  = (LMud_SizeFunc) struct_name##_CalculateSizeInBytes; \
         self->name.marker     = (LMud_MarkFunc) struct_name##_Mark; \
         self->name.destructor = (LMud_Destructor) struct_name##_Destroy; \
     }

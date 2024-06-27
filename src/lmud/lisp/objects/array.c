@@ -44,6 +44,11 @@ void LMud_Array_Mark(struct LMud_GC* gc, struct LMud_Array* self)
     }
 }
 
+LMud_Size LMud_Array_CalculateSizeInBytes(struct LMud_Array* self)
+{
+    return sizeof(struct LMud_Array) + LMud_Array_GetSize(self) * sizeof(LMud_Any);
+}
+
 LMud_Size LMud_Array_GetSize(struct LMud_Array* self)
 {
     return self->size;

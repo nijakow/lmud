@@ -4,12 +4,14 @@
 #include <lmud/defs.h>
 
 
-typedef void (*LMud_MarkFunc)(struct LMud_GC* gc, void* object);
-typedef void (*LMud_Destructor)(void* object);
+typedef LMud_Size (*LMud_SizeFunc)(void* object);
+typedef void      (*LMud_MarkFunc)(struct LMud_GC* gc, void* object);
+typedef void      (*LMud_Destructor)(void* object);
 
 struct LMud_Type
 {
     LMud_Size        base_size;
+    LMud_SizeFunc    size_func;
     LMud_MarkFunc    marker;
     LMud_Destructor  destructor;
 };

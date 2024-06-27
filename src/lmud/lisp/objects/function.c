@@ -21,6 +21,12 @@ void LMud_Function_Mark(struct LMud_GC* gc, struct LMud_Function* self)
     LMud_GC_MarkAny(gc, self->constants);
 }
 
+LMud_Size LMud_Function_CalculateSizeInBytes(struct LMud_Function* self)
+{
+    (void) self;
+    return sizeof(struct LMud_Function);
+}
+
 
 LMud_Any LMud_Function_Bytecodes(struct LMud_Function* self)
 {

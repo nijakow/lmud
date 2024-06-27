@@ -20,6 +20,11 @@ void LMud_Bytes_Mark(struct LMud_GC* gc, struct LMud_Bytes* self)
     (void) self;
 }
 
+LMud_Size LMud_Bytes_CalculateSizeInBytes(struct LMud_Bytes* self)
+{
+    return sizeof(struct LMud_Bytes) + LMud_Bytes_GetSize(self);
+}
+
 LMud_Size LMud_Bytes_GetSize(struct LMud_Bytes* self)
 {
     return self->size;

@@ -35,6 +35,11 @@ void LMud_Custom_Mark(struct LMud_GC* gc, struct LMud_Custom* self)
     }
 }
 
+LMud_Size LMud_Custom_CalculateSizeInBytes(struct LMud_Custom* self)
+{
+    return sizeof(struct LMud_Custom) + self->size * sizeof(LMud_Any);
+}
+
 LMud_Any  LMud_Custom_Meta(struct LMud_Custom* self)
 {
     return self->meta;

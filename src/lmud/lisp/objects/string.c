@@ -7,8 +7,7 @@
 
 void LMud_String_Create(struct LMud_String* self, const char* chars)
 {
-    (void) self;
-    (void) chars;
+    self->byte_size = LMud_CStr_Length(chars);
 }
 
 void LMud_String_Destroy(struct LMud_String* self)
@@ -20,6 +19,11 @@ void LMud_String_Mark(struct LMud_GC* gc, struct LMud_String* self)
 {
     (void) gc;
     (void) self;
+}
+
+LMud_Size LMud_String_CalculateSizeInBytes(struct LMud_String* self)
+{
+    return sizeof(struct LMud_String) + self->byte_size + 1;
 }
 
 

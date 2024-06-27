@@ -20,6 +20,12 @@ void LMud_Closure_Mark(struct LMud_GC* gc, struct LMud_Closure* self)
     LMud_GC_MarkFrame(gc, LMud_Closure_GetLexical(self));
 }
 
+LMud_Size LMud_Closure_CalculateSizeInBytes(struct LMud_Closure* self)
+{
+    (void) self;
+    return sizeof(struct LMud_Closure);
+}
+
 
 struct LMud_Function* LMud_Closure_GetFunction(struct LMud_Closure* self)
 {

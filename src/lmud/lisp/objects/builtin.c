@@ -20,3 +20,8 @@ void LMud_Builtin_Mark(struct LMud_GC* gc, struct LMud_Builtin* self)
     (void) gc;
     (void) self;
 }
+
+LMud_Size LMud_Builtin_CalculateSizeInBytes(struct LMud_Builtin* self)
+{
+    return sizeof(struct LMud_Builtin) + LMud_CStr_Length(self->name) + 1;
+}

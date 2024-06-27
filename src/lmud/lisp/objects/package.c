@@ -24,6 +24,12 @@ void LMud_Package_Mark(struct LMud_GC* gc, struct LMud_Package* self)
     LMud_SymbolTable_Mark(gc, &self->symbols);
 }
 
+LMud_Size LMud_Package_CalculateSizeInBytes(struct LMud_Package* self)
+{
+    (void) self;
+    return sizeof(struct LMud_Package);
+}
+
 void LMud_Package_Link(struct LMud_Package* self, struct LMud_Package** list)
 {
     self->prev = list;

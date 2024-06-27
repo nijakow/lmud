@@ -20,6 +20,13 @@ void LMud_Ratio_Mark(struct LMud_GC* gc, struct LMud_Ratio* self)
     LMud_GC_MarkAny(gc, self->denominator);
 }
 
+LMud_Size LMud_Ratio_CalculateSizeInBytes(struct LMud_Ratio* self)
+{
+    (void) self;
+    return sizeof(struct LMud_Ratio);
+}
+
+
 LMud_Any LMud_Ratio_Numerator(struct LMud_Ratio* self)
 {
     return self->numerator;
