@@ -126,4 +126,6 @@ void LMud_Lisp_GarbageCollect(struct LMud_Lisp* self, struct LMud_GCStats* stats
 void LMud_Lisp_PeriodicInterrupt(struct LMud_Lisp* self);
 void LMud_Lisp_Tick(struct LMud_Lisp* self);
 
-LMud_Any LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename);
+bool LMud_Lisp_Kickstart(struct LMud_Lisp* self, LMud_Any function);
+
+bool LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename, LMud_Any* result);
