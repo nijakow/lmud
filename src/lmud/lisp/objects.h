@@ -53,6 +53,7 @@ struct LMud_Objects
     struct LMud_Header*      objects;
     struct LMud_Package*     packages;
     struct LMud_Types        types;
+    LMud_Size                bytes_allocated;
 };
 
 bool LMud_Objects_Create(struct LMud_Objects* self, struct LMud_Lisp* lisp);

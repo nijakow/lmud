@@ -5,12 +5,13 @@
 #include "objects.h"
 
 
-#define LMud_Types_CreateType(struct_name, name) \
+#define LMud_Types_CreateType(struct_name, slot) \
     { \
-        self->name.base_size  = sizeof(struct struct_name); \
-        self->name.size_func  = (LMud_SizeFunc) struct_name##_CalculateSizeInBytes; \
-        self->name.marker     = (LMud_MarkFunc) struct_name##_Mark; \
-        self->name.destructor = (LMud_Destructor) struct_name##_Destroy; \
+        self->slot.name       = ""#struct_name; \
+        self->slot.base_size  = sizeof(struct struct_name); \
+        self->slot.size_func  = (LMud_SizeFunc) struct_name##_CalculateSizeInBytes; \
+        self->slot.marker     = (LMud_MarkFunc) struct_name##_Mark; \
+        self->slot.destructor = (LMud_Destructor) struct_name##_Destroy; \
     }
 
 
@@ -97,6 +98,8 @@ bool LMud_Objects_Create(struct LMud_Objects* self, struct LMud_Lisp* lisp)
     self->objects  = NULL;
     self->packages = NULL;
 
+    self->bytes_allocated = 0;
+
     LMud_Types_Create(&self->types);
 
     return true;
@@ -128,6 +131,18 @@ void* LMud_Objects_Allocate(struct LMud_Objects* self, struct LMud_Type* type, L
     return LMud_Header_ToObject(object);
 }
 
+static void LMud_Objects_AfterAllocate(struct LMud_Objects* self, void* object)
+{
+    struct LMud_Header*  header;
+    LMud_Size            size;
+
+    header = LMud_ToHeader(object);
+    size   = header->type->size_func(object) + sizeof(struct LMud_Header);
+
+    self->bytes_allocated += size;
+    
+    // printf("%8zu Allocated %zu bytes for %s\n", self->bytes_allocated, size, header->type->name);
+}
 
 struct LMud_Array*  LMud_Objects_MakeArray(struct LMud_Objects* self, LMud_Size size, LMud_Any fill)
 {
@@ -138,6 +153,7 @@ struct LMud_Array*  LMud_Objects_MakeArray(struct LMud_Objects* self, LMud_Size 
     if (array != NULL)
     {
         LMud_Array_Create_Overallocated(array, size, fill);
+        LMud_Objects_AfterAllocate(self, array);
     }
 
     return array;
@@ -152,6 +168,7 @@ struct LMud_Array*  LMud_Objects_MakeArray_FromData(struct LMud_Objects* self, L
     if (array != NULL)
     {
         LMud_Array_Create_OverallocatedFromData(array, size, data);
+        LMud_Objects_AfterAllocate(self, array);
     }
 
     return array;
@@ -166,6 +183,7 @@ struct LMud_Builtin* LMud_Objects_Builtin(struct LMud_Objects* self, const char*
     if (builtin != NULL)
     {
         LMud_Builtin_Create(builtin, name, function);
+        LMud_Objects_AfterAllocate(self, builtin);
     }
 
     return builtin;
@@ -180,6 +198,7 @@ struct LMud_Bytes* LMud_Objects_MakeBytes(struct LMud_Objects* self, LMud_Size s
     if (bytes != NULL)
     {
         LMud_Bytes_Create_Overallocated(bytes, size);
+        LMud_Objects_AfterAllocate(self, bytes);
     }
 
     return bytes;
@@ -212,6 +231,7 @@ struct LMud_Closure* LMud_Objects_Closure(struct LMud_Objects* self, struct LMud
     if (closure != NULL)
     {
         LMud_Closure_Create(closure, function, lexical);
+        LMud_Objects_AfterAllocate(self, closure);
     }
 
     return closure;
@@ -226,6 +246,7 @@ struct LMud_Cons* LMud_Objects_Cons(struct LMud_Objects* self, LMud_Any car, LMu
     if (cons != NULL)
     {
         LMud_Cons_Create(cons, car, cdr);
+        LMud_Objects_AfterAllocate(self, cons);
     }
 
     return cons;
@@ -240,6 +261,7 @@ struct LMud_Custom* LMud_Objects_Custom(struct LMud_Objects* self, LMud_Any meta
     if (custom != NULL)
     {
         LMud_Custom_Create(custom, meta, slots, size);
+        LMud_Objects_AfterAllocate(self, custom);
     }
 
     return custom;
@@ -254,6 +276,7 @@ struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LM
     if (function != NULL)
     {
         LMud_Function_Create(function, info, bytecodes, constants);
+        LMud_Objects_AfterAllocate(self, function);
     }
 
     return function;
@@ -277,6 +300,7 @@ struct LMud_Package* LMud_Objects_Package(struct LMud_Objects* self, LMud_Any na
     {
         LMud_Package_Create(package, name);
         LMud_Package_Link(package, &self->packages);
+        LMud_Objects_AfterAllocate(self, package);
     }
 
     return package;
@@ -291,6 +315,7 @@ struct LMud_Ratio* LMud_Objects_Ratio(struct LMud_Objects* self, LMud_Any numera
     if (ratio != NULL)
     {
         LMud_Ratio_Create(ratio, numerator, denominator);
+        LMud_Objects_AfterAllocate(self, ratio);
     }
 
     return ratio;
@@ -300,7 +325,6 @@ struct LMud_String* LMud_Objects_String(struct LMud_Objects* self, const char* t
 {
     struct LMud_String*  string;
     LMud_Size            length;
-    LMud_Size            index;
 
     length = LMud_CStr_Length(text);
 
@@ -308,14 +332,8 @@ struct LMud_String* LMud_Objects_String(struct LMud_Objects* self, const char* t
 
     if (string != NULL)
     {
-        string->chars = string->payload;
-
-        for (index = 0; index < length; index++)
-        {
-            string->chars[index] = text[index];
-        }
-
-        string->chars[index] = '\0';
+        LMud_String_Create_Overallocated(string, text);
+        LMud_Objects_AfterAllocate(self, string);
     }
 
     return string;
@@ -352,6 +370,8 @@ struct LMud_Symbol* LMud_Objects_Gensym(struct LMud_Objects* self)
         );
 
         LMud_Symbol_MakeGensym(symbol);
+
+        LMud_Objects_AfterAllocate(self, symbol);
     }
 
     return symbol;

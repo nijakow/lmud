@@ -5,9 +5,20 @@
 
 #include "string.h"
 
-void LMud_String_Create(struct LMud_String* self, const char* chars)
+void LMud_String_Create_Overallocated(struct LMud_String* self, const char* chars)
 {
-    self->byte_size = LMud_CStr_Length(chars);
+    LMud_Size  index;
+
+    self->chars = self->payload;
+
+    for (index = 0; chars[index] != '\0'; index++)
+    {
+        self->chars[index] = chars[index];
+    }
+
+    self->chars[index] = '\0';
+
+    self->byte_size = index;
 }
 
 void LMud_String_Destroy(struct LMud_String* self)

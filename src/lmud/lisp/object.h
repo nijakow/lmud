@@ -10,6 +10,7 @@ typedef void      (*LMud_Destructor)(void* object);
 
 struct LMud_Type
 {
+    const char*      name;
     LMud_Size        base_size;
     LMud_SizeFunc    size_func;
     LMud_MarkFunc    marker;
