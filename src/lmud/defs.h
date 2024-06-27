@@ -17,9 +17,7 @@
 
 #define LMud_VERSION "0.1"
 #define LMud_VERSION_EXTRA "alpha"
-#define LMud_RELEASE_NAME "Glitchy Gargoyle"
-
-#define LMud_SYMBOL_NAME_LENGTH 1023
+#define LMud_RELEASE_NAME "Patchy Phoenix"
 
 typedef size_t        LMud_Size;
 typedef int           LMud_Integer;
