@@ -112,7 +112,8 @@ static void LMud_GC_Collect(struct LMud_GC* self)
                 break;
 
             case LMud_GCBits_Black:
-                next = &header->next;
+                header->bits.gc = LMud_GCBits_White;
+                next            = &header->next;
                 break;
             
             case LMud_GCBits_Grey:

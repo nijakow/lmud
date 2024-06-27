@@ -143,7 +143,7 @@ void LMud_Frame_RemoveReference(struct LMud_Frame* self, struct LMud_FrameRef* r
         if (*current == reference)
         {
             *current = reference->next;
-            return;
+            break;
         }
 
         current = &(*current)->next;
