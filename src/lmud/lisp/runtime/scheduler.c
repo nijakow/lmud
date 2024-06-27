@@ -7,7 +7,8 @@
 
 bool LMud_Scheduler_Create(struct LMud_Scheduler* self, struct LMud_Lisp* lisp)
 {
-    self->lisp = lisp;
+    self->lisp   = lisp;
+    self->fibers = NULL;
 
     return true;
 }
@@ -21,9 +22,10 @@ void LMud_Scheduler_Mark(struct LMud_GC* gc, struct LMud_Scheduler* self)
 {
     struct LMud_Fiber*  fiber;
 
-    (void) self;
-    (void) gc;
-    (void) fiber;
+    for (fiber = self->fibers; fiber != NULL; fiber = fiber->next)
+    {
+        LMud_Fiber_Mark(gc, fiber);
+    }
 }
 
 
@@ -36,6 +38,7 @@ struct LMud_Fiber* LMud_Scheduler_SpawnFiber(struct LMud_Scheduler* self)
     if (fiber != NULL)
     {
         LMud_Fiber_Create(fiber, self->lisp);
+        LMud_Fiber_Link(fiber, &self->fibers);
     }
 
     return fiber;

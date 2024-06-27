@@ -1,4 +1,5 @@
 
+#include <lmud/lisp/gc.h>
 #include <lmud/lisp/lisp.h>
 #include <lmud/lisp/objects/closure.h>
 #include <lmud/lisp/objects/function.h>
@@ -12,6 +13,9 @@
 void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp)
 {
     self->lisp          = lisp;
+
+    self->prev          = NULL;
+    self->next          = NULL;
 
     self->top           = NULL;
 
@@ -29,7 +33,43 @@ void LMud_Fiber_Destroy(struct LMud_Fiber* self)
 {
     LMud_FrameList_Destroy(&self->floating_frames);
     LMud_Free(self->stack);
+    LMud_Fiber_Unlink(self);
 }
+
+void LMud_Fiber_Mark(struct LMud_GC* gc, struct LMud_Fiber* self)
+{
+    LMud_Size  index;
+
+    for (index = 0; index < self->accumulator_count; index++)
+    {
+        LMud_GC_MarkAny(gc, self->accumulator[index]);
+    }
+
+    LMud_GC_MarkFrame(gc, self->top);  // This will run recursively.
+}
+
+
+void LMud_Fiber_Link(struct LMud_Fiber* self, struct LMud_Fiber** list)
+{
+    LMud_Fiber_Unlink(self);
+
+    self->prev =  list;
+    self->next = *list;
+    if (*list != NULL)
+        (*list)->prev = &self->next;
+    *list = self;
+}
+
+void LMud_Fiber_Unlink(struct LMud_Fiber* self)
+{
+    if (self->prev != NULL)
+        *self->prev = self->next;
+    if (self->next != NULL)
+        self->next->prev = self->prev;
+    self->prev = NULL;
+    self->next = NULL;
+}
+
 
 bool LMud_Fiber_HasFrames(struct LMud_Fiber* self)
 {
