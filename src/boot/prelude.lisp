@@ -642,8 +642,12 @@
    (defun tos.int:specific-> (class1 class2)
       (tos.int:specific-< class2 class1))
    
-   (defun tos.int:subclassp (class parent-class)
+   (defun tos.int:strict-subclassp (class parent-class)
       (tos.int:specific-< parent-class class))
+
+   (defun tos.int:subclassp (class parent-class)
+      (or (eq class parent-class)
+          (tos.int:strict-subclassp class parent-class)))
    
    (defun tos.int:instancep (object class)
       (tos.int:subclassp (tos.int:class-of object) class))
@@ -656,13 +660,20 @@
    (tos.int:defclass tos.int:<t> () ())
 
    (tos.int:defclass tos.int:<generic-function> ()
-      ((dispatch-table)))
+      ((dispatch-table)
+       (dispatch-function)))
    
    (defun tos.int:%generic-function-dispatch-table (gf)
       (tos.int:slot-value-by-name gf 'dispatch-table))
    
    (defun (setf tos.int:%generic-function-dispatch-table) (value gf)
       (list 'tos.int:set-slot-value-by-name gf ''dispatch-table value))
+   
+   (defun tos.int:%generic-function-dispatch-function (gf)
+      (tos.int:slot-value-by-name gf 'dispatch-function))
+   
+   (defun (setf tos.int:%generic-function-dispatch-function) (value gf)
+      (list 'tos.int:set-slot-value-by-name gf ''dispatch-function value))
 
    (defun tos.int:typed-arglist-equal-arity-specific-> (t1 t2)
       (cond ((endp t1) nil)
@@ -685,12 +696,29 @@
             (sort (tos.int:%generic-function-dispatch-table gf)
                   #'tos.int:typed-arglist-specific->
                   :key #'car))
+      (let ((dispatcher-source
+               (list 'lambda '(args-as-list)
+                     (list* 'cond
+                        (domap (clause (tos.int:%generic-function-dispatch-table gf))
+                           (list (list* 'and
+                                    (let ((nested-clause 'args-as-list))
+                                       (domap (arg (car clause))
+                                          (prog1 (list 'tos.int:instancep (list 'car nested-clause) (cdr arg))
+                                             (setq nested-clause (list 'cdr nested-clause))))))
+                                 (list 'apply (cdr clause) 'args-as-list)))))))
+         (lmud.dummy::%prin1 dispatcher-source)
+         (lmud.dummy::%terpri)
+         (setf (tos.int:%generic-function-dispatch-function gf)
+               (eval dispatcher-source)))
       gf)
 
    (defun tos.int:generic-function-add-method (gf fixed-args lambda)
       ;; TODO: Check for duplicate methods, replace them
       (push (cons fixed-args lambda) (tos.int:%generic-function-dispatch-table gf))
       (tos.int:generic-function-resort-methods gf))
+   
+   (defun tos.int:generic-function-invoke (gf &rest args)
+      (funcall (tos.int:%generic-function-dispatch-function gf) args))
 
    (defun tos.int:extract-typed-args (arglist)
       (cond ((endp arglist) (values nil nil))
@@ -769,9 +797,15 @@
       (lmud.dummy::%princ " ")
       (lmud.dummy::%prin1 b)
       (lmud.dummy::%terpri))
+   
+   (defun point (a b)
+      (tos.int:make-instance <point> :x a :y b))
+   
+   (defun p () (point 0 0))
+   (defun a () (tos.int:make-instance tos.int:<t>))
 
-   (lmud.dummy::%prin1 (tos.int:%generic-function-dispatch-table *the-gf*))
-   (lmud.dummy::%terpri)
+   (defun f (a b)
+      (tos.int:generic-function-invoke *the-gf* a b))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
