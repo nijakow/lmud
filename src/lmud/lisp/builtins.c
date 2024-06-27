@@ -1,4 +1,5 @@
 
+#include <lmud/lisp/gc.h>
 #include <lmud/lisp/objects/builtin.h>
 #include <lmud/lisp/objects/function.h>
 #include <lmud/lisp/runtime/fiber.h>
@@ -935,12 +936,25 @@ void LMud_Builtin_Modulo(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
 
 void LMud_Builtin_GarbageCollect(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
+    struct LMud_GCStats  stats;
+    
     /*
      * TODO: Check arguments.
      */
     (void) arguments;
     (void) argument_count;
-    LMud_Lisp_GarbageCollect(fiber->lisp);  // TODO, FIXME, XXX: Will this invalidate our arguments?
+    
+    /*
+     * TODO, FIXME, XXX: Will this invalidate our arguments?
+     */
+    LMud_Lisp_GarbageCollect(fiber->lisp, &stats);
+
+    LMud_Any  values[2] = {
+        LMud_Any_FromInteger(stats.objects_kept),
+        LMud_Any_FromInteger(stats.objects_freed)
+    };
+
+    LMud_Fiber_Values(fiber, values, sizeof(values) / sizeof(values[0]));
 }
 
 

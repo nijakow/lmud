@@ -121,6 +121,6 @@ bool LMud_Lisp_Compile(struct LMud_Lisp* self, LMud_Any expression, LMud_Any* re
 void LMud_Lisp_InstallBuiltin(struct LMud_Lisp* self, const char* name, LMud_BuiltinFunction function);
 void LMud_Lisp_InstallPackagedBuiltin(struct LMud_Lisp* self, const char* package_name, const char* name, LMud_BuiltinFunction function);
 
-void LMud_Lisp_GarbageCollect(struct LMud_Lisp* self);
+void LMud_Lisp_GarbageCollect(struct LMud_Lisp* self, struct LMud_GCStats* stats);
 
 void LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename);

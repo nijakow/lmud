@@ -12,14 +12,28 @@ enum LMud_GCBits
 };
 
 
+struct LMud_GCStats
+{
+    LMud_Size  objects_freed;
+    LMud_Size  objects_kept;
+};
+
+void LMud_GCStats_Create(struct LMud_GCStats* self);
+void LMud_GCStats_Destroy(struct LMud_GCStats* self);
+
+
 struct LMud_GC
 {
     struct LMud_Header*  pending;
     struct LMud_Lisp*    lisp;
+
+    struct LMud_GCStats  stats;
 };
 
 void LMud_GC_Create(struct LMud_GC* self, struct LMud_Lisp* lisp);
 void LMud_GC_Destroy(struct LMud_GC* self);
+
+void LMud_GC_FetchStats(struct LMud_GC* self, struct LMud_GCStats* stats);
 
 void LMud_GC_MarkAny(struct LMud_GC* self, struct LMud_Any any);
 void LMud_GC_MarkObject(struct LMud_GC* self, void* object);

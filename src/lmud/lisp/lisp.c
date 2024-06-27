@@ -568,7 +568,7 @@ void LMud_Lisp_InstallPackagedBuiltin(struct LMud_Lisp* self, const char* packag
 }
 
 
-void LMud_Lisp_GarbageCollect(struct LMud_Lisp* self)
+void LMud_Lisp_GarbageCollect(struct LMud_Lisp* self, struct LMud_GCStats* stats)
 {
     struct LMud_GC  gc;
 
@@ -576,6 +576,7 @@ void LMud_Lisp_GarbageCollect(struct LMud_Lisp* self)
 
     LMud_GC_Create(&gc, self);
     LMud_GC_Run(&gc);
+    LMud_GC_FetchStats(&gc, stats);
     LMud_GC_Destroy(&gc);
 }
 

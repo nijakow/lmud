@@ -29,3 +29,4 @@ struct LMud_Objects;
 struct LMud_Fiber;
 struct LMud_Frame;
 struct LMud_GC;
+struct LMud_GCStats;

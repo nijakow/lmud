@@ -6,15 +6,38 @@
 #include "gc.h"
 
 
+void LMud_GCStats_Create(struct LMud_GCStats* self)
+{
+    self->objects_freed = 0;
+    self->objects_kept  = 0;
+}
+
+void LMud_GCStats_Destroy(struct LMud_GCStats* self)
+{
+    (void) self;
+}
+
+
 void LMud_GC_Create(struct LMud_GC* self, struct LMud_Lisp* lisp)
 {
     self->pending = NULL;
     self->lisp    = lisp;
+
+    LMud_GCStats_Create(&self->stats);
 }
 
 void LMud_GC_Destroy(struct LMud_GC* self)
 {
     assert(self->pending == NULL);
+    LMud_GCStats_Destroy(&self->stats);
+}
+
+void LMud_GC_FetchStats(struct LMud_GC* self, struct LMud_GCStats* stats)
+{
+    if (stats != NULL)
+    {
+        *stats = self->stats;
+    }
 }
 
 void LMud_GC_MarkAny(struct LMud_GC* self, struct LMud_Any any)
@@ -109,11 +132,13 @@ static void LMud_GC_Collect(struct LMud_GC* self)
                 *iterator = header->next;
                 header->type->destructor(LMud_Header_ToObject(header));
                 LMud_Free(header);
+                self->stats.objects_freed++;
                 break;
 
             case LMud_GCBits_Black:
                 header->bits.gc = LMud_GCBits_White;
                 next            = &header->next;
+                self->stats.objects_kept++;
                 break;
             
             case LMud_GCBits_Grey:
