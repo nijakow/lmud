@@ -30,6 +30,45 @@ void LMud_Builtin_Quit(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size 
     exit(0);
 }
 
+void LMud_Builtin_Apply(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any   function;
+    LMud_Any   iterator;
+    LMud_Size  extra_argument_count;
+    LMud_Size  index;
+
+    /*
+     * TODO: Check arguments.
+     */
+
+    function             = arguments[0];
+    extra_argument_count = 0;
+    iterator             = arguments[argument_count - 1];
+
+    while (LMud_Lisp_IsCons(fiber->lisp, iterator))
+    {
+        extra_argument_count++;
+        iterator = LMud_Lisp_Cdr(fiber->lisp, iterator);
+    }
+
+    LMud_Any  args[argument_count + extra_argument_count];
+
+    for (index = 0; index < argument_count - 2; index++)
+    {
+        args[index] = arguments[index + 1];
+    }
+
+    iterator = arguments[argument_count - 1];
+
+    while (LMud_Lisp_IsCons(fiber->lisp, iterator))
+    {
+        args[index++] = LMud_Lisp_Car(fiber->lisp, iterator);
+        iterator      = LMud_Lisp_Cdr(fiber->lisp, iterator);
+    }
+
+    LMud_Fiber_Enter(fiber, function, args, index);
+}
+
 void LMud_Builtin_Funcall(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     LMud_Fiber_Enter(fiber, arguments[0], &arguments[1], argument_count - 1);
@@ -101,43 +140,23 @@ void LMud_Builtin_FuncallForwardRest(struct LMud_Fiber* fiber, LMud_Any* argumen
     LMud_Fiber_Enter(fiber, function, new_args, total_new_arg_count);
 }
 
-void LMud_Builtin_Apply(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+void LMud_Builtin_GivenArgumentCount(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
-    LMud_Any   function;
-    LMud_Any   iterator;
-    LMud_Size  extra_argument_count;
-    LMud_Size  index;
-
     /*
      * TODO: Check arguments.
      */
+    (void) arguments;
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(LMud_Frame_GivenArgumentCount(fiber->top)));
+}
 
-    function             = arguments[0];
-    extra_argument_count = 0;
-    iterator             = arguments[argument_count - 1];
-
-    while (LMud_Lisp_IsCons(fiber->lisp, iterator))
-    {
-        extra_argument_count++;
-        iterator = LMud_Lisp_Cdr(fiber->lisp, iterator);
-    }
-
-    LMud_Any  args[argument_count + extra_argument_count];
-
-    for (index = 0; index < argument_count - 2; index++)
-    {
-        args[index] = arguments[index + 1];
-    }
-
-    iterator = arguments[argument_count - 1];
-
-    while (LMud_Lisp_IsCons(fiber->lisp, iterator))
-    {
-        args[index++] = LMud_Lisp_Car(fiber->lisp, iterator);
-        iterator      = LMud_Lisp_Cdr(fiber->lisp, iterator);
-    }
-
-    LMud_Fiber_Enter(fiber, function, args, index);
+void LMud_Builtin_GivenArgumentRef(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, *LMud_Frame_GivenArgumentRef(fiber->top, LMud_Any_AsInteger(arguments[0])));
 }
 
 void LMud_Builtin_Values(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -969,6 +988,8 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%QUIT", LMud_Builtin_Quit);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "FUNCALL-FORWARD", LMud_Builtin_FuncallForward);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "FUNCALL-FORWARD-REST", LMud_Builtin_FuncallForwardRest);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%GIVEN-ARGUMENT-COUNT", LMud_Builtin_GivenArgumentCount);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%GIVEN-ARGUMENT-REF", LMud_Builtin_GivenArgumentRef);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-DISPATCHER-FUNCTION", LMud_Builtin_GetCustomDispatcherFunction);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%SET-CUSTOM-DISPATCHER-FUNCTION", LMud_Builtin_SetCustomDispatcherFunction);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOMP", LMud_Builtin_Customp);
