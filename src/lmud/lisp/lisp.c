@@ -568,6 +568,18 @@ void LMud_Lisp_InstallPackagedBuiltin(struct LMud_Lisp* self, const char* packag
 }
 
 
+void LMud_Lisp_GarbageCollect(struct LMud_Lisp* self)
+{
+    struct LMud_GC  gc;
+
+    printf(LMud_VT100_Italic "; " LMud_VT100_Blue "Garbage Collection..." LMud_VT100_Normal "\n");
+
+    LMud_GC_Create(&gc, self);
+    LMud_GC_Run(&gc);
+    LMud_GC_Destroy(&gc);
+}
+
+
 void LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename)
 {
     struct LMud_InputStream  stream;

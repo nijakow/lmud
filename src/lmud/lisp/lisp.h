@@ -65,7 +65,6 @@ bool LMud_Lisp_IsSymbol(struct LMud_Lisp* self, LMud_Any value);
 
 bool LMud_Lisp_IsNil(struct LMud_Lisp* self, LMud_Any value);
 
-
 LMud_Any LMud_Lisp_T(struct LMud_Lisp* self);
 LMud_Any LMud_Lisp_Nil(struct LMud_Lisp* self);
 LMud_Any LMud_Lisp_Boolean(struct LMud_Lisp* self, bool value);
@@ -98,7 +97,6 @@ LMud_Any LMud_Lisp_EasyUpcaseIntern(struct LMud_Lisp* self, const char* package_
 LMud_Any LMud_Lisp_ReinternAsKeyword(struct LMud_Lisp* self, LMud_Any symbol);
 LMud_Any LMud_Lisp_Gensym(struct LMud_Lisp* self);
 
-
 LMud_Any LMud_Lisp_Car(struct LMud_Lisp* self, LMud_Any value);
 LMud_Any LMud_Lisp_Cdr(struct LMud_Lisp* self, LMud_Any value);
 LMud_Any LMud_Lisp_Caar(struct LMud_Lisp* self, LMud_Any value);
@@ -122,5 +120,7 @@ bool LMud_Lisp_Compile(struct LMud_Lisp* self, LMud_Any expression, LMud_Any* re
 
 void LMud_Lisp_InstallBuiltin(struct LMud_Lisp* self, const char* name, LMud_BuiltinFunction function);
 void LMud_Lisp_InstallPackagedBuiltin(struct LMud_Lisp* self, const char* package_name, const char* name, LMud_BuiltinFunction function);
+
+void LMud_Lisp_GarbageCollect(struct LMud_Lisp* self);
 
 void LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename);

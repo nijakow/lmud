@@ -933,6 +933,16 @@ void LMud_Builtin_Modulo(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
     LMud_Fiber_SetAccumulator(fiber, result);
 }
 
+void LMud_Builtin_GarbageCollect(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) arguments;
+    (void) argument_count;
+    LMud_Lisp_GarbageCollect(fiber->lisp);  // TODO, FIXME, XXX: Will this invalidate our arguments?
+}
+
 
 void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
 {
@@ -1006,6 +1016,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%BYTECODE-FUNCTION-P", LMud_Builtin_BytecodeFunctionp);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%FUNCTION-BYTECODES", LMud_Builtin_FunctionBytecodes);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%FUNCTION-CONSTANTS", LMud_Builtin_FunctionConstants);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "GARBAGE-COLLECT", LMud_Builtin_GarbageCollect);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRIN1", LMud_Builtin_Prin1);

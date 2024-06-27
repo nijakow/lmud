@@ -48,6 +48,7 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
                        LMud_Size             extra_argument_count)
 {
     LMud_Size  index;
+    LMud_Size  limit;
 
     self->references     = NULL;
     self->previous       = previous;
@@ -65,6 +66,16 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
     for (index = 0; index < function->info.fixed_argument_count; ++index)
     {
         self->payload[index] = arguments[index];
+    }
+
+    limit = function->info.register_count + function->info.stack_size;
+    while (index < limit)
+    {
+        /*
+         * Unfortunately, fetching NIL from the constants is not possible here.
+         * This is why all registers are initialized to zero instead.
+         */
+        self->payload[index++] = LMud_Any_FromInteger(0);
     }
 
     for (index = 0; index < extra_argument_count; ++index)
