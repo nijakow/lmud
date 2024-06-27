@@ -32,6 +32,8 @@ LMud_Size LMud_Package_CalculateSizeInBytes(struct LMud_Package* self)
 
 void LMud_Package_Link(struct LMud_Package* self, struct LMud_Package** list)
 {
+    LMud_Package_Unlink(self);
+
     self->prev = list;
     self->next = *list;
     if (self->next != NULL)

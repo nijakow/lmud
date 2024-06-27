@@ -6,12 +6,26 @@
 
 #define LMud_Fiber_MAX_ACCUMULATORS 16
 
+struct LMud_FiberQueue
+{
+    struct LMud_Fiber*  fibers;
+};
+
+void LMud_FiberQueue_Create(struct LMud_FiberQueue* self);
+void LMud_FiberQueue_Destroy(struct LMud_FiberQueue* self);
+
+void LMud_FiberQueue_AddFiber(struct LMud_FiberQueue* self, struct LMud_Fiber* fiber);
+
+
 struct LMud_Fiber
 {
     struct LMud_Lisp*      lisp;
 
     struct LMud_Fiber**    prev;
     struct LMud_Fiber*     next;
+
+    struct LMud_Fiber**    queue_prev;
+    struct LMud_Fiber*     queue_next;
 
     struct LMud_Frame*     top;
     char*                  stack;
@@ -32,6 +46,10 @@ void LMud_Fiber_Mark(struct LMud_GC* gc, struct LMud_Fiber* self);
 
 void LMud_Fiber_Link(struct LMud_Fiber* self, struct LMud_Fiber** list);
 void LMud_Fiber_Unlink(struct LMud_Fiber* self);
+
+void LMud_Fiber_LinkQueue(struct LMud_Fiber* self, struct LMud_Fiber** list);
+void LMud_Fiber_UnlinkQueue(struct LMud_Fiber* self);
+void LMud_Fiber_MoveToQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* queue);
 
 bool LMud_Fiber_HasTerminated(struct LMud_Fiber* self);
 void LMud_Fiber_Terminate(struct LMud_Fiber* self);

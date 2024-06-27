@@ -37,7 +37,7 @@ void LMud_SignalInterrupt(struct LMud* self, int signal)
 
 void LMud_Tick(struct LMud* self)
 {
-    LMud_Net_Tick(&self->net);
+    // LMud_Net_Tick(&self->net);
     LMud_Lisp_Tick(&self->lisp);
 }
 

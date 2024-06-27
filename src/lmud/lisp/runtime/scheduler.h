@@ -2,11 +2,14 @@
 #pragma once
 
 #include <lmud/lisp/base.h>
+#include <lmud/lisp/runtime/fiber.h>
+
 
 struct LMud_Scheduler
 {
-    struct LMud_Lisp*   lisp;
-    struct LMud_Fiber*  fibers;
+    struct LMud_Lisp*       lisp;
+    struct LMud_Fiber*      fibers;
+    struct LMud_FiberQueue  running_fibers;
 };
 
 bool LMud_Scheduler_Create(struct LMud_Scheduler* self, struct LMud_Lisp* lisp);

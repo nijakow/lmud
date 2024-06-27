@@ -18,6 +18,8 @@ void LMud_Connection_Destroy(struct LMud_Connection* self)
 
 void LMud_Connection_Link(struct LMud_Connection* self, struct LMud_Connection** list)
 {
+    LMud_Connection_Unlink(self);
+
     self->prev =  list;
     self->next = *list;
     if (*list != NULL)

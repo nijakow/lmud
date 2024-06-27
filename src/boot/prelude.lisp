@@ -43,7 +43,15 @@
       (list 'set-symbol-macro (list 'quote name)
             (list 'lambda args (list* 'block name body)))))
 
-(lmud.util:map1 #'eval '(
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;
+;;;;  We return a lambda that will be passed to the scheduler
+;;;;  as the kickstart function for the master process.
+;;;;
+
+(lambda ()
+   (lmud.util:map1 #'eval '(
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
@@ -798,7 +806,7 @@
                (lmud.dummy::%princ "  ")
                (lmud.dummy::%prin1 e)
                (lmud.dummy::%terpri)))))
+   ))
 
    (lmud.bootstrap::repl)
-
-))
+)

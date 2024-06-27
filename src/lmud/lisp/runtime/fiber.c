@@ -10,6 +10,25 @@
 #include "fiber.h"
 
 
+void LMud_FiberQueue_Create(struct LMud_FiberQueue* self)
+{
+    self->fibers = NULL;
+}
+
+void LMud_FiberQueue_Destroy(struct LMud_FiberQueue* self)
+{
+    while (self->fibers != NULL)
+    {
+        LMud_Fiber_UnlinkQueue(self->fibers);
+    }
+}
+
+void LMud_FiberQueue_AddFiber(struct LMud_FiberQueue* self, struct LMud_Fiber* fiber)
+{
+    LMud_Fiber_MoveToQueue(fiber, self);
+}
+
+
 void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp)
 {
     self->lisp          = lisp;
@@ -33,6 +52,7 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp)
 
 void LMud_Fiber_Destroy(struct LMud_Fiber* self)
 {
+    LMud_Fiber_UnlinkQueue(self);
     LMud_FrameList_Destroy(&self->floating_frames);
     LMud_Free(self->stack);
     LMud_Fiber_Unlink(self);
@@ -70,6 +90,32 @@ void LMud_Fiber_Unlink(struct LMud_Fiber* self)
         self->next->prev = self->prev;
     self->prev = NULL;
     self->next = NULL;
+}
+
+void LMud_Fiber_LinkQueue(struct LMud_Fiber* self, struct LMud_Fiber** list)
+{
+    LMud_Fiber_UnlinkQueue(self);
+
+    self->queue_prev =  list;
+    self->queue_next = *list;
+    if (*list != NULL)
+        (*list)->queue_prev = &self->queue_next;
+    *list = self;
+}
+
+void LMud_Fiber_UnlinkQueue(struct LMud_Fiber* self)
+{
+    if (self->queue_prev != NULL)
+        *self->queue_prev = self->queue_next;
+    if (self->queue_next != NULL)
+        self->queue_next->queue_prev = self->queue_prev;
+    self->queue_prev = NULL;
+    self->queue_next = NULL;
+}
+
+void LMud_Fiber_MoveToQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* queue)
+{
+    LMud_Fiber_LinkQueue(self, &queue->fibers);
 }
 
 

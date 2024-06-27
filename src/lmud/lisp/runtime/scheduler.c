@@ -11,12 +11,24 @@ bool LMud_Scheduler_Create(struct LMud_Scheduler* self, struct LMud_Lisp* lisp)
     self->lisp   = lisp;
     self->fibers = NULL;
 
+    LMud_FiberQueue_Create(&self->running_fibers);
+
     return true;
 }
 
 void LMud_Scheduler_Destroy(struct LMud_Scheduler* self)
 {
-    (void) self;
+    LMud_FiberQueue_Destroy(&self->running_fibers);
+
+    if (self->fibers != NULL)
+    {
+        printf("Warning: Destroying scheduler with fibers still alive.\n");
+
+        while (self->fibers != NULL)
+        {
+            LMud_Fiber_Unlink(self->fibers);
+        }
+    }
 }
 
 void LMud_Scheduler_Mark(struct LMud_GC* gc, struct LMud_Scheduler* self)
@@ -62,6 +74,7 @@ struct LMud_Fiber* LMud_Scheduler_Kickstart(struct LMud_Scheduler* self, LMud_An
     if (fiber != NULL)
     {
         LMud_Fiber_EnterThunk(fiber, thunk);
+        LMud_Fiber_MoveToQueue(fiber, &self->running_fibers);
     }
 
     return fiber;
@@ -94,6 +107,24 @@ bool LMud_Scheduler_BlockAndRunThunk(struct LMud_Scheduler* self, LMud_Any thunk
 
 void LMud_Scheduler_Tick(struct LMud_Scheduler* self)
 {
-    // TODO
-    (void) self;
+    struct LMud_Fiber*  fiber;
+    struct LMud_Fiber*  next;
+
+    fiber = self->running_fibers.fibers;
+
+    while (fiber != NULL)
+    {
+        next = fiber->queue_next;
+
+        LMud_Fiber_Tick(fiber);
+
+        if (LMud_Fiber_HasTerminated(fiber))
+        {
+            printf("[Note]: Fiber terminated.\n");
+            LMud_Fiber_UnlinkQueue(fiber);
+            LMud_Scheduler_RequestDeleteFiber(self, fiber);
+        }
+
+        fiber = next;
+    }
 }
