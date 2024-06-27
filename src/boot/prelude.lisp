@@ -524,17 +524,19 @@
    (defun (setf lmud.int:%custom-at) (value object index)
       (list 'lmud.int:%custom-set object index value))
 
-   (defun tos.int:%class-constructor       (class) (lmud.int:%custom-at class 0))
-   (defun tos.int:%class-layout            (class) (lmud.int:%custom-at class 1))
-   (defun tos.int:%class-inheritance-chain (class) (lmud.int:%custom-at class 2))
-   (defun tos.int:%class-superclasses      (class) (lmud.int:%custom-at class 3))
-   (defun tos.int:%class-slots             (class) (lmud.int:%custom-at class 4))
+   (defun tos.int:%class-constructor        (class) (lmud.int:%custom-at class 0))
+   (defun tos.int:%class-layout             (class) (lmud.int:%custom-at class 1))
+   (defun tos.int:%class-inheritance-chain  (class) (lmud.int:%custom-at class 2))
+   (defun tos.int:%class-superclasses       (class) (lmud.int:%custom-at class 3))
+   (defun tos.int:%class-slots              (class) (lmud.int:%custom-at class 4))
+   (defun tos.int:%class-funcall-dispatcher (class) (lmud.int:%custom-at class 5))
 
-   (defun (setf tos.int:%class-constructor)       (value class) (list 'lmud.int:%custom-set class 0 value))
-   (defun (setf tos.int:%class-layout)            (value class) (list 'lmud.int:%custom-set class 1 value))
-   (defun (setf tos.int:%class-inheritance-chain) (value class) (list 'lmud.int:%custom-set class 2 value))
-   (defun (setf tos.int:%class-superclasses)      (value class) (list 'lmud.int:%custom-set class 3 value))
-   (defun (setf tos.int:%class-slots)             (value class) (list 'lmud.int:%custom-set class 4 value))
+   (defun (setf tos.int:%class-constructor)        (value class) (list 'lmud.int:%custom-set class 0 value))
+   (defun (setf tos.int:%class-layout)             (value class) (list 'lmud.int:%custom-set class 1 value))
+   (defun (setf tos.int:%class-inheritance-chain)  (value class) (list 'lmud.int:%custom-set class 2 value))
+   (defun (setf tos.int:%class-superclasses)       (value class) (list 'lmud.int:%custom-set class 3 value))
+   (defun (setf tos.int:%class-slots)              (value class) (list 'lmud.int:%custom-set class 4 value))
+   (defun (setf tos.int:%class-funcall-dispatcher) (value class) (list 'lmud.int:%custom-set class 5 value))
 
    (defun tos.int:%slot-name          (slot) (lmud.int:%custom-at slot 0))
    (defun tos.int:%slot-default-value (slot) (lmud.int:%custom-at slot 1))
@@ -543,12 +545,12 @@
    (defun (setf tos.int:%slot-default-value) (value slot) (list 'lmud.int:%custom-set slot 1 value))
 
 
-   (defparameter tos.int:<class> (lmud.int:%make-custom nil nil nil nil nil nil))
+   (defparameter tos.int:<class> (lmud.int:%make-custom nil nil nil nil nil nil nil))
 
    (setf (lmud.int:%custom-meta tos.int:<class>) tos.int:<class>)
 
-   (defun tos.int:make-class (&key (constructor nil) (superclasses nil) (slots nil))
-      (let ((instance (lmud.int:%make-custom tos.int:<class> constructor nil nil superclasses slots)))
+   (defun tos.int:make-class (&key (constructor nil) (superclasses nil) (slots nil) (funcall-dispatcher nil))
+      (let ((instance (lmud.int:%make-custom tos.int:<class> constructor nil nil superclasses slots funcall-dispatcher)))
          (tos.int:rebuild-class-layout instance)
          (when constructor
             (setf (tos.int:%class-constructor instance) constructor))
@@ -576,6 +578,18 @@
          (when (null slot-index)
             (lmud.util:simple-error "Slot not found!"))
          (setf (lmud.int:%custom-at object slot-index) value)))
+   
+   (defun tos.int:funcall-dispatcher-of (object)
+      (let ((class (tos.int:class-of object)))
+         (or (tos.int:%class-funcall-dispatcher class)
+             (dolist (superclass (tos.int:%class-inheritance-chain class))
+                (when (tos.int:%class-funcall-dispatcher superclass)
+                   (return (tos.int:%class-funcall-dispatcher superclass)))))))
+   
+   (defun tos.int:funcall-dispatcher (object &rest args)
+      (apply (tos.int:funcall-dispatcher-of object) object args))
+   
+   (lmud.int:%set-custom-dispatcher-function #'tos.int:funcall-dispatcher)
 
    (defun tos.int:rebuild-class-layout (class)
       (let* ((slots  (tos.int:%class-slots class))
@@ -717,6 +731,7 @@
    
    (defun tos.int:generic-function-invoke (gf &rest args)
       (funcall (tos.int:%generic-function-dispatch-function gf) args))
+   (setf (tos.int:%class-funcall-dispatcher tos.int:<generic-function>) #'tos.int:generic-function-invoke)
 
    (defun tos.int:extract-typed-args (arglist)
       (cond ((endp arglist) (values nil nil))
@@ -807,7 +822,7 @@
    (defun a () (tos.int:make-instance tos.int:<t>))
 
    (defun f (a b)
-      (tos.int:generic-function-invoke *the-gf* a b))
+      (funcall *the-gf* a b))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
