@@ -16,6 +16,8 @@ struct LMud_Constants
     LMud_Any  t;
     LMud_Any  quote;
     LMud_Any  function;
+
+    LMud_Any  custom_dispatcher_function;
 };
 
 bool LMud_Constants_Create(struct LMud_Constants* self, struct LMud_Lisp* lisp);
@@ -65,6 +67,9 @@ bool LMud_Lisp_IsNil(struct LMud_Lisp* self, LMud_Any value);
 LMud_Any LMud_Lisp_T(struct LMud_Lisp* self);
 LMud_Any LMud_Lisp_Nil(struct LMud_Lisp* self);
 LMud_Any LMud_Lisp_Boolean(struct LMud_Lisp* self, bool value);
+
+LMud_Any LMud_Lisp_CustomDispatcherFunction(struct LMud_Lisp* self);
+void     LMud_Lisp_SetCustomDispatcherFunction(struct LMud_Lisp* self, LMud_Any value);
 
 LMud_Any LMud_Lisp_MakeArray(struct LMud_Lisp* self, LMud_Size size, LMud_Any fill);
 LMud_Any LMud_Lisp_MakeArray_FromData(struct LMud_Lisp* self, LMud_Size size, LMud_Any* data);

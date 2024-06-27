@@ -30,6 +30,8 @@ bool LMud_Constants_Create(struct LMud_Constants* self, struct LMud_Lisp* lisp)
     self->quote    = LMud_Lisp_Intern(lisp, "QUOTE");
     self->function = LMud_Lisp_Intern(lisp, "FUNCTION");
 
+    self->custom_dispatcher_function = self->nil;
+
     LMud_Lisp_InstallBuiltins(lisp);
 
     return true;
@@ -200,6 +202,16 @@ LMud_Any LMud_Lisp_Boolean(struct LMud_Lisp* self, bool value)
         return LMud_Lisp_T(self);
     else
         return LMud_Lisp_Nil(self);
+}
+
+LMud_Any LMud_Lisp_CustomDispatcherFunction(struct LMud_Lisp* self)
+{
+    return self->constants.custom_dispatcher_function;
+}
+
+void LMud_Lisp_SetCustomDispatcherFunction(struct LMud_Lisp* self, LMud_Any value)
+{
+    self->constants.custom_dispatcher_function = value;
 }
 
 LMud_Any LMud_Lisp_MakeArray(struct LMud_Lisp* self, LMud_Size size, LMud_Any fill)

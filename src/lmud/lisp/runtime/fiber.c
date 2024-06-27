@@ -139,6 +139,23 @@ void LMud_Fiber_Unwind(struct LMud_Fiber* self)
 }
 
 
+void LMud_Fiber_CallCustomObject(struct LMud_Fiber* self, LMud_Any custom, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Size  index;
+    LMud_Any   new_arguments[argument_count + 1];
+
+    assert(LMud_Lisp_IsCustom(self->lisp, custom));
+
+    new_arguments[0] = custom;
+
+    for (index = 0; index < argument_count; index++)
+    {
+        new_arguments[index + 1] = arguments[index];
+    }
+
+    LMud_Fiber_Enter(self, LMud_Lisp_CustomDispatcherFunction(self->lisp), new_arguments, argument_count + 1);
+}
+
 void LMud_Fiber_Enter(struct LMud_Fiber* self, LMud_Any function, LMud_Any* arguments, LMud_Size argument_count)
 {
     if (LMud_Lisp_IsFunction(self->lisp, function)) {
@@ -159,6 +176,8 @@ void LMud_Fiber_Enter(struct LMud_Fiber* self, LMud_Any function, LMud_Any* argu
         );
     } else if (LMud_Lisp_IsBuiltin(self->lisp, function)) {
         ((struct LMud_Builtin*) LMud_Any_AsPointer(function))->function(self, arguments, argument_count);
+    } else if (LMud_Lisp_IsCustom(self->lisp, function)) {
+        LMud_Fiber_CallCustomObject(self, function, arguments, argument_count);
     } else {
         LMud_Fiber_PerformError(self, "Not a function.");
     }
