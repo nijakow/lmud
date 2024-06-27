@@ -5,19 +5,27 @@
 #include "objects.h"
 
 
+#define LMud_Types_CreateType(struct_name, name) \
+    { \
+        self->name.base_size  = sizeof(struct struct_name); \
+        self->name.marker     = (LMud_MarkFunc) struct_name##_Mark; \
+        self->name.destructor = (LMud_Destructor) struct_name##_Destroy; \
+    }
+
+
 void LMud_Types_Create(struct LMud_Types* self)
 {
-    self->array.base_size    = sizeof(struct LMud_Array);
-    self->builtin.base_size  = sizeof(struct LMud_Builtin);
-    self->bytes.base_size    = sizeof(struct LMud_Bytes);
-    self->closure.base_size  = sizeof(struct LMud_Closure);
-    self->cons.base_size     = sizeof(struct LMud_Cons);
-    self->custom.base_size   = sizeof(struct LMud_Custom);
-    self->function.base_size = sizeof(struct LMud_Function);
-    self->package.base_size  = sizeof(struct LMud_Package);
-    self->ratio.base_size    = sizeof(struct LMud_Ratio);
-    self->string.base_size   = sizeof(struct LMud_String);
-    self->symbol.base_size   = sizeof(struct LMud_Symbol);
+    LMud_Types_CreateType(LMud_Array, array);
+    LMud_Types_CreateType(LMud_Builtin, builtin);
+    LMud_Types_CreateType(LMud_Bytes, bytes);
+    LMud_Types_CreateType(LMud_Closure, closure);
+    LMud_Types_CreateType(LMud_Cons, cons);
+    LMud_Types_CreateType(LMud_Custom, custom);
+    LMud_Types_CreateType(LMud_Function, function);
+    LMud_Types_CreateType(LMud_Package, package);
+    LMud_Types_CreateType(LMud_Ratio, ratio);
+    LMud_Types_CreateType(LMud_String, string);
+    LMud_Types_CreateType(LMud_Symbol, symbol);
 }
 
 void LMud_Types_Destroy(struct LMud_Types* self)
