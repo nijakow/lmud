@@ -641,6 +641,12 @@
 
    (defun tos.int:specific-> (class1 class2)
       (tos.int:specific-< class2 class1))
+   
+   (defun tos.int:subclassp (class parent-class)
+      (tos.int:specific-< parent-class class))
+   
+   (defun tos.int:instancep (object class)
+      (tos.int:subclassp (tos.int:class-of object) class))
 
    (defmacro tos.int:defclass (name superclasses slot-descriptions)
       (list 'tos.int:defclass-execute (list 'quote name)
