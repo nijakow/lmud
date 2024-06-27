@@ -1,6 +1,8 @@
 
 #include <lmud/lisp/objects/builtin.h>
+#include <lmud/lisp/objects/function.h>
 #include <lmud/lisp/runtime/fiber.h>
+#include <lmud/lisp/runtime/frame.h>
 #include <lmud/lisp/math.h>
 #include <lmud/lisp/io.h>
 #include <lmud/util/stringbuilder.h>
@@ -31,6 +33,41 @@ void LMud_Builtin_Quit(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size 
 void LMud_Builtin_Funcall(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     LMud_Fiber_Enter(fiber, arguments[0], &arguments[1], argument_count - 1);
+}
+
+void LMud_Builtin_FuncallForward(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    struct LMud_Frame*  top;
+    LMud_Any            function;
+    LMud_Size           forwarded_fixed_arg_count;
+    LMud_Size           forwarded_extra_arg_count;
+    LMud_Size           forwarded_arg_count;
+    LMud_Size           total_new_arg_count;
+    LMud_Size           index;
+    LMud_Size           fill;
+
+    top                       = fiber->top;
+    function                  = arguments[0];
+
+    forwarded_fixed_arg_count = LMud_Frame_FixedArgumentCount(top);
+    forwarded_extra_arg_count = LMud_Frame_ExtraArgumentCount(top);
+    forwarded_arg_count       = forwarded_fixed_arg_count + forwarded_extra_arg_count;
+    total_new_arg_count       = forwarded_arg_count + argument_count - 1;
+
+    LMud_Any new_args[total_new_arg_count];
+
+    fill = 0;
+
+    for (index = 1; index < argument_count; index++)
+        new_args[fill++] = arguments[index];
+    for (index = 0; index < forwarded_fixed_arg_count; index++)
+        new_args[fill++] = *LMud_Frame_FixedArgumentRef(top, index);
+    for (index = 0; index < forwarded_extra_arg_count; index++)
+        new_args[fill++] = *LMud_Frame_ExtraArgumentRef(top, index);
+    
+    assert(fill == total_new_arg_count);
+
+    LMud_Fiber_Enter(fiber, function, new_args, total_new_arg_count);
 }
 
 void LMud_Builtin_Apply(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -899,6 +936,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
 
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.TEST", "HELLO-WORLD", LMud_Builtin_HelloWorld);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%QUIT", LMud_Builtin_Quit);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "FUNCALL-FORWARD", LMud_Builtin_FuncallForward);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-DISPATCHER-FUNCTION", LMud_Builtin_GetCustomDispatcherFunction);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%SET-CUSTOM-DISPATCHER-FUNCTION", LMud_Builtin_SetCustomDispatcherFunction);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOMP", LMud_Builtin_Customp);

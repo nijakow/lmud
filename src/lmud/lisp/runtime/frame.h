@@ -52,6 +52,13 @@ void LMud_Frame_RemoveReference(struct LMud_Frame* self, struct LMud_FrameRef* r
 LMud_Size LMud_Frame_PayloadSizeInAnys(struct LMud_Frame* self);
 LMud_Size LMud_Frame_PayloadSizeInBytes(struct LMud_Frame* self);
 
+LMud_Size LMud_Frame_ExtraArgumentCount(struct LMud_Frame* self);
+LMud_Size LMud_Frame_FixedArgumentCount(struct LMud_Frame* self);
+LMud_Size LMud_Frame_GivenArgumentCount(struct LMud_Frame* self);
+
+LMud_Any* LMud_Frame_FixedArgumentRef(struct LMud_Frame* self, LMud_Size index);
+LMud_Any* LMud_Frame_ExtraArgumentRef(struct LMud_Frame* self, LMud_Size index);
+
 LMud_Size LMud_Frame_RemainingExtraArgumentCount(struct LMud_Frame* self);
 bool      LMud_Frame_HasExtraArguments(struct LMud_Frame* self);
 bool      LMud_Frame_GetExtraArgument(struct LMud_Frame* self, LMud_Size index, LMud_Any* value);

@@ -160,6 +160,35 @@ LMud_Size LMud_Frame_PayloadSizeInBytes(struct LMud_Frame* self)
 }
 
 
+LMud_Size LMud_Frame_ExtraArgumentCount(struct LMud_Frame* self)
+{
+    return (self->ap - (self->function->info.register_count + self->function->info.stack_size));
+}
+
+LMud_Size LMud_Frame_FixedArgumentCount(struct LMud_Frame* self)
+{
+    return self->function->info.fixed_argument_count;
+}
+
+LMud_Size LMud_Frame_GivenArgumentCount(struct LMud_Frame* self)
+{
+    return LMud_Frame_FixedArgumentCount(self) + LMud_Frame_ExtraArgumentCount(self);
+}
+
+
+LMud_Any* LMud_Frame_FixedArgumentRef(struct LMud_Frame* self, LMud_Size index)
+{
+    assert(index < LMud_Frame_FixedArgumentCount(self));
+    return &self->payload[index];
+}
+
+LMud_Any* LMud_Frame_ExtraArgumentRef(struct LMud_Frame* self, LMud_Size index)
+{
+    assert(index < LMud_Frame_RemainingExtraArgumentCount(self));
+    return &self->payload[self->function->info.register_count + self->function->info.stack_size + index];
+}
+
+
 LMud_Size LMud_Frame_RemainingExtraArgumentCount(struct LMud_Frame* self)
 {
     return self->ap - self->ac;
