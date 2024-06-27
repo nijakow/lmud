@@ -41,9 +41,28 @@ void LMud_GC_MarkObject(struct LMud_GC* self, void* object)
 
 void LMud_GC_MarkFrame(struct LMud_GC* self, struct LMud_Frame* frame)
 {
-    // TODO
-    (void) self;
-    (void) frame;
+    LMud_Size  size;
+    LMud_Size  index;
+
+    /*
+     * TODO, FIXME, XXX: This might cause a crash if lexical frames still
+     *                   have their previous pointers set to a frame that
+     *                   used to be on the stack but has been deallocated.
+     */
+
+    while (frame != NULL)
+    {
+        size = LMud_Frame_PayloadSizeInAnys(frame);
+
+        for (index = 0; index < size; index++)
+        {
+            LMud_GC_MarkAny(self, frame->payload[index]);
+        }
+
+        LMud_GC_MarkObject(self, frame->function);
+        LMud_GC_MarkFrame(self, LMud_FrameRef_GetFrame(&frame->lexical));
+        frame = frame->previous;
+    }
 }
 
 static bool LMud_GC_PopPending(struct LMud_GC* self, struct LMud_Header** header)
