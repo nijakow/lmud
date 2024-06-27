@@ -1,5 +1,6 @@
 
 #include <lmud/lisp/objects.h>
+#include <lmud/lisp/gc.h>
 
 #include "object.h"
 
@@ -8,9 +9,12 @@ bool LMud_Header_Create(struct LMud_Header* self, struct LMud_Objects* objects, 
 {
     (void) objects;
 
+    self->bits.gc    = LMud_GCBits_White;
+
     self->next       = objects->objects;
     objects->objects = self;
 
+    self->link = NULL;
     self->type = type;
 
     return true;
