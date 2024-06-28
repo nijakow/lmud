@@ -83,7 +83,7 @@ void LMud_GC_MarkFrame(struct LMud_GC* self, struct LMud_Frame* frame)
         }
 
         LMud_GC_MarkObject(self, frame->function);
-        LMud_GC_MarkFrame(self, LMud_FrameRef_GetFrame(&frame->lexical));
+        LMud_GC_MarkFrame(self, LMud_Frame_GetLexical(frame));
         frame = frame->previous;
     }
 }

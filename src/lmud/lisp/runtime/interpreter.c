@@ -136,7 +136,7 @@ struct LMud_Frame* LMud_Interpreter_LexicalFrame(struct LMud_Interpreter* self, 
 
     while (index --> 0)
     {
-        frame = LMud_FrameRef_GetFrame(&frame->lexical);
+        frame = LMud_Frame_GetLexical(frame);
     }
 
     return frame;

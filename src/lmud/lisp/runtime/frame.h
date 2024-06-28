@@ -21,15 +21,22 @@ void LMud_FrameRef_Transfer(struct LMud_FrameRef* self, struct LMud_Frame* frame
 
 struct LMud_FrameExtension
 {
-    struct LMud_Frame*  return_to;
+    struct LMud_FrameRef  lexical;
+    struct LMud_Frame*    return_to;
 };
+
+void LMud_FrameExtension_Create(struct LMud_FrameExtension* self, struct LMud_Frame* lexical);
+void LMud_FrameExtension_Destroy(struct LMud_FrameExtension* self);
+
+struct LMud_FrameExtension* LMud_FrameExtension_New(struct LMud_Frame* lexical);
+void                        LMud_FrameExtension_Delete(struct LMud_FrameExtension* self);
+
 
 struct LMud_Frame
 {
     struct LMud_FrameRef*        references;
     struct LMud_Frame*           previous;
     struct LMud_Frame*           child;
-    struct LMud_FrameRef         lexical;
     struct LMud_Function*        function;
     struct LMud_FrameExtension*  extension;
     uint16_t                     ip;
@@ -49,6 +56,8 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
                        LMud_Size             extra_argument_count);
 void LMud_Frame_Destroy(struct LMud_Frame* self);
 void LMud_Frame_Move(struct LMud_Frame* self, struct LMud_Frame* location);
+
+struct LMud_Frame* LMud_Frame_GetLexical(struct LMud_Frame* self);
 
 bool LMud_Frame_ShouldBeMovedToShip(struct LMud_Frame* self);
 bool LMud_Frame_IsReadyForShipDeletion(struct LMud_Frame* self);

@@ -40,6 +40,37 @@ void LMud_FrameRef_Transfer(struct LMud_FrameRef* self, struct LMud_Frame* frame
 }
 
 
+void LMud_FrameExtension_Create(struct LMud_FrameExtension* self, struct LMud_Frame* lexical)
+{
+    LMud_FrameRef_Create(&self->lexical, lexical);
+    self->return_to = NULL;
+}
+
+void LMud_FrameExtension_Destroy(struct LMud_FrameExtension* self)
+{
+    LMud_FrameRef_Destroy(&self->lexical);
+}
+struct LMud_FrameExtension* LMud_FrameExtension_New(struct LMud_Frame* lexical)
+{
+    struct LMud_FrameExtension*  self;
+
+    self = LMud_Alloc(sizeof(struct LMud_FrameExtension));
+
+    if (self != NULL)
+    {
+        LMud_FrameExtension_Create(self, lexical);
+    }
+
+    return self;
+}
+
+void LMud_FrameExtension_Delete(struct LMud_FrameExtension* self)
+{
+    LMud_FrameExtension_Destroy(self);
+    LMud_Free(self);
+}
+
+
 void LMud_Frame_Create(struct LMud_Frame*    self,
                        struct LMud_Frame*    previous,
                        struct LMud_Frame*    lexical,
@@ -53,9 +84,11 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
     self->references = NULL;
     self->previous   = previous;
     self->child      = NULL;
-    self->extension  = NULL;
     
-    LMud_FrameRef_Create(&self->lexical, lexical);
+    if (lexical == NULL)
+        self->extension  = NULL;
+    else
+        self->extension = LMud_FrameExtension_New(lexical);
 
     self->function       = function;
     self->ip             = 0;
@@ -89,7 +122,11 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
 void LMud_Frame_Destroy(struct LMud_Frame* self)
 {
     assert(self->references == NULL);
-    LMud_FrameRef_Destroy(&self->lexical);
+    
+    if (self->extension != NULL)
+    {
+        LMud_FrameExtension_Delete(self->extension);
+    }
 }
 
 void LMud_Frame_Move(struct LMud_Frame* self, struct LMud_Frame* location)
@@ -114,9 +151,23 @@ void LMud_Frame_Move(struct LMud_Frame* self, struct LMud_Frame* location)
     }
 
     /*
-     * And destroy the old frame.
+     * We have also transferred the extension by copying the pointer.
+     * So we need to clear the old pointer to avoid double-freeing.
+     */
+    self->extension = NULL;
+
+    /*
+     * And as the last step, we destroy the old frame.
      */
     LMud_Frame_Destroy(self);
+}
+
+struct LMud_Frame* LMud_Frame_GetLexical(struct LMud_Frame* self)
+{
+    if (self->extension == NULL)
+        return NULL;
+    else
+        return LMud_FrameRef_GetFrame(&self->extension->lexical);
 }
 
 bool LMud_Frame_ShouldBeMovedToShip(struct LMud_Frame* self)
