@@ -724,7 +724,7 @@
                      (list* 'cond
                         (domap (clause (tos.int:%generic-function-dispatch-table gf))
                            (list (list* 'and
-                                    (list '= '(lmud.int:%given-argument-count) (length (car clause)))
+                                    (list '>= '(lmud.int:%given-argument-count) (length (car clause)))
                                     (let ((arg-index 0))
                                        (domap (arg (car clause))
                                           (prog1 (list 'tos.int:instancep (list 'lmud.int:%given-argument-ref arg-index) (cdr arg))
