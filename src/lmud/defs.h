@@ -32,8 +32,8 @@
 #define LMud_ENABLE_COMPRESSED_ANYS
 #define LMud_ENABLE_MALLOC_TRIM
 
-#define LMud_UNWIND_PROTECT_UNDEFINED 0xffff
-
+#define LMud_UNWIND_PROTECT_UNDEFINED   0xffff
+#define LMud_UNWIND_PROTECT_MAX_NESTING 8
 
 typedef size_t        LMud_Size;
 typedef int           LMud_Integer;

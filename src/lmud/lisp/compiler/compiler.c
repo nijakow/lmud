@@ -302,6 +302,8 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->uses_lexical_stuff   = false;
     self->variadic             = false;
 
+    self->unwind_protect_stack_pointer = 0;
+
     self->cached.symbol_quote          = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "QUOTE");
     self->cached.symbol_function       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FUNCTION");
     self->cached.symbol_lambda         = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LAMBDA");
@@ -436,6 +438,39 @@ void LMud_Compiler_EndBlock(struct LMud_Compiler* self)
 {
     LMud_Compiler_PlaceLabel(self, self->scopes->block_info->end_label);
     LMud_Compiler_PopScope(self);
+}
+
+bool LMud_Compiler_PushUnwindProtectLabel(struct LMud_Compiler* self, LMud_CompilerLabel label)
+{
+    if (self->unwind_protect_stack_pointer >= LMud_UNWIND_PROTECT_MAX_NESTING)
+        return false;
+    else
+    {
+        self->unwind_protect_stack[self->unwind_protect_stack_pointer++] = label;
+        return true;
+    }
+}
+
+bool LMud_Compiler_PopUnwindProtectLabel(struct LMud_Compiler* self)
+{
+    if (self->unwind_protect_stack_pointer <= 0)
+        return false;
+    else
+    {
+        self->unwind_protect_stack_pointer--;
+        return true;
+    }
+}
+
+bool LMud_Compiler_GetTopUnwindProtectLabel(struct LMud_Compiler* self, LMud_CompilerLabel* location)
+{
+    if (self->unwind_protect_stack_pointer > 0) {
+        if (location != NULL)
+            *location = self->unwind_protect_stack[self->unwind_protect_stack_pointer - 1];
+        return true;
+    } else {
+        return false;
+    }
 }
 
 bool LMud_Compiler_FindBlock(struct LMud_Compiler* self, LMud_Any name, struct LMud_ScopeBlockInfo** block_info)
@@ -1419,16 +1454,30 @@ void LMud_Compiler_CompileSpecialReturnFrom(struct LMud_Compiler* self, LMud_Any
 
 void LMud_Compiler_CompileSpecialUnwindProtect(struct LMud_Compiler* self, LMud_Any arguments)
 {
-    LMud_Any  protected_clause;
-    LMud_Any  unwind_clause;
+    LMud_Any            protected_clause;
+    LMud_Any            unwind_clause;
+    LMud_CompilerLabel  unwind_protect_label;
+    LMud_CompilerLabel  other_unwind_protect_label;
 
     protected_clause = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
     unwind_clause    = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arguments);
 
-    LMud_Compiler_Compile(self, protected_clause);
-    LMud_Compiler_WriteBeginUnwindProtect(self);
-    LMud_Compiler_CompileExpressions(self, unwind_clause);
-    LMud_Compiler_WriteEndUnwindProtect(self);
+    LMud_Compiler_OpenLabel(self, &unwind_protect_label);
+    {
+        LMud_Compiler_PushUnwindProtectLabel(self, unwind_protect_label);
+        LMud_Compiler_WriteSetUnwindProtect(self, unwind_protect_label);
+        LMud_Compiler_Compile(self, protected_clause);
+        LMud_Compiler_PlaceLabel(self, unwind_protect_label);
+        LMud_Compiler_WriteBeginUnwindProtect(self);
+        LMud_Compiler_PopUnwindProtectLabel(self);
+        if (LMud_Compiler_GetTopUnwindProtectLabel(self, &other_unwind_protect_label))
+            LMud_Compiler_WriteSetUnwindProtect(self, other_unwind_protect_label);
+        else
+            LMud_Compiler_WriteDisableUnwindProtect(self);
+        LMud_Compiler_CompileExpressions(self, unwind_clause);
+        LMud_Compiler_WriteEndUnwindProtect(self);
+    }
+    LMud_Compiler_CloseLabel(self, unwind_protect_label);
 }
 
 void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expression)

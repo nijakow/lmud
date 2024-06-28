@@ -125,6 +125,9 @@ struct LMud_Compiler
     bool                            uses_lexical_stuff;
     bool                            variadic;
 
+    LMud_CompilerLabel              unwind_protect_stack[LMud_UNWIND_PROTECT_MAX_NESTING];
+    LMud_Size                       unwind_protect_stack_pointer;
+
     struct
     {
         LMud_Any                    symbol_symbol_value;
@@ -166,6 +169,10 @@ void LMud_Compiler_PopScope(struct LMud_Compiler* self);
 
 void LMud_Compiler_BeginBlock(struct LMud_Compiler* self, LMud_Any name);
 void LMud_Compiler_EndBlock(struct LMud_Compiler* self);
+
+bool LMud_Compiler_PushUnwindProtectLabel(struct LMud_Compiler* self, LMud_CompilerLabel label);
+bool LMud_Compiler_PopUnwindProtectLabel(struct LMud_Compiler* self);
+bool LMud_Compiler_GetTopUnwindProtectLabel(struct LMud_Compiler* self, LMud_CompilerLabel* location);
 
 struct LMud_Register* LMud_Compiler_AllocateRegister(struct LMud_Compiler* self);
 
