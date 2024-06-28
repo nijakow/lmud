@@ -810,8 +810,11 @@
    ;;;
 
    (defun foo ()
-      (unwind-protect (values 1 2 42)
-         (lmud.dummy::%princ "Look ma, no hands!")
+      (unwind-protect
+         (unwind-protect (values 1 2 42)
+            (lmud.dummy::%princ "Look ma, no hands!")
+            (lmud.dummy::%terpri))
+         (lmud.dummy::%princ "Look ma, still no hands!")
          (lmud.dummy::%terpri)))
 
    (defun lmud.bootstrap::repl ()
