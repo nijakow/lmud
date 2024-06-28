@@ -318,6 +318,7 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->cached.symbol_mvl            = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "MULTIPLE-VALUE-LIST");
     self->cached.symbol_return_from    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "RETURN-FROM");
     self->cached.symbol_unwind_protect = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "UNWIND-PROTECT");
+    self->cached.symbol_signal_handler = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "%SIGNAL-HANDLER");
 
     self->cached.symbol_andrest       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&REST");
     self->cached.symbol_andbody       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&BODY");
@@ -1480,6 +1481,35 @@ void LMud_Compiler_CompileSpecialUnwindProtect(struct LMud_Compiler* self, LMud_
     LMud_Compiler_CloseLabel(self, unwind_protect_label);
 }
 
+void LMud_Compiler_CompileSpecialSignalHandler(struct LMud_Compiler* self, LMud_Any arguments)
+{
+    /*
+     * The `%signal-handler` builtin is not typically found in Common Lisp,
+     * but it is a useful construct for the implementation of higher-level
+     * primitives, such as `handler-case`.
+     * 
+     * A `%signal-handler`-block usually has the following structure:
+     * 
+     * (%signal-handler (condition)
+     *       protected-expression
+     *    handler-body ...) 
+     */
+
+    LMud_Any            arglist;
+    LMud_Any            protected_expression;
+    LMud_Any            body;
+
+    /*
+     * TODO: Check the arguments
+     */
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &arglist);
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &protected_expression);
+    body = arguments;
+
+    // TODO: Establish the signal handler
+    LMud_Compiler_Compile(self, protected_expression);
+}
+
 void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expression)
 {
     LMud_Any  function;
@@ -1505,6 +1535,7 @@ void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expre
     else if (LMud_Any_Eq(function, self->cached.symbol_mvl))            LMud_Compiler_CompileSpecialMultipleValueList(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_return_from))    LMud_Compiler_CompileSpecialReturnFrom(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_unwind_protect)) LMud_Compiler_CompileSpecialUnwindProtect(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_signal_handler)) LMud_Compiler_CompileSpecialSignalHandler(self, arguments);
     else LMud_Compiler_CompileFuncall(self, function, arguments);
 }
 

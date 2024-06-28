@@ -148,6 +148,7 @@ struct LMud_Compiler
         LMud_Any                    symbol_mvl;
         LMud_Any                    symbol_return_from;
         LMud_Any                    symbol_unwind_protect;
+        LMud_Any                    symbol_signal_handler;
 
         LMud_Any                    symbol_andrest;
         LMud_Any                    symbol_andbody;

@@ -816,6 +816,14 @@
             (lmud.dummy::%terpri))
          (lmud.dummy::%princ "Look ma, still no hands!")
          (lmud.dummy::%terpri)))
+   
+   (defun bar ()
+      (%signal-handler (e)
+            (progn (lmud.dummy::%princ "Look ma, no hands!")
+                   (lmud.dummy::%terpri)
+                   (/ 1 0))
+            (lmud.dummy::%princ "Look ma, still no hands!")
+            (lmud.dummy::%terpri)))
 
    (defun lmud.bootstrap::repl ()
       (while t
