@@ -19,20 +19,26 @@ struct LMud_Frame* LMud_FrameRef_GetFrame(struct LMud_FrameRef* self);
 void LMud_FrameRef_Transfer(struct LMud_FrameRef* self, struct LMud_Frame* frame);
 
 
+struct LMud_FrameExtension
+{
+    struct LMud_Frame*  return_to;
+};
+
 struct LMud_Frame
 {
-    struct LMud_FrameRef*  references;
-    struct LMud_Frame*     previous;
-    struct LMud_Frame*     child;
-    struct LMud_FrameRef   lexical;
-    struct LMud_Function*  function;
-    uint16_t               ip;
-    uint16_t               unwind_protect;
-    uint8_t                sp;
-    uint8_t                ap;
-    uint8_t                ac;
-    bool                   in_ship;
-    LMud_Any               payload[];
+    struct LMud_FrameRef*        references;
+    struct LMud_Frame*           previous;
+    struct LMud_Frame*           child;
+    struct LMud_FrameRef         lexical;
+    struct LMud_Function*        function;
+    struct LMud_FrameExtension*  extension;
+    uint16_t                     ip;
+    uint16_t                     unwind_protect;
+    uint8_t                      sp;
+    uint8_t                      ap;
+    uint8_t                      ac;
+    bool                         in_ship;
+    LMud_Any                     payload[];
 };
 
 void LMud_Frame_Create(struct LMud_Frame*    self,
