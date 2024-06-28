@@ -58,6 +58,7 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
 
     self->function       = function;
     self->ip             = 0;
+    self->unwind_protect = LMud_UNWIND_PROTECT_UNDEFINED;
     self->sp             = function->info.register_count;
     self->ap             = function->info.register_count + function->info.stack_size + extra_argument_count;
     self->ac             = function->info.register_count + function->info.stack_size;
@@ -307,6 +308,20 @@ LMud_Any* LMud_Frame_PopN(struct LMud_Frame* self, LMud_Size count)
 void LMud_Frame_Drop(struct LMud_Frame* self, LMud_Size count)
 {
     self->sp -= count;
+}
+
+bool LMud_Frame_GetUnwindProtect(struct LMud_Frame* self, uint16_t* location)
+{
+    if (self->unwind_protect == LMud_UNWIND_PROTECT_UNDEFINED)
+        return false;
+    else if (location != NULL)
+        *location = self->unwind_protect;
+    return true;
+}
+
+void LMud_Frame_SetUnwindProtect(struct LMud_Frame* self, uint16_t value)
+{
+    self->unwind_protect = value;
 }
 
 

@@ -3,7 +3,6 @@
 
 #include <lmud/defs.h>
 
-
 enum LMud_Bytecode
 {
     LMud_Bytecode_NOP,
@@ -25,4 +24,5 @@ enum LMud_Bytecode
     LMud_Bytecode_JUMP,
     LMud_Bytecode_JUMP_IF_NIL,
     LMud_Bytecode_RETURN,
+    LMud_Bytecode_SET_UNWIND_PROTECT,
 };

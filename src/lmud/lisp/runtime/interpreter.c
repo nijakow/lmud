@@ -442,6 +442,15 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
+            case LMud_Bytecode_SET_UNWIND_PROTECT:
+            {
+                index = LMud_InstructionStream_NextJumpOffset(&stream);
+
+                LMud_Frame_SetUnwindProtect(self->fiber->top, index);
+
+                break;
+            }
+
             default:
             {
                 LMud_Interpreter_Flush(self);

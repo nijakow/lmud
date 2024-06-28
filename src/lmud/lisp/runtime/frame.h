@@ -27,6 +27,7 @@ struct LMud_Frame
     struct LMud_FrameRef   lexical;
     struct LMud_Function*  function;
     uint16_t               ip;
+    uint16_t               unwind_protect;
     uint8_t                sp;
     uint8_t                ap;
     uint8_t                ac;
@@ -75,6 +76,8 @@ LMud_Any  LMud_Frame_Pop(struct LMud_Frame* self);
 LMud_Any* LMud_Frame_PopN(struct LMud_Frame* self, LMud_Size count);
 void      LMud_Frame_Drop(struct LMud_Frame* self, LMud_Size count);
 
+bool LMud_Frame_GetUnwindProtect(struct LMud_Frame* self, uint16_t* location);
+void LMud_Frame_SetUnwindProtect(struct LMud_Frame* self, uint16_t value);
 
 
 struct LMud_FrameShip
