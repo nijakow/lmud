@@ -59,6 +59,7 @@ void LMud_FrameExtension_Create(struct LMud_FrameExtension* self, struct LMud_Fr
 
 void LMud_FrameExtension_Destroy(struct LMud_FrameExtension* self)
 {
+    assert(self->references == NULL);
     LMud_FrameRef_Destroy(&self->lexical);
 }
 
@@ -78,7 +79,6 @@ struct LMud_FrameExtension* LMud_FrameExtension_New(struct LMud_Frame* lexical)
 
 void LMud_FrameExtension_Delete(struct LMud_FrameExtension* self)
 {
-    assert(self->references == NULL);
     LMud_FrameExtension_Destroy(self);
     LMud_Free(self);
 }
@@ -158,7 +158,7 @@ void LMud_Frame_Move(struct LMud_Frame* self, struct LMud_Frame* location)
 
         for (reference = extension->references; reference != NULL; reference = reference->next)
         {
-            LMud_FrameRef_TransferWithoutRemoval(extension->references, location);
+            LMud_FrameRef_TransferWithoutRemoval(reference, location);
         }
     }
 

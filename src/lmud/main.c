@@ -15,12 +15,18 @@ static void LMud_InstallSignalHandlers()
     signal(SIGTERM, LMud_SignalHandler);
 }
 
+static void LMud_Prepare()
+{
+    srand(time(NULL));
+    LMud_InstallSignalHandlers();
+}
+
 
 int main(int argc, char* argv[])
 {
     if (LMud_Create(&LMUD))
     {
-        LMud_InstallSignalHandlers();
+        LMud_Prepare();
         LMud_Main(&LMUD, argc, argv);
         LMud_Destroy(&LMUD);
     }

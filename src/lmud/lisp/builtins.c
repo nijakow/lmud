@@ -967,6 +967,15 @@ void LMud_Builtin_KickstartTask(struct LMud_Fiber* fiber, LMud_Any* arguments, L
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
 }
 
+void LMud_Builtin_Random(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(rand() % LMud_Any_AsInteger(arguments[0])));
+}
+
 
 void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
 {
@@ -1017,6 +1026,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "*", LMud_Builtin_Multiply);
     LMud_Lisp_InstallBuiltin(lisp, "/", LMud_Builtin_Divide);
     LMud_Lisp_InstallBuiltin(lisp, "MOD", LMud_Builtin_Modulo);
+    LMud_Lisp_InstallBuiltin(lisp, "RANDOM", LMud_Builtin_Random);
 
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.TEST", "HELLO-WORLD", LMud_Builtin_HelloWorld);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%QUIT", LMud_Builtin_Quit);
