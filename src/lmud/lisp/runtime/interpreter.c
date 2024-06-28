@@ -161,6 +161,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
     LMud_Any                       value;
     LMud_Any                       value2;
     LMud_Size                      index;
+    LMud_Size                      index2;
     LMud_Size                      steps_remaining;
 
     steps_remaining = 64 * 1024;
@@ -448,6 +449,73 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
                 LMud_Frame_SetUnwindProtect(self->fiber->top, index);
 
+                break;
+            }
+
+            case LMud_Bytecode_BEGIN_UNWIND_PROTECT:
+            {
+                /*
+                 * First, we restore the stack pointer.
+                 */
+                LMud_Frame_SetStackPointer(self->fiber->top, LMud_InstructionStream_NextU8(&stream));
+
+                /*
+                 * Then, we push the accumulator/values state.
+                 */
+                if (LMud_Fiber_ValueCount(self->fiber) == 1) {
+                    /*
+                     * This is a special case.
+                     */
+                    LMud_Frame_Push(self->fiber->top, LMud_Fiber_GetAccumulator(self->fiber));
+                } else {
+                    /*
+                     * This is the general case.
+                     */
+                    value = LMud_Lisp_Nil(self->fiber->lisp);
+                    index = LMud_Fiber_ValueCount(self->fiber);
+
+                    while (index --> 0)
+                    {
+                        value = LMud_Lisp_Cons(self->fiber->lisp, LMud_Fiber_GetValue(self->fiber, index), value);
+                    }
+
+                    LMud_Frame_Push(self->fiber->top, value);
+                }
+
+                LMud_Frame_Push(self->fiber->top, LMud_Any_FromInteger(LMud_Fiber_ValueCount(self->fiber)));
+
+                break;
+            }
+
+            case LMud_Bytecode_END_UNWIND_PROTECT:
+            {
+                /*
+                 * We restore the accumulator/values from the stack.
+                 */
+                index2 = LMud_Any_AsInteger(LMud_Frame_Pop(self->fiber->top));
+                value  = LMud_Frame_Pop(self->fiber->top);
+
+                if (index2 == 1) {
+                    /*
+                     * The special case.
+                     */
+                    LMud_Fiber_SetAccumulator(self->fiber, value);
+                } else {
+                    /*
+                     * The general case.
+                     */
+
+                    LMud_Any  values[index2];
+
+                    for (index = 0; index < index2; index++)
+                    {
+                        values[index] = LMud_Lisp_Car(self->fiber->lisp, value);
+                        value         = LMud_Lisp_Cdr(self->fiber->lisp, value);
+                    }
+
+                    LMud_Fiber_Values(self->fiber, values, index2);
+                }
+                
                 break;
             }
 

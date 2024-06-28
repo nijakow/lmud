@@ -144,6 +144,7 @@ struct LMud_Compiler
         LMud_Any                    symbol_while;
         LMud_Any                    symbol_mvl;
         LMud_Any                    symbol_return_from;
+        LMud_Any                    symbol_unwind_protect;
 
         LMud_Any                    symbol_andrest;
         LMud_Any                    symbol_andbody;
@@ -179,6 +180,10 @@ void LMud_Compiler_CloseLabel(struct LMud_Compiler* self, LMud_CompilerLabel lab
 void LMud_Compiler_PlaceLabel(struct LMud_Compiler* self, LMud_CompilerLabel label);
 void LMud_Compiler_WriteJump(struct LMud_Compiler* self, LMud_CompilerLabel label);
 void LMud_Compiler_WriteJumpIfNil(struct LMud_Compiler* self, LMud_CompilerLabel label);
+void LMud_Compiler_WriteSetUnwindProtect(struct LMud_Compiler* self, LMud_CompilerLabel protect_label);
+void LMud_Compiler_WriteDisableUnwindProtect(struct LMud_Compiler* self);
+void LMud_Compiler_WriteBeginUnwindProtect(struct LMud_Compiler* self);
+void LMud_Compiler_WriteEndUnwindProtect(struct LMud_Compiler* self);
 
 bool LMud_Compiler_WriteLoadRegister(struct LMud_Compiler* self, struct LMud_Register* reg);
 bool LMud_Compiler_WriteStoreRegister(struct LMud_Compiler* self, struct LMud_Register* reg);

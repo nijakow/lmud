@@ -809,6 +809,11 @@
    ;;;    REPL
    ;;;
 
+   (defun foo ()
+      (unwind-protect (values 1 2 42)
+         (lmud.dummy::%princ "Look ma, no hands!")
+         (lmud.dummy::%terpri)))
+
    (defun lmud.bootstrap::repl ()
       (while t
          (lmud.dummy::%princ "⍝ ")

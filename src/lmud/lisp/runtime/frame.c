@@ -289,6 +289,11 @@ void LMud_Frame_SetRegister(struct LMud_Frame* self, LMud_Size index, LMud_Any v
 }
 
 
+void LMud_Frame_SetStackPointer(struct LMud_Frame* self, LMud_Size offset)
+{
+    self->sp = offset;
+}
+
 void LMud_Frame_Push(struct LMud_Frame* self, LMud_Any value)
 {
     self->payload[self->sp++] = value;
