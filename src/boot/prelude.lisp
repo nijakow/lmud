@@ -786,11 +786,22 @@
    (defmacro tos:defclass (name superclasses slot-descriptions)
       (list 'tos.int:defclass name superclasses slot-descriptions))
    
+   (defmacro tos:defgeneric (name args &body body)
+      (list 'tos.int:ensure-generic-function (list 'quote name)))
+
    (defmacro tos:defmethod (name args &body body)
       (list* 'tos.int:defmethod-on-generic-function (list 'tos.int:ensure-generic-function (list 'quote name)) args body))
    
    (defun tos:make-instance (class &ignore-rest)
       (lmud.int:funcall-forward #'tos.int:make-instance))
+   
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
+   ;;;    Streams and I/O
+   ;;;
+
+   (tos:defclass io.stream:<stream> () ())
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
