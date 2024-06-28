@@ -6,13 +6,17 @@
 
 void LMud_FrameRef_Create(struct LMud_FrameRef* self, struct LMud_Frame* frame)
 {
+    struct LMud_FrameExtension*  extension;
+
     self->frame = frame;
     
     if (frame == NULL) {
         self->next = NULL;
     } else {
-        self->next        = frame->references;
-        frame->references = self;
+        extension = LMud_Frame_EnsureExtension(frame);
+
+        self->next            = extension->references;
+        extension->references = self;
     }
 }
 
@@ -39,17 +43,25 @@ void LMud_FrameRef_Transfer(struct LMud_FrameRef* self, struct LMud_Frame* frame
     LMud_FrameRef_Create(self, frame);
 }
 
+void LMud_FrameRef_TransferWithoutRemoval(struct LMud_FrameRef* self, struct LMud_Frame* frame)
+{
+    self->frame = frame;
+}
+
 
 void LMud_FrameExtension_Create(struct LMud_FrameExtension* self, struct LMud_Frame* lexical)
 {
     LMud_FrameRef_Create(&self->lexical, lexical);
-    self->return_to = NULL;
+    
+    self->references = NULL;
+    self->return_to  = NULL;
 }
 
 void LMud_FrameExtension_Destroy(struct LMud_FrameExtension* self)
 {
     LMud_FrameRef_Destroy(&self->lexical);
 }
+
 struct LMud_FrameExtension* LMud_FrameExtension_New(struct LMud_Frame* lexical)
 {
     struct LMud_FrameExtension*  self;
@@ -66,6 +78,7 @@ struct LMud_FrameExtension* LMud_FrameExtension_New(struct LMud_Frame* lexical)
 
 void LMud_FrameExtension_Delete(struct LMud_FrameExtension* self)
 {
+    assert(self->references == NULL);
     LMud_FrameExtension_Destroy(self);
     LMud_Free(self);
 }
@@ -81,7 +94,6 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
     LMud_Size  index;
     LMud_Size  limit;
 
-    self->references = NULL;
     self->previous   = previous;
     self->child      = NULL;
     
@@ -121,8 +133,6 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
 
 void LMud_Frame_Destroy(struct LMud_Frame* self)
 {
-    assert(self->references == NULL);
-    
     if (self->extension != NULL)
     {
         LMud_FrameExtension_Delete(self->extension);
@@ -131,23 +141,25 @@ void LMud_Frame_Destroy(struct LMud_Frame* self)
 
 void LMud_Frame_Move(struct LMud_Frame* self, struct LMud_Frame* location)
 {
+    struct LMud_FrameExtension*  extension;
+    struct LMud_FrameRef*        reference;
+
     /*
      * First, we initialize the new frame with the same values as the old frame.
      */
     LMud_CopyMemory(location, self, sizeof(struct LMud_Frame) + LMud_Frame_PayloadSizeInBytes(self));
-    
-    /*
-     * Since the references are bound to the specific memory location of a frame,
-     * we need to start with a clean slate for the new frame.
-     */
-    location->references = NULL;
 
     /*
      * Transfer all references to the new frame.
      */
-    while (self->references != NULL)
+    if (self->extension != NULL)
     {
-        LMud_FrameRef_Transfer(self->references, location);
+        extension = self->extension;
+
+        for (reference = extension->references; reference != NULL; reference = reference->next)
+        {
+            LMud_FrameRef_TransferWithoutRemoval(extension->references, location);
+        }
     }
 
     /*
@@ -162,6 +174,16 @@ void LMud_Frame_Move(struct LMud_Frame* self, struct LMud_Frame* location)
     LMud_Frame_Destroy(self);
 }
 
+struct LMud_FrameExtension* LMud_Frame_EnsureExtension(struct LMud_Frame* self)
+{
+    if (self->extension == NULL)
+    {
+        self->extension = LMud_FrameExtension_New(NULL);
+    }
+
+    return self->extension;
+}
+
 struct LMud_Frame* LMud_Frame_GetLexical(struct LMud_Frame* self)
 {
     if (self->extension == NULL)
@@ -172,24 +194,26 @@ struct LMud_Frame* LMud_Frame_GetLexical(struct LMud_Frame* self)
 
 bool LMud_Frame_ShouldBeMovedToShip(struct LMud_Frame* self)
 {
-    return !self->in_ship && self->references != NULL;
+    return !self->in_ship && (self->extension != NULL && self->extension->references != NULL);
 }
 
 bool LMud_Frame_IsReadyForShipDeletion(struct LMud_Frame* self)
 {
-    return self->in_ship && self->references == NULL && self->child == NULL;
+    return self->in_ship && (self->extension == NULL || self->extension->references == NULL) && self->child == NULL;
 }
 
 bool LMud_Frame_HasPendingReferences(struct LMud_Frame* self)
 {
-    return self->references != NULL;
+    return (self->extension != NULL && self->extension->references != NULL);
 }
 
 void LMud_Frame_RemoveReference(struct LMud_Frame* self, struct LMud_FrameRef* reference)
 {
     struct LMud_FrameRef**  current;
 
-    current = &self->references;
+    assert(self->extension != NULL);
+
+    current = &self->extension->references;
 
     while (*current != NULL)
     {
