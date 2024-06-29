@@ -665,7 +665,11 @@
                              :slots        slots)))
 
    (defun tos.int:defclass-execute (name superclasses slot-descriptions)
-      (set-symbol-value name (tos.int:construct-class name superclasses slot-descriptions)))
+      (set-symbol-value name
+         (tos.int:construct-class name
+                                  (or superclasses
+                                      (and lmud.classes:<t> (list lmud.classes:<t>)))
+                                  slot-descriptions)))
 
    (defun tos.int:specific-< (class1 class2)
       (conversions:->bool
@@ -692,7 +696,7 @@
    
    (tos.int:defclass lmud.classes:<t> () ())
 
-   (tos.int:defclass tos.int:<generic-function> ()
+   (tos.int:defclass tos.classes:<generic-function> ()
       ((dispatch-table)
        (dispatch-function)))
    
@@ -751,7 +755,7 @@
    
    (defun tos.int:generic-function-invoke (gf &ignore-rest)
       (lmud.int:funcall-forward-rest (tos.int:%generic-function-dispatch-function gf)))
-   (setf (tos.int:%class-funcall-dispatcher tos.int:<generic-function>) #'tos.int:generic-function-invoke)
+   (setf (tos.int:%class-funcall-dispatcher tos.classes:<generic-function>) #'tos.int:generic-function-invoke)
 
    (defun tos.int:extract-typed-args (arglist)
       (cond ((endp arglist) (values nil nil))
@@ -777,11 +781,11 @@
 
    (defun tos.int:ensure-generic-function (symbol)
       (let ((value (symbol-function symbol)))
-         (if (tos.int:instancep value tos.int:<generic-function>)
+         (if (tos.int:instancep value tos.classes:<generic-function>)
              value
              (progn (when (not (null value))
                        (lmud.util:simple-error "Symbol already bound to a non-generic-function!"))
-                    (let ((gf (tos.int:make-instance tos.int:<generic-function>)))
+                    (let ((gf (tos.int:make-instance tos.classes:<generic-function>)))
                        (set-symbol-function symbol gf)
                        gf)))))
 
@@ -825,7 +829,6 @@
    (tos:defclass io.stream:<stream> () ())
 
    (tos:defmethod io:write-byte-to-stream ((stream lmud.classes:<port>) byte)
-      (lmud.dummy::%princln "I am here XXX!")
       (lmud.int:port-write-byte stream byte))
    
    (defun write-byte (byte stream)
