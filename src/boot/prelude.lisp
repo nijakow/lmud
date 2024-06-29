@@ -572,8 +572,18 @@
                    (return i)))))
       nil)
    
+   (defun tos.int:soft-class-of (object)
+      (cond ((lmud.int:%customp object) (lmud.int:%custom-meta object))
+            ((characterp        object) lmud.classes:<character>)
+            ((lmud.int:portp    object) lmud.classes:<port>)
+            (t                          lmud.classes:<t>)))
+
+   (defun tos.int:classy-object-p (object)
+      (not (null (tos.int:soft-class-of object))))
+
    (defun tos.int:class-of (object)
-      (lmud.int:%custom-meta object))
+      (or (tos.int:soft-class-of object)
+          (lmud.util:simple-error "Not a classy object!")))
 
    (defun tos.int:slot-value-by-name (object slot-name)
       (let ((slot-index (tos.int:class-instance-slot-index-by-name (tos.int:class-of object) slot-name)))
@@ -672,7 +682,7 @@
           (tos.int:strict-subclassp class parent-class)))
    
    (defun tos.int:instancep (object class)
-      (and (lmud.int:%customp object)
+      (and (tos.int:classy-object-p object)
            (tos.int:subclassp (tos.int:class-of object) class)))
 
    (defmacro tos.int:defclass (name superclasses slot-descriptions)
@@ -680,7 +690,7 @@
                                       (list* 'list superclasses)
                                       (list 'quote slot-descriptions)))
    
-   (tos.int:defclass tos.int:<t> () ())
+   (tos.int:defclass lmud.classes:<t> () ())
 
    (tos.int:defclass tos.int:<generic-function> ()
       ((dispatch-table)
@@ -750,7 +760,7 @@
                      (tos.int:extract-typed-args (cdr arglist))
                   (values (cons (if (consp (car arglist))
                                     (car arglist)
-                                    (list (car arglist) tos.int:<t>))
+                                    (list (car arglist) lmud.classes:<t>))
                                 typed)
                            untyped)))))
    
@@ -783,6 +793,9 @@
    (defun tos:class-of (object)
       (tos.int:class-of object))
    
+   (defun tos:instancep (object class)
+      (tos.int:instancep object class))
+   
    (defmacro tos:defclass (name superclasses slot-descriptions)
       (list 'tos.int:defclass name superclasses slot-descriptions))
    
@@ -795,6 +808,14 @@
    (defun tos:make-instance (class &ignore-rest)
       (lmud.int:funcall-forward #'tos.int:make-instance))
    
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
+   ;;; The TOS standard classes
+   ;;;
+
+   (tos:defclass lmud.classes:<character> () ())
+   (tos:defclass lmud.classes:<port>      () ())
+
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
@@ -802,6 +823,13 @@
    ;;;
 
    (tos:defclass io.stream:<stream> () ())
+
+   (tos:defmethod io:write-byte-to-stream ((stream lmud.classes:<port>) byte)
+      (lmud.dummy::%princln "I am here XXX!")
+      (lmud.int:port-write-byte stream byte))
+   
+   (defun write-byte (byte stream)
+      (io:write-byte-to-stream stream byte))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -837,9 +865,9 @@
       (lambda (port)
          (lmud.dummy::%princln "New connection just came in!")
          (dosequence (i "Hello, world!")
-            (lmud.int:port-write-byte port (char-code i)))
-         (lmud.int:port-write-byte port 13)
-         (lmud.int:port-write-byte port 10)))
+            (write-byte (char-code i) port))
+         (write-byte 13 port)
+         (write-byte 10 port)))
 
    (defun lmud.bootstrap::repl ()
       (while t
