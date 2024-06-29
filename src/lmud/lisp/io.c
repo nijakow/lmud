@@ -313,6 +313,65 @@ void LMud_Lisp_ReadUntilBreakingChar(struct LMud_Lisp* lisp, struct LMud_InputSt
     }
 }
 
+static bool LMud_GetIntegerValueFromChar(char c, unsigned int* result)
+{
+    unsigned int  value;
+
+    if ((c >= '0') && (c <= '9')) {
+        value = c - '0';
+    } else if ((c >= 'A') && (c <= 'Z')) {
+        value = c - 'A' + 10;
+    } else if ((c >= 'a') && (c <= 'z')) {
+        value = c - 'a' + 10;
+    } else {
+        return false;
+    }
+
+    *result = value;
+
+    return true;
+}
+
+bool LMud_Lisp_ReadInteger(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMud_Size base, LMud_Any* result)
+{
+    long long      value;
+    unsigned int   digits_read;
+    unsigned int   digit;
+    bool           negative;
+
+    (void) lisp;
+
+    if (LMud_InputStream_CheckStr(stream, "-")) {
+        negative = true;
+    } else {
+        negative = false;
+    }
+
+    digits_read = 0;
+    value       = 0;
+
+    while (!LMud_InputStream_Eof(stream))
+    {
+        if (!LMud_GetIntegerValueFromChar(LMud_InputStream_Get(stream), &digit))
+            break;
+
+        if (digit >= base)
+            break;
+
+        value = (value * base) + digit;
+        digits_read++;
+
+        LMud_InputStream_Read(stream);
+    }
+
+    if (negative)
+        value = -value;
+
+    *result = LMud_Any_FromInteger((LMud_Integer) value);
+
+    return (digits_read > 0);
+}
+
 bool LMud_Lisp_ReadAtom(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMud_Any* result)
 {
     struct LMud_StringBuilder  builder;
@@ -413,6 +472,12 @@ bool LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMu
         return LMud_Lisp_ReadCharacter(lisp, stream, result);
     } else if (LMud_InputStream_CheckStr(stream, "\"")) {
         return LMud_Lisp_ReadString(lisp, stream, result);
+    } else if (LMud_InputStream_CheckStr(stream, "#b")) {
+        return LMud_Lisp_ReadInteger(lisp, stream, 2, result);
+    } else if (LMud_InputStream_CheckStr(stream, "#o")) {
+        return LMud_Lisp_ReadInteger(lisp, stream, 8, result);
+    } else if (LMud_InputStream_CheckStr(stream, "#x")) {
+        return LMud_Lisp_ReadInteger(lisp, stream, 16, result);
     } else if (LMud_InputStream_CheckStr(stream, "(")) {
         return LMud_Lisp_ReadList(lisp, stream, result);
     } else if (LMud_InputStream_CheckStr(stream, ":")) {
