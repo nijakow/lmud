@@ -283,7 +283,6 @@ struct LMud_Frame* LMud_Fiber_PushFrame(struct LMud_Fiber* self, struct LMud_Fun
 void LMud_Fiber_PopFrame(struct LMud_Fiber* self)
 {
     struct LMud_Frame*  frame;
-    struct LMud_Frame*  frame2;
     
     /*
      * TODO: Handle 'floating' frames.
@@ -298,8 +297,7 @@ void LMud_Fiber_PopFrame(struct LMud_Fiber* self)
     }
 
     if (LMud_Frame_ShouldBeMovedToShip(frame)) {
-        frame2 = &LMud_FrameList_Insert(&self->floating_frames, frame)->frame;
-        printf("[Note]: Frame %p is moved to a ship and is now %p.\n", frame, frame2);
+        LMud_FrameList_Insert(&self->floating_frames, frame);
     } else {
         LMud_Frame_Destroy(frame);
     }
