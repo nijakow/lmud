@@ -132,6 +132,12 @@ void LMud_Fiber_Terminate(struct LMud_Fiber* self)
     self->terminated = true;
 }
 
+enum LMud_ExecutionResumption LMud_Fiber_GetExecutionResumptionMode(struct LMud_Fiber* self)
+{
+    (void) self;
+    return LMud_ExecutionResumption_NORMAL;
+}
+
 bool LMud_Fiber_HasFrames(struct LMud_Fiber* self)
 {
     return self->top != NULL;

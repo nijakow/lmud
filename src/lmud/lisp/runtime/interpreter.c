@@ -163,6 +163,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
     LMud_Size                      index;
     LMud_Size                      index2;
     LMud_Size                      steps_remaining;
+    enum LMud_ExecutionResumption  resumption;
 
     steps_remaining = 64 * 1024;
 
@@ -460,9 +461,12 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 LMud_Frame_SetStackPointer(self->fiber->top, LMud_InstructionStream_NextU8(&stream));
 
                 /*
-                 * We push whether we are handling a signal or not.
+                 * We push the resumption mode. This is the first of the three magic values
+                 * needed for the unwinding process.
+                 * 
+                 * TODO: Grab this information from the frame.
                  */
-                LMud_Frame_Push(self->fiber->top, LMud_Lisp_Boolean(LMud_Interpreter_GetLisp(self), false));
+                LMud_Frame_Push(self->fiber->top, LMud_Any_FromInteger(LMud_Fiber_GetExecutionResumptionMode(self->fiber)));
 
                 /*
                  * Then, we push the accumulator/values state.
@@ -499,26 +503,29 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                  */
                 index2 = LMud_Any_AsInteger(LMud_Frame_Pop(self->fiber->top));
                 value  = LMud_Frame_Pop(self->fiber->top);
+                
+                /*
+                 * In order to load the values, we need a dynamic array.
+                 */
+                LMud_Any  values[index2];
 
-                if (index2 == 1) {
+                if (index2 == 0) {
+                    // Do nothing.
+                } else if (index2 == 1) {
                     /*
                      * The special case.
                      */
-                    LMud_Fiber_SetAccumulator(self->fiber, value);
+                    values[0] = value;
                 } else {
                     /*
                      * The general case.
                      */
-
-                    LMud_Any  values[index2];
 
                     for (index = 0; index < index2; index++)
                     {
                         values[index] = LMud_Lisp_Car(self->fiber->lisp, value);
                         value         = LMud_Lisp_Cdr(self->fiber->lisp, value);
                     }
-
-                    LMud_Fiber_Values(self->fiber, values, index2);
                 }
 
                 /*
@@ -538,11 +545,18 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                  *     // Do nothing, we can continue our normal execution
                  * }
                  */
-                if (LMud_Lisp_Truthy(self->fiber->lisp, LMud_Frame_Pop(self->fiber->top))) {
-                    // Unwind further (the signal info can be found in the accumulator) -- TODO!
-                    printf("[ERROR]: Unwinding from an unwind-protect block is not implemented yet!\n");
-                } else {
-                    // Nothing to do, we can continue our normal execution
+                resumption = (enum LMud_ExecutionResumption) LMud_Any_AsInteger(LMud_Frame_Pop(self->fiber->top));
+
+                switch (resumption) {
+                    case LMud_ExecutionResumption_NORMAL:
+                        /*
+                         * We set the values, and continue our normal execution.
+                         */
+                        LMud_Fiber_Values(self->fiber, values, index2);
+                        break;
+                    default:
+                        printf("[ERROR]: Execution resumption mode not recognized!\n");
+                        TERMINATE;
                 }
                 
                 break;
@@ -560,7 +574,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                  * Otherwise, we jump to the target instruction that skips
                  * the signal handler.
                  */
-                if (false) {
+                if (LMud_Fiber_GetExecutionResumptionMode(self->fiber) == LMud_ExecutionResumption_SIGNAL) {
                     LMud_Frame_SetRegister(self->fiber->top, index, LMud_Interpreter_GetAccu(self)); 
                 } else {
                     LMud_InstructionStream_Jump(&stream, index2);

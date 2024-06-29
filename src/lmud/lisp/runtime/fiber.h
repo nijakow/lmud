@@ -2,6 +2,7 @@
 #pragma once
 
 #include <lmud/lisp/base.h>
+#include <lmud/lisp/bytecodes.h>
 #include <lmud/lisp/runtime/frame.h>
 
 #define LMud_Fiber_MAX_ACCUMULATORS 16
@@ -53,6 +54,8 @@ void LMud_Fiber_MoveToQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* que
 
 bool LMud_Fiber_HasTerminated(struct LMud_Fiber* self);
 void LMud_Fiber_Terminate(struct LMud_Fiber* self);
+
+enum LMud_ExecutionResumption LMud_Fiber_GetExecutionResumptionMode(struct LMud_Fiber* self);
 
 bool LMud_Fiber_HasFrames(struct LMud_Fiber* self);
 

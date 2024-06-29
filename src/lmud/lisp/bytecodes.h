@@ -30,3 +30,10 @@ enum LMud_Bytecode
     LMud_Bytecode_BEGIN_SIGNAL_HANDLER,
     LMud_Bytecode_SIGNAL,
 };
+
+enum LMud_ExecutionResumption
+{
+    LMud_ExecutionResumption_NORMAL,
+    LMud_ExecutionResumption_RETURN,
+    LMud_ExecutionResumption_SIGNAL,
+};
