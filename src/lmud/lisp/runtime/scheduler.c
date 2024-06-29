@@ -65,6 +65,11 @@ void LMud_Scheduler_RequestDeleteFiber(struct LMud_Scheduler* self, struct LMud_
     LMud_Free(fiber);
 }
 
+void LMud_Scheduler_MoveToRunningQueue(struct LMud_Scheduler* self, struct LMud_Fiber* fiber)
+{
+    LMud_Fiber_MoveToQueue(fiber, &self->running_fibers);
+}
+
 struct LMud_Fiber* LMud_Scheduler_Kickstart(struct LMud_Scheduler* self, LMud_Any thunk)
 {
     struct LMud_Fiber*  fiber;
@@ -74,7 +79,7 @@ struct LMud_Fiber* LMud_Scheduler_Kickstart(struct LMud_Scheduler* self, LMud_An
     if (fiber != NULL)
     {
         LMud_Fiber_EnterThunk(fiber, thunk);
-        LMud_Fiber_MoveToQueue(fiber, &self->running_fibers);
+        LMud_Fiber_ControlStart(fiber);
     }
 
     return fiber;
@@ -89,7 +94,7 @@ struct LMud_Fiber* LMud_Scheduler_KickstartWithArgs(struct LMud_Scheduler* self,
     if (fiber != NULL)
     {
         LMud_Fiber_Enter(fiber, function, arguments, argument_count);
-        LMud_Fiber_MoveToQueue(fiber, &self->running_fibers);
+        LMud_Fiber_ControlStart(fiber);
     }
 
     return fiber;
@@ -105,11 +110,26 @@ bool LMud_Scheduler_BlockAndRunThunk(struct LMud_Scheduler* self, LMud_Any thunk
         return false;
 
     LMud_Fiber_EnterThunk(fiber, thunk);
+
+    LMud_Fiber_ControlStart(fiber);
     
-    while (!LMud_Fiber_HasTerminated(fiber))
+    while (LMud_Fiber_IsRunning(fiber))
     {
         LMud_Fiber_Tick(fiber);
         LMud_Lisp_PeriodicInterrupt(self->lisp);
+    }
+
+    /*
+     * Yielding and Waiting are illegal operations in this run mode.
+     * If any of these operations are attempted, the fiber will be terminated
+     * withouth any further processing.
+     */
+
+    if (!LMud_Fiber_HasTerminated(fiber))
+    {
+        /*
+         * TODO: Issue a warning.
+         */
     }
 
     if (result != NULL)
@@ -130,6 +150,11 @@ void LMud_Scheduler_Tick(struct LMud_Scheduler* self)
     while (fiber != NULL)
     {
         next = fiber->queue_next;
+
+        if (LMud_Fiber_IsYielding(fiber))
+            LMud_Fiber_ControlUnyield(fiber);
+
+        assert(LMud_Fiber_IsRunning(fiber));
 
         LMud_Fiber_Tick(fiber);
 

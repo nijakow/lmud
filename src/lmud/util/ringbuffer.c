@@ -36,23 +36,24 @@ bool LMud_Ringbuffer_HasData(struct LMud_Ringbuffer* self)
     return !LMud_Ringbuffer_IsEmpty(self);
 }
 
-bool LMud_Ringbuffer_PeekBytes(struct LMud_Ringbuffer* self, char* bytes, LMud_Size size)
+LMud_Size LMud_Ringbuffer_PeekBytes(struct LMud_Ringbuffer* self, char* bytes, LMud_Size size)
 {
     LMud_Size  i;
-    LMud_Size  read;
-    
-    read = self->read;
+    LMud_Size  p;
+
+    p = self->read;
 
     for (i = 0; i < size; ++i)
     {
-        if (read == self->write)
-            return false;
+        if (p == self->write)
+            return i;
 
-        bytes[i] = self->data[read];
-        read = LMud_Ringbuffer_NextIndex(self, read);
+        bytes[i] = self->data[p];
+
+        p = LMud_Ringbuffer_NextIndex(self, p);
     }
 
-    return true;
+    return size;
 }
 
 bool LMud_Ringbuffer_SkipBytes(struct LMud_Ringbuffer* self, LMud_Size size)

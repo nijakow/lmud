@@ -24,6 +24,7 @@ enum LMud_FiberState
     LMud_FiberState_CREATED,
     LMud_FiberState_RUNNING,
     LMud_FiberState_WAITING,
+    LMud_FiberState_YIELDING,
     LMud_FiberState_TERMINATED
 };
 
@@ -68,10 +69,14 @@ enum LMud_FiberState LMud_Fiber_GetState(struct LMud_Fiber* self);
 
 bool LMud_Fiber_IsRunning(struct LMud_Fiber* self);
 bool LMud_Fiber_IsWaiting(struct LMud_Fiber* self);
+bool LMud_Fiber_IsYielding(struct LMud_Fiber* self);
 bool LMud_Fiber_HasTerminated(struct LMud_Fiber* self);
 
-void LMud_Fiber_ControlWaitOnQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* queue);
+void LMud_Fiber_ControlStart(struct LMud_Fiber* self);
 void LMud_Fiber_ControlRestartWithValue(struct LMud_Fiber* self, LMud_Any value);
+void LMud_Fiber_ControlWaitOnQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* queue);
+void LMud_Fiber_ControlYield(struct LMud_Fiber* self);
+void LMud_Fiber_ControlUnyield(struct LMud_Fiber* self);
 void LMud_Fiber_ControlTerminate(struct LMud_Fiber* self);
 
 enum LMud_ExecutionResumption LMud_Fiber_GetExecutionResumptionMode(struct LMud_Fiber* self);

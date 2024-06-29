@@ -159,6 +159,11 @@ struct LMud_Frame* LMud_Interpreter_LexicalFrame(struct LMud_Interpreter* self, 
         goto end; \
     }
 
+#define AGAIN_WITH_CHECK \
+    { \
+        goto again_with_check; \
+    }
+
 void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 {
     struct LMud_InstructionStream  stream;
@@ -175,7 +180,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
     LMud_InstructionStream_Create(&stream, self->fiber->top);
 
   again_with_check:
-    if (LMud_Fiber_IsRunning(self->fiber))
+    if (!LMud_Fiber_IsRunning(self->fiber))
         goto end;
 
     while (steps_remaining --> 0)
@@ -450,7 +455,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 LMud_Fiber_PerformCall(self->fiber, value, index);
                 LMud_Interpreter_Restore(self);
 
-                break;
+                AGAIN_WITH_CHECK;
             }
 
             case LMud_Bytecode_JUMP:

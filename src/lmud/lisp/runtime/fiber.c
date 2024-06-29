@@ -144,21 +144,42 @@ bool LMud_Fiber_IsWaiting(struct LMud_Fiber* self)
     return LMud_Fiber_GetState(self) == LMud_FiberState_WAITING;
 }
 
+bool LMud_Fiber_IsYielding(struct LMud_Fiber* self)
+{
+    return LMud_Fiber_GetState(self) == LMud_FiberState_YIELDING;
+}
+
 bool LMud_Fiber_HasTerminated(struct LMud_Fiber* self)
 {
     return LMud_Fiber_GetState(self) == LMud_FiberState_TERMINATED;
 }
 
+void LMud_Fiber_ControlStart(struct LMud_Fiber* self)
+{
+    LMud_Fiber_SetState(self, LMud_FiberState_RUNNING);
+    LMud_Scheduler_MoveToRunningQueue(self->scheduler, self);
+}
+
 void LMud_Fiber_ControlRestartWithValue(struct LMud_Fiber* self, LMud_Any value)
 {
     LMud_Fiber_SetAccumulator(self, value);
-    LMud_Fiber_SetState(self, LMud_FiberState_RUNNING);
+    LMud_Fiber_ControlStart(self);
 }
 
 void LMud_Fiber_ControlWaitOnQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* queue)
 {
     LMud_Fiber_MoveToQueue(self, queue);
     LMud_Fiber_SetState(self, LMud_FiberState_WAITING);
+}
+
+void LMud_Fiber_ControlYield(struct LMud_Fiber* self)
+{
+    LMud_Fiber_SetState(self, LMud_FiberState_YIELDING);
+}
+
+void LMud_Fiber_ControlUnyield(struct LMud_Fiber* self)
+{
+    LMud_Fiber_SetState(self, LMud_FiberState_RUNNING);
 }
 
 void LMud_Fiber_ControlTerminate(struct LMud_Fiber* self)

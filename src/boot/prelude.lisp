@@ -835,7 +835,11 @@
 
    (lmud.int:on-connect
       (lambda (port)
-         (lmud.dummy::%princln "New connection just came in!")))
+         (lmud.dummy::%princln "New connection just came in!")
+         (dosequence (i "Hello, world!")
+            (lmud.int:port-write-byte port (char-code i)))
+         (lmud.int:port-write-byte port 13)
+         (lmud.int:port-write-byte port 10)))
 
    (defun lmud.bootstrap::repl ()
       (while t
