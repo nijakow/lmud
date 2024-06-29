@@ -49,12 +49,12 @@ void LMud_FrameRef_TransferWithoutRemoval(struct LMud_FrameRef* self, struct LMu
 }
 
 
-void LMud_FrameExtension_Create(struct LMud_FrameExtension* self, struct LMud_Frame* lexical)
+void LMud_FrameExtension_Create(struct LMud_FrameExtension* self, struct LMud_Frame* owner, struct LMud_Frame* lexical)
 {
     LMud_FrameRef_Create(&self->lexical, lexical);
     
     self->references = NULL;
-    self->return_to  = NULL;
+    self->return_to  = owner;
 }
 
 void LMud_FrameExtension_Destroy(struct LMud_FrameExtension* self)
@@ -63,7 +63,7 @@ void LMud_FrameExtension_Destroy(struct LMud_FrameExtension* self)
     LMud_FrameRef_Destroy(&self->lexical);
 }
 
-struct LMud_FrameExtension* LMud_FrameExtension_New(struct LMud_Frame* lexical)
+struct LMud_FrameExtension* LMud_FrameExtension_New(struct LMud_Frame* owner, struct LMud_Frame* lexical)
 {
     struct LMud_FrameExtension*  self;
 
@@ -71,7 +71,7 @@ struct LMud_FrameExtension* LMud_FrameExtension_New(struct LMud_Frame* lexical)
 
     if (self != NULL)
     {
-        LMud_FrameExtension_Create(self, lexical);
+        LMud_FrameExtension_Create(self, owner, lexical);
     }
 
     return self;
@@ -100,7 +100,7 @@ void LMud_Frame_Create(struct LMud_Frame*    self,
     if (lexical == NULL)
         self->extension  = NULL;
     else
-        self->extension = LMud_FrameExtension_New(lexical);
+        self->extension = LMud_FrameExtension_New(self, lexical);
 
     self->function       = function;
     self->ip             = 0;
@@ -163,6 +163,14 @@ void LMud_Frame_Move(struct LMud_Frame* self, struct LMud_Frame* location)
     }
 
     /*
+     * If our 'return_to' slot points to our old frame, we need to update it.
+     */
+    if (location->extension != NULL && location->extension->return_to == self)
+    {
+        location->extension->return_to = location;
+    }
+
+    /*
      * We have also transferred the extension by copying the pointer.
      * So we need to clear the old pointer to avoid double-freeing.
      */
@@ -178,10 +186,23 @@ struct LMud_FrameExtension* LMud_Frame_EnsureExtension(struct LMud_Frame* self)
 {
     if (self->extension == NULL)
     {
-        self->extension = LMud_FrameExtension_New(NULL);
+        self->extension = LMud_FrameExtension_New(self, NULL);
     }
 
     return self->extension;
+}
+
+struct LMud_Frame* LMud_Frame_GetReturnTo(struct LMud_Frame* self)
+{
+    if (self->extension == NULL)
+        return self;
+    else
+        return self->extension->return_to;
+}
+
+void LMud_Frame_SetReturnTo(struct LMud_Frame* self, struct LMud_Frame* value)
+{
+    LMud_Frame_EnsureExtension(self)->return_to = value;
 }
 
 struct LMud_Frame* LMud_Frame_GetLexical(struct LMud_Frame* self)

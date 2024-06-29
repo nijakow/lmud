@@ -27,10 +27,10 @@ struct LMud_FrameExtension
     struct LMud_Frame*     return_to;
 };
 
-void LMud_FrameExtension_Create(struct LMud_FrameExtension* self, struct LMud_Frame* lexical);
+void LMud_FrameExtension_Create(struct LMud_FrameExtension* self, struct LMud_Frame* owner, struct LMud_Frame* lexical);
 void LMud_FrameExtension_Destroy(struct LMud_FrameExtension* self);
 
-struct LMud_FrameExtension* LMud_FrameExtension_New(struct LMud_Frame* lexical);
+struct LMud_FrameExtension* LMud_FrameExtension_New(struct LMud_Frame* lexical, struct LMud_Frame* owner);
 void                        LMud_FrameExtension_Delete(struct LMud_FrameExtension* self);
 
 
@@ -59,6 +59,9 @@ void LMud_Frame_Destroy(struct LMud_Frame* self);
 void LMud_Frame_Move(struct LMud_Frame* self, struct LMud_Frame* location);
 
 struct LMud_FrameExtension* LMud_Frame_EnsureExtension(struct LMud_Frame* self);
+
+struct LMud_Frame* LMud_Frame_GetReturnTo(struct LMud_Frame* self);
+void               LMud_Frame_SetReturnTo(struct LMud_Frame* self, struct LMud_Frame* value);
 
 struct LMud_Frame* LMud_Frame_GetLexical(struct LMud_Frame* self);
 
