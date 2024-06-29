@@ -212,7 +212,8 @@ void LMud_Compiler_WriteSetUnwindProtect(struct LMud_Compiler* self, LMud_Compil
 void LMud_Compiler_WriteDisableUnwindProtect(struct LMud_Compiler* self);
 void LMud_Compiler_WriteBeginUnwindProtect(struct LMud_Compiler* self);
 void LMud_Compiler_WriteEndUnwindProtect(struct LMud_Compiler* self);
-void LMud_Compiler_WriteBeginSignalHandler(struct LMud_Compiler* self);
+void LMud_Compiler_WriteBeginSignalHandler(struct LMud_Compiler* self, LMud_CompilerLabel handler_label, struct LMud_Register* reg);
+void LMud_Compiler_WriteSignal(struct LMud_Compiler* self);
 
 void LMud_Compiler_Compile(struct LMud_Compiler* self, LMud_Any expression);
 void LMud_Compiler_CompileExpressions(struct LMud_Compiler* self, LMud_Any expressions);

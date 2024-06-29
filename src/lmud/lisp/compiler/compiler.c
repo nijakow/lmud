@@ -1011,6 +1011,26 @@ void LMud_Compiler_WriteEndUnwindProtect(struct LMud_Compiler* self)
     LMud_Compiler_PushBytecode(self, LMud_Bytecode_END_UNWIND_PROTECT);
 }
 
+void LMud_Compiler_WriteBeginSignalHandler(struct LMud_Compiler* self, LMud_CompilerLabel handler_label, struct LMud_Register* reg)
+{
+    LMud_Size  depth;
+    LMud_Size  index;
+
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_BEGIN_SIGNAL_HANDLER);
+
+    if (LMud_Compiler_IdentifyRegister(self, reg, &depth, &index)) {
+        assert(depth == 0);
+        LMud_Compiler_PushU8(self, index);
+    }
+
+    LMud_Compiler_WriteLabel(self, handler_label);
+}
+
+void LMud_Compiler_WriteSignal(struct LMud_Compiler* self)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SIGNAL);
+}
+
 
 
 bool LMud_Compiler_WriteLoadRegister(struct LMud_Compiler* self, struct LMud_Register* reg)
@@ -1514,9 +1534,13 @@ void LMud_Compiler_CompileSpecialSignalHandler(struct LMud_Compiler* self, LMud_
      *    handler-body ...) 
      */
 
-    LMud_Any            arglist;
-    LMud_Any            protected_expression;
-    LMud_Any            handler_body;
+    struct LMud_UnwindProtectCookie  cookie;
+    LMud_CompilerLabel               skip_label;
+    struct LMud_Register*            reg;
+    LMud_Any                         arglist;
+    LMud_Any                         signal_var;
+    LMud_Any                         protected_expression;
+    LMud_Any                         handler_body;
 
     /*
      * TODO: Check the arguments
@@ -1525,9 +1549,25 @@ void LMud_Compiler_CompileSpecialSignalHandler(struct LMud_Compiler* self, LMud_
     LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &protected_expression);
     handler_body = arguments;
 
-    // TODO: Establish the signal handler
-    LMud_Compiler_Compile(self, protected_expression);
-    (void) handler_body;
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arglist, &signal_var);
+
+    LMud_Compiler_PushScope(self);
+    LMud_Compiler_OpenLabel(self, &skip_label);
+    {
+        LMud_Compiler_BeginUnwindProtect(self, &cookie);
+        LMud_Compiler_Compile(self, protected_expression);
+        LMud_Compiler_StartUnwindingClause(self, &cookie);
+        {
+            reg = LMud_Compiler_AllocateRegister(self);
+            LMud_Compiler_BindRegister(self, signal_var, LMud_BindingType_VARIABLE, reg);
+            LMud_Compiler_WriteBeginSignalHandler(self, skip_label, reg);
+            LMud_Compiler_CompileExpressions(self, handler_body);
+            LMud_Compiler_PlaceLabel(self, skip_label);
+        }
+        LMud_Compiler_EndUnwindProtect(self, &cookie);
+    }
+    LMud_Compiler_CloseLabel(self, skip_label);
+    LMud_Compiler_PopScope(self);
 }
 
 void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expression)

@@ -519,6 +519,35 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
+            case LMud_Bytecode_BEGIN_SIGNAL_HANDLER:
+            {
+                index  = LMud_InstructionStream_NextU8(&stream);
+                index2 = LMud_InstructionStream_NextJumpOffset(&stream);
+
+                /*
+                 * If we are handling a signal, we bind the signalled value
+                 * to the register.
+                 * 
+                 * Otherwise, we jump to the target instruction that skips
+                 * the signal handler.
+                 */
+                if (false) {
+                    LMud_Frame_SetRegister(self->fiber->top, index, LMud_Interpreter_GetAccu(self)); 
+                } else {
+                    LMud_InstructionStream_Jump(&stream, index2);
+                }
+
+                break;
+            }
+
+            case LMud_Bytecode_SIGNAL:
+            {
+                /*
+                 * TODO
+                 */
+                break;
+            }
+
             default:
             {
                 LMud_Interpreter_Flush(self);
