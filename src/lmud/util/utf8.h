@@ -14,6 +14,8 @@ struct LMud_Utf8_Encoder
 void LMud_Utf8_Encoder_Create(struct LMud_Utf8_Encoder* self, LMud_Rune rune);
 void LMud_Utf8_Encoder_Destroy(struct LMud_Utf8_Encoder* self);
 
+LMud_Size LMud_Utf8_Encoder_RemainingBytes(struct LMud_Utf8_Encoder* self);
+
 bool LMud_Utf8_Encoder_HasBytesToRead(struct LMud_Utf8_Encoder* self);
 bool LMud_Utf8_Encoder_Read(struct LMud_Utf8_Encoder* self, char* byte);
 bool LMud_Utf8_Encoder_ReadAll(struct LMud_Utf8_Encoder* self, char* buffer, LMud_Size size);

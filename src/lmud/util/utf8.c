@@ -41,6 +41,11 @@ void LMud_Utf8_Encoder_Destroy(struct LMud_Utf8_Encoder* self)
     (void) self;
 }
 
+LMud_Size LMud_Utf8_Encoder_RemainingBytes(struct LMud_Utf8_Encoder* self)
+{
+    return self->write - self->read;
+}
+
 bool LMud_Utf8_Encoder_HasBytesToRead(struct LMud_Utf8_Encoder* self)
 {
     return self->read < self->write;
@@ -58,6 +63,19 @@ bool LMud_Utf8_Encoder_Read(struct LMud_Utf8_Encoder* self, char* byte)
     }
 
     return false;
+}
+
+bool LMud_Utf8_Encoder_ReadAll(struct LMud_Utf8_Encoder* self, char* buffer, LMud_Size size)
+{
+    LMud_Size  index;
+
+    for (index = 0; index < size; index++)
+    {
+        if (!LMud_Utf8_Encoder_Read(self, &buffer[index]))
+            return false;
+    }
+
+    return true;
 }
 
 const char* LMud_Utf8_Encoder_AsString(struct LMud_Utf8_Encoder* self)
