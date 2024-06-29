@@ -474,6 +474,37 @@ bool LMud_Compiler_GetTopUnwindProtectLabel(struct LMud_Compiler* self, LMud_Com
     }
 }
 
+
+struct LMud_UnwindProtectCookie
+{
+    LMud_CompilerLabel  unwind_protect_label;
+};
+
+void LMud_Compiler_BeginUnwindProtect(struct LMud_Compiler* self, struct LMud_UnwindProtectCookie* cookie)
+{
+    LMud_Compiler_OpenLabel(self, &cookie->unwind_protect_label);
+    LMud_Compiler_PushUnwindProtectLabel(self, cookie->unwind_protect_label);
+}
+
+void LMud_Compiler_StartUnwindingClause(struct LMud_Compiler* self, struct LMud_UnwindProtectCookie* cookie)
+{
+    LMud_CompilerLabel  other_unwind_protect_label;
+
+    LMud_Compiler_PlaceLabel(self, cookie->unwind_protect_label);
+    LMud_Compiler_WriteBeginUnwindProtect(self);
+    LMud_Compiler_PopUnwindProtectLabel(self);
+    if (LMud_Compiler_GetTopUnwindProtectLabel(self, &other_unwind_protect_label))
+        LMud_Compiler_WriteSetUnwindProtect(self, other_unwind_protect_label);
+    else
+        LMud_Compiler_WriteDisableUnwindProtect(self);
+}
+
+void LMud_Compiler_EndUnwindProtect(struct LMud_Compiler* self, struct LMud_UnwindProtectCookie* cookie)
+{
+    LMud_Compiler_WriteEndUnwindProtect(self);
+    LMud_Compiler_CloseLabel(self, cookie->unwind_protect_label);
+}
+
 bool LMud_Compiler_FindBlock(struct LMud_Compiler* self, LMud_Any name, struct LMud_ScopeBlockInfo** block_info)
 {
     struct LMud_Scope*  scope;
@@ -1455,30 +1486,18 @@ void LMud_Compiler_CompileSpecialReturnFrom(struct LMud_Compiler* self, LMud_Any
 
 void LMud_Compiler_CompileSpecialUnwindProtect(struct LMud_Compiler* self, LMud_Any arguments)
 {
-    LMud_Any            protected_clause;
-    LMud_Any            unwind_clause;
-    LMud_CompilerLabel  unwind_protect_label;
-    LMud_CompilerLabel  other_unwind_protect_label;
+    struct LMud_UnwindProtectCookie  cookie;
+    LMud_Any                         protected_clause;
+    LMud_Any                         unwind_clause;
 
     protected_clause = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), arguments);
     unwind_clause    = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), arguments);
 
-    LMud_Compiler_OpenLabel(self, &unwind_protect_label);
-    {
-        LMud_Compiler_PushUnwindProtectLabel(self, unwind_protect_label);
-        LMud_Compiler_WriteSetUnwindProtect(self, unwind_protect_label);
-        LMud_Compiler_Compile(self, protected_clause);
-        LMud_Compiler_PlaceLabel(self, unwind_protect_label);
-        LMud_Compiler_WriteBeginUnwindProtect(self);
-        LMud_Compiler_PopUnwindProtectLabel(self);
-        if (LMud_Compiler_GetTopUnwindProtectLabel(self, &other_unwind_protect_label))
-            LMud_Compiler_WriteSetUnwindProtect(self, other_unwind_protect_label);
-        else
-            LMud_Compiler_WriteDisableUnwindProtect(self);
-        LMud_Compiler_CompileExpressions(self, unwind_clause);
-        LMud_Compiler_WriteEndUnwindProtect(self);
-    }
-    LMud_Compiler_CloseLabel(self, unwind_protect_label);
+    LMud_Compiler_BeginUnwindProtect(self, &cookie);
+    LMud_Compiler_Compile(self, protected_clause);
+    LMud_Compiler_StartUnwindingClause(self, &cookie);
+    LMud_Compiler_CompileExpressions(self, unwind_clause);
+    LMud_Compiler_EndUnwindProtect(self, &cookie);
 }
 
 void LMud_Compiler_CompileSpecialSignalHandler(struct LMud_Compiler* self, LMud_Any arguments)
@@ -1497,17 +1516,18 @@ void LMud_Compiler_CompileSpecialSignalHandler(struct LMud_Compiler* self, LMud_
 
     LMud_Any            arglist;
     LMud_Any            protected_expression;
-    LMud_Any            body;
+    LMud_Any            handler_body;
 
     /*
      * TODO: Check the arguments
      */
     LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &arglist);
     LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &protected_expression);
-    body = arguments;
+    handler_body = arguments;
 
     // TODO: Establish the signal handler
     LMud_Compiler_Compile(self, protected_expression);
+    (void) handler_body;
 }
 
 void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expression)
