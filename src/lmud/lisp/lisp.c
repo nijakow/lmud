@@ -222,6 +222,11 @@ LMud_Any LMud_Lisp_Boolean(struct LMud_Lisp* self, bool value)
         return LMud_Lisp_Nil(self);
 }
 
+bool LMud_Lisp_Truthy(struct LMud_Lisp* self, LMud_Any value)
+{
+    return !LMud_Any_Eq(value, LMud_Lisp_Nil(self));
+}
+
 LMud_Any LMud_Lisp_CustomDispatcherFunction(struct LMud_Lisp* self)
 {
     return self->constants.custom_dispatcher_function;

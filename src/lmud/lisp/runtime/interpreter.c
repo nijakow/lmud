@@ -460,6 +460,11 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 LMud_Frame_SetStackPointer(self->fiber->top, LMud_InstructionStream_NextU8(&stream));
 
                 /*
+                 * We push whether we are handling a signal or not.
+                 */
+                LMud_Frame_Push(self->fiber->top, LMud_Lisp_Boolean(LMud_Interpreter_GetLisp(self), false));
+
+                /*
                  * Then, we push the accumulator/values state.
                  */
                 if (LMud_Fiber_ValueCount(self->fiber) == 1) {
@@ -517,15 +522,11 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 }
 
                 /*
-                 * TODO, FIXME, XXX:
-                 *
                  * Unwind-protect blocks can run as part of normal execution flow, but some of them
                  * may also be triggered by signals. If our current unwind-protect block is run as
                  * part of a stack-unwinding signal propagation, we should not resume the execution
                  * of our function, but unwind further and skip directly to the next
                  * unwind-protect block surrounding us.
-                 * 
-                 * This is not implemented yet.
                  * 
                  * In order to get this right, we also need to push and pop some information about
                  * whether we are coming from normal code or from an unwinding process, and not
@@ -537,6 +538,12 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                  *     // Do nothing, we can continue our normal execution
                  * }
                  */
+                if (LMud_Lisp_Truthy(self->fiber->lisp, LMud_Frame_Pop(self->fiber->top))) {
+                    // Unwind further (the signal info can be found in the accumulator) -- TODO!
+                    printf("[ERROR]: Unwinding from an unwind-protect block is not implemented yet!\n");
+                } else {
+                    // Nothing to do, we can continue our normal execution
+                }
                 
                 break;
             }

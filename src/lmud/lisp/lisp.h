@@ -68,6 +68,7 @@ bool LMud_Lisp_IsNil(struct LMud_Lisp* self, LMud_Any value);
 LMud_Any LMud_Lisp_T(struct LMud_Lisp* self);
 LMud_Any LMud_Lisp_Nil(struct LMud_Lisp* self);
 LMud_Any LMud_Lisp_Boolean(struct LMud_Lisp* self, bool value);
+bool     LMud_Lisp_Truthy(struct LMud_Lisp* self, LMud_Any value);
 
 LMud_Any LMud_Lisp_CustomDispatcherFunction(struct LMud_Lisp* self);
 void     LMud_Lisp_SetCustomDispatcherFunction(struct LMud_Lisp* self, LMud_Any value);
