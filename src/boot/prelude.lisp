@@ -834,7 +834,7 @@
    (tos:defmethod io:read-byte-from-stream ((stream lmud.classes:<port>) protocol)
       (lmud.int:port-read-byte stream))
    
-   (tos:defmethod io:write-char-to-stream ((stream lmud.classes:<port>) protocol char)
+   (defun io:write-utf8-char (char stream protocol)
       (let ((code (char-code char)))
          (cond ((< code #x80)    (io:write-byte-to-stream stream protocol code))
                ((< code #x800)   (io:write-byte-to-stream stream protocol (logior #xC0 (ash code -6)))
@@ -847,7 +847,7 @@
                                  (io:write-byte-to-stream stream protocol (logior #x80 (logand (ash code -6) #x3F)))
                                  (io:write-byte-to-stream stream protocol (logior #x80 (logand code #x3F)))))))
    
-   (tos:defmethod io:read-char-from-stream ((stream lmud.classes:<port>) protocol)
+   (defun io:read-utf8-char (stream protocol)
       (code-char
          (let ((byte (io:read-byte-from-stream stream protocol)))
             (cond ((< byte #x80) byte)
@@ -861,6 +861,12 @@
                                          (ash (logand (io:read-byte-from-stream stream protocol) #x3F) 6)
                                          (logand (io:read-byte-from-stream stream protocol) #x3F)))
                   (t (lmud.util:simple-error "Invalid UTF-8 encoding!"))))))
+
+   (tos:defmethod io:read-char-from-stream (stream protocol)
+      (io:read-utf8-char stream protocol))
+   
+   (tos:defmethod io:write-char-to-stream (stream protocol char)
+      (io:write-utf8-char char stream protocol))
 
    (defun write-byte (byte stream)
       (io:write-byte-to-stream stream nil byte))
