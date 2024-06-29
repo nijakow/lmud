@@ -196,6 +196,8 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
             fprintf(stream, "⦍" LMud_VT100_Underline "PACKAGE" LMud_VT100_Normal " :NAME ");
             LMud_Lisp_Print(lisp, LMud_Package_Name((struct LMud_Package*) pointer), stream, true);
             fprintf(stream, "⦎");
+        } else if (LMud_Lisp_IsPortPointer(lisp, pointer)) {
+            fprintf(stream, "⦍" LMud_VT100_Underline "PORT" LMud_VT100_Normal " %p⦎", pointer);
         } else if (LMud_Lisp_IsCustomPointer(lisp, pointer)) {
             fprintf(stream, "⦍" LMud_VT100_Underline "CUSTOM" LMud_VT100_Normal " %p⦎", pointer);
         } else {
