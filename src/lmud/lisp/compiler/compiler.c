@@ -738,6 +738,19 @@ void LMud_Compiler_PushBytecode(struct LMud_Compiler* self, enum LMud_Bytecode b
     LMud_Compiler_PushU8(self, (uint8_t) bytecode);
 }
 
+bool LMud_Compiler_CheckSmallConstant(struct LMud_Compiler* self, LMud_Any constant)
+{
+    LMud_Size  index;
+
+    for (index = 0; index < self->constants_fill; index++)
+    {
+        if (LMud_Any_Eq(self->constants[index], constant))
+            return index <= 0xff;
+    }
+
+    return self->constants_fill <= 0xff;
+}
+
 LMud_Size LMud_Compiler_PushConstant_None(struct LMud_Compiler* self, LMud_Any constant)
 {
     LMud_Size  index;
@@ -851,8 +864,28 @@ void LMud_Compiler_WriteMultipleValueList(struct LMud_Compiler* self)
 
 void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant)
 {
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_LOAD_CONSTANT);
-    LMud_Compiler_PushConstant(self, constant);
+    /*
+     * This function is not written in a particularly good way.
+     * We basically hijack the interface to the constant pool to determine
+     * in advance whether we should use the small constant opcode or the
+     * regular constant opcode.
+     * 
+     * The constant pool is deterministic enough that this will work,
+     * but it's not a good way to do it, and I am aware of that.
+     * 
+     * We also use low-level functions to extract the constant index
+     * and push it into the instruction stream, which is not a good
+     * solution either.
+     * 
+     * This code probably needs to be rewritten at some point.
+     */
+    if (LMud_Compiler_CheckSmallConstant(self, constant)) {
+        LMud_Compiler_PushBytecode(self, LMud_Bytecode_LOAD_CONSTANT_SMALL);
+        LMud_Compiler_PushU8(self, LMud_Compiler_PushConstant_None(self, constant));
+    } else {
+        LMud_Compiler_PushBytecode(self, LMud_Bytecode_LOAD_CONSTANT);
+        LMud_Compiler_PushU16(self, LMud_Compiler_PushConstant_None(self, constant));
+    }
 }
 
 void LMud_Compiler_WriteLambda(struct LMud_Compiler* self, LMud_Any lambda)
@@ -916,19 +949,25 @@ void LMud_Compiler_WriteSymbolFunction(struct LMud_Compiler* self, LMud_Any symb
 
 void LMud_Compiler_WriteLoad(struct LMud_Compiler* self, LMud_Size depth, LMud_Size index)
 {
-    if (depth > 0)
+    if (depth > 0) {
         LMud_Compiler_EnableLexicalStuff(self);
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_LOAD_REGISTER_LEXICAL);
-    LMud_Compiler_PushU8(self, depth);
+        LMud_Compiler_PushBytecode(self, LMud_Bytecode_LOAD_REGISTER_LEXICAL);
+        LMud_Compiler_PushU8(self, depth);
+    } else {
+        LMud_Compiler_PushBytecode(self, LMud_Bytecode_LOAD_REGISTER_LOCAL);
+    }
     LMud_Compiler_PushU8(self, index);
 }
 
 void LMud_Compiler_WriteStore(struct LMud_Compiler* self, LMud_Size depth, LMud_Size index)
 {
-    if (depth > 0)
+    if (depth > 0) {
         LMud_Compiler_EnableLexicalStuff(self);
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_STORE_REGISTER_LEXICAL);
-    LMud_Compiler_PushU8(self, depth);
+        LMud_Compiler_PushBytecode(self, LMud_Bytecode_STORE_REGISTER_LEXICAL);
+        LMud_Compiler_PushU8(self, depth);
+    } else {
+        LMud_Compiler_PushBytecode(self, LMud_Bytecode_STORE_REGISTER_LOCAL);
+    }
     LMud_Compiler_PushU8(self, index);
 }
 

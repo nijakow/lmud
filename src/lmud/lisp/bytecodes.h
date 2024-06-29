@@ -12,13 +12,16 @@ enum LMud_Bytecode
     LMud_Bytecode_CONS_REST_ARGUMENTS,
     LMud_Bytecode_MULTIPLE_VALUE_LIST,
     
+    LMud_Bytecode_LOAD_CONSTANT_SMALL,
     LMud_Bytecode_LOAD_CONSTANT,
     LMud_Bytecode_LOAD_LAMBDA,
     
+    LMud_Bytecode_LOAD_REGISTER_LOCAL,
     LMud_Bytecode_LOAD_REGISTER_LEXICAL,
     LMud_Bytecode_LOAD_SYMBOL_VARIABLE,
     LMud_Bytecode_LOAD_SYMBOL_FUNCTION,
 
+    LMud_Bytecode_STORE_REGISTER_LOCAL,
     LMud_Bytecode_STORE_REGISTER_LEXICAL,
     LMud_Bytecode_STORE_SYMBOL_VARIABLE,
     LMud_Bytecode_STORE_SYMBOL_FUNCTION,

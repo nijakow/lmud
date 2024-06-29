@@ -91,6 +91,11 @@ enum LMud_Bytecode LMud_InstructionStream_NextBytecode(struct LMud_InstructionSt
     return (enum LMud_Bytecode) LMud_InstructionStream_NextU8(self);
 }
 
+LMud_Any LMud_InstructionStream_NextSmallConstant(struct LMud_InstructionStream* self)
+{
+    return self->constants[LMud_InstructionStream_NextU8(self)];
+}
+
 LMud_Any LMud_InstructionStream_NextConstant(struct LMud_InstructionStream* self)
 {
     return self->constants[LMud_InstructionStream_NextU16(self)];
@@ -251,6 +256,15 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
+            case LMud_Bytecode_LOAD_CONSTANT_SMALL:
+            {
+                LMud_Interpreter_SetAccu(
+                    self,
+                    LMud_InstructionStream_NextSmallConstant(&stream)
+                );
+                break;
+            }
+
             case LMud_Bytecode_LOAD_CONSTANT:
             {
                 LMud_Interpreter_SetAccu(
@@ -370,6 +384,16 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
+            case LMud_Bytecode_LOAD_REGISTER_LOCAL:
+            {
+                LMud_Interpreter_SetAccu(
+                    self,
+                    LMud_Frame_GetRegister(self->fiber->top, LMud_InstructionStream_NextU8(&stream))
+                );
+
+                break;
+            }
+
             case LMud_Bytecode_LOAD_REGISTER_LEXICAL:
             {
                 lexical = LMud_Interpreter_LexicalFrame(self, LMud_InstructionStream_NextU8(&stream));
@@ -377,6 +401,17 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 LMud_Interpreter_SetAccu(
                     self,
                     LMud_Frame_GetRegister(lexical, LMud_InstructionStream_NextU8(&stream))
+                );
+
+                break;
+            }
+
+            case LMud_Bytecode_STORE_REGISTER_LOCAL:
+            {
+                LMud_Frame_SetRegister(
+                    self->fiber->top,
+                    LMud_InstructionStream_NextU8(&stream),
+                    LMud_Interpreter_GetAccu(self)
                 );
 
                 break;
