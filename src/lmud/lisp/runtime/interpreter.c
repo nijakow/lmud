@@ -515,6 +515,28 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
                     LMud_Fiber_Values(self->fiber, values, index2);
                 }
+
+                /*
+                 * TODO, FIXME, XXX:
+                 *
+                 * Unwind-protect blocks can run as part of normal execution flow, but some of them
+                 * may also be triggered by signals. If our current unwind-protect block is run as
+                 * part of a stack-unwinding signal propagation, we should not resume the execution
+                 * of our function, but unwind further and skip directly to the next
+                 * unwind-protect block surrounding us.
+                 * 
+                 * This is not implemented yet.
+                 * 
+                 * In order to get this right, we also need to push and pop some information about
+                 * whether we are coming from normal code or from an unwinding process, and not
+                 * just the state of the registers:
+                 * 
+                 * if (coming_from_signal_unwind) {
+                 *     // Unwind further (the signal info can be found in the accumulator)
+                 * } else {
+                 *     // Do nothing, we can continue our normal execution
+                 * }
+                 */
                 
                 break;
             }
