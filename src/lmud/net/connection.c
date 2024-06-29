@@ -7,13 +7,20 @@
 void LMud_Connection_Create(struct LMud_Connection* self, int fd)
 {
     self->fd   = fd;
+
     self->prev = NULL;
     self->next = NULL;
+
+    LMud_Ringbuffer_Create(&self->inbuf,  4096);
+    LMud_Ringbuffer_Create(&self->outbuf, 4096);
 }
 
 void LMud_Connection_Destroy(struct LMud_Connection* self)
 {
+    close(self->fd);
     LMud_Connection_Unlink(self);
+    LMud_Ringbuffer_Destroy(&self->inbuf);
+    LMud_Ringbuffer_Destroy(&self->outbuf);
 }
 
 void LMud_Connection_Link(struct LMud_Connection* self, struct LMud_Connection** list)
@@ -37,20 +44,61 @@ void LMud_Connection_Unlink(struct LMud_Connection* self)
 
 void LMud_Connection_RegisterOnSelector(struct LMud_Connection* self, struct LMud_Selector* selector)
 {
+    if (LMud_Ringbuffer_HasData(&self->outbuf))
+        LMud_Selector_AddWrite(selector, self->fd);
+
     LMud_Selector_AddRead(selector, self->fd);
     LMud_Selector_AddExcept(selector, self->fd);
 }
 
+void LMud_Connection_HandleError(struct LMud_Connection* self)
+{
+    (void) self;
+}
+
+void LMud_Connection_HandleDisconnect(struct LMud_Connection* self)
+{
+    LMud_Connection_HandleError(self);
+}
+
 void LMud_Connection_Tick(struct LMud_Connection* self, struct LMud_Selector* selector)
 {
+    size_t   size;
+    ssize_t  ssize;
+    ssize_t  written;
+    char     buffer[1024];
+
     if (LMud_Selector_IsRead(selector, self->fd))
     {
-        // Handle read
+        ssize = read(self->fd, buffer, sizeof(buffer));
+
+        if (ssize <= 0) {
+            LMud_Connection_HandleDisconnect(self);
+        } else {
+            LMud_Ringbuffer_WriteBytes(&self->inbuf, buffer, ssize);
+        }
+    }
+
+    if (LMud_Selector_IsWrite(selector, self->fd))
+    {
+        written = 0;
+        size    = LMud_Ringbuffer_PeekBytes(&self->outbuf, buffer, sizeof(buffer));
+
+        if (size > 0)
+        {
+            written = write(self->fd, buffer, size);
+        }
+
+        if (written < 0) {
+            LMud_Connection_HandleDisconnect(self);
+        } else {
+            LMud_Ringbuffer_SkipBytes(&self->outbuf, written);
+        }
     }
 
     if (LMud_Selector_IsExcept(selector, self->fd))
     {
-        // Handle exception
+        LMud_Connection_HandleError(self);
     }
 }
 

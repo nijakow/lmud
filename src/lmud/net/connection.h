@@ -3,6 +3,7 @@
 
 #include <lmud/defs.h>
 #include <lmud/net/selector.h>
+#include <lmud/util/ringbuffer.h>
 
 struct LMud_Connection
 {
@@ -10,6 +11,9 @@ struct LMud_Connection
 
     struct LMud_Connection**  prev;
     struct LMud_Connection*   next;
+
+    struct LMud_Ringbuffer    inbuf;
+    struct LMud_Ringbuffer    outbuf;
 };
 
 void LMud_Connection_Create(struct LMud_Connection* self, int fd);
