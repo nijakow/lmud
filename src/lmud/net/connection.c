@@ -113,7 +113,7 @@ static void LMud_Connection_ReleaseFibers(struct LMud_Connection* self, char byt
 {
     while (self->waiting_fibers.fibers != NULL)
     {
-        LMud_Fiber_ControlRestartWithValue(self->waiting_fibers.fibers, LMud_Any_FromInteger(byte));
+        LMud_Fiber_ControlRestartWithValue(self->waiting_fibers.fibers, LMud_Any_FromInteger(((LMud_Integer) 0) | (unsigned char) byte));
     }
 }
 
@@ -137,7 +137,7 @@ void LMud_Connection_FiberReadByte(struct LMud_Connection* self, struct LMud_Fib
     char  byte;
 
     if (LMud_Ringbuffer_ReadByte(&self->inbuf, &byte)) {
-        LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(byte));
+        LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(((LMud_Integer) 0) | (unsigned char) byte));
     } else {
         LMud_Connection_AddWaitingFiber(self, fiber);
     }

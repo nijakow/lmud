@@ -1279,11 +1279,14 @@ void LMud_Compiler_CompileSpecialSetq(struct LMud_Compiler* self, LMud_Any argum
     /*
      * TODO: Error if arguments is not a list of length 2
      */
-    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &variable);
-    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &value);
+    while (LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), arguments))
+    {
+        LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &variable);
+        LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &value);
 
-    LMud_Compiler_Compile(self, value);
-    LMud_Compiler_CompileStoreVariable(self, variable, LMud_BindingType_VARIABLE);
+        LMud_Compiler_Compile(self, value);
+        LMud_Compiler_CompileStoreVariable(self, variable, LMud_BindingType_VARIABLE);
+    }
 }
 
 

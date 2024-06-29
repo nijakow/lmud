@@ -90,6 +90,12 @@ bool LMud_Port_FiberReadByte(struct LMud_Port* self, struct LMud_Fiber* fiber)
         return false;
     }
 
+    if (self->pushbacks_fill > 0)
+    {
+        LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(((LMud_Integer) 0) | (unsigned char) self->pushbacks[--self->pushbacks_fill]));
+        return true;
+    }
+
     LMud_Connection_FiberReadByte(connection, fiber);
 
     return true;

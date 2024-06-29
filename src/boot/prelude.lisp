@@ -834,6 +834,9 @@
    (tos:defmethod io:read-byte-from-stream ((stream lmud.classes:<port>) protocol)
       (lmud.int:port-read-byte stream))
    
+   (tos:defmethod io:unread-char-from-stream ((stream lmud.classes:<port>) protocol char)
+      (lmud.int:port-unread-char stream char))
+   
    (defun io:write-utf8-char (char stream protocol)
       (let ((code (char-code char)))
          (cond ((< code #x80)    (io:write-byte-to-stream stream protocol code))
@@ -879,6 +882,9 @@
    
    (defun read-char (stream)
       (io:read-char-from-stream stream nil))
+   
+   (defun unread-char (char stream)
+      (io:unread-char-from-stream stream nil char))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -918,7 +924,9 @@
          (write-char #\return  port)
          (write-char #\newline port)
          (while t
-            (write-char (read-char port) port))))
+            (let ((char (read-char port)))
+               (unread-char char port)
+               (write-char (read-char port) port)))))
 
    (defun lmud.bootstrap::repl ()
       (while t
