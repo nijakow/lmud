@@ -809,6 +809,10 @@
    ;;;    REPL
    ;;;
 
+   (defun lmud.dummy::%princln (e)
+      (lmud.dummy::%princ e)
+      (lmud.dummy::%terpri))
+
    (defun foo ()
       (unwind-protect
          (unwind-protect (values 1 2 42)
@@ -818,12 +822,16 @@
          (lmud.dummy::%terpri)))
    
    (defun bar ()
-      (%signal-handler (e)
-            (progn (lmud.dummy::%princ "Look ma, no hands!")
-                   (lmud.dummy::%terpri)
-                   (lmud.int:signal 42))
-            (lmud.dummy::%princ "Look ma, still no hands!")
-            (lmud.dummy::%terpri)))
+      (unwind-protect
+            (%signal-handler (e)
+                  (unwind-protect (progn (lmud.dummy::%princ "Look ma, no hands!")
+                                         (lmud.dummy::%terpri)
+                                         (lmud.int:signal 42))
+                     (lmud.dummy::%princln "First passthrough!"))
+                  (lmud.dummy::%princ "Look ma, still no hands!")
+                  (lmud.dummy::%terpri)
+                  (list e e e))
+         (lmud.dummy::%princln "Second passthrough!")))
 
    (defun lmud.bootstrap::repl ()
       (while t

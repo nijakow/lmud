@@ -496,19 +496,6 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 LMud_Frame_SetStackPointer(self->fiber->top, LMud_InstructionStream_NextU8(&stream));
 
                 /*
-                 * We push the resumption mode. This is the first of the three magic values
-                 * needed for the unwinding process.
-                 * 
-                 * TODO: Grab this information from the frame.
-                 */
-                LMud_Frame_Push(self->fiber->top, LMud_Any_FromInteger(LMud_Fiber_GetExecutionResumptionMode(self->fiber)));
-
-                /*
-                 * Now that the execution resumption mode is preserved, we can switch to normal mode again.
-                 */
-                LMud_Fiber_SetExecutionResumptionMode(self->fiber, LMud_ExecutionResumption_NORMAL);
-
-                /*
                  * Then, we push the accumulator/values state.
                  */
                 if (LMud_Fiber_ValueCount(self->fiber) == 1) {
@@ -531,13 +518,40 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                     LMud_Frame_Push(self->fiber->top, value);
                 }
 
+                /*
+                 * The value count is pushed next. This is the second of the three magic values.
+                 */
                 LMud_Frame_Push(self->fiber->top, LMud_Any_FromInteger(LMud_Fiber_ValueCount(self->fiber)));
+
+                /*
+                 * We push the resumption mode. This is the last of the three magic values
+                 * needed for the unwinding process.
+                 * 
+                 * TODO: Grab this information from the frame.
+                 */
+                LMud_Frame_Push(self->fiber->top, LMud_Any_FromInteger(LMud_Fiber_GetExecutionResumptionMode(self->fiber)));
+
+                /*
+                 * We set our execution resumption mode back to NORMAL, so that the unwinding
+                 * code can run without interference.
+                 */
+                LMud_Fiber_SetExecutionResumptionMode(self->fiber, LMud_ExecutionResumption_NORMAL);
+
+                /*
+                 * Now that the execution resumption mode is preserved, we can switch to normal mode again.
+                 */
+                LMud_Fiber_SetExecutionResumptionMode(self->fiber, LMud_ExecutionResumption_NORMAL);
 
                 break;
             }
 
             case LMud_Bytecode_END_UNWIND_PROTECT:
             {
+                /*
+                 * First, we pop the resumption mode.
+                 */
+                resumption = (enum LMud_ExecutionResumption) LMud_Any_AsInteger(LMud_Frame_Pop(self->fiber->top));
+
                 /*
                  * We restore the accumulator/values from the stack.
                  */
@@ -585,15 +599,27 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                  *     // Do nothing, we can continue our normal execution
                  * }
                  */
-                resumption = (enum LMud_ExecutionResumption) LMud_Any_AsInteger(LMud_Frame_Pop(self->fiber->top));
-
                 switch (resumption) {
                     case LMud_ExecutionResumption_NORMAL:
-                    case LMud_ExecutionResumption_SIGNAL:
                         /*
                          * We set the values, and continue our normal execution.
                          */
                         LMud_Fiber_Values(self->fiber, values, index2);
+                        break;
+                    case LMud_ExecutionResumption_DIRECT:
+                        /*
+                         * We do nothing, and continue our normal execution.
+                         */
+                        LMud_Fiber_SetExecutionResumptionMode(self->fiber, LMud_ExecutionResumption_NORMAL);
+                        break;
+                    case LMud_ExecutionResumption_SIGNAL:
+                        /*
+                         * We set the values, and signal again.
+                         */
+                        LMud_Interpreter_Flush(self);
+                        LMud_Fiber_Values(self->fiber, values, index2);
+                        LMud_Fiber_SignalAndUnwind(self->fiber);
+                        LMud_Interpreter_Restore(self);
                         break;
                     default:
                         printf("[ERROR]: Execution resumption mode not recognized!\n");
@@ -605,21 +631,49 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
             case LMud_Bytecode_BEGIN_SIGNAL_HANDLER:
             {
+                /*
+                 * This instruction can only occur in the context of an unwind-protect block,
+                 * directly after the BEGIN-UNWIND-PROTECT instruction.
+                 * 
+                 * The BEGIN-SIGNAL-HANDLER instruction is used in unwind-protect blocks established
+                 * to handle signals, and therefore interfers with the "invisible pass-through"
+                 * of unwind-protect blocks.
+                 * 
+                 * To make a signal handler block actually return something, we need to change the
+                 * execution resumption mode that was left on the stack by BEGIN-UNWIND-PROTECT.
+                 */
+
+                /*
+                 * Fetch our arguments.
+                 */
                 index  = LMud_InstructionStream_NextU8(&stream);
                 index2 = LMud_InstructionStream_NextJumpOffset(&stream);
 
                 /*
+                 * Fetch the execution resumption mode.
+                 */
+                resumption = (enum LMud_ExecutionResumption) LMud_Any_AsInteger(LMud_Frame_Pop(self->fiber->top));
+
+                /*
                  * If we are handling a signal, we bind the signalled value
-                 * to the register.
+                 * to the register. The resumption mode is changed to DIRECT,
+                 * so that the return value of the handler block will not be
+                 * overwritten by the restored accumulator.
                  * 
                  * Otherwise, we jump to the target instruction that skips
                  * the signal handler.
                  */
-                if (LMud_Fiber_GetExecutionResumptionMode(self->fiber) == LMud_ExecutionResumption_SIGNAL) {
+                if (resumption == LMud_ExecutionResumption_SIGNAL) {
+                    resumption = LMud_ExecutionResumption_DIRECT;  // The value will be pushed later in this block.
                     LMud_Frame_SetRegister(self->fiber->top, index, LMud_Interpreter_GetAccu(self)); 
                 } else {
                     LMud_InstructionStream_Jump(&stream, index2);
                 }
+
+                /*
+                 * Push the (possibly new) execution resumption mode back onto the stack.
+                 */
+                LMud_Frame_Push(self->fiber->top, LMud_Any_FromInteger(resumption));
 
                 break;
             }

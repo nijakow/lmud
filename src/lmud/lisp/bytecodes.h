@@ -44,6 +44,7 @@ enum LMud_Bytecode
 enum LMud_ExecutionResumption
 {
     LMud_ExecutionResumption_NORMAL,
+    LMud_ExecutionResumption_DIRECT,
     LMud_ExecutionResumption_RETURN,
     LMud_ExecutionResumption_SIGNAL,
 };

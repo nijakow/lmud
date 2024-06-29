@@ -1026,28 +1026,28 @@ void LMud_Compiler_WriteBeginUnwindProtect(struct LMud_Compiler* self)
      */
     LMud_Compiler_PushU8(self, self->current_stack_depth);
     /*
-     * Whenever an unwind-protect clause is entered, we immediately push
-     * the reason why we are entering that clause (LMud_ExecutionResumption)
+     * Whenever an unwind-protect clause is entered, we also push the
+     * reason why we are entering that clause (LMud_ExecutionResumption)
      * and the accumulator/values state to the stack.
      * 
      * In most cases, we have exactly one value in the accumulator, so
      * the configuration is optimized for that case:
      * 
-     *     NORMAL ACCU_VALUE  1   <-- TOP
+     *     ACCU_VALUE  1  NORMAL   <-- TOP
      * 
      * This is a one-argument accumulator pushed to the stack (with 1 on top).
      * If we have zero or more than one values, ACCU_VALUE contains a list
      * of the values, and the topmost element is the count:
      * 
-     *     NORMAL T (V1 V2 V3) 3
+     *     (V1 V2 V3)  3  NORMAL
      * 
      * The rule works for both zero and more than one values, since a
      * zero-value configuration can be represented by the empty list,
      * which is NIL:
      * 
-     *     NORMAL T ()  0
+     *     ()  0  NORMAL
      * i.e.:
-     *     NORMAL T NIL 0
+     *     NIL 0  NORMAL
      */
     LMud_Compiler_IncreaseStackDepth(self, 3);
 }
