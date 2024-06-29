@@ -65,6 +65,9 @@ void LMud_Fiber_UnlinkQueue(struct LMud_Fiber* self);
 void LMud_Fiber_MoveToQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* queue);
 
 enum LMud_FiberState LMud_Fiber_GetState(struct LMud_Fiber* self);
+
+bool LMud_Fiber_IsRunning(struct LMud_Fiber* self);
+bool LMud_Fiber_IsWaiting(struct LMud_Fiber* self);
 bool LMud_Fiber_HasTerminated(struct LMud_Fiber* self);
 
 void LMud_Fiber_ControlWaitOnQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* queue);

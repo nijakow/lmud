@@ -132,7 +132,7 @@ void LMud_Connection_AddWaitingFiber(struct LMud_Connection* self, struct LMud_F
     LMud_Fiber_ControlWaitOnQueue(fiber, &self->waiting_fibers);
 }
 
-void LMud_Connection_ReadByte(struct LMud_Connection* self, struct LMud_Fiber* fiber)
+void LMud_Connection_FiberReadByte(struct LMud_Connection* self, struct LMud_Fiber* fiber)
 {
     char  byte;
 
@@ -141,6 +141,11 @@ void LMud_Connection_ReadByte(struct LMud_Connection* self, struct LMud_Fiber* f
     } else {
         LMud_Connection_AddWaitingFiber(self, fiber);
     }
+}
+
+bool LMud_Connection_WriteByte(struct LMud_Connection* self, char byte)
+{
+    return LMud_Ringbuffer_WriteByte(&self->outbuf, byte);
 }
 
 

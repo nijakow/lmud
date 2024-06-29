@@ -996,6 +996,36 @@ void LMud_Builtin_OnConnect(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
 }
 
+void LMud_Builtin_Portp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsPort(fiber->lisp, arguments[0])));
+}
+
+void LMud_Builtin_PortReadByte(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Port_FiberReadByte(LMud_Any_AsPointer(arguments[0]), fiber);
+}
+
+void LMud_Builtin_PortWriteByte(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    bool  success;
+
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    success = LMud_Port_WriteByte(LMud_Any_AsPointer(arguments[0]), LMud_Any_AsInteger(arguments[1]));
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, success));
+}
+
 
 void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
 {
@@ -1074,6 +1104,9 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "KICKSTART-TASK", LMud_Builtin_KickstartTask);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "SIGNAL", LMud_Builtin_Signal);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "ON-CONNECT", LMud_Builtin_OnConnect);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PORTP", LMud_Builtin_Portp);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PORT-READ-BYTE", LMud_Builtin_PortReadByte);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PORT-WRITE-BYTE", LMud_Builtin_PortWriteByte);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRIN1", LMud_Builtin_Prin1);

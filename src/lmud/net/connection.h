@@ -45,7 +45,9 @@ void LMud_Connection_Unlink(struct LMud_Connection* self);
 void LMud_Connection_RegisterOnSelector(struct LMud_Connection* self, struct LMud_Selector* selector);
 
 void LMud_Connection_AddWaitingFiber(struct LMud_Connection* self, struct LMud_Fiber* fiber);
-void LMud_Connection_ReadByte(struct LMud_Connection* self, struct LMud_Fiber* fiber);
+void LMud_Connection_FiberReadByte(struct LMud_Connection* self, struct LMud_Fiber* fiber);
+
+bool LMud_Connection_WriteByte(struct LMud_Connection* self, char byte);
 
 
 struct LMud_Connections

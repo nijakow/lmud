@@ -174,6 +174,10 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
     LMud_InstructionStream_Create(&stream, self->fiber->top);
 
+  again_with_check:
+    if (LMud_Fiber_IsRunning(self->fiber))
+        goto end;
+
     while (steps_remaining --> 0)
     {
         switch (LMud_InstructionStream_NextBytecode(&stream))

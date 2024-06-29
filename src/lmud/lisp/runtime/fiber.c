@@ -134,6 +134,16 @@ static void LMud_Fiber_SetState(struct LMud_Fiber* self, enum LMud_FiberState st
     self->state = state;
 }
 
+bool LMud_Fiber_IsRunning(struct LMud_Fiber* self)
+{
+    return LMud_Fiber_GetState(self) == LMud_FiberState_RUNNING;
+}
+
+bool LMud_Fiber_IsWaiting(struct LMud_Fiber* self)
+{
+    return LMud_Fiber_GetState(self) == LMud_FiberState_WAITING;
+}
+
 bool LMud_Fiber_HasTerminated(struct LMud_Fiber* self)
 {
     return LMud_Fiber_GetState(self) == LMud_FiberState_TERMINATED;
