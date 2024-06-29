@@ -934,6 +934,89 @@ void LMud_Builtin_Modulo(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
     LMud_Fiber_SetAccumulator(fiber, result);
 }
 
+void LMud_Builtin_LogAnd(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any   result;
+    LMud_Size  index;
+
+    /*
+     * TODO: Check arguments.
+     */
+
+    result = LMud_Any_FromInteger(-1);
+
+    for (index = 0; index < argument_count; index++)
+    {
+        LMud_Lisp_LogAnd2(fiber->lisp, result, arguments[index], &result);
+    }
+
+    LMud_Fiber_SetAccumulator(fiber, result);
+}
+
+void LMud_Builtin_LogIor(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any   result;
+    LMud_Size  index;
+
+    /*
+     * TODO: Check arguments.
+     */
+
+    result = LMud_Any_FromInteger(0);
+
+    for (index = 0; index < argument_count; index++)
+    {
+        LMud_Lisp_LogIor2(fiber->lisp, result, arguments[index], &result);
+    }
+
+    LMud_Fiber_SetAccumulator(fiber, result);
+}
+
+void LMud_Builtin_LogXor(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any   result;
+    LMud_Size  index;
+
+    /*
+     * TODO: Check arguments.
+     */
+
+    result = LMud_Any_FromInteger(0);
+
+    for (index = 0; index < argument_count; index++)
+    {
+        LMud_Lisp_LogXor2(fiber->lisp, result, arguments[index], &result);
+    }
+}
+
+void LMud_Builtin_LogNot(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any  result;
+
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+
+    LMud_Lisp_LogNot(fiber->lisp, arguments[0], &result);
+
+    LMud_Fiber_SetAccumulator(fiber, result);
+}
+
+void LMud_Builtin_Ash(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any  result;
+
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+
+    LMud_Lisp_Ash(fiber->lisp, arguments[0], arguments[1], &result);
+
+    LMud_Fiber_SetAccumulator(fiber, result);
+}
+
 void LMud_Builtin_GarbageCollect(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     struct LMud_GCStats  stats;
@@ -1076,6 +1159,11 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "*", LMud_Builtin_Multiply);
     LMud_Lisp_InstallBuiltin(lisp, "/", LMud_Builtin_Divide);
     LMud_Lisp_InstallBuiltin(lisp, "MOD", LMud_Builtin_Modulo);
+    LMud_Lisp_InstallBuiltin(lisp, "LOGAND", LMud_Builtin_LogAnd);
+    LMud_Lisp_InstallBuiltin(lisp, "LOGIOR", LMud_Builtin_LogIor);
+    LMud_Lisp_InstallBuiltin(lisp, "LOGXOR", LMud_Builtin_LogXor);
+    LMud_Lisp_InstallBuiltin(lisp, "LOGNOT", LMud_Builtin_LogNot);
+    LMud_Lisp_InstallBuiltin(lisp, "ASH", LMud_Builtin_Ash);
     LMud_Lisp_InstallBuiltin(lisp, "RANDOM", LMud_Builtin_Random);
 
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.TEST", "HELLO-WORLD", LMud_Builtin_HelloWorld);
