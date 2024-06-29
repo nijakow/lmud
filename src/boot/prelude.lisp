@@ -831,8 +831,14 @@
    (tos:defmethod io:write-byte-to-stream ((stream lmud.classes:<port>) byte)
       (lmud.int:port-write-byte stream byte))
    
+   (tos:defmethod io:read-byte-from-stream ((stream lmud.classes:<port>))
+      (lmud.int:port-read-byte stream))
+   
    (defun write-byte (byte stream)
       (io:write-byte-to-stream stream byte))
+   
+   (defun read-byte (stream)
+      (io:read-byte-from-stream stream))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -870,7 +876,9 @@
          (dosequence (i "Hello, world!")
             (write-byte (char-code i) port))
          (write-byte 13 port)
-         (write-byte 10 port)))
+         (write-byte 10 port)
+         (while t
+            (write-byte (read-byte port) port))))
 
    (defun lmud.bootstrap::repl ()
       (while t
