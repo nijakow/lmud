@@ -828,17 +828,51 @@
 
    (tos:defclass io.stream:<stream> () ())
 
-   (tos:defmethod io:write-byte-to-stream ((stream lmud.classes:<port>) byte)
+   (tos:defmethod io:write-byte-to-stream ((stream lmud.classes:<port>) protocol byte)
       (lmud.int:port-write-byte stream byte))
    
-   (tos:defmethod io:read-byte-from-stream ((stream lmud.classes:<port>))
+   (tos:defmethod io:read-byte-from-stream ((stream lmud.classes:<port>) protocol)
       (lmud.int:port-read-byte stream))
    
+   (tos:defmethod io:write-char-to-stream ((stream lmud.classes:<port>) protocol char)
+      (let ((code (char-code char)))
+         (cond ((< code #x80)    (io:write-byte-to-stream stream protocol code))
+               ((< code #x800)   (io:write-byte-to-stream stream protocol (logior #xC0 (ash code -6)))
+                                 (io:write-byte-to-stream stream protocol (logior #x80 (logand code #x3F))))
+               ((< code #x10000) (io:write-byte-to-stream stream protocol (logior #xE0 (ash code -12)))
+                                 (io:write-byte-to-stream stream protocol (logior #x80 (logand (ash code -6) #x3F)))
+                                 (io:write-byte-to-stream stream protocol (logior #x80 (logand code #x3F))))
+               (t                (io:write-byte-to-stream stream protocol (logior #xF0 (ash code -18)))
+                                 (io:write-byte-to-stream stream protocol (logior #x80 (logand (ash code -12) #x3F)))
+                                 (io:write-byte-to-stream stream protocol (logior #x80 (logand (ash code -6) #x3F)))
+                                 (io:write-byte-to-stream stream protocol (logior #x80 (logand code #x3F)))))))
+   
+   (tos:defmethod io:read-char-from-stream ((stream lmud.classes:<port>) protocol)
+      (code-char
+         (let ((byte (io:read-byte-from-stream stream protocol)))
+            (cond ((< byte #x80) byte)
+                  ((< byte #xE0) (logior (ash (logand byte #x1F) 6)
+                                         (logand (io:read-byte-from-stream stream protocol) #x3F)))
+                  ((< byte #xF0) (logior (ash (logand byte #xF) 12)
+                                         (ash (logand (io:read-byte-from-stream stream protocol) #x3F) 6)
+                                         (logand (io:read-byte-from-stream stream protocol) #x3F)))
+                  ((< byte #xF8) (logior (ash (logand byte #x7) 18)
+                                         (ash (logand (io:read-byte-from-stream stream protocol) #x3F) 12)
+                                         (ash (logand (io:read-byte-from-stream stream protocol) #x3F) 6)
+                                         (logand (io:read-byte-from-stream stream protocol) #x3F)))
+                  (t (lmud.util:simple-error "Invalid UTF-8 encoding!"))))))
+
    (defun write-byte (byte stream)
-      (io:write-byte-to-stream stream byte))
+      (io:write-byte-to-stream stream nil byte))
    
    (defun read-byte (stream)
-      (io:read-byte-from-stream stream))
+      (io:read-byte-from-stream stream nil))
+   
+   (defun write-char (char stream)
+      (io:write-char-to-stream stream nil char))
+   
+   (defun read-char (stream)
+      (io:read-char-from-stream stream nil))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -873,12 +907,12 @@
    (lmud.int:on-connect
       (lambda (port)
          (lmud.dummy::%princln "New connection just came in!")
-         (dosequence (i "Hello, world!")
-            (write-byte (char-code i) port))
-         (write-byte 13 port)
-         (write-byte 10 port)
+         (dosequence (i "⍝ Hello, world!")
+            (write-char i port))
+         (write-char #\return  port)
+         (write-char #\newline port)
          (while t
-            (write-byte (read-byte port) port))))
+            (write-char (read-char port) port))))
 
    (defun lmud.bootstrap::repl ()
       (while t
