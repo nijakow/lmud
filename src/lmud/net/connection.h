@@ -50,8 +50,8 @@ struct LMud_Connections
 void LMud_Connections_Create(struct LMud_Connections* self);
 void LMud_Connections_Destroy(struct LMud_Connections* self);
 
-bool LMud_Connections_RegisterFileDescriptor(struct LMud_Connections* self, int fd);
-bool LMud_Connections_RegisterFileDescriptorOrClose(struct LMud_Connections* self, int fd);
+bool LMud_Connections_RegisterFileDescriptor(struct LMud_Connections* self, int fd, struct LMud_Connection** connection);
+bool LMud_Connections_RegisterFileDescriptorOrClose(struct LMud_Connections* self, int fd, struct LMud_Connection** connection);
 
 void LMud_Connections_RegisterOnSelector(struct LMud_Connections* self, struct LMud_Selector* selector);
 

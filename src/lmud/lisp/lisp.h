@@ -18,6 +18,7 @@ struct LMud_Constants
     LMud_Any  function;
 
     LMud_Any  custom_dispatcher_function;
+    LMud_Any  new_connection_function;
 };
 
 bool LMud_Constants_Create(struct LMud_Constants* self, struct LMud_Lisp* lisp);
@@ -27,13 +28,14 @@ void LMud_Constants_Mark(struct LMud_GC* gc, struct LMud_Constants* self);
 
 struct LMud_Lisp
 {
+    struct LMud*             mud;
     struct LMud_Objects      objects;
     struct LMud_Constants    constants;
     struct LMud_Scheduler    scheduler;
     struct LMud_InputStream  standard_input;
 };
 
-bool LMud_Lisp_Create(struct LMud_Lisp* self);
+bool LMud_Lisp_Create(struct LMud_Lisp* self, struct LMud* mud);
 void LMud_Lisp_Destroy(struct LMud_Lisp* self);
 void LMud_Lisp_Mark(struct LMud_GC* gc, struct LMud_Lisp* self);
 

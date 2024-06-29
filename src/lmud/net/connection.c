@@ -177,7 +177,7 @@ void LMud_Connections_Destroy(struct LMud_Connections* self)
     }
 }
 
-bool LMud_Connections_RegisterFileDescriptor(struct LMud_Connections* self, int fd)
+bool LMud_Connections_RegisterFileDescriptor(struct LMud_Connections* self, int fd, struct LMud_Connection** connection_location)
 {
     struct LMud_Connection*  connection;
 
@@ -189,12 +189,17 @@ bool LMud_Connections_RegisterFileDescriptor(struct LMud_Connections* self, int 
         LMud_Connection_Link(connection, &self->connections);
     }
 
+    if (connection_location != NULL)
+    {
+        *connection_location = connection;
+    }
+
     return connection != NULL;
 }
 
-bool LMud_Connections_RegisterFileDescriptorOrClose(struct LMud_Connections* self, int fd)
+bool LMud_Connections_RegisterFileDescriptorOrClose(struct LMud_Connections* self, int fd, struct LMud_Connection** connection)
 {
-    if (LMud_Connections_RegisterFileDescriptor(self, fd))
+    if (LMud_Connections_RegisterFileDescriptor(self, fd, connection))
         return true;
     else
     {

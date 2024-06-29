@@ -8,8 +8,8 @@
 bool LMud_Create(struct LMud* self)
 {
     self->running = true;
-    return LMud_Net_Create(&self->net)
-        && LMud_Lisp_Create(&self->lisp);
+    return LMud_Net_Create(&self->net, self)
+        && LMud_Lisp_Create(&self->lisp, self);
 }
 
 void LMud_Destroy(struct LMud* self)
@@ -63,6 +63,8 @@ void LMud_Banner(struct LMud* self)
 void LMud_Start(struct LMud* self)
 {
     LMud_Any  boot_function;
+
+    LMud_Net_OpenV4(&self->net, "0.0.0.0", 4242);
 
     if (LMud_Lisp_LoadFile(&self->lisp, "../boot/prelude.lisp", &boot_function)) {
         LMud_Lisp_Kickstart(&self->lisp, boot_function);

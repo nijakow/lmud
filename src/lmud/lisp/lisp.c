@@ -32,6 +32,7 @@ bool LMud_Constants_Create(struct LMud_Constants* self, struct LMud_Lisp* lisp)
     self->function = LMud_Lisp_Intern(lisp, "FUNCTION");
 
     self->custom_dispatcher_function = self->nil;
+    self->new_connection_function    = self->nil;
 
     LMud_Lisp_InstallBuiltins(lisp);
 
@@ -56,8 +57,10 @@ void LMud_Constants_Mark(struct LMud_GC* gc, struct LMud_Constants* self)
 
 
 
-bool LMud_Lisp_Create(struct LMud_Lisp* self)
+bool LMud_Lisp_Create(struct LMud_Lisp* self, struct LMud* mud)
 {
+    self->mud = mud;
+
     LMud_InputStream_CreateFromFile(&self->standard_input, stdin);
 
     return LMud_Objects_Create(&self->objects, self)
