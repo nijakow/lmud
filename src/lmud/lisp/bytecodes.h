@@ -27,4 +27,5 @@ enum LMud_Bytecode
     LMud_Bytecode_SET_UNWIND_PROTECT,
     LMud_Bytecode_BEGIN_UNWIND_PROTECT,
     LMud_Bytecode_END_UNWIND_PROTECT,
+    LMud_Bytecode_BEGIN_SIGNALHANDLER,
 };

@@ -810,78 +810,6 @@ void LMud_Compiler_WriteLabel(struct LMud_Compiler* self, LMud_CompilerLabel lab
     }
 }
 
-void LMud_Compiler_WriteJump(struct LMud_Compiler* self, LMud_CompilerLabel label)
-{
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_JUMP);
-    LMud_Compiler_WriteLabel(self, label);
-}
-
-void LMud_Compiler_WriteJumpIfNil(struct LMud_Compiler* self, LMud_CompilerLabel label)
-{
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_JUMP_IF_NIL);
-    LMud_Compiler_WriteLabel(self, label);
-}
-
-void LMud_Compiler_WriteSetUnwindProtect(struct LMud_Compiler* self, LMud_CompilerLabel protect_label)
-{
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SET_UNWIND_PROTECT);
-    LMud_Compiler_WriteLabel(self, protect_label);
-}
-
-void LMud_Compiler_WriteDisableUnwindProtect(struct LMud_Compiler* self)
-{
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SET_UNWIND_PROTECT);
-    LMud_Compiler_PushU16(self, LMud_UNWIND_PROTECT_UNDEFINED);
-}
-
-void LMud_Compiler_WriteBeginUnwindProtect(struct LMud_Compiler* self)
-{
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_BEGIN_UNWIND_PROTECT);
-    /*
-     * An unwind clause can be entered from anywhere, at any stack depth.
-     * To ensure that we don't mess up the stack, we store the stack depth
-     * that is expected by us directly in the instruction parameters,
-     * so that every time we enter an unwind clause, the stack is
-     * restored.
-     */
-    LMud_Compiler_PushU8(self, self->current_stack_depth);
-    /*
-     * Whenever an unwind-protect clause is entered, we immediately push
-     * the accumulator/values state to the stack.
-     * 
-     * In most cases, we have exactly one value in the accumulator, so
-     * the two-element configuration is optimized for that case:
-     * 
-     *     ACCU_VALUE  1   <-- TOP
-     * 
-     * This is a one-argument accumulator pushed to the stack (with 1 on top).
-     * If we have zero or more than one values, ACCU_VALUE contains a list
-     * of the values, and the topmost element is the count:
-     * 
-     *     (V1 V2 V3) 3
-     * 
-     * The rule works for both zero and more than one values, since a
-     * zero-value configuration can be represented by the empty list,
-     * which is NIL:
-     * 
-     *     ()  0
-     * i.e.:
-     *     NIL 0
-     */
-    LMud_Compiler_IncreaseStackDepth(self, 2);
-}
-
-void LMud_Compiler_WriteEndUnwindProtect(struct LMud_Compiler* self)
-{
-    /*
-     * This is the opposite operation:
-     *
-     * We restore the original state of the accumulator/values.
-     */
-    LMud_Compiler_DecreaseStackDepth(self, 2);
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_END_UNWIND_PROTECT);
-}
-
 
 void LMud_Compiler_WriteHasArgument(struct LMud_Compiler* self)
 {
@@ -1006,9 +934,81 @@ void LMud_Compiler_WriteCall(struct LMud_Compiler* self, LMud_Size arity)
     LMud_Compiler_DecreaseStackDepth(self, arity);
 }
 
+void LMud_Compiler_WriteJump(struct LMud_Compiler* self, LMud_CompilerLabel label)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_JUMP);
+    LMud_Compiler_WriteLabel(self, label);
+}
+
+void LMud_Compiler_WriteJumpIfNil(struct LMud_Compiler* self, LMud_CompilerLabel label)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_JUMP_IF_NIL);
+    LMud_Compiler_WriteLabel(self, label);
+}
+
 void LMud_Compiler_WriteReturn(struct LMud_Compiler* self)
 {
     LMud_Compiler_PushBytecode(self, LMud_Bytecode_RETURN);
+}
+
+void LMud_Compiler_WriteSetUnwindProtect(struct LMud_Compiler* self, LMud_CompilerLabel protect_label)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SET_UNWIND_PROTECT);
+    LMud_Compiler_WriteLabel(self, protect_label);
+}
+
+void LMud_Compiler_WriteDisableUnwindProtect(struct LMud_Compiler* self)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SET_UNWIND_PROTECT);
+    LMud_Compiler_PushU16(self, LMud_UNWIND_PROTECT_UNDEFINED);
+}
+
+void LMud_Compiler_WriteBeginUnwindProtect(struct LMud_Compiler* self)
+{
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_BEGIN_UNWIND_PROTECT);
+    /*
+     * An unwind clause can be entered from anywhere, at any stack depth.
+     * To ensure that we don't mess up the stack, we store the stack depth
+     * that is expected by us directly in the instruction parameters,
+     * so that every time we enter an unwind clause, the stack is
+     * restored.
+     */
+    LMud_Compiler_PushU8(self, self->current_stack_depth);
+    /*
+     * Whenever an unwind-protect clause is entered, we immediately push
+     * the accumulator/values state to the stack.
+     * 
+     * In most cases, we have exactly one value in the accumulator, so
+     * the two-element configuration is optimized for that case:
+     * 
+     *     ACCU_VALUE  1   <-- TOP
+     * 
+     * This is a one-argument accumulator pushed to the stack (with 1 on top).
+     * If we have zero or more than one values, ACCU_VALUE contains a list
+     * of the values, and the topmost element is the count:
+     * 
+     *     (V1 V2 V3) 3
+     * 
+     * The rule works for both zero and more than one values, since a
+     * zero-value configuration can be represented by the empty list,
+     * which is NIL:
+     * 
+     *     ()  0
+     * i.e.:
+     *     NIL 0
+     */
+    LMud_Compiler_IncreaseStackDepth(self, 2);
+}
+
+void LMud_Compiler_WriteEndUnwindProtect(struct LMud_Compiler* self)
+{
+    /*
+     * This is the opposite operation:
+     *
+     * We restore the original state of the accumulator/values.
+     */
+    LMud_Compiler_DecreaseStackDepth(self, 2);
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_END_UNWIND_PROTECT);
 }
 
 

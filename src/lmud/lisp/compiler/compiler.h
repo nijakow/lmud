@@ -186,12 +186,6 @@ void      LMud_Compiler_PushConstant(struct LMud_Compiler* self, LMud_Any consta
 bool LMud_Compiler_OpenLabel(struct LMud_Compiler* self, LMud_CompilerLabel* label);
 void LMud_Compiler_CloseLabel(struct LMud_Compiler* self, LMud_CompilerLabel label);
 void LMud_Compiler_PlaceLabel(struct LMud_Compiler* self, LMud_CompilerLabel label);
-void LMud_Compiler_WriteJump(struct LMud_Compiler* self, LMud_CompilerLabel label);
-void LMud_Compiler_WriteJumpIfNil(struct LMud_Compiler* self, LMud_CompilerLabel label);
-void LMud_Compiler_WriteSetUnwindProtect(struct LMud_Compiler* self, LMud_CompilerLabel protect_label);
-void LMud_Compiler_WriteDisableUnwindProtect(struct LMud_Compiler* self);
-void LMud_Compiler_WriteBeginUnwindProtect(struct LMud_Compiler* self);
-void LMud_Compiler_WriteEndUnwindProtect(struct LMud_Compiler* self);
 
 bool LMud_Compiler_WriteLoadRegister(struct LMud_Compiler* self, struct LMud_Register* reg);
 bool LMud_Compiler_WriteStoreRegister(struct LMud_Compiler* self, struct LMud_Register* reg);
@@ -211,6 +205,14 @@ void LMud_Compiler_WriteLoad(struct LMud_Compiler* self, LMud_Size depth, LMud_S
 void LMud_Compiler_WriteStore(struct LMud_Compiler* self, LMud_Size depth, LMud_Size index);
 void LMud_Compiler_WritePush(struct LMud_Compiler* self);
 void LMud_Compiler_WriteCall(struct LMud_Compiler* self, LMud_Size arity);
+void LMud_Compiler_WriteJump(struct LMud_Compiler* self, LMud_CompilerLabel label);
+void LMud_Compiler_WriteJumpIfNil(struct LMud_Compiler* self, LMud_CompilerLabel label);
+void LMud_Compiler_WriteReturn(struct LMud_Compiler* self);
+void LMud_Compiler_WriteSetUnwindProtect(struct LMud_Compiler* self, LMud_CompilerLabel protect_label);
+void LMud_Compiler_WriteDisableUnwindProtect(struct LMud_Compiler* self);
+void LMud_Compiler_WriteBeginUnwindProtect(struct LMud_Compiler* self);
+void LMud_Compiler_WriteEndUnwindProtect(struct LMud_Compiler* self);
+void LMud_Compiler_WriteBeginSignalHandler(struct LMud_Compiler* self);
 
 void LMud_Compiler_Compile(struct LMud_Compiler* self, LMud_Any expression);
 void LMud_Compiler_CompileExpressions(struct LMud_Compiler* self, LMud_Any expressions);
