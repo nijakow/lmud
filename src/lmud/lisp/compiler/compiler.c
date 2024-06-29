@@ -486,6 +486,7 @@ void LMud_Compiler_BeginUnwindProtect(struct LMud_Compiler* self, struct LMud_Un
     LMud_Compiler_PushScope(self);
     LMud_Compiler_OpenLabel(self, &cookie->unwind_protect_label);
     LMud_Compiler_OpenLabel(self, &cookie->skip_label);
+    LMud_Compiler_WriteSetUnwindProtect(self, cookie->unwind_protect_label);
     LMud_Compiler_PushUnwindProtectLabel(self, cookie->unwind_protect_label);
 }
 

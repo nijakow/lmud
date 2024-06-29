@@ -92,6 +92,8 @@ bool      LMud_Frame_PickKeywordArgument(struct LMud_Frame* self, LMud_Any key, 
 LMud_Any LMud_Frame_GetRegister(struct LMud_Frame* self, LMud_Size index);
 void     LMud_Frame_SetRegister(struct LMud_Frame* self, LMud_Size index, LMud_Any value);
 
+void      LMud_Frame_SetInstructionPointer(struct LMud_Frame* self, uint16_t value);
+
 void      LMud_Frame_SetStackPointer(struct LMud_Frame* self, LMud_Size offset);
 void      LMud_Frame_Push(struct LMud_Frame* self, LMud_Any value);
 LMud_Any  LMud_Frame_Pop(struct LMud_Frame* self);

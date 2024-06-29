@@ -20,25 +20,27 @@ void LMud_FiberQueue_AddFiber(struct LMud_FiberQueue* self, struct LMud_Fiber* f
 
 struct LMud_Fiber
 {
-    struct LMud_Lisp*      lisp;
+    struct LMud_Lisp*              lisp;
 
-    struct LMud_Fiber**    prev;
-    struct LMud_Fiber*     next;
+    struct LMud_Fiber**            prev;
+    struct LMud_Fiber*             next;
 
-    struct LMud_Fiber**    queue_prev;
-    struct LMud_Fiber*     queue_next;
+    struct LMud_Fiber**            queue_prev;
+    struct LMud_Fiber*             queue_next;
 
-    struct LMud_Frame*     top;
-    char*                  stack;
-    char*                  stack_roof;
-    char*                  stack_pointer;
+    struct LMud_Frame*             top;
+    char*                          stack;
+    char*                          stack_roof;
+    char*                          stack_pointer;
 
-    LMud_Size              accumulator_count;
-    LMud_Any               accumulator[LMud_Fiber_MAX_ACCUMULATORS];
+    LMud_Size                      accumulator_count;
+    LMud_Any                       accumulator[LMud_Fiber_MAX_ACCUMULATORS];
 
-    struct LMud_FrameList  floating_frames;
+    struct LMud_FrameList          floating_frames;
 
-    bool                   terminated;
+    enum LMud_ExecutionResumption  execution_mode;
+
+    bool                           terminated;
 };
 
 void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp);
@@ -56,6 +58,7 @@ bool LMud_Fiber_HasTerminated(struct LMud_Fiber* self);
 void LMud_Fiber_Terminate(struct LMud_Fiber* self);
 
 enum LMud_ExecutionResumption LMud_Fiber_GetExecutionResumptionMode(struct LMud_Fiber* self);
+void                          LMud_Fiber_SetExecutionResumptionMode(struct LMud_Fiber* self, enum LMud_ExecutionResumption mode);
 
 bool LMud_Fiber_HasFrames(struct LMud_Fiber* self);
 
@@ -74,5 +77,7 @@ void LMud_Fiber_EnterThunk(struct LMud_Fiber* self, LMud_Any function);
 void LMud_Fiber_PerformCall(struct LMud_Fiber* self, LMud_Any function, LMud_Size argument_count);
 void LMud_Fiber_PerformReturn(struct LMud_Fiber* self);
 void LMud_Fiber_PerformError(struct LMud_Fiber* self, const char* message);
+
+void LMud_Fiber_SignalAndUnwind(struct LMud_Fiber* self);
 
 void LMud_Fiber_Tick(struct LMud_Fiber* self);

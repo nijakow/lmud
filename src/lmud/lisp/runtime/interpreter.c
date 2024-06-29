@@ -504,6 +504,11 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 LMud_Frame_Push(self->fiber->top, LMud_Any_FromInteger(LMud_Fiber_GetExecutionResumptionMode(self->fiber)));
 
                 /*
+                 * Now that the execution resumption mode is preserved, we can switch to normal mode again.
+                 */
+                LMud_Fiber_SetExecutionResumptionMode(self->fiber, LMud_ExecutionResumption_NORMAL);
+
+                /*
                  * Then, we push the accumulator/values state.
                  */
                 if (LMud_Fiber_ValueCount(self->fiber) == 1) {
@@ -584,6 +589,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
                 switch (resumption) {
                     case LMud_ExecutionResumption_NORMAL:
+                    case LMud_ExecutionResumption_SIGNAL:
                         /*
                          * We set the values, and continue our normal execution.
                          */

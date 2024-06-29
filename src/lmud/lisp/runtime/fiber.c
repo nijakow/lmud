@@ -50,7 +50,8 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp)
 
     LMud_FrameList_Create(&self->floating_frames);
 
-    self->terminated = false;
+    self->execution_mode = LMud_ExecutionResumption_NORMAL;
+    self->terminated     = false;
 }
 
 void LMud_Fiber_Destroy(struct LMud_Fiber* self)
@@ -134,8 +135,12 @@ void LMud_Fiber_Terminate(struct LMud_Fiber* self)
 
 enum LMud_ExecutionResumption LMud_Fiber_GetExecutionResumptionMode(struct LMud_Fiber* self)
 {
-    (void) self;
-    return LMud_ExecutionResumption_NORMAL;
+    return self->execution_mode;
+}
+
+void LMud_Fiber_SetExecutionResumptionMode(struct LMud_Fiber* self, enum LMud_ExecutionResumption mode)
+{
+    self->execution_mode = mode;
 }
 
 bool LMud_Fiber_HasFrames(struct LMud_Fiber* self)
@@ -301,6 +306,7 @@ void LMud_Fiber_Enter(struct LMud_Fiber* self, LMud_Any function, LMud_Any* argu
 
 void LMud_Fiber_EnterThunk(struct LMud_Fiber* self, LMud_Any function)
 {
+    LMud_Fiber_SetExecutionResumptionMode(self, LMud_ExecutionResumption_NORMAL);
     LMud_Fiber_Enter(self, function, NULL, 0);
 }
 
@@ -318,6 +324,24 @@ void LMud_Fiber_PerformError(struct LMud_Fiber* self, const char* message)
 {
     printf(LMud_VT100_Italic "; " LMud_VT100_Red LMud_VT100_Blink "Error: %s" LMud_VT100_Normal "\n", message);
     LMud_Fiber_Unwind(self);
+}
+
+void LMud_Fiber_SignalAndUnwind(struct LMud_Fiber* self)
+{
+    LMud_Fiber_SetExecutionResumptionMode(self, LMud_ExecutionResumption_SIGNAL);
+
+    while (self->top != NULL)
+    {
+        printf("[Note]: Unwinding frame %p.\n", self->top);
+        if (self->top->unwind_protect != LMud_UNWIND_PROTECT_UNDEFINED)
+        {
+            printf("[Note]: Found an unwind-protect frame: %p\n", self->top);
+            LMud_Frame_SetInstructionPointer(self->top, self->top->unwind_protect);
+            break;
+        }
+
+        LMud_Fiber_PopFrame(self);
+    }
 }
 
 

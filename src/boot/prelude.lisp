@@ -821,7 +821,7 @@
       (%signal-handler (e)
             (progn (lmud.dummy::%princ "Look ma, no hands!")
                    (lmud.dummy::%terpri)
-                   (/ 1 0))
+                   (lmud.int:signal 42))
             (lmud.dummy::%princ "Look ma, still no hands!")
             (lmud.dummy::%terpri)))
 
