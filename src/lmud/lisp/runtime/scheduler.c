@@ -80,6 +80,21 @@ struct LMud_Fiber* LMud_Scheduler_Kickstart(struct LMud_Scheduler* self, LMud_An
     return fiber;
 }
 
+struct LMud_Fiber* LMud_Scheduler_KickstartWithArgs(struct LMud_Scheduler* self, LMud_Any function, LMud_Any* arguments, LMud_Size argument_count)
+{
+    struct LMud_Fiber*  fiber;
+
+    fiber = LMud_Scheduler_SpawnFiber(self);
+
+    if (fiber != NULL)
+    {
+        LMud_Fiber_Enter(fiber, function, arguments, argument_count);
+        LMud_Fiber_MoveToQueue(fiber, &self->running_fibers);
+    }
+
+    return fiber;
+}
+
 bool LMud_Scheduler_BlockAndRunThunk(struct LMud_Scheduler* self, LMud_Any thunk, LMud_Any* result)
 {
     struct LMud_Fiber*  fiber;

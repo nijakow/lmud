@@ -833,6 +833,10 @@
                   (list e e e))
          (lmud.dummy::%princln "Second passthrough!")))
 
+   (lmud.int:on-connect
+      (lambda (port)
+         (lmud.dummy::%princln "New connection just came in!")))
+
    (defun lmud.bootstrap::repl ()
       (while t
          (lmud.dummy::%princ "⍝ ")

@@ -3,6 +3,5 @@
 
 void LMud_NotifyIncomingConnection(struct LMud* self, struct LMud_Connection* connection)
 {
-    (void) self;
-    (void) connection;
+    LMud_Lisp_KickstartNewConnectionTask(&self->lisp, connection);
 }

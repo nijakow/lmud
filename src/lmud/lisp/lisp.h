@@ -76,6 +76,7 @@ bool     LMud_Lisp_Truthy(struct LMud_Lisp* self, LMud_Any value);
 
 LMud_Any LMud_Lisp_CustomDispatcherFunction(struct LMud_Lisp* self);
 void     LMud_Lisp_SetCustomDispatcherFunction(struct LMud_Lisp* self, LMud_Any value);
+void     LMud_Lisp_SetNewConnectionFunction(struct LMud_Lisp* self, LMud_Any value);
 
 LMud_Any LMud_Lisp_MakeArray(struct LMud_Lisp* self, LMud_Size size, LMud_Any fill);
 LMud_Any LMud_Lisp_MakeArray_FromData(struct LMud_Lisp* self, LMud_Size size, LMud_Any* data);
@@ -133,5 +134,6 @@ void LMud_Lisp_PeriodicInterrupt(struct LMud_Lisp* self);
 void LMud_Lisp_Tick(struct LMud_Lisp* self);
 
 bool LMud_Lisp_Kickstart(struct LMud_Lisp* self, LMud_Any function);
+bool LMud_Lisp_KickstartNewConnectionTask(struct LMud_Lisp* self, struct LMud_Connection* connection);
 
 bool LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename, LMud_Any* result);

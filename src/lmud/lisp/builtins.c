@@ -986,6 +986,16 @@ void LMud_Builtin_Signal(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
     LMud_Fiber_SignalAndUnwind(fiber);
 }
 
+void LMud_Builtin_OnConnect(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Lisp_SetNewConnectionFunction(fiber->lisp, arguments[0]);
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
+}
+
 
 void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
 {
@@ -1063,6 +1073,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "GARBAGE-COLLECT", LMud_Builtin_GarbageCollect);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "KICKSTART-TASK", LMud_Builtin_KickstartTask);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "SIGNAL", LMud_Builtin_Signal);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "ON-CONNECT", LMud_Builtin_OnConnect);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRIN1", LMud_Builtin_Prin1);
