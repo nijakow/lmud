@@ -46,6 +46,14 @@ void LMud_ConnectionRef_Kill(struct LMud_ConnectionRef* self)
 }
 
 
+static void LMud_Connection_KillRefs(struct LMud_Connection* self)
+{
+    while (self->refs != NULL)
+    {
+        LMud_ConnectionRef_Kill(self->refs);
+    }
+}
+
 void LMud_Connection_Create(struct LMud_Connection* self, int fd)
 {
     self->fd   = fd;
@@ -62,6 +70,7 @@ void LMud_Connection_Destroy(struct LMud_Connection* self)
 {
     close(self->fd);
     LMud_Connection_Unlink(self);
+    LMud_Connection_KillRefs(self);
     LMud_Ringbuffer_Destroy(&self->inbuf);
     LMud_Ringbuffer_Destroy(&self->outbuf);
 }
