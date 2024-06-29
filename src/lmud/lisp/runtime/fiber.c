@@ -29,9 +29,10 @@ void LMud_FiberQueue_AddFiber(struct LMud_FiberQueue* self, struct LMud_Fiber* f
 }
 
 
-void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp)
+void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct LMud_Scheduler* scheduler)
 {
     self->lisp          = lisp;
+    self->scheduler     = scheduler;
 
     self->prev          = NULL;
     self->next          = NULL;
@@ -50,8 +51,8 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp)
 
     LMud_FrameList_Create(&self->floating_frames);
 
+    self->state          = LMud_FiberState_CREATED;
     self->execution_mode = LMud_ExecutionResumption_NORMAL;
-    self->terminated     = false;
 }
 
 void LMud_Fiber_Destroy(struct LMud_Fiber* self)
@@ -123,14 +124,40 @@ void LMud_Fiber_MoveToQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* que
 }
 
 
-bool LMud_Fiber_HasTerminated(struct LMud_Fiber* self)
+enum LMud_FiberState LMud_Fiber_GetState(struct LMud_Fiber* self)
 {
-    return self->terminated;
+    return self->state;
 }
 
-void LMud_Fiber_Terminate(struct LMud_Fiber* self)
+static void LMud_Fiber_SetState(struct LMud_Fiber* self, enum LMud_FiberState state)
 {
-    self->terminated = true;
+    self->state = state;
+}
+
+bool LMud_Fiber_HasTerminated(struct LMud_Fiber* self)
+{
+    return LMud_Fiber_GetState(self) == LMud_FiberState_TERMINATED;
+}
+
+void LMud_Fiber_ControlRestartWithValue(struct LMud_Fiber* self, LMud_Any value)
+{
+    LMud_Fiber_SetAccumulator(self, value);
+    LMud_Fiber_SetState(self, LMud_FiberState_RUNNING);
+}
+
+void LMud_Fiber_ControlWaitOnQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* queue)
+{
+    LMud_Fiber_MoveToQueue(self, queue);
+    LMud_Fiber_SetState(self, LMud_FiberState_WAITING);
+}
+
+void LMud_Fiber_ControlTerminate(struct LMud_Fiber* self)
+{
+    /*
+     * TODO: Completely unwind the stack and run all unwind-protects.
+     */
+    LMud_Fiber_SetState(self, LMud_FiberState_TERMINATED);
+    LMud_Fiber_UnlinkQueue(self);
 }
 
 enum LMud_ExecutionResumption LMud_Fiber_GetExecutionResumptionMode(struct LMud_Fiber* self)

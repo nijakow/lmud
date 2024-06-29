@@ -50,7 +50,7 @@ struct LMud_Fiber* LMud_Scheduler_SpawnFiber(struct LMud_Scheduler* self)
 
     if (fiber != NULL)
     {
-        LMud_Fiber_Create(fiber, self->lisp);
+        LMud_Fiber_Create(fiber, self->lisp, self);
         LMud_Fiber_Link(fiber, &self->fibers);
     }
 

@@ -155,7 +155,7 @@ struct LMud_Frame* LMud_Interpreter_LexicalFrame(struct LMud_Interpreter* self, 
 
 #define TERMINATE \
     { \
-        LMud_Fiber_Terminate(self->fiber); \
+        LMud_Fiber_ControlTerminate(self->fiber); \
         goto end; \
     }
 

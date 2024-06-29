@@ -18,9 +18,20 @@ void LMud_FiberQueue_Destroy(struct LMud_FiberQueue* self);
 void LMud_FiberQueue_AddFiber(struct LMud_FiberQueue* self, struct LMud_Fiber* fiber);
 
 
+
+enum LMud_FiberState
+{
+    LMud_FiberState_CREATED,
+    LMud_FiberState_RUNNING,
+    LMud_FiberState_WAITING,
+    LMud_FiberState_TERMINATED
+};
+
+
 struct LMud_Fiber
 {
     struct LMud_Lisp*              lisp;
+    struct LMud_Scheduler*         scheduler;
 
     struct LMud_Fiber**            prev;
     struct LMud_Fiber*             next;
@@ -38,12 +49,11 @@ struct LMud_Fiber
 
     struct LMud_FrameList          floating_frames;
 
+    enum LMud_FiberState           state;
     enum LMud_ExecutionResumption  execution_mode;
-
-    bool                           terminated;
 };
 
-void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp);
+void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct LMud_Scheduler* scheduler);
 void LMud_Fiber_Destroy(struct LMud_Fiber* self);
 void LMud_Fiber_Mark(struct LMud_GC* gc, struct LMud_Fiber* self);
 
@@ -54,8 +64,12 @@ void LMud_Fiber_LinkQueue(struct LMud_Fiber* self, struct LMud_Fiber** list);
 void LMud_Fiber_UnlinkQueue(struct LMud_Fiber* self);
 void LMud_Fiber_MoveToQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* queue);
 
+enum LMud_FiberState LMud_Fiber_GetState(struct LMud_Fiber* self);
 bool LMud_Fiber_HasTerminated(struct LMud_Fiber* self);
-void LMud_Fiber_Terminate(struct LMud_Fiber* self);
+
+void LMud_Fiber_ControlWaitOnQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* queue);
+void LMud_Fiber_ControlRestartWithValue(struct LMud_Fiber* self, LMud_Any value);
+void LMud_Fiber_ControlTerminate(struct LMud_Fiber* self);
 
 enum LMud_ExecutionResumption LMud_Fiber_GetExecutionResumptionMode(struct LMud_Fiber* self);
 void                          LMud_Fiber_SetExecutionResumptionMode(struct LMud_Fiber* self, enum LMud_ExecutionResumption mode);

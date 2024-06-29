@@ -62,6 +62,8 @@ void LMud_Connection_Create(struct LMud_Connection* self, int fd)
     self->next = NULL;
     self->refs = NULL;
 
+    LMud_FiberQueue_Create(&self->waiting_fibers);
+
     LMud_Ringbuffer_Create(&self->inbuf,  4096);
     LMud_Ringbuffer_Create(&self->outbuf, 4096);
 }
@@ -71,6 +73,7 @@ void LMud_Connection_Destroy(struct LMud_Connection* self)
     close(self->fd);
     LMud_Connection_Unlink(self);
     LMud_Connection_KillRefs(self);
+    LMud_FiberQueue_Destroy(&self->waiting_fibers); // TODO, FIXME, XXX: What shall we do with the drunken fiber? ;-)
     LMud_Ringbuffer_Destroy(&self->inbuf);
     LMud_Ringbuffer_Destroy(&self->outbuf);
 }
@@ -105,6 +108,42 @@ void LMud_Connection_RegisterOnSelector(struct LMud_Connection* self, struct LMu
     LMud_Selector_AddExcept(selector, self->fd);
 }
 
+
+static void LMud_Connection_ReleaseFibers(struct LMud_Connection* self, char byte)
+{
+    while (self->waiting_fibers.fibers != NULL)
+    {
+        LMud_Fiber_ControlRestartWithValue(self->waiting_fibers.fibers, LMud_Any_FromInteger(byte));
+    }
+}
+
+static void LMud_Connection_MaybeReleaseFibers(struct LMud_Connection* self)
+{
+    char  byte;
+
+    if (LMud_Ringbuffer_ReadByte(&self->inbuf, &byte))
+    {
+        LMud_Connection_ReleaseFibers(self, byte);
+    }
+}
+
+void LMud_Connection_AddWaitingFiber(struct LMud_Connection* self, struct LMud_Fiber* fiber)
+{
+    LMud_Fiber_ControlWaitOnQueue(fiber, &self->waiting_fibers);
+}
+
+void LMud_Connection_ReadByte(struct LMud_Connection* self, struct LMud_Fiber* fiber)
+{
+    char  byte;
+
+    if (LMud_Ringbuffer_ReadByte(&self->inbuf, &byte)) {
+        LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(byte));
+    } else {
+        LMud_Connection_AddWaitingFiber(self, fiber);
+    }
+}
+
+
 void LMud_Connection_HandleError(struct LMud_Connection* self)
 {
     (void) self;
@@ -130,6 +169,7 @@ void LMud_Connection_Tick(struct LMud_Connection* self, struct LMud_Selector* se
             LMud_Connection_HandleDisconnect(self);
         } else {
             LMud_Ringbuffer_WriteBytes(&self->inbuf, buffer, ssize);
+            LMud_Connection_MaybeReleaseFibers(self);
         }
     }
 

@@ -3,6 +3,7 @@
 
 #include <lmud/defs.h>
 #include <lmud/net/selector.h>
+#include <lmud/lisp/runtime/fiber.h>
 #include <lmud/util/ringbuffer.h>
 
 struct LMud_ConnectionRef
@@ -29,8 +30,10 @@ struct LMud_Connection
     struct LMud_Connection*     next;
     struct LMud_ConnectionRef*  refs;
 
-    struct LMud_Ringbuffer    inbuf;
-    struct LMud_Ringbuffer    outbuf;
+    struct LMud_FiberQueue      waiting_fibers;
+
+    struct LMud_Ringbuffer      inbuf;
+    struct LMud_Ringbuffer      outbuf;
 };
 
 void LMud_Connection_Create(struct LMud_Connection* self, int fd);
@@ -40,6 +43,9 @@ void LMud_Connection_Link(struct LMud_Connection* self, struct LMud_Connection**
 void LMud_Connection_Unlink(struct LMud_Connection* self);
 
 void LMud_Connection_RegisterOnSelector(struct LMud_Connection* self, struct LMud_Selector* selector);
+
+void LMud_Connection_AddWaitingFiber(struct LMud_Connection* self, struct LMud_Fiber* fiber);
+void LMud_Connection_ReadByte(struct LMud_Connection* self, struct LMud_Fiber* fiber);
 
 
 struct LMud_Connections
