@@ -4,12 +4,55 @@
 #include "connection.h"
 
 
+void LMud_ConnectionRef_Create(struct LMud_ConnectionRef* self, struct LMud_Connection* connection)
+{
+    self->connection = connection;
+    self->prev       = NULL;
+    self->next       = NULL;
+
+    LMud_ConnectionRef_Link(self, &connection->refs);
+}
+
+void LMud_ConnectionRef_Destroy(struct LMud_ConnectionRef* self)
+{
+    LMud_ConnectionRef_Unlink(self);
+}
+
+void LMud_ConnectionRef_Link(struct LMud_ConnectionRef* self, struct LMud_ConnectionRef** list)
+{
+    LMud_ConnectionRef_Unlink(self);
+
+    self->prev =  list;
+    self->next = *list;
+    if (*list != NULL)
+        (*list)->prev = &self->next;
+    *list = self;
+}
+
+void LMud_ConnectionRef_Unlink(struct LMud_ConnectionRef* self)
+{
+    if (self->prev != NULL)
+        *self->prev = self->next;
+    if (self->next != NULL)
+        self->next->prev = self->prev;
+    self->prev = NULL;
+    self->next = NULL;
+}
+
+void LMud_ConnectionRef_Kill(struct LMud_ConnectionRef* self)
+{
+    self->connection = NULL;
+    LMud_ConnectionRef_Unlink(self);
+}
+
+
 void LMud_Connection_Create(struct LMud_Connection* self, int fd)
 {
     self->fd   = fd;
 
     self->prev = NULL;
     self->next = NULL;
+    self->refs = NULL;
 
     LMud_Ringbuffer_Create(&self->inbuf,  4096);
     LMud_Ringbuffer_Create(&self->outbuf, 4096);
@@ -40,6 +83,8 @@ void LMud_Connection_Unlink(struct LMud_Connection* self)
         *self->prev = self->next;
     if (self->next != NULL)
         self->next->prev = self->prev;
+    self->prev = NULL;
+    self->next = NULL;
 }
 
 void LMud_Connection_RegisterOnSelector(struct LMud_Connection* self, struct LMud_Selector* selector)

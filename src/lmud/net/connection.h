@@ -5,12 +5,29 @@
 #include <lmud/net/selector.h>
 #include <lmud/util/ringbuffer.h>
 
+struct LMud_ConnectionRef
+{
+    struct LMud_Connection*      connection;
+    struct LMud_ConnectionRef**  prev;
+    struct LMud_ConnectionRef*   next;
+};
+
+void LMud_ConnectionRef_Create(struct LMud_ConnectionRef* self, struct LMud_Connection* connection);
+void LMud_ConnectionRef_Destroy(struct LMud_ConnectionRef* self);
+
+void LMud_ConnectionRef_Link(struct LMud_ConnectionRef* self, struct LMud_ConnectionRef** list);
+void LMud_ConnectionRef_Unlink(struct LMud_ConnectionRef* self);
+
+void LMud_ConnectionRef_Kill(struct LMud_ConnectionRef* self);
+
+
 struct LMud_Connection
 {
     int  fd;
 
-    struct LMud_Connection**  prev;
-    struct LMud_Connection*   next;
+    struct LMud_Connection**    prev;
+    struct LMud_Connection*     next;
+    struct LMud_ConnectionRef*  refs;
 
     struct LMud_Ringbuffer    inbuf;
     struct LMud_Ringbuffer    outbuf;
