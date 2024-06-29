@@ -251,7 +251,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
-            case LMud_Bytecode_CONSTANT:
+            case LMud_Bytecode_LOAD_CONSTANT:
             {
                 LMud_Interpreter_SetAccu(
                     self,
@@ -260,7 +260,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
-            case LMud_Bytecode_LAMBDA:
+            case LMud_Bytecode_LOAD_LAMBDA:
             {
                 value = LMud_InstructionStream_NextConstant(&stream);
 
@@ -290,7 +290,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
-            case LMud_Bytecode_SYMBOL_VARIABLE_LOAD:
+            case LMud_Bytecode_LOAD_SYMBOL_VARIABLE:
             {
                 value = LMud_InstructionStream_NextConstant(&stream);
 
@@ -311,7 +311,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
-            case LMud_Bytecode_SYMBOL_VARIABLE_STORE:
+            case LMud_Bytecode_STORE_SYMBOL_VARIABLE:
             {
                 value = LMud_InstructionStream_NextConstant(&stream);
 
@@ -330,7 +330,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
-            case LMud_Bytecode_SYMBOL_FUNCTION_LOAD:
+            case LMud_Bytecode_LOAD_SYMBOL_FUNCTION:
             {
                 value = LMud_InstructionStream_NextConstant(&stream);
 
@@ -351,7 +351,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
-            case LMud_Bytecode_SYMBOL_FUNCTION_STORE:
+            case LMud_Bytecode_STORE_SYMBOL_FUNCTION:
             {
                 value = LMud_InstructionStream_NextConstant(&stream);
 
@@ -370,7 +370,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
-            case LMud_Bytecode_LEXICAL_LOAD:
+            case LMud_Bytecode_LOAD_REGISTER_LEXICAL:
             {
                 lexical = LMud_Interpreter_LexicalFrame(self, LMud_InstructionStream_NextU8(&stream));
 
@@ -382,7 +382,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
-            case LMud_Bytecode_LEXICAL_STORE:
+            case LMud_Bytecode_STORE_REGISTER_LEXICAL:
             {
                 lexical = LMud_Interpreter_LexicalFrame(self, LMud_InstructionStream_NextU8(&stream));
 

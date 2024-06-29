@@ -851,26 +851,26 @@ void LMud_Compiler_WriteMultipleValueList(struct LMud_Compiler* self)
 
 void LMud_Compiler_WriteConstant(struct LMud_Compiler* self, LMud_Any constant)
 {
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_CONSTANT);
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_LOAD_CONSTANT);
     LMud_Compiler_PushConstant(self, constant);
 }
 
 void LMud_Compiler_WriteLambda(struct LMud_Compiler* self, LMud_Any lambda)
 {
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_LAMBDA);
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_LOAD_LAMBDA);
     LMud_Compiler_PushConstant(self, lambda);
 }
 
 
 void LMud_Compiler_WriteSymbolVariableLoad(struct LMud_Compiler* self, LMud_Any symbol)
 {
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SYMBOL_VARIABLE_LOAD);
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_LOAD_SYMBOL_VARIABLE);
     LMud_Compiler_PushConstant(self, symbol);
 }
 
 void LMud_Compiler_WriteSymbolVariableStore(struct LMud_Compiler* self, LMud_Any symbol)
 {
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SYMBOL_VARIABLE_STORE);
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_STORE_SYMBOL_VARIABLE);
     LMud_Compiler_PushConstant(self, symbol);
 }
 
@@ -890,13 +890,13 @@ void LMud_Compiler_WriteSymbolVariable(struct LMud_Compiler* self, LMud_Any symb
 
 void LMud_Compiler_WriteSymbolFunctionLoad(struct LMud_Compiler* self, LMud_Any symbol)
 {
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SYMBOL_FUNCTION_LOAD);
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_LOAD_SYMBOL_FUNCTION);
     LMud_Compiler_PushConstant(self, symbol);
 }
 
 void LMud_Compiler_WriteSymbolFunctionStore(struct LMud_Compiler* self, LMud_Any symbol)
 {
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SYMBOL_FUNCTION_STORE);
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_STORE_SYMBOL_FUNCTION);
     LMud_Compiler_PushConstant(self, symbol);
 }
 
@@ -918,7 +918,7 @@ void LMud_Compiler_WriteLoad(struct LMud_Compiler* self, LMud_Size depth, LMud_S
 {
     if (depth > 0)
         LMud_Compiler_EnableLexicalStuff(self);
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_LEXICAL_LOAD);
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_LOAD_REGISTER_LEXICAL);
     LMud_Compiler_PushU8(self, depth);
     LMud_Compiler_PushU8(self, index);
 }
@@ -927,7 +927,7 @@ void LMud_Compiler_WriteStore(struct LMud_Compiler* self, LMud_Size depth, LMud_
 {
     if (depth > 0)
         LMud_Compiler_EnableLexicalStuff(self);
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_LEXICAL_STORE);
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_STORE_REGISTER_LEXICAL);
     LMud_Compiler_PushU8(self, depth);
     LMud_Compiler_PushU8(self, index);
 }
