@@ -1210,7 +1210,7 @@
          (io.printer:print-expression stream meta (car list))
          (setq list (cdr list)))
       (unless (null list)
-         (io.printer:write-string stream meta ". ")
+         (io.printer:write-string stream meta " . ")
          (io.printer:print-expression stream meta list)))
 
    (defun io.printer:print-list (stream meta list)
@@ -1267,17 +1267,20 @@
    ;;;    REPL
    ;;;
 
-   (lmud.int:on-connect
-      (lambda (port)
-         (while t
-            (princ "⍝ " port)
-            (let ((value (io.reader:read port)))
-               (lmud.dummy::%prin1 value)
-               (lmud.dummy::%terpri)
-               (prin1 value port)
+   (defun lmud.bootstrap::repl (port)
+      (while t
+         (princ "⍝ " port)
+         (let ((expr (read port)))
+            (dolist (e (multiple-value-list (eval expr)))
+               (princ "  " port)
+               (prin1 e port)
                (terpri port)))))
 
-   (defun lmud.bootstrap::repl ()
+   (lmud.int:on-connect
+      (lambda (port)
+         (lmud.bootstrap::repl port)))
+
+   (defun lmud.bootstrap::console-repl ()
       (while t
          (lmud.dummy::%princ "⍝ ")
          (let ((expr (lmud.dummy::%read)))
@@ -1287,5 +1290,5 @@
                (lmud.dummy::%terpri)))))
    ))
 
-   (lmud.bootstrap::repl)
+   (lmud.bootstrap::console-repl)
 )
