@@ -360,6 +360,18 @@
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
+   ;;;    Math
+   ;;;
+
+   (defun 1+ (n) (+ n 1))
+   (defun 1- (n) (- n 1))
+
+   (defun evenp (n) (= (mod n 2) 0))
+   (defun oddp  (n) (not (evenp n)))
+
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
    ;;;    Characters
    ;;;
 
@@ -916,6 +928,9 @@
 
    (tos:defclass io.stream:<stream> () ())
 
+   (defun io:the-stream (stream)
+      (or stream (lmud.int:current-port)))
+
    (tos:defmethod io:write-byte-to-stream ((stream lmud.classes:<port>) protocol byte)
       (lmud.int:port-write-byte stream byte))
    
@@ -1247,6 +1262,14 @@
          (when (< i (- (length vector) 1))
             (io.printer:write-char stream meta #\Space)))
       (io.printer:write-string stream meta ")"))
+   
+   (defun io.printer:print-bytes (stream meta vector)
+      (io.printer:write-string stream meta "#B(")
+      (dotimes (i (length vector))
+         (io.printer:print-expression stream meta (aref vector i))
+         (when (< i (- (length vector) 1))
+            (io.printer:write-char stream meta #\Space)))
+      (io.printer:write-string stream meta ")"))
 
    (defun io.printer:print-expression (stream meta e)
       (cond ((symbolp            e) (io.printer:print-symbol    stream meta e))
@@ -1255,6 +1278,7 @@
             ((characterp         e) (io.printer:print-character stream meta e))
             ((stringp            e) (io.printer:print-string    stream meta e))
             ((vectorp            e) (io.printer:print-vector    stream meta e))
+            ((lmud.int:bytesp    e) (io.printer:print-bytes     stream meta e))
             ((lmud.int:ratiop    e) (io.printer:print-ratio     stream meta e))
             ((lmud.int:%customp  e) (io.printer:write-string    stream meta "#<CUSTOM>"))
             ((lmud.int:machine-function-p)
@@ -1265,6 +1289,8 @@
              (io.printer:write-string stream meta "#<BYTE-COMPILED-FUNCTION>"))
             ((lmud.int:closure-p e)
              (io.printer:write-string stream meta "#<CLOSURE>"))
+            ((lmud.int:portp e)
+             (io.printer:write-string stream meta "#<PORT>"))
             (t (io.printer:write-string stream meta "#<UNKNOWN>"))))
 
    (defun io.printer:prin1 (stream e)
@@ -1276,20 +1302,50 @@
    (defun io.printer:terpri (stream)
       (io.printer:princ stream #\Newline))
    
-   (defun prin1 (e stream)
-      (io.printer:prin1 stream e))
+   (defun prin1 (e &optional stream)
+      (io.printer:prin1 (io:the-stream stream) e))
    
-   (defun princ (e stream)
-      (io.printer:princ stream e))
+   (defun princ (e &optional stream)
+      (io.printer:princ (io:the-stream stream) e))
    
-   (defun terpri (stream)
-      (io.printer:terpri stream))
+   (defun terpri (&optional stream)
+      (io.printer:terpri (io:the-stream stream)))
+
+   (defun io:uformat (stream format-string &rest args)
+      (setq stream
+            (io:the-stream (cond ((eq stream nil) nil)
+                                 ((eq stream t)   nil)
+                                 (t               stream))))
+      (let ((index 0)
+            (cap   (length format-string)))
+         (while (< index cap)
+            (let ((char (aref format-string index)))
+               (if (and (char= char #\~) (< (1+ index) cap)) 
+                   (progn (incf index)
+                          (let ((directive (aref format-string index)))
+                             (cond ((char= directive #\%) (terpri stream))
+                                   ((char= directive #\&) nil)
+                                   ((char= directive #\a) (princ (pop args) stream))
+                                   ((char= directive #\s) (prin1 (pop args) stream))
+                                   (t (lmud.util:simple-error "Unknown format directive!")))))
+                   (princ char stream))
+               (incf index)))))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
-   ;;;    REPL
+   ;;;    REPL and Tools
    ;;;
+
+   (defun disassemble (function &optional stream)
+      (unless (lmud.int:bytecode-function-p function)
+         (lmud.util:simple-error "Not a bytecode-compiled function!"))
+      (io:uformat t "~&~%Bytecodes for ~s:~%" function)
+      (prin1 (lmud.int:function-bytecodes function)) (terpri)
+      (io:uformat t "~&~%Constants:~%")
+      (let ((constants (lmud.int:function-constants function)))
+         (dotimes (i (length constants))
+            (io:uformat t "~&  [~s]: ~s~%" i (aref constants i)))))
 
    (defun lmud.bootstrap::repl (port)
       (while t
@@ -1302,19 +1358,12 @@
 
    (lmud.int:on-connect
       (lambda (port)
+         (lmud.int:set-current-port port)
          (lmud.bootstrap::repl port)))
 
-   (defun lmud.bootstrap::console-repl ()
-      (while t
-         (lmud.dummy::%princ "⍝ ")
-         (let ((expr (lmud.dummy::%read)))
-            (dolist (e (multiple-value-list (eval expr)))
-               (lmud.dummy::%princ "  ")
-               (lmud.dummy::%prin1 e)
-               (lmud.dummy::%terpri)))))
    ))
 
-   ;; (lmud.bootstrap::console-repl)
-
-   (lmud.bootstrap::repl (lmud.int::open-fd 0))
+   (let ((port (lmud.int::open-fd 0)))
+      (lmud.int:set-current-port port)
+      (lmud.bootstrap::repl port))
 )

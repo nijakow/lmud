@@ -59,6 +59,8 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct L
     self->accumulator_count = 1;
     self->accumulator[0]    = LMud_Lisp_Nil(lisp);
 
+    self->port          = LMud_Lisp_Nil(lisp);
+
     LMud_FrameList_Create(&self->floating_frames);
 
     self->state          = LMud_FiberState_CREATED;
@@ -81,6 +83,8 @@ void LMud_Fiber_Mark(struct LMud_GC* gc, struct LMud_Fiber* self)
     {
         LMud_GC_MarkAny(gc, self->accumulator[index]);
     }
+
+    LMud_GC_MarkAny(gc, self->port);
 
     LMud_GC_MarkFrame(gc, self->top);  // This will run recursively.
 }
@@ -253,6 +257,17 @@ LMud_Any LMud_Fiber_GetValue(struct LMud_Fiber* self, LMud_Size index)
     if (index >= LMud_Fiber_ValueCount(self))
         return LMud_Lisp_Nil(self->lisp);
     return self->accumulator[index];
+}
+
+
+LMud_Any LMud_Fiber_GetPort(struct LMud_Fiber* self)
+{
+    return self->port;
+}
+
+void LMud_Fiber_SetPort(struct LMud_Fiber* self, LMud_Any port)
+{
+    self->port = port;
 }
 
 

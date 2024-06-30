@@ -51,6 +51,8 @@ struct LMud_Fiber
     LMud_Size                      accumulator_count;
     LMud_Any                       accumulator[LMud_Fiber_MAX_ACCUMULATORS];
 
+    LMud_Any                       port;
+
     struct LMud_FrameList          floating_frames;
 
     enum LMud_FiberState           state;
@@ -92,6 +94,9 @@ void       LMud_Fiber_SetAccumulator(struct LMud_Fiber* self, LMud_Any value);
 void       LMud_Fiber_Values(struct LMud_Fiber* self, LMud_Any* values, LMud_Size count);
 LMud_Size  LMud_Fiber_ValueCount(struct LMud_Fiber* self);
 LMud_Any   LMud_Fiber_GetValue(struct LMud_Fiber* self, LMud_Size index);
+
+LMud_Any   LMud_Fiber_GetPort(struct LMud_Fiber* self);
+void       LMud_Fiber_SetPort(struct LMud_Fiber* self, LMud_Any port);
 
 struct LMud_Frame* LMud_Fiber_PushFrame(struct LMud_Fiber* self, struct LMud_Function* function, struct LMud_Frame* lexical, LMud_Any* arguments, LMud_Size argument_count);
 void               LMud_Fiber_PopFrame(struct LMud_Fiber* self);
