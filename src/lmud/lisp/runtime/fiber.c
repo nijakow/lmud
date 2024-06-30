@@ -23,6 +23,16 @@ void LMud_FiberQueue_Destroy(struct LMud_FiberQueue* self)
     }
 }
 
+bool LMud_FiberQueue_IsEmpty(struct LMud_FiberQueue* self)
+{
+    return self->fibers == NULL;
+}
+
+bool LMud_FiberQueue_HasFibers(struct LMud_FiberQueue* self)
+{
+    return self->fibers != NULL;
+}
+
 void LMud_FiberQueue_AddFiber(struct LMud_FiberQueue* self, struct LMud_Fiber* fiber)
 {
     LMud_Fiber_MoveToQueue(fiber, self);

@@ -121,9 +121,12 @@ static void LMud_Connection_MaybeReleaseFibers(struct LMud_Connection* self)
 {
     char  byte;
 
-    if (LMud_Ringbuffer_ReadByte(&self->inbuf, &byte))
+    if (LMud_FiberQueue_HasFibers(&self->waiting_fibers))
     {
-        LMud_Connection_ReleaseFibers(self, byte);
+        if (LMud_Ringbuffer_ReadByte(&self->inbuf, &byte))
+        {
+            LMud_Connection_ReleaseFibers(self, byte);
+        }
     }
 }
 
