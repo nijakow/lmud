@@ -10,6 +10,7 @@ enum LMud_Bytecode
     LMud_Bytecode_POP_ARGUMENT,
     LMud_Bytecode_POP_KEYWORD_ARGUMENT,
     LMud_Bytecode_CONS_REST_ARGUMENTS,
+    LMud_Bytecode_MULTIPLE_VALUE_BIND,
     LMud_Bytecode_MULTIPLE_VALUE_LIST,
     
     LMud_Bytecode_LOAD_CONSTANT_SMALL,

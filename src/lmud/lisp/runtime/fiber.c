@@ -240,6 +240,8 @@ LMud_Size LMud_Fiber_ValueCount(struct LMud_Fiber* self)
 
 LMud_Any LMud_Fiber_GetValue(struct LMud_Fiber* self, LMud_Size index)
 {
+    if (index >= LMud_Fiber_ValueCount(self))
+        return LMud_Lisp_Nil(self->lisp);
     return self->accumulator[index];
 }
 

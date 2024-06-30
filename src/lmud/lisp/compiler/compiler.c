@@ -315,6 +315,7 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->cached.symbol_labels         = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LABELS");
     self->cached.symbol_if             = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "IF");
     self->cached.symbol_while          = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "WHILE");
+    self->cached.symbol_mvb            = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "MULTIPLE-VALUE-BIND");
     self->cached.symbol_mvl            = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "MULTIPLE-VALUE-LIST");
     self->cached.symbol_return_from    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "RETURN-FROM");
     self->cached.symbol_unwind_protect = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "UNWIND-PROTECT");
@@ -858,6 +859,26 @@ void LMud_Compiler_WriteConsRestArguments(struct LMud_Compiler* self)
     LMud_Compiler_PushBytecode(self, LMud_Bytecode_CONS_REST_ARGUMENTS);
 }
 
+void LMud_Compiler_WriteMultipleValueBind(struct LMud_Compiler* self, struct LMud_Register** registers, LMud_Size count)
+{
+    LMud_Size  index;
+    LMud_Size  reg_depth;
+    LMud_Size  reg_index;
+
+    LMud_Compiler_PushBytecode(self, LMud_Bytecode_MULTIPLE_VALUE_BIND);
+    LMud_Compiler_PushU8(self, count);
+
+    for (index = 0; index < count; index++)
+    {
+        if (LMud_Compiler_IdentifyRegister(self, registers[index], &reg_depth, &reg_index)) {
+            assert(reg_depth == 0);
+            LMud_Compiler_PushU8(self, reg_index);
+        } else {
+            // TODO, FIXME, XXX: Error!
+        }
+    }
+}
+
 void LMud_Compiler_WriteMultipleValueList(struct LMud_Compiler* self)
 {
     LMud_Compiler_PushBytecode(self, LMud_Bytecode_MULTIPLE_VALUE_LIST);
@@ -1073,6 +1094,8 @@ void LMud_Compiler_WriteBeginSignalHandler(struct LMud_Compiler* self, LMud_Comp
     if (LMud_Compiler_IdentifyRegister(self, reg, &depth, &index)) {
         assert(depth == 0);
         LMud_Compiler_PushU8(self, index);
+    } else {
+        // TODO, FIXME, XXX: Error!
     }
 
     LMud_Compiler_WriteLabel(self, handler_label);
@@ -1525,6 +1548,53 @@ void LMud_Compiler_CompileSpecialWhile(struct LMud_Compiler* self, LMud_Any argu
     LMud_Compiler_CloseLabel(self, end_label);
 }
 
+void LMud_Compiler_CompileSpecialMultipleValueBind(struct LMud_Compiler* self, LMud_Any arguments)
+{
+    LMud_Any   variables;
+    LMud_Any   expression;
+    LMud_Any   body;
+    LMud_Any   iterator;
+    LMud_Size  binding_count;
+    LMud_Size  index;
+
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &variables);
+    LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &expression);
+    body = arguments;
+
+    {
+        binding_count = 0;
+
+        for (iterator = variables; LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), iterator); iterator = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), iterator))
+        {
+            binding_count++;
+        }
+    }
+
+    LMud_Compiler_Compile(self, expression);
+
+    LMud_Compiler_PushScope(self);
+    {
+        struct LMud_Register*  registers[binding_count];
+
+        {
+            index = 0;
+
+            for (iterator = variables; LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), iterator); iterator = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), iterator))
+            {
+                registers[index] = LMud_Compiler_AllocateRegister(self);
+
+                LMud_Compiler_BindRegister(self, LMud_Lisp_Car(LMud_Compiler_GetLisp(self), iterator), LMud_BindingType_VARIABLE, registers[index]);
+
+                index = index + 1;
+            }
+        }
+
+        LMud_Compiler_WriteMultipleValueBind(self, registers, binding_count);
+        LMud_Compiler_CompileExpressions(self, body);
+    }
+    LMud_Compiler_PopScope(self);
+}
+
 void LMud_Compiler_CompileSpecialMultipleValueList(struct LMud_Compiler* self, LMud_Any arguments)
 {
     LMud_Any  expression;
@@ -1655,6 +1725,7 @@ void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expre
     else if (LMud_Any_Eq(function, self->cached.symbol_labels))         LMud_Compiler_CompileSpecialLabels(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_if))             LMud_Compiler_CompileSpecialIf(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_while))          LMud_Compiler_CompileSpecialWhile(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_mvb))            LMud_Compiler_CompileSpecialMultipleValueBind(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_mvl))            LMud_Compiler_CompileSpecialMultipleValueList(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_return_from))    LMud_Compiler_CompileSpecialReturnFrom(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_unwind_protect)) LMud_Compiler_CompileSpecialUnwindProtect(self, arguments);

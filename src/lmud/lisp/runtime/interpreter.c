@@ -249,6 +249,22 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
+            case LMud_Bytecode_MULTIPLE_VALUE_BIND:
+            {
+                index2 = LMud_InstructionStream_NextU8(&stream);
+
+                for (index = 0; index < index2; index++)
+                {
+                    LMud_Frame_SetRegister(
+                        self->fiber->top,
+                        LMud_InstructionStream_NextU8(&stream),
+                        LMud_Fiber_GetValue(self->fiber, index)
+                    );
+                }
+
+                break;
+            }
+
             case LMud_Bytecode_MULTIPLE_VALUE_LIST:
             {
                 value = LMud_Lisp_Nil(LMud_Interpreter_GetLisp(self));

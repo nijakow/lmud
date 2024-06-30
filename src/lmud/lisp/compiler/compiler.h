@@ -145,6 +145,7 @@ struct LMud_Compiler
         LMud_Any                    symbol_labels;
         LMud_Any                    symbol_if;
         LMud_Any                    symbol_while;
+        LMud_Any                    symbol_mvb;
         LMud_Any                    symbol_mvl;
         LMud_Any                    symbol_return_from;
         LMud_Any                    symbol_unwind_protect;

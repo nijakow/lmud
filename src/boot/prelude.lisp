@@ -511,10 +511,6 @@
                   (list* 'let (reverse let-expressions)
                      forms)))))
 
-   (defmacro multiple-value-bind (lambda-list expression &body forms)
-      (list* 'destructuring-bind lambda-list
-             (list 'multiple-value-list expression)
-             forms))
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
