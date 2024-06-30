@@ -1115,9 +1115,34 @@
                                      (return nil))
                               (return (if negative (- value) value)))))))))
 
+   (defun io.reader:parse-integer (chars &optional (base 10))
+      (setq chars (conversions:->list chars))
+      
+      (let ((negative  nil)
+            (value       0)
+            (digits-read 0))
+         
+         (cond ((char= (car chars) #\-)
+                (pop chars)
+                (setq negative t))
+               ((char= (car chars) #\+)
+                (pop chars)))
+         
+         (while t
+            (let* ((char  (car chars))
+                   (digit (io.reader:char->digit char base)))
+               (if digit
+                   (setq value       (+ (* value base) digit)
+                         digits-read (+ digits-read 1))
+                   (return (if (or (= digits-read 0)
+                                   (not (null chars)))
+                               nil
+                               (if negative (- value) value))))
+               (pop chars)))))
+
    (defun io.reader:read-atom (stream)
-      (or (io.reader:read-integer stream)
-          (let ((text (io.reader:read-until-breaking-char stream)))
+      (let ((text (io.reader:read-until-breaking-char stream)))
+         (or (io.reader:parse-integer text)
              (multiple-value-bind (part-1 part-2)
                    (multiple-value-bind (a b)
                          (lmud.util:string-partition text "::")
