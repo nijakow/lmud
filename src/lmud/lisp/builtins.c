@@ -1,4 +1,6 @@
 
+#include <lmud/lmud.h>
+#include <lmud/net/net.h>
 #include <lmud/lisp/gc.h>
 #include <lmud/lisp/objects/builtin.h>
 #include <lmud/lisp/objects/function.h>
@@ -1149,6 +1151,21 @@ void LMud_Builtin_Portp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsPort(fiber->lisp, arguments[0])));
 }
 
+void LMud_Builtin_OpenFd(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    struct LMud_Connection*  connection;
+
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    if (LMud_Net_RegisterClientFileDescriptor(&fiber->lisp->mud->net, LMud_Any_AsInteger(arguments[0]), false, &connection)) {
+        LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Port(fiber->lisp, connection));
+    } else {
+        LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
+    }
+}
+
 void LMud_Builtin_PortReadByte(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     /*
@@ -1283,6 +1300,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PORT-WRITE-BYTE", LMud_Builtin_PortWriteByte);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PORT-UNREAD-BYTE", LMud_Builtin_PortUnreadByte);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PORT-UNREAD-CHAR", LMud_Builtin_PortUnreadCharacter);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "OPEN-FD", LMud_Builtin_OpenFd);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "RATIOP", LMud_Builtin_Ratiop);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);

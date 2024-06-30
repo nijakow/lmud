@@ -1297,5 +1297,7 @@
                (lmud.dummy::%terpri)))))
    ))
 
-   (lmud.bootstrap::console-repl)
+   ;; (lmud.bootstrap::console-repl)
+
+   (lmud.bootstrap::repl (lmud.int::open-fd 0))
 )
