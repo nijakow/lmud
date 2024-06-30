@@ -784,6 +784,15 @@ void LMud_Builtin_Integerp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_S
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Any_IsInteger(arguments[0])));
 }
 
+void LMud_Builtin_Ratiop(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsRatio(fiber->lisp, arguments[0])));
+}
+
 void LMud_Builtin_Numerator(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     LMud_Any  result;
@@ -1274,6 +1283,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PORT-WRITE-BYTE", LMud_Builtin_PortWriteByte);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PORT-UNREAD-BYTE", LMud_Builtin_PortUnreadByte);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PORT-UNREAD-CHAR", LMud_Builtin_PortUnreadCharacter);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "RATIOP", LMud_Builtin_Ratiop);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRIN1", LMud_Builtin_Prin1);

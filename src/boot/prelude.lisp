@@ -1175,6 +1175,11 @@
                            (io.printer:print-unsigned-nonzero-integer stream meta (- integer)))
             (t             (io.printer:print-unsigned-nonzero-integer stream meta integer))))
    
+   (defun io.printer:print-ratio (stream meta ratio)
+      (io.printer:print-integer stream meta (numerator ratio))
+      (io.printer:write-char stream meta #\/)
+      (io.printer:print-integer stream meta (denominator ratio)))
+
    (defun io.printer:print-character (stream meta character)
       (if (io.printer:meta-escaped-p meta)
           (progn (io.printer:write-string stream meta "#\\")
@@ -1236,12 +1241,14 @@
                (t (lmud.util:simple-error "Not a list!")))))
 
    (defun io.printer:print-expression (stream meta e)
-      (cond ((symbolp    e) (io.printer:print-symbol    stream meta e))
-            ((consp      e) (io.printer:print-list      stream meta e))
-            ((integerp   e) (io.printer:print-integer   stream meta e))
-            ((characterp e) (io.printer:print-character stream meta e))
-            ((stringp    e) (io.printer:print-string    stream meta e))
-            (t              (io.printer:write-string    stream meta "#<UNKNOWN>"))))
+      (cond ((symbolp            e) (io.printer:print-symbol    stream meta e))
+            ((consp              e) (io.printer:print-list      stream meta e))
+            ((integerp           e) (io.printer:print-integer   stream meta e))
+            ((characterp         e) (io.printer:print-character stream meta e))
+            ((stringp            e) (io.printer:print-string    stream meta e))
+            ((lmud.int:ratiop    e) (io.printer:print-ratio     stream meta e))
+            ((lmud.int:%customp  e) (io.printer:write-string    stream meta "#<CUSTOM>"))
+            (t                      (io.printer:write-string    stream meta "#<UNKNOWN>"))))
 
    (defun io.printer:prin1 (stream e)
       (io.printer:print-expression stream t e))
