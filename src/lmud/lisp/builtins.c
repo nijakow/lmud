@@ -658,6 +658,15 @@ void LMud_Builtin_MachineFunctionp(struct LMud_Fiber* fiber, LMud_Any* arguments
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsBuiltin(fiber->lisp, arguments[0])));
 }
 
+void LMud_Builtin_MachineFunctionName(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_String(fiber->lisp, LMud_Builtin_GetName(LMud_Any_AsPointer(arguments[0]))));
+}
+
 void LMud_Builtin_Closurep(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     /*
@@ -1307,6 +1316,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%ASET", LMud_Builtin_Aset);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%COMPILE", LMud_Builtin_Compile);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "MACHINE-FUNCTION-P", LMud_Builtin_MachineFunctionp);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "MACHINE-FUNCTION-NAME", LMud_Builtin_MachineFunctionName);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "CLOSURE-P", LMud_Builtin_Closurep);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "BYTECODE-FUNCTION-P", LMud_Builtin_BytecodeFunctionp);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "FUNCTION-BYTECODES", LMud_Builtin_FunctionBytecodes);

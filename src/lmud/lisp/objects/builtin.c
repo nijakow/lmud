@@ -25,3 +25,8 @@ LMud_Size LMud_Builtin_CalculateSizeInBytes(struct LMud_Builtin* self)
 {
     return sizeof(struct LMud_Builtin) + LMud_CStr_Length(self->name) + 1;
 }
+
+const char* LMud_Builtin_GetName(struct LMud_Builtin* self)
+{
+    return self->name;
+}
