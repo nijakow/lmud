@@ -61,7 +61,7 @@ bool LMud_Net_IncomingConnection(struct LMud_Net* self, LMud_Socket socket)
     }
 }
 
-void LMud_Net_Tick(struct LMud_Net* self)
+void LMud_Net_Tick(struct LMud_Net* self, bool block)
 {
     struct LMud_Selector  selector;
 
@@ -70,7 +70,7 @@ void LMud_Net_Tick(struct LMud_Net* self)
         LMud_Servers_RegisterOnSelector(&self->servers, &selector);
         LMud_Connections_RegisterOnSelector(&self->connections, &selector);
 
-        LMud_Selector_Select(&selector, false);
+        LMud_Selector_Select(&selector, block);
 
         LMud_Connections_Tick(&self->connections, &selector);
         LMud_Servers_Tick(&self->servers, &selector);

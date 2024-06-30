@@ -630,6 +630,11 @@ void LMud_Lisp_GarbageCollect(struct LMud_Lisp* self, struct LMud_GCStats* stats
 }
 
 
+bool LMud_Lisp_NeedsControlBackImmediately(struct LMud_Lisp* self)
+{
+    return LMud_Scheduler_NeedsControlBackImmediately(&self->scheduler);
+}
+
 void LMud_Lisp_PeriodicInterrupt(struct LMud_Lisp* self)
 {
     if (LMud_Objects_GetGcAllocationCounter(&self->objects) >= (16 * 1024 * 1024))

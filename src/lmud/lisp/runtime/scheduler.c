@@ -140,6 +140,11 @@ bool LMud_Scheduler_BlockAndRunThunk(struct LMud_Scheduler* self, LMud_Any thunk
     return true;
 }
 
+bool LMud_Scheduler_NeedsControlBackImmediately(struct LMud_Scheduler* self)
+{
+    return LMud_FiberQueue_HasFibers(&self->running_fibers);
+}
+
 void LMud_Scheduler_Tick(struct LMud_Scheduler* self)
 {
     struct LMud_Fiber*  fiber;

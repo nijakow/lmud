@@ -26,4 +26,6 @@ struct LMud_Fiber* LMud_Scheduler_KickstartWithArgs(struct LMud_Scheduler* self,
 
 bool LMud_Scheduler_BlockAndRunThunk(struct LMud_Scheduler* self, LMud_Any thunk, LMud_Any* result);
 
+bool LMud_Scheduler_NeedsControlBackImmediately(struct LMud_Scheduler* self);
+
 void LMud_Scheduler_Tick(struct LMud_Scheduler* self);

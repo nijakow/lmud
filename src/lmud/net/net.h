@@ -23,4 +23,4 @@ bool LMud_Net_RegisterClientSocket(struct LMud_Net* self, LMud_Socket socket, bo
 
 bool LMud_Net_IncomingConnection(struct LMud_Net* self, LMud_Socket socket);
 
-void LMud_Net_Tick(struct LMud_Net* self);
+void LMud_Net_Tick(struct LMud_Net* self, bool block);
