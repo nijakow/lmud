@@ -866,6 +866,8 @@
    
    (tos:defmethod io:write-char-to-stream (stream protocol char)
       (io:write-utf8-char char stream protocol))
+   
+   (defun io:eof-p (stream) nil) ; TODO
 
    (defun write-byte (byte stream)
       (io:write-byte-to-stream stream nil byte))
@@ -881,6 +883,11 @@
    
    (defun unread-char (char stream)
       (io:unread-char-from-stream stream nil char))
+   
+   (defun peek-char (stream)
+      (let ((char (read-char stream)))
+         (unread-char char stream)
+         char))
 
    (defun io.reader:whitespacep (char)
       (or (char= char #\Space)
@@ -896,14 +903,14 @@
    (defun io.reader:check (stream char)
       (let ((parsed-char (read-char stream)))
          (if (char= parsed-char char)
-             t
+             parsed-char
              (progn (unread-char parsed-char stream)
-                    nil))))
+                    (values nil nil)))))
    
    (defun io.reader:checkpred (stream predicate)
       (let ((parsed-char (read-char stream)))
          (if (funcall predicate parsed-char)
-             t
+             parsed-char
              (progn (unread-char parsed-char stream)
                     nil))))
    
@@ -918,8 +925,65 @@
    (defun io.reader:skip (stream predicate)
       (while (io.reader:checkpred stream predicate)))
    
+   (defun io.reader:read-until (stream predicate)
+      (let ((result '()))
+         (while t
+            (let ((char (io.reader:checkpred stream predicate)))
+               (if char
+                   (push char result)
+                   (return (conversions:->string (reverse result))))))))
+   
    (defun io.reader:skip-whitespace (stream)
       (io.reader:skip stream #'io.reader:whitespacep))
+
+   (defun io.reader:read-until-breaking-char (stream)
+      (io.reader:read-until stream #'io.reader:breaking-char-p))
+   
+   (defun io.reader:generate-letcond (clauses)
+      (if (endp clauses)
+          nil
+          (let ((clause (car clauses))
+                (var    (gensym)))
+             (list 'let (list (cons var (cdar clause)))
+                (list 'if var
+                   (if var
+                       (list* 'let (list (list (caar clause) var))
+                          (cdr clause))
+                       (cons 'progn (cdr clause)))
+                   (io.reader:generate-letcond (cdr clauses)))))))
+   
+   (defmacro io.reader:letcond (&body clauses)
+      (io.reader:generate-letcond clauses))
+   
+   (defun io.reader:eof-error (stream)
+      (lmud.util:simple-error "Unexpected end of file!"))
+
+   (defun io.reader:read-list (stream)
+      (io.reader:skip-whitespace stream)
+      (cond ((io:eof-p stream) (io.reader:eof-error stream))
+            ((io.reader:checkstr stream ")") nil)
+            ((io.reader:checkstr stream ". ")
+               (prog1 (io.reader:read stream)
+                      (unless (io.reader:checkstr stream ")")
+                         (lmud.util:simple-error "Expected ')' after '.'!"))))
+            (t (cons (io.reader:read stream)
+                     (io.reader:read-list stream)))))
+
+   (defun io.reader:read (stream)
+      (io.reader:skip-whitespace stream)
+      (cond ((io:eof-p stream) nil)
+            ((io.reader:checkstr stream ";")
+             (io.reader:skip stream (lambda (char) (not (char= char #\Newline))))
+             (io.reader:read stream))
+            ((io.reader:checkstr stream "#'")
+             (list 'function (io.reader:read stream)))
+            ((io.reader:checkstr stream "'")
+             (list 'quote (io.reader:read stream)))
+            ((io.reader:checkstr stream "(")
+             (io.reader:read-list stream))
+            ((io.reader:checkstr stream ":")
+             (io.reader:read-keyword))
+            (t (io.reader:read-atom))))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
