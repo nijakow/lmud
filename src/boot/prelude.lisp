@@ -1124,6 +1124,46 @@
              (io.reader:read-integer stream 16))
             (t (io.reader:read-atom stream))))
 
+   (defun read (stream)
+      (io.reader:read stream))
+
+
+   (defun io.printer:write-char (stream meta char)
+      (write-char char stream))
+
+   (defun io.printer:write-string (stream meta string)
+      (dosequence (char string)
+         (write-char char stream)))
+
+   (defun io.printer:print-integer (stream meta integer)
+      ;; TODO
+      nil)
+   
+   (defun io.printer:print-character (stream meta character)
+      ;; TODO
+      nil)
+   
+   (defun io.printer:print-string (stream meta string)
+      ;; TODO
+      nil)
+   
+   (defun io.printer:print-symbol (stream meta symbol)
+      ;; TODO
+      nil)
+   
+   (defun io.printer:print-list (stream meta list)
+      ;; TODO
+      nil)
+
+   (defun io.printer:print-expression (stream meta e)
+      (cond ((null       e) (io.printer:write-string    stream meta "NIL"))
+            ((consp      e) (io.printer:print-list      stream meta e))
+            ((integerp   e) (io.printer:print-integer   stream meta e))
+            ((characterp e) (io.printer:print-character stream meta e))
+            ((stringp    e) (io.printer:print-string    stream meta e))
+            ((symbolp    e) (io.printer:print-symbol    stream meta e))
+            (t              (io.printer:write-string    stream meta "#<UNKNOWN>"))))
+
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;

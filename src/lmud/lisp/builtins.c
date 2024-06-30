@@ -775,6 +775,15 @@ void LMud_Builtin_CharUpcase(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud
 }
 
 
+void LMud_Builtin_Integerp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Any_IsInteger(arguments[0])));
+}
+
 void LMud_Builtin_Numerator(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     LMud_Any  result;
@@ -1201,6 +1210,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "CHAR-CODE", LMud_Builtin_CharCode);
     LMud_Lisp_InstallBuiltin(lisp, "CODE-CHAR", LMud_Builtin_CodeChar);
     LMud_Lisp_InstallBuiltin(lisp, "CHAR-UPCASE", LMud_Builtin_CharUpcase);
+    LMud_Lisp_InstallBuiltin(lisp, "INTEGERP", LMud_Builtin_Integerp);
     LMud_Lisp_InstallBuiltin(lisp, "NUMERATOR", LMud_Builtin_Numerator);
     LMud_Lisp_InstallBuiltin(lisp, "DENOMINATOR", LMud_Builtin_Denominator);
     LMud_Lisp_InstallBuiltin(lisp, "=", LMud_Builtin_NumericEqual);
