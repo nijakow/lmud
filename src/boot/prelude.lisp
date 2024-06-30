@@ -886,6 +886,45 @@
    (defun unread-char (char stream)
       (io:unread-char-from-stream stream nil char))
 
+   (defun io.reader:whitespacep (char)
+      (or (char= char #\Space)
+          (char= char #\Tab)
+          (char= char #\Newline)
+          (char= char #\Return)))
+   
+   (defun io.reader:breaking-char-p (char)
+      (or (char= char (code-char 40)) ; '('
+          (char= char (code-char 41)) ; ')'
+          (io.reader:whitespacep char)))
+
+   (defun io.reader:check (stream char)
+      (let ((parsed-char (read-char stream)))
+         (if (char= parsed-char char)
+             t
+             (progn (unread-char parsed-char stream)
+                    nil))))
+   
+   (defun io.reader:checkpred (stream predicate)
+      (let ((parsed-char (read-char stream)))
+         (if (funcall predicate parsed-char)
+             t
+             (progn (unread-char parsed-char stream)
+                    nil))))
+   
+   (defun io.reader:checkstr (stream sequence)
+      (dotimes (i (length sequence))
+         (if (not (io.reader:check stream (aref sequence i)))
+             (dotimes (j i)
+                (unread-char (aref sequence (- i j 1)) stream)
+                (return-from io.reader:checkstr nil))))
+      t)
+
+   (defun io.reader:skip (stream predicate)
+      (while (io.reader:checkpred stream predicate)))
+   
+   (defun io.reader:skip-whitespace (stream)
+      (io.reader:skip stream #'io.reader:whitespacep))
+
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
@@ -895,26 +934,6 @@
    (defun lmud.dummy::%princln (e)
       (lmud.dummy::%princ e)
       (lmud.dummy::%terpri))
-
-   (defun foo ()
-      (unwind-protect
-         (unwind-protect (values 1 2 42)
-            (lmud.dummy::%princ "Look ma, no hands!")
-            (lmud.dummy::%terpri))
-         (lmud.dummy::%princ "Look ma, still no hands!")
-         (lmud.dummy::%terpri)))
-   
-   (defun bar ()
-      (unwind-protect
-            (%signal-handler (e)
-                  (unwind-protect (progn (lmud.dummy::%princ "Look ma, no hands!")
-                                         (lmud.dummy::%terpri)
-                                         (lmud.int:signal 42))
-                     (lmud.dummy::%princln "First passthrough!"))
-                  (lmud.dummy::%princ "Look ma, still no hands!")
-                  (lmud.dummy::%terpri)
-                  (list e e e))
-         (lmud.dummy::%princln "Second passthrough!")))
 
    (lmud.int:on-connect
       (lambda (port)
