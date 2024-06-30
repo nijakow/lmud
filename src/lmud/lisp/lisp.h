@@ -102,6 +102,7 @@ LMud_Any LMud_Lisp_InternKeywordUpcase(struct LMud_Lisp* self, const char* name)
 LMud_Any LMud_Lisp_EasyIntern(struct LMud_Lisp* self, const char* package_name, const char* name);
 LMud_Any LMud_Lisp_EasyUpcaseIntern(struct LMud_Lisp* self, const char* package_name, const char* name);
 LMud_Any LMud_Lisp_ReinternAsKeyword(struct LMud_Lisp* self, LMud_Any symbol);
+LMud_Any LMud_Lisp_InternInPackageLL(struct LMud_Lisp* self, LMud_Any package, LMud_Any name);
 LMud_Any LMud_Lisp_Gensym(struct LMud_Lisp* self);
 
 LMud_Any LMud_Lisp_Car(struct LMud_Lisp* self, LMud_Any value);

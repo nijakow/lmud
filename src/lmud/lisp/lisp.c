@@ -407,6 +407,26 @@ LMud_Any LMud_Lisp_ReinternAsKeyword(struct LMud_Lisp* self, LMud_Any symbol)
     return LMud_Lisp_InternKeyword(self, LMud_Symbol_NameChars(LMud_Any_AsPointer(symbol)));
 }
 
+LMud_Any LMud_Lisp_InternInPackageLL(struct LMud_Lisp* self, LMud_Any package, LMud_Any name)
+{
+    struct LMud_Symbol*  symbol;
+
+    assert(LMud_Lisp_IsPackage(self, package));
+    assert(LMud_Lisp_IsString(self, name));
+
+    symbol = LMud_Objects_Intern(&self->objects, LMud_Any_AsPointer(package), LMud_String_Chars(LMud_Any_AsPointer(name)));
+
+    /*
+     * If we are interning a symbol in the KEYWORD package, we make it a self-referencing constant.
+     */
+    if (LMud_Any_Eq(package, self->constants.keyword_package))
+    {
+        LMud_Symbol_MakeConstant(symbol);
+    }
+
+    return LMud_Any_FromPointer(symbol);
+}
+
 LMud_Any LMud_Lisp_Gensym(struct LMud_Lisp* self)
 {
     return LMud_Any_FromPointer(LMud_Objects_Gensym(&self->objects));
