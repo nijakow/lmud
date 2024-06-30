@@ -965,22 +965,38 @@
    
    (defun io.reader:checkstr (stream sequence)
       (dotimes (i (length sequence))
-         (if (not (io.reader:check stream (aref sequence i)))
-             (dotimes (j i)
-                (unread-char (aref sequence (- i j 1)) stream)
-                (return-from io.reader:checkstr nil))))
+         (unless (io.reader:check stream (aref sequence i))
+            (dotimes (j i)
+               (unread-char (aref sequence (- i j 1)) stream))
+            (return-from io.reader:checkstr nil)))
       t)
 
    (defun io.reader:skip (stream predicate)
       (while (io.reader:checkpred stream predicate)))
    
-   (defun io.reader:read-until (stream predicate)
+   (defun io.reader:read-until2 (stream predicate)
       (let ((result '()))
-         (while t
-            (let ((char (io.reader:checkpred stream predicate)))
-               (if char
-                   (push char result)
-                   (return (conversions:->string (reverse result))))))))
+         (while (not (io:eof-p stream))
+            (let ((char (read-char stream)))
+               (lmud.dummy::%princ "Read char: ")
+               (lmud.dummy::%prin1 char)
+               (lmud.dummy::%terpri)
+               (when (funcall predicate char)
+                  (lmud.dummy::%princ "  ! That was too much! Unreading char: ")
+                  (lmud.dummy::%prin1 char)
+                  (lmud.dummy::%terpri)
+                  (unread-char char stream)
+                  (return (conversions:->string (reverse result))))
+               (lmud.dummy::%princ "  * Adding the char: ")
+               (lmud.dummy::%prin1 char)
+               (lmud.dummy::%terpri)
+               (push char result)))
+         (conversions:->string (reverse result))))
+   
+   (defun io.reader:read-until (stream predicate)
+      (lmud.dummy::%princln "Reading until...")
+      (prog1 (io.reader:read-until2 stream predicate)
+         (lmud.dummy::%princln "Done reading until!")))
    
    (defun io.reader:skip-whitespace (stream)
       (io.reader:skip stream #'io.reader:whitespacep))
@@ -1004,6 +1020,11 @@
    (defmacro io.reader:letcond (&body clauses)
       (io.reader:generate-letcond clauses))
    
+   (defmacro io.reader:iflet (var-expr &body body)
+      (list 'let (list var-expr)
+         (list* 'if (car var-expr)
+            body)))
+   
    (defun io.reader:eof-error (stream)
       (lmud.util:simple-error "Unexpected end of file!"))
 
@@ -1017,6 +1038,50 @@
                          (lmud.util:simple-error "Expected ')' after '.'!"))))
             (t (cons (io.reader:read stream)
                      (io.reader:read-list stream)))))
+
+   (defun io.reader:char->digit (char &optional (base 10))
+      (let ((value (cond ((and (char>= char #\0) (char<= char #\9)) (- (char-code char) (char-code #\0)))
+                         ((and (char>= char #\A) (char<= char #\Z)) (+ 10 (- (char-code char) (char-code #\A))))
+                         ((and (char>= char #\a) (char<= char #\z)) (+ 10 (- (char-code char) (char-code #\a))))
+                         (t nil))))
+         (and value (< value base) value))) 
+
+   (defun io.reader:read-integer (stream &optional (base 10))
+      (io.reader:skip-whitespace stream)
+
+      (let ((negative nil)
+            (value 0)
+            (digits-read 0))
+
+         (setq negative (io.reader:check stream #\-))
+
+         (while t
+            (let* ((char  (read-char stream))
+                   (digit (io.reader:char->digit char base)))
+               (if digit
+                   (setq value       (+ (* value base) digit)
+                         digits-read (+ digits-read 1))
+                   (progn (unread-char char stream)
+                          (return (and (> digits-read 0)
+                                       (if negative (- value) value)))))))))
+
+   (defun io.reader:read-atom (stream)
+      (or (io.reader:read-integer stream)
+          (let ((text (io.reader:read-until-breaking-char stream)))
+             (lmud.dummy::%princln text)
+             (multiple-value-bind (part-1 part-2)
+                   (multiple-value-bind (a b)
+                         (lmud.util:string-partition text "::")
+                      (if b
+                          (values a b)
+                          (lmud.util:string-partition text ":")))
+                (if part-2
+                    (intern (string-upcase part-2) (find-package (string-upcase part-1)))
+                    (intern (string-upcase text)))))))
+   
+   (defun io.reader:read-keyword (stream)
+      (let ((text (io.reader:read-until-breaking-char stream)))
+         (intern (string-upcase text) (find-package "KEYWORD"))))
 
    (defun io.reader:read (stream)
       (io.reader:skip-whitespace stream)
@@ -1032,7 +1097,7 @@
              (io.reader:read-list stream))
             ((io.reader:checkstr stream ":")
              (io.reader:read-keyword))
-            (t (io.reader:read-atom))))
+            (t (io.reader:read-atom stream))))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1047,14 +1112,11 @@
    (lmud.int:on-connect
       (lambda (port)
          (lmud.dummy::%princln "New connection just came in!")
-         (dosequence (i "⍝ Hello, world!")
-            (write-char i port))
-         (write-char #\return  port)
-         (write-char #\newline port)
          (while t
-            (let ((char (read-char port)))
-               (unread-char char port)
-               (write-char (read-char port) port)))))
+            (dosequence (i "⍝ ")
+               (write-char i port))
+            (lmud.dummy::%prin1 (io.reader:read port))
+            (lmud.dummy::%terpri))))
 
    (defun lmud.bootstrap::repl ()
       (while t
