@@ -26,16 +26,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-
-#define LMud_VERSION "0.1"
-#define LMud_VERSION_EXTRA "alpha"
-#define LMud_RELEASE_NAME "Patchy Phoenix"
-
-#define LMud_ENABLE_COMPRESSED_ANYS
-#define LMud_ENABLE_MALLOC_TRIM
-
-#define LMud_UNWIND_PROTECT_UNDEFINED   0xffff
-#define LMud_UNWIND_PROTECT_MAX_NESTING 8
+#include <lmud/config.h>
 
 typedef size_t        LMud_Size;
 typedef int           LMud_Integer;
