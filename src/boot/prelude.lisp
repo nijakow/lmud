@@ -991,6 +991,16 @@
    (defun io.reader:read-until-breaking-char (stream)
       (io.reader:read-until stream #'io.reader:breaking-char-p))
    
+   (defun io.reader:read-escaped (stream escape-sequence terminator)
+      (let ((result '()))
+         (while (not (io:eof-p stream))
+            (cond ((io.reader:checkstr stream escape-sequence)
+                   (push (read-char stream) result))
+                  ((io.reader:checkstr stream terminator)
+                   (return (conversions:->string (reverse result))))
+                  (t (push (read-char stream) result))))
+         (lmud.util:simple-error "Unexpected end of file!")))
+   
    (defun io.reader:generate-letcond (clauses)
       (if (endp clauses)
           nil
@@ -1084,6 +1094,9 @@
 
    (defun io.reader:parse-character (stream)
       (io.reader:character-by-name (io.reader:read-until-breaking-char stream)))
+   
+   (defun io.reader:parse-string (stream)
+      (io.reader:read-escaped stream "\\" "\""))
 
    (defun io.reader:read (stream)
       (io.reader:skip-whitespace stream)
