@@ -975,7 +975,7 @@
    (defun io.reader:skip (stream predicate)
       (while (io.reader:checkpred stream predicate)))
    
-   (defun io.reader:read-until2 (stream predicate)
+   (defun io.reader:read-until (stream predicate)
       (let ((result '()))
          (while (not (io:eof-p stream))
             (let ((char (read-char stream)))
@@ -984,12 +984,7 @@
                   (return (conversions:->string (reverse result))))
                (push char result)))
          (conversions:->string (reverse result))))
-   
-   (defun io.reader:read-until (stream predicate)
-      (lmud.dummy::%princln "Reading until...")
-      (prog1 (io.reader:read-until2 stream predicate)
-         (lmud.dummy::%princln "Done reading until!")))
-   
+      
    (defun io.reader:skip-whitespace (stream)
       (io.reader:skip stream #'io.reader:whitespacep))
 
@@ -1074,6 +1069,22 @@
       (let ((text (io.reader:read-until-breaking-char stream)))
          (intern (string-upcase text) (find-package "KEYWORD"))))
 
+   (defun io.reader:special-character-by-name (name)
+      (let ((capitalized (string-upcase name)))
+         (cond ((string= capitalized "SPACE")   #\Space)
+               ((string= capitalized "TAB")     #\Tab)
+               ((string= capitalized "NEWLINE") #\Newline)
+               ((string= capitalized "RETURN")  #\Return)
+               (t (lmud.util:simple-error "Unknown character name!")))))
+   
+   (defun io.reader:character-by-name (name)
+      (if (= (length name) 1)
+          (aref name 0)
+          (io.reader:special-character-by-name name)))
+
+   (defun io.reader:parse-character (stream)
+      (io.reader:character-by-name (io.reader:read-until-breaking-char stream)))
+
    (defun io.reader:read (stream)
       (io.reader:skip-whitespace stream)
       (cond ((io:eof-p stream) nil)
@@ -1088,6 +1099,10 @@
              (list 'quote (io.reader:read stream)))
             ((io.reader:checkstr stream "#'")
              (list 'function (io.reader:read stream)))
+            ((io.reader:checkstr stream "#\\")
+             (io.reader:parse-character stream))
+            ((io.reader:checkstr stream "\"")
+             (io.reader:parse-string stream))
             ((io.reader:checkstr stream "#b")
              (io.reader:read-integer stream 2))
             ((io.reader:checkstr stream "#o")

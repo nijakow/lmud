@@ -277,7 +277,9 @@ void LMud_Lisp_ReadEscaped(struct LMud_Lisp* lisp, struct LMud_InputStream* stre
 
     while (!LMud_InputStream_Eof(stream))
     {
-        if (LMud_InputStream_CheckStr(stream, terminator)) {
+        if (LMud_InputStream_CheckStr(stream, "\\")) {
+            // Do nothing
+        } else if (LMud_InputStream_CheckStr(stream, terminator)) {
             break;
         }
 
