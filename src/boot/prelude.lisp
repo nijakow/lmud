@@ -76,6 +76,16 @@
    (defmacro defconstant (name value)
       (list 'set-symbol-value (list 'quote name) value))
 
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
+   ;;;    Globals
+   ;;;
+
+   (defparameter lmud:*default-package* (find-package "LISP"))
+   (defparameter lmud:*keyword-package* (find-package "KEYWORD"))
+
+
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
    ;;;    Error Handling
@@ -154,6 +164,7 @@
          (list 'let (list (list temp expr))
             (cons 'progn body)
             temp)))
+
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
@@ -235,6 +246,7 @@
          (list 'let (list (list seq (cadr info)))
             (list 'dotimes (list i (list 'length seq))
                (list* 'let (list (list var (list 'aref seq i))) body)))))
+
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
@@ -356,6 +368,36 @@
    (defun char>  (a b) (> (char-code a) (char-code b)))
    (defun char<= (a b) (<= (char-code a) (char-code b)))
    (defun char>= (a b) (>= (char-code a) (char-code b)))
+
+   (defun lmud.util:whitespacep (char)
+      (or (char= char #\Space)
+          (char= char #\Tab)
+          (char= char #\Newline)
+          (char= char #\Return)))
+
+   (defun lmud.util:special-character-by-name (name)
+      (let ((capitalized (string-upcase name)))
+         (cond ((string= capitalized "SPACE")   #\Space)
+               ((string= capitalized "TAB")     #\Tab)
+               ((string= capitalized "NEWLINE") #\Newline)
+               ((string= capitalized "RETURN")  #\Return)
+               (t (lmud.util:simple-error "Unknown character name!")))))
+   
+   (defun lmud.util:character-by-name (name)
+      (if (= (length name) 1)
+          (aref name 0)
+          (lmud.util:special-character-by-name name)))
+   
+   (defun lmud.util:character-name-or-nil (char)
+      (cond ((char= char #\Space)   "SPACE")
+            ((char= char #\Tab)     "TAB")
+            ((char= char #\Newline) "NEWLINE")
+            ((char= char #\Return)  "RETURN")
+            (t                      nil)))
+   
+   (defun lmud.util:character-name (char)
+      (or (lmud.util:character-name-or-nil char)
+          (string char)))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -938,17 +980,11 @@
       (let ((char (read-char stream)))
          (unread-char char stream)
          char))
-
-   (defun io.reader:whitespacep (char)
-      (or (char= char #\Space)
-          (char= char #\Tab)
-          (char= char #\Newline)
-          (char= char #\Return)))
    
    (defun io.reader:breaking-char-p (char)
       (or (char= char (code-char 40)) ; '('
           (char= char (code-char 41)) ; ')'
-          (io.reader:whitespacep char)))
+          (lmud.util:whitespacep char)))
 
    (defun io.reader:check (stream char)
       (let ((parsed-char (read-char stream)))
@@ -986,7 +1022,7 @@
          (conversions:->string (reverse result))))
       
    (defun io.reader:skip-whitespace (stream)
-      (io.reader:skip stream #'io.reader:whitespacep))
+      (io.reader:skip stream #'lmud.util:whitespacep))
 
    (defun io.reader:read-until-breaking-char (stream)
       (io.reader:read-until stream #'io.reader:breaking-char-p))
@@ -1041,7 +1077,7 @@
                          ((and (char>= char #\A) (char<= char #\Z)) (+ 10 (- (char-code char) (char-code #\A))))
                          ((and (char>= char #\a) (char<= char #\z)) (+ 10 (- (char-code char) (char-code #\a))))
                          (t nil))))
-         (and value (< value base) value))) 
+         (and value (< value base) value)))
 
    (defun io.reader:read-integer (stream &optional (base 10))
       (io.reader:skip-whitespace stream)
@@ -1059,8 +1095,10 @@
                    (setq value       (+ (* value base) digit)
                          digits-read (+ digits-read 1))
                    (progn (unread-char char stream)
-                          (return (and (> digits-read 0)
-                                       (if negative (- value) value)))))))))
+                          (if (= digits-read 0)
+                              (progn (when negative (unread-char #\- stream))
+                                     (return nil))
+                              (return (if negative (- value) value)))))))))
 
    (defun io.reader:read-atom (stream)
       (or (io.reader:read-integer stream)
@@ -1079,21 +1117,8 @@
       (let ((text (io.reader:read-until-breaking-char stream)))
          (intern (string-upcase text) (find-package "KEYWORD"))))
 
-   (defun io.reader:special-character-by-name (name)
-      (let ((capitalized (string-upcase name)))
-         (cond ((string= capitalized "SPACE")   #\Space)
-               ((string= capitalized "TAB")     #\Tab)
-               ((string= capitalized "NEWLINE") #\Newline)
-               ((string= capitalized "RETURN")  #\Return)
-               (t (lmud.util:simple-error "Unknown character name!")))))
-   
-   (defun io.reader:character-by-name (name)
-      (if (= (length name) 1)
-          (aref name 0)
-          (io.reader:special-character-by-name name)))
-
    (defun io.reader:parse-character (stream)
-      (io.reader:character-by-name (io.reader:read-until-breaking-char stream)))
+      (lmud.util:character-by-name (io.reader:read-until-breaking-char stream)))
    
    (defun io.reader:parse-string (stream)
       (io.reader:read-escaped stream "\\" "\""))
@@ -1128,6 +1153,8 @@
       (io.reader:read stream))
 
 
+   (defun io.printer:meta-escaped-p (meta) meta)
+
    (defun io.printer:write-char (stream meta char)
       (write-char char stream))
 
@@ -1135,34 +1162,104 @@
       (dosequence (char string)
          (write-char char stream)))
 
-   (defun io.printer:print-integer (stream meta integer)
-      ;; TODO
-      nil)
+   (defun io.printer:print-unsigned-nonzero-integer (stream meta n)
+      (when (> n 0)
+         (io.printer:print-unsigned-nonzero-integer stream meta (truncate n 10))
+         (write-char (code-char (+ (char-code #\0)
+                                   (mod n 10)))
+                     stream)))
+
+   (defun io.printer:print-integer (stream meta integer &optional (base 10))
+      (cond ((= integer 0) (write-char #\0 stream))
+            ((< integer 0) (write-char #\- stream)
+                           (io.printer:print-unsigned-nonzero-integer stream meta (- integer)))
+            (t             (io.printer:print-unsigned-nonzero-integer stream meta integer))))
    
    (defun io.printer:print-character (stream meta character)
-      ;; TODO
-      nil)
+      (if (io.printer:meta-escaped-p meta)
+          (progn (io.printer:write-string stream meta "#\\")
+                 (let ((name (lmud.util:character-name-or-nil character)))
+                    (if name
+                        (io.printer:write-string stream meta name)
+                        (io.printer:write-char stream meta character))))
+          (write-char character stream)))
    
    (defun io.printer:print-string (stream meta string)
-      ;; TODO
-      nil)
+      (if (io.printer:meta-escaped-p meta)
+          (progn (io.printer:write-char stream meta #\")
+                 (dosequence (char string)
+                    (cond ((char= char #\") (io.printer:write-string stream meta "\\\""))
+                          ((char= char #\\) (io.printer:write-string stream meta "\\\\"))
+                          (t (io.printer:write-char stream meta char))))
+                 (io.printer:write-char stream meta #\"))
+          (io.printer:write-string stream meta string)))
    
    (defun io.printer:print-symbol (stream meta symbol)
-      ;; TODO
-      nil)
+      (let ((package (symbol-package symbol))
+            (name    (symbol-name    symbol)))
+         (cond ((eq package lmud:*default-package*) nil)
+               ((eq package lmud:*keyword-package*)
+                (io.printer:write-char stream meta #\:))
+               (t (io.printer:write-string stream meta (package-name package))
+                  (io.printer:write-string stream meta "::")))
+         (io.printer:write-string stream meta name)))
    
+   (defun io.printer:print-list-body (stream meta list)
+      (while (consp list)
+         (io.printer:write-char       stream meta #\Space)
+         (io.printer:print-expression stream meta (car list))
+         (setq list (cdr list)))
+      (unless (null list)
+         (io.printer:write-string stream meta ". ")
+         (io.printer:print-expression stream meta list)))
+
    (defun io.printer:print-list (stream meta list)
-      ;; TODO
-      nil)
+      (flet ((quote-clause-p (xlist)
+               (and (consp xlist)
+                    (eq (car xlist) 'quote)
+                    (consp (cdr xlist))
+                    (null (cddr xlist))))
+             (function-clause-p (xlist)
+               (and (consp xlist)
+                    (eq (car xlist) 'function)
+                    (consp (cdr xlist))
+                    (null (cddr xlist)))))
+         (cond ((null list) (io.printer:write-string stream meta "()"))
+               ((quote-clause-p list) (io.printer:write-string stream meta "'")
+                                      (io.printer:print-expression stream meta (cadr list)))
+               ((function-clause-p list) (io.printer:write-string stream meta "#'")
+                                         (io.printer:print-expression stream meta (cadr list)))
+               ((consp list) (io.printer:write-string     stream meta "(")
+                             (io.printer:print-expression stream meta (car list))
+                             (io.printer:print-list-body  stream meta (cdr list))
+                             (io.printer:write-string    stream meta ")"))
+               (t (lmud.util:simple-error "Not a list!")))))
 
    (defun io.printer:print-expression (stream meta e)
-      (cond ((null       e) (io.printer:write-string    stream meta "NIL"))
+      (cond ((symbolp    e) (io.printer:print-symbol    stream meta e))
             ((consp      e) (io.printer:print-list      stream meta e))
             ((integerp   e) (io.printer:print-integer   stream meta e))
             ((characterp e) (io.printer:print-character stream meta e))
             ((stringp    e) (io.printer:print-string    stream meta e))
-            ((symbolp    e) (io.printer:print-symbol    stream meta e))
             (t              (io.printer:write-string    stream meta "#<UNKNOWN>"))))
+
+   (defun io.printer:prin1 (stream e)
+      (io.printer:print-expression stream t e))
+   
+   (defun io.printer:princ (stream e)
+      (io.printer:print-expression stream nil e))
+   
+   (defun io.printer:terpri (stream)
+      (io.printer:princ stream #\Newline))
+   
+   (defun prin1 (e stream)
+      (io.printer:prin1 stream e))
+   
+   (defun princ (e stream)
+      (io.printer:princ stream e))
+   
+   (defun terpri (stream)
+      (io.printer:terpri stream))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1170,18 +1267,15 @@
    ;;;    REPL
    ;;;
 
-   (defun lmud.dummy::%princln (e)
-      (lmud.dummy::%princ e)
-      (lmud.dummy::%terpri))
-
    (lmud.int:on-connect
       (lambda (port)
-         (lmud.dummy::%princln "New connection just came in!")
          (while t
-            (dosequence (i "⍝ ")
-               (write-char i port))
-            (lmud.dummy::%prin1 (io.reader:read port))
-            (lmud.dummy::%terpri))))
+            (princ "⍝ " port)
+            (let ((value (io.reader:read port)))
+               (lmud.dummy::%prin1 value)
+               (lmud.dummy::%terpri)
+               (prin1 value port)
+               (terpri port)))))
 
    (defun lmud.bootstrap::repl ()
       (while t

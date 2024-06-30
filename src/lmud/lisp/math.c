@@ -397,6 +397,24 @@ bool LMud_Lisp_Mod2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* re
     return LMud_Lisp_NumberDispatch(self, a, b, (LMud_RatioArithmeticFunction) LMud_Lisp_Mod2_Ratios, result);
 }
 
+bool LMud_Lisp_Truncate(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
+{
+    LMud_Integer  a_value;
+    LMud_Integer  b_value;
+
+    (void) self;
+
+    if (!LMud_Any_IsInteger(a) || !LMud_Any_IsInteger(b))
+        return false;
+
+    a_value = LMud_Any_AsInteger(a);
+    b_value = LMud_Any_AsInteger(b);
+
+    *result = LMud_Any_FromInteger(a_value / b_value);
+
+    return true;
+}
+
 bool LMud_Lisp_LogAnd2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result)
 {
     LMud_Integer  a_value;

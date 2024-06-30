@@ -974,6 +974,18 @@ void LMud_Builtin_Modulo(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
     LMud_Fiber_SetAccumulator(fiber, result);
 }
 
+void LMud_Builtin_Truncate(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any  result;
+
+    /*
+     * TODO: Check arguments. Must have exactly two arguments.
+     */
+    (void) argument_count;
+    LMud_Lisp_Truncate(fiber->lisp, arguments[0], arguments[1], &result);
+    LMud_Fiber_SetAccumulator(fiber, result);
+}
+
 void LMud_Builtin_LogAnd(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     LMud_Any   result;
@@ -1223,6 +1235,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "*", LMud_Builtin_Multiply);
     LMud_Lisp_InstallBuiltin(lisp, "/", LMud_Builtin_Divide);
     LMud_Lisp_InstallBuiltin(lisp, "MOD", LMud_Builtin_Modulo);
+    LMud_Lisp_InstallBuiltin(lisp, "TRUNCATE", LMud_Builtin_Truncate);
     LMud_Lisp_InstallBuiltin(lisp, "LOGAND", LMud_Builtin_LogAnd);
     LMud_Lisp_InstallBuiltin(lisp, "LOGIOR", LMud_Builtin_LogIor);
     LMud_Lisp_InstallBuiltin(lisp, "LOGXOR", LMud_Builtin_LogXor);

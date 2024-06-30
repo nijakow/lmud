@@ -557,10 +557,7 @@ void LMud_Compiler_BindRegister(struct LMud_Compiler* self, LMud_Any name, enum 
 {
     struct LMud_Binding*  binding;
 
-    if (!LMud_Compiler_FindBinding(self, name, type, &binding))
-    {
-        binding = LMud_Scope_CreateBinding(self->scopes, name, type);
-    }
+    binding = LMud_Scope_CreateBinding(self->scopes, name, type);
 
     LMud_Binding_SetRegister(binding, reg);
 }

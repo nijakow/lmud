@@ -20,6 +20,8 @@ bool LMud_Lisp_Mul2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* re
 bool LMud_Lisp_Div2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result);
 bool LMud_Lisp_Mod2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result);
 
+bool LMud_Lisp_Truncate(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result);
+
 bool LMud_Lisp_LogAnd2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result);
 bool LMud_Lisp_LogIor2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result);
 bool LMud_Lisp_LogXor2(struct LMud_Lisp* self, LMud_Any a, LMud_Any b, LMud_Any* result);
