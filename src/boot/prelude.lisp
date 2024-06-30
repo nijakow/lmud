@@ -236,7 +236,6 @@
             (list 'dotimes (list i (list 'length seq))
                (list* 'let (list (list var (list 'aref seq i))) body)))))
 
-
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
    ;;;    List Operations
@@ -510,6 +509,56 @@
                (list 'let (list (list expr-sym expression))
                   (list* 'let (reverse let-expressions)
                      forms)))))
+
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
+   ;;;    String Operations
+   ;;;
+
+   (defun string= (a b &optional (key #'identity))
+      (and (stringp a)
+           (stringp b)
+           (or (eq a b)
+               (= (length a) (length b))
+               (progn (dosequence (i a)
+                  (unless (char= (funcall key (aref a i))
+                                 (funcall key (aref b i)))
+                     (return nil)))
+                  t))))
+   
+   (defun string-upcase (string)
+      (conversions:->string (mapcar #'char-upcase (conversions:string->list string))))
+
+   (defun substring (string start end)
+      (let ((result '()))
+         (dotimes (i (- end start))
+            (push (aref string (+ start i)) result))
+         (conversions:->string (reverse result))))
+
+   (defun lmud.util:string-subsequence-= (string subsequence &key (start 0) (key #'identity))
+      (let ((sublen (length subsequence)))
+         (and (>= (length string) (+ start sublen))
+              (progn (dotimes (i sublen)
+                        (unless (char= (funcall key (aref string (+ start i)))
+                                       (funcall key (aref subsequence i)))
+                           (return nil)))
+                     t))))
+   
+   (defun lmud.util:string-find-subsequence (string subsequence &key (key #'identity))
+      (let ((len    (length string))
+            (sublen (length subsequence)))
+         (dotimes (i (- len sublen))
+            (when (lmud.util:string-subsequence-= string subsequence :start i :key key)
+               (return i)))
+         nil))
+   
+   (defun lmud.util:string-partition (string separator &key (key #'identity))
+      (let ((index (lmud.util:string-find-subsequence string separator :key key)))
+         (if index
+             (values (substring string 0 index)
+                     (substring string (+ index (length separator)) (length string)))
+             (values string nil))))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
