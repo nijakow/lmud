@@ -1437,6 +1437,9 @@
          (dotimes (i (length constants))
             (io:uformat t "~&  [~s]: ~s~%" i (aref constants i)))))
 
+   (defun lmud.bootstrap::banner (port)
+      (io:uformat port "~&~%Welcome to the LMUD REPL!~%"))
+
    (defun lmud.bootstrap::repl (port)
       (while t
          (princ "⍝ " port)
@@ -1449,6 +1452,7 @@
    (lmud.int:on-connect
       (lambda (port)
          (lmud.int:set-current-port port)
+         (lmud.bootstrap::banner port)
          (lmud.bootstrap::repl port)))
 
    ))
