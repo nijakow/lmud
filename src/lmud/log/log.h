@@ -2,6 +2,7 @@
 #pragma once
 
 #include <lmud/defs.h>
+#include <lmud/log/loglevel.h>
 #include <lmud/util/stringbuilder.h>
 
 struct LMud_Line
@@ -32,11 +33,12 @@ void LMud_Log_Append(struct LMud_Log* self, const char* text);
 struct LMud_LogComposer
 {
     struct LMud_Log*           log;
+    enum LMud_LogLevel         loglevel;
     LMud_Size                  line_offset;
     struct LMud_StringBuilder  builder;
 };
 
-void LMud_LogComposer_Create(struct LMud_LogComposer* self, struct LMud_Log* log);
+void LMud_LogComposer_Create(struct LMud_LogComposer* self, struct LMud_Log* log, enum LMud_LogLevel loglevel);
 void LMud_LogComposer_Destroy(struct LMud_LogComposer* self);
 
 void LMud_LogComposer_Commit(struct LMud_LogComposer* self);

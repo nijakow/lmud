@@ -88,9 +88,10 @@ static void LMud_LogComposer_FreshLine(struct LMud_LogComposer* self)
     LMud_StringBuilder_AppendCStr(&self->builder, "; ");
 }
 
-void LMud_LogComposer_Create(struct LMud_LogComposer* self, struct LMud_Log* log)
+void LMud_LogComposer_Create(struct LMud_LogComposer* self, struct LMud_Log* log, enum LMud_LogLevel loglevel)
 {
     self->log         = log;
+    self->loglevel    = loglevel;
     self->line_offset = 0;
     LMud_StringBuilder_Create(&self->builder);
 }

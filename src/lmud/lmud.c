@@ -36,7 +36,7 @@ struct LMud_Net* LMud_GetNet(struct LMud* self)
     return &self->net;
 }
 
-void LMud_Logf(struct LMud* mud, const char* format, ...)
+void LMud_Logf(struct LMud* mud, enum LMud_LogLevel loglevel, const char* format, ...)
 {
     va_list                  args;
     struct LMud_LogComposer  composer;
@@ -44,7 +44,7 @@ void LMud_Logf(struct LMud* mud, const char* format, ...)
 
     va_start(args, format);
     {
-        LMud_LogComposer_Create(&composer, LMud_GetLog(mud));
+        LMud_LogComposer_Create(&composer, LMud_GetLog(mud), loglevel);
         LMud_OutputStream_CreateOnLogComposer(&stream, &composer);
         LMud_OutputStream_VPrintf(&stream, format, args);
         LMud_OutputStream_Destroy(&stream);
@@ -101,7 +101,7 @@ void LMud_Startup(struct LMud* self)
 {
     LMud_Any  boot_function;
 
-    LMud_Logf(self, "Starting up LMud v%s %s '%s'...\n", LMud_VERSION, LMud_VERSION_EXTRA, LMud_RELEASE_NAME);
+    LMud_Logf(self, LMud_LogLevel_NOTE, "Starting up LMud v%s %s '%s'...\n", LMud_VERSION, LMud_VERSION_EXTRA, LMud_RELEASE_NAME);
 
     if (LMud_Lisp_LoadFile(&self->lisp, "../boot/prelude.lisp", &boot_function))
     {
@@ -111,7 +111,7 @@ void LMud_Startup(struct LMud* self)
 
 void LMud_Shutdown(struct LMud* self)
 {
-    LMud_Logf(self, "Shutting down...\n");
+    LMud_Logf(self, LMud_LogLevel_NOTE, "Shutting down...\n");
 }
 
 void LMud_Main(struct LMud* self, int argc, char* argv[])

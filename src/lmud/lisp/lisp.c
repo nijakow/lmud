@@ -627,7 +627,7 @@ void LMud_Lisp_GarbageCollect(struct LMud_Lisp* self, struct LMud_GCStats* stats
 {
     struct LMud_GC  gc;
 
-    LMud_Logf(self->mud, "Garbage Collection...\n");
+    LMud_Logf(self->mud, LMud_LogLevel_NOTE, "Garbage Collection...\n");
 
     LMud_GC_Create(&gc, self);
     LMud_GC_Run(&gc);
@@ -680,16 +680,16 @@ bool LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename, LMud_Any* 
     file   = fopen(filename, "r");
     
     if (file == NULL)
-        LMud_Logf(self->mud, "Failed to open file: \"%s\"!\n", filename);
+        LMud_Logf(self->mud, LMud_LogLevel_ERROR, "Failed to open file: \"%s\"!\n", filename);
     else {
-        LMud_Logf(self->mud, "Loading file: \"%s\"...\n", filename);
+        LMud_Logf(self->mud, LMud_LogLevel_NOTE, "Loading file: \"%s\"...\n", filename);
 
         LMud_InputStream_CreateFromFile(&stream, file);
 
         while (LMud_Lisp_Read(self, &stream, &program))
         {
             if (!LMud_Lisp_Compile(self, program, &program)) {
-                LMud_Logf(self->mud, " --> Failed to compile an expression!\n");
+                LMud_Logf(self->mud, LMud_LogLevel_WARNING, " --> Failed to compile an expression!\n");
                 break;
             } else {
                 LMud_Scheduler_BlockAndRunThunk(&self->scheduler, program, result);

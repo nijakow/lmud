@@ -426,7 +426,7 @@ void LMud_Fiber_PerformError(struct LMud_Fiber* self, const char* message)
 {
     LMud_Any  exception;
 
-    LMud_Logf(self->lisp->mud, "Encountered an error on fiber %p: %s\n", self, message);
+    LMud_Logf(self->lisp->mud, LMud_LogLevel_ERROR, "Encountered an error on fiber %p: %s\n", self, message);
 
     exception = LMud_Lisp_String(self->lisp, message);
 

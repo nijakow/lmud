@@ -19,7 +19,7 @@ struct LMud
 bool LMud_Create(struct LMud* self);
 void LMud_Destroy(struct LMud* self);
 
-void LMud_Logf(struct LMud* self, const char* format, ...);
+void LMud_Logf(struct LMud* self, enum LMud_LogLevel loglevel, const char* format, ...);
 
 void LMud_SignalInterrupt(struct LMud* self, int signal);
 
