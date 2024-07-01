@@ -276,14 +276,25 @@ static void* LMud_Fiber_StackTop(struct LMud_Fiber* self)
     return self->stack_pointer;
 }
 
+static inline bool LMud_Fiber_HasSpaceOnStack(struct LMud_Fiber* self, LMud_Size size)
+{
+    return self->stack_pointer + size < self->stack_roof;
+}
+
 struct LMud_Frame* LMud_Fiber_PushFrame(struct LMud_Fiber* self, struct LMud_Function* function, struct LMud_Frame* lexical, LMud_Any* arguments, LMud_Size argument_count)
 {
     struct LMud_Frame*  frame;
     LMud_Size           extra_args;
+    LMud_Size           frame_size;
 
     extra_args = argument_count - function->info.fixed_argument_count;
+    frame_size = sizeof(struct LMud_Frame) + (function->info.register_count + function->info.stack_size + extra_args) * sizeof(LMud_Any);
 
-    if (argument_count < function->info.fixed_argument_count) {
+
+    if (!LMud_Fiber_HasSpaceOnStack(self, frame_size)) {
+        LMud_Fiber_PerformError(self, "Stack overflow!");
+        return NULL;
+    } else if (argument_count < function->info.fixed_argument_count) {
         LMud_Fiber_PerformError(self, "Not enough arguments!");
         return NULL;
     } else if (extra_args > 0 && !function->info.variadic) {
@@ -292,7 +303,7 @@ struct LMud_Frame* LMud_Fiber_PushFrame(struct LMud_Fiber* self, struct LMud_Fun
     }
     
     frame               = LMud_Fiber_StackTop(self);
-    self->stack_pointer = self->stack_pointer + sizeof(struct LMud_Frame) + (function->info.register_count + function->info.stack_size + extra_args) * sizeof(LMud_Any);
+    self->stack_pointer = self->stack_pointer + frame_size;
 
     LMud_Frame_Create(frame, self->top, lexical, function, arguments, extra_args);
 
@@ -395,10 +406,8 @@ void LMud_Fiber_SignalAndUnwind(struct LMud_Fiber* self)
 
     while (self->top != NULL)
     {
-        printf("[Note]: Unwinding frame %p.\n", self->top);
         if (self->top->unwind_protect != LMud_UNWIND_PROTECT_UNDEFINED)
         {
-            printf("[Note]: Found an unwind-protect frame: %p\n", self->top);
             LMud_Frame_SetInstructionPointer(self->top, self->top->unwind_protect);
             break;
         }
