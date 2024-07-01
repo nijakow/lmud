@@ -799,9 +799,18 @@
            (tos.int:subclassp (tos.int:class-of object) class)))
 
    (defmacro tos.int:defclass (name superclasses slot-descriptions)
-      (list 'tos.int:defclass-execute (list 'quote name)
-                                      (list* 'list superclasses)
-                                      (list 'quote slot-descriptions)))
+      (let ((class-var (gensym))
+            (expr      (list 'tos.int:defclass-execute (list 'quote name)
+                                                       (list* 'list superclasses)
+                                                       (list 'quote slot-descriptions))))
+         (list 'let (list (list class-var expr))
+            (list* 'prog1 class-var
+               (domap (slot-description slot-descriptions)
+                  (apply #'(lambda (name &key accessor)
+                              (when accessor
+                                 (list 'tos:defmethod accessor (list (list 'object class-var))
+                                      (list 'tos.int:slot-value-by-name 'object (list 'quote name)))))
+                         slot-description))))))
    
    (tos.int:defclass lmud.classes:<t> () ())
 
