@@ -1,4 +1,5 @@
 
+#include <lmud/glue.h>
 #include <lmud/lisp/lisp.h>
 #include <lmud/lisp/objects.h>
 #include <lmud/util/memory.h>
@@ -156,7 +157,7 @@ static void LMud_GC_Collect(struct LMud_GC* self)
 
 static void LMud_GC_MarkRoots(struct LMud_GC* self)
 {
-    LMud_Lisp_Mark(self, self->lisp);
+    LMud_Mark(self, self->lisp->mud);
 }
 
 static void LMud_GC_InitialBookeeping(struct LMud_GC* self)

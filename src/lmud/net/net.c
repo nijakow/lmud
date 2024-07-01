@@ -21,6 +21,11 @@ void LMud_Net_Destroy(struct LMud_Net* self)
     LMud_Servers_Destroy(&self->servers);
 }
 
+void LMud_Net_Mark(struct LMud_GC* gc, struct LMud_Net* self)
+{
+    LMud_Servers_Mark(gc, &self->servers);
+}
+
 bool LMud_Net_OpenV4(struct LMud_Net* self, const char* address, LMud_Port port, LMud_Any startup_function)
 {
     return LMud_Servers_OpenV4(&self->servers, address, port, startup_function);
@@ -49,12 +54,12 @@ bool LMud_Net_RegisterClientSocket(struct LMud_Net* self, LMud_Socket socket, bo
     return LMud_Net_RegisterClientFileDescriptor(self, socket, close_on_error, connection);
 }
 
-bool LMud_Net_IncomingConnection(struct LMud_Net* self, LMud_Socket socket)
+bool LMud_Net_IncomingConnection(struct LMud_Net* self, struct LMud_Server* from, LMud_Socket socket)
 {
     struct LMud_Connection*  connection;
 
     if (LMud_Net_RegisterClientSocket(self, socket, true, &connection)) {
-        LMud_NotifyIncomingConnection(self->mud, connection);
+        LMud_NotifyIncomingConnection(self->mud, LMud_Server_GetStartupFunction(from), connection);
         return true;
     } else {
         return false;

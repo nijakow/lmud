@@ -1,5 +1,6 @@
 
 #include <lmud/net/net.h>
+#include <lmud/lisp/gc.h>
 #include <lmud/util/inet.h>
 #include <lmud/util/memory.h>
 
@@ -42,6 +43,11 @@ void LMud_Server_Delete(struct LMud_Server* self)
     LMud_Free(self);
 }
 
+void LMud_Server_Mark(struct LMud_GC* gc, struct LMud_Server* self)
+{
+    LMud_GC_MarkAny(gc, self->startup_func);
+}
+
 
 void LMud_Server_Link(struct LMud_Server* self, struct LMud_Server** list)
 {
@@ -65,6 +71,11 @@ void LMud_Server_Unlink(struct LMud_Server* self)
         self->next->prev = self->prev;
 }
 
+LMud_Any LMud_Server_GetStartupFunction(struct LMud_Server* self)
+{
+    return self->startup_func;
+}
+
 void LMud_Server_RegisterOnSelector(struct LMud_Server* self, struct LMud_Selector* selector)
 {
     LMud_Selector_AddRead(selector, self->fd);
@@ -79,7 +90,7 @@ void LMud_Server_HandleRead(struct LMud_Server* self)
     {
         if (LMud_Inet_Accept(self->fd, &info))
         {
-            LMud_Net_IncomingConnection(self->net, LMud_Inet_AcceptInfo_GetSocket(&info));
+            LMud_Net_IncomingConnection(self->net, self, LMud_Inet_AcceptInfo_GetSocket(&info));
         }
     }
     LMud_Inet_AcceptInfo_Destroy(&info);
@@ -111,6 +122,16 @@ void LMud_Servers_Destroy(struct LMud_Servers* self)
     while (self->servers != NULL)
     {
         LMud_Server_Delete(self->servers);
+    }
+}
+
+void LMud_Servers_Mark(struct LMud_GC* gc, struct LMud_Servers* self)
+{
+    struct LMud_Server*  server;
+
+    for (server = self->servers; server != NULL; server = server->next)
+    {
+        LMud_Server_Mark(gc, server);
     }
 }
 

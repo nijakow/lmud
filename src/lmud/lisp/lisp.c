@@ -661,13 +661,13 @@ bool LMud_Lisp_Kickstart(struct LMud_Lisp* self, LMud_Any function)
     return LMud_Scheduler_Kickstart(&self->scheduler, function) != NULL;
 }
 
-bool LMud_Lisp_KickstartNewConnectionTask(struct LMud_Lisp* self, struct LMud_Connection* connection)
+bool LMud_Lisp_KickstartNewConnectionTask(struct LMud_Lisp* self, LMud_Any function, struct LMud_Connection* connection)
 {
     LMud_Any  connection_any;
 
     connection_any = LMud_Lisp_Port(self, connection);
 
-    return LMud_Scheduler_KickstartWithArgs(&self->scheduler, self->constants.new_connection_function, &connection_any, 1);
+    return LMud_Scheduler_KickstartWithArgs(&self->scheduler, function, &connection_any, 1);
 }
 
 
