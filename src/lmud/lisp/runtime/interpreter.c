@@ -123,6 +123,11 @@ struct LMud_Lisp* LMud_Interpreter_GetLisp(struct LMud_Interpreter* self)
     return self->fiber->lisp;
 }
 
+static void LMud_Interpreter_PerformError(struct LMud_Interpreter* self, const char* message)
+{
+    LMud_Fiber_PerformError(self->fiber, message);
+}
+
 LMud_Any LMud_Interpreter_GetAccu(struct LMud_Interpreter* self)
 {
     return LMud_Fiber_GetAccumulator(self->fiber);
@@ -162,6 +167,14 @@ struct LMud_Frame* LMud_Interpreter_LexicalFrame(struct LMud_Interpreter* self, 
 #define AGAIN_WITH_CHECK \
     { \
         goto again_with_check; \
+    }
+
+#define LMud_Interpreter_ERROR(message) \
+    { \
+        LMud_Interpreter_Flush(self); \
+        LMud_Interpreter_PerformError(self, message); \
+        LMud_Interpreter_Restore(self); \
+        AGAIN_WITH_CHECK; \
     }
 
 void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
@@ -305,9 +318,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
                 if (!LMud_Lisp_IsFunction(LMud_Interpreter_GetLisp(self), value))
                 {
-                    /*
-                     * TODO
-                     */
+                    LMud_Interpreter_ERROR("Invalid function!");
                 }
 
                 if (LMud_Function_IsLexicalized((struct LMud_Function*) LMud_Any_AsPointer(value))) {
@@ -335,9 +346,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
                 if (!LMud_Lisp_IsSymbol(LMud_Interpreter_GetLisp(self), value))
                 {
-                    /*
-                     * TODO
-                     */
+                    LMud_Interpreter_ERROR("Invalid symbol!");
                 }
 
                 value = LMud_Symbol_Value((struct LMud_Symbol*) LMud_Any_AsPointer(value));
@@ -356,9 +365,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
                 if (!LMud_Lisp_IsSymbol(LMud_Interpreter_GetLisp(self), value))
                 {
-                    /*
-                     * TODO
-                     */
+                    LMud_Interpreter_ERROR("Invalid symbol!");
                 }
 
                 LMud_Symbol_SetValue(
@@ -375,9 +382,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
                 if (!LMud_Lisp_IsSymbol(LMud_Interpreter_GetLisp(self), value))
                 {
-                    /*
-                     * TODO
-                     */
+                    LMud_Interpreter_ERROR("Invalid symbol!");
                 }
 
                 value = LMud_Symbol_Function((struct LMud_Symbol*) LMud_Any_AsPointer(value));
@@ -396,9 +401,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
                 if (!LMud_Lisp_IsSymbol(LMud_Interpreter_GetLisp(self), value))
                 {
-                    /*
-                     * TODO
-                     */
+                    LMud_Interpreter_ERROR("Invalid symbol!");
                 }
 
                 LMud_Symbol_SetFunction(
@@ -643,8 +646,8 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                         LMud_Interpreter_Restore(self);
                         break;
                     default:
-                        printf("[ERROR]: Execution resumption mode not recognized!\n");
-                        TERMINATE;
+                        LMud_Interpreter_ERROR("Execution resumption mode not recognized!");
+                        break;
                 }
                 
                 break;
@@ -710,8 +713,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
             default:
             {
                 LMud_Interpreter_Flush(self);
-                LMud_Fiber_PerformError(self->fiber, "Invalid bytecode!");
-                TERMINATE;
+                LMud_Interpreter_ERROR("Invalid bytecode!");
             }
         }
     }
