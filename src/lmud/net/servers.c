@@ -5,58 +5,126 @@
 
 #include "servers.h"
 
+
+void LMud_Server_Create(struct LMud_Server* self, struct LMud_Net* net, LMud_Socket fd)
+{
+    self->net  = net;
+    self->prev = NULL;
+    self->next = NULL;
+    self->fd   = fd;
+}
+
+void LMud_Server_Destroy(struct LMud_Server* self)
+{
+    LMud_Server_Unlink(self);
+    LMud_Inet_Close(self->fd);
+}
+
+
+struct LMud_Server* LMud_Server_New(struct LMud_Net* net, LMud_Socket fd)
+{
+    struct LMud_Server*  self;
+
+    self = LMud_Alloc(sizeof(struct LMud_Server));
+
+    if (self != NULL)
+    {
+        LMud_Server_Create(self, net, fd);
+    }
+    
+    return self;
+}
+
+void LMud_Server_Delete(struct LMud_Server* self)
+{
+    LMud_Server_Destroy(self);
+    LMud_Free(self);
+}
+
+
+void LMud_Server_Link(struct LMud_Server* self, struct LMud_Server** list)
+{
+    LMud_Server_Unlink(self);
+
+    self->prev =  list;
+    self->next = *list;
+
+    if (*list != NULL)
+        (*list)->prev = &self->next;
+    
+    *list = self;
+}
+
+void LMud_Server_Unlink(struct LMud_Server* self)
+{
+    if (self->prev != NULL)
+        *self->prev = self->next;
+    
+    if (self->next != NULL)
+        self->next->prev = self->prev;
+}
+
+void LMud_Server_RegisterOnSelector(struct LMud_Server* self, struct LMud_Selector* selector)
+{
+    LMud_Selector_AddRead(selector, self->fd);
+    LMud_Selector_AddExcept(selector, self->fd);
+}
+
+void LMud_Server_HandleRead(struct LMud_Server* self)
+{
+    struct LMud_Inet_AcceptInfo  info;
+
+    LMud_Inet_AcceptInfo_Create(&info);
+    {
+        if (LMud_Inet_Accept(self->fd, &info))
+        {
+            LMud_Net_IncomingConnection(self->net, LMud_Inet_AcceptInfo_GetSocket(&info));
+        }
+    }
+    LMud_Inet_AcceptInfo_Destroy(&info);
+}
+
+void LMud_Server_Tick(struct LMud_Server* self, struct LMud_Selector* selector)
+{
+    if (LMud_Selector_IsRead(selector, self->fd))
+    {
+        LMud_Server_HandleRead(self);
+    }
+
+    if (LMud_Selector_IsExcept(selector, self->fd))
+    {
+        // TODO!
+        printf("LMud_Server_Tick: Exception!\n");
+    }
+}
+
+
 void LMud_Servers_Create(struct LMud_Servers* self, struct LMud_Net* net)
 {
-    self->net   = net;
-    self->fds   = NULL;
-    self->alloc = 0;
-    self->fill  = 0;
+    self->net     = net;
+    self->servers = NULL;
 }
 
 void LMud_Servers_Destroy(struct LMud_Servers* self)
 {
-    LMud_Size  index;
-
-    for (index = 0; index < self->fill; index++)
+    while (self->servers != NULL)
     {
-        close(self->fds[index]);
+        LMud_Server_Delete(self->servers);
     }
-
-    LMud_Free(self->fds);
-}
-
-static bool LMud_Servers_EnsureCapacity(struct LMud_Servers* self, LMud_Size capacity)
-{
-    LMud_Size     new_alloc;
-    LMud_Socket*  new_fds;
-
-    if (self->alloc >= capacity)
-        return true;
-    
-    new_alloc = self->alloc * 2;
-
-    if (new_alloc < capacity)
-        new_alloc = capacity;
-    
-    new_fds = LMud_Realloc(self->fds, new_alloc * sizeof(LMud_Socket));
-
-    if (new_fds == NULL)
-        return false;
-    
-    self->fds   = new_fds;
-    self->alloc = new_alloc;
-
-    return true;
 }
 
 static bool LMud_Servers_PushSocket(struct LMud_Servers* self, LMud_Socket socket)
 {
-    if (!LMud_Servers_EnsureCapacity(self, self->fill + 1))
-        return false;
-    
-    self->fds[self->fill++] = socket;
+    struct LMud_Server*  server;
 
-    return true;    
+    server = LMud_Server_New(self->net, socket);
+
+    if (server != NULL)
+    {
+        LMud_Server_Link(server, &self->servers);
+    }
+
+    return (server != NULL);
 }
 
 static void LMud_Servers_PushSocketOrClose(struct LMud_Servers* self, LMud_Socket socket)
@@ -91,53 +159,24 @@ bool LMud_Servers_OpenV6(struct LMud_Servers* self, const char* address, LMud_Po
 
 void LMud_Servers_RegisterOnSelector(struct LMud_Servers* self, struct LMud_Selector* selector)
 {
-    LMud_Size  index;
+    struct LMud_Server*  server;
 
-    for (index = 0; index < self->fill; index++)
+    for (server = self->servers; server != NULL; server = server->next)
     {
-        LMud_Selector_AddRead(selector, self->fds[index]);
-        LMud_Selector_AddExcept(selector, self->fds[index]);
+        LMud_Server_RegisterOnSelector(server, selector);
     }
 }
 
-static void LMud_Servers_CloseByIndex(struct LMud_Servers* self, LMud_Size index)
-{
-    if (index < self->fill)
-    {
-        LMud_Inet_Close(self->fds[index]);
-        self->fill--;
-        if (index < self->fill)
-            self->fds[index] = self->fds[self->fill];
-    }
-}
-
-static void LMud_Servers_HandleReadByIndex(struct LMud_Servers* self, LMud_Size index)
-{
-    struct LMud_Inet_AcceptInfo  info;
-
-    LMud_Inet_AcceptInfo_Create(&info);
-    {
-        if (LMud_Inet_Accept(self->fds[index], &info)) {
-            LMud_Net_IncomingConnection(self->net, LMud_Inet_AcceptInfo_GetSocket(&info));
-        }
-    }
-    LMud_Inet_AcceptInfo_Destroy(&info);
-}
 
 void LMud_Servers_Tick(struct LMud_Servers* self, struct LMud_Selector* selector)
 {
-    LMud_Size  index;
+    struct LMud_Server*  server;
+    struct LMud_Server*  next;
 
-    for (index = 0; index < self->fill; index++)
+    for (server = self->servers; server != NULL; server = next)
     {
-        if (LMud_Selector_IsRead(selector, self->fds[index]))
-        {
-            LMud_Servers_HandleReadByIndex(self, index);
-        }
+        next = server->next;
 
-        if (LMud_Selector_IsExcept(selector, self->fds[index]))
-        {
-            LMud_Servers_CloseByIndex(self, index);
-        }
+        LMud_Server_Tick(server, selector);
     }
 }
