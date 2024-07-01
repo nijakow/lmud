@@ -12,10 +12,12 @@
                 (args (cdr expression)))
             (if (eq head 'quote)
                 expression
-                (if (if (symbolp head)
-                        (if (symbol-macro head) t))
-                    (macroexpand (apply (symbol-macro head) args))
-                    (lmud.util:map1 #'macroexpand expression))))
+                (if (eq head 'lmud.qq:quasiquote)
+                    (macroexpand (lmud.qq:expand-quasiquote (cadr expression)))
+                    (if (if (symbolp head)
+                            (if (symbol-macro head) t))
+                        (macroexpand (apply (symbol-macro head) args))
+                        (lmud.util:map1 #'macroexpand expression)))))
            expression)))
 
 (set-symbol-function 'compile
@@ -627,6 +629,45 @@
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
+   ;;;    The Quasiquote Expander
+   ;;;
+
+   (defun lmud.qq:tag-clause-p (symbol expr)
+      (and (consp expr)
+           (eq (car expr) symbol)
+           (consp (cdr expr))
+           (null (cddr expr))))
+   
+   (defun lmud.qq:quasiquote-clause-p (expr)
+      (lmud.qq:tag-clause-p 'lmud.qq:quasiquote expr))
+
+   (defun lmud.qq:unquote-clause-p (expr)
+      (lmud.qq:tag-clause-p 'lmud.qq:unquote expr))
+   
+   (defun lmud.qq:unquote-splice-clause-p (expr)
+      (lmud.qq:tag-clause-p 'lmud.qq:unquote-splice expr))
+
+   (defun lmud.qq:quote (expr)
+      (list 'quote expr))
+
+   (defun lmud.qq:expand-quasiquote-list (expr)
+      (if (consp expr)
+          (if (lmud.qq:unquote-splice-clause-p (car expr))
+              (list (list 'append (cadar expr)
+                                  (cons 'list* (lmud.qq:expand-quasiquote-list (cdr expr)))))
+              (cons (lmud.qq:expand-quasiquote      (car expr))
+                    (lmud.qq:expand-quasiquote-list (cdr expr))))
+          (list expr)))
+
+   (defun lmud.qq:expand-quasiquote (expr)
+      (cond ((lmud.qq:quasiquote-clause-p expr) (lmud.qq:quote expr))
+            ((lmud.qq:unquote-clause-p expr)    (cadr expr))
+            ((consp expr) (cons 'list* (lmud.qq:expand-quasiquote-list expr)))
+            (t (lmud.qq:quote expr))))
+
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
    ;;;    The Type- and Object System
    ;;;
 
@@ -1212,6 +1253,12 @@
              (list 'quote (io.reader:read stream)))
             ((io.reader:checkstr stream "#'")
              (list 'function (io.reader:read stream)))
+            ((io.reader:checkstr stream "`")
+             (list 'lmud.qq:quasiquote (io.reader:read stream)))
+            ((io.reader:checkstr stream ",@")
+             (list 'lmud.qq:unquote-splice (io.reader:read stream)))
+            ((io.reader:checkstr stream ",")
+             (list 'lmud.qq:unquote (io.reader:read stream)))
             ((io.reader:checkstr stream "#\\")
              (io.reader:parse-character stream))
             ((io.reader:checkstr stream "\"")
@@ -1342,12 +1389,33 @@
                (and (consp xlist)
                     (eq (car xlist) 'function)
                     (consp (cdr xlist))
+                    (null (cddr xlist))))
+             (quasiquote-clause-p (xlist)
+               (and (consp xlist)
+                    (eq (car xlist) 'lmud.qq:quasiquote)
+                    (consp (cdr xlist))
+                    (null (cddr xlist))))
+             (unquote-clause-p (xlist)
+               (and (consp xlist)
+                    (eq (car xlist) 'lmud.qq:unquote)
+                    (consp (cdr xlist))
+                    (null (cddr xlist))))
+             (unquote-splice-clause-p (xlist)
+               (and (consp xlist)
+                    (eq (car xlist) 'lmud.qq:unquote-splice)
+                    (consp (cdr xlist))
                     (null (cddr xlist)))))
          (cond ((null list) (io.printer:write-string stream meta "()"))
                ((quote-clause-p list) (io.printer:write-string stream meta "'")
                                       (io.printer:print-expression stream meta (cadr list)))
                ((function-clause-p list) (io.printer:write-string stream meta "#'")
                                          (io.printer:print-expression stream meta (cadr list)))
+               ((quasiquote-clause-p list) (io.printer:write-string stream meta "`")
+                                           (io.printer:print-expression stream meta (cadr list)))
+               ((unquote-clause-p list) (io.printer:write-string stream meta ",")
+                                        (io.printer:print-expression stream meta (cadr list)))
+               ((unquote-splice-clause-p list) (io.printer:write-string stream meta ",@")
+                                               (io.printer:print-expression stream meta (cadr list)))
                ((consp list) (io.printer:write-string     stream meta "(")
                              (io.printer:print-expression stream meta (car list))
                              (io.printer:print-list-body  stream meta (cdr list))
