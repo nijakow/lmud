@@ -1146,7 +1146,16 @@
          (and (null remaining-chars) number)))
 
    (defun io.reader:parse-number (chars &optional (base 10))
-      (io.reader:parse-integer chars base))
+      (multiple-value-bind (numerator remaining-chars)
+            (io.reader:parse-integer-core chars base)
+         (cond ((null remaining-chars) numerator)
+               ((char= (car remaining-chars) #\/)
+                (multiple-value-bind (denominator remaining-chars)
+                     (io.reader:parse-integer-core (cdr remaining-chars) base)
+                  (if (and denominator (null remaining-chars))
+                      (values (/ numerator denominator) nil)
+                      (values nil nil))))
+               (t (values nil remaining-chars)))))
 
    (defun io.reader:read-atom (stream)
       (let ((text (io.reader:read-until-breaking-char stream)))
