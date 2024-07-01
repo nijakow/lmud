@@ -290,6 +290,10 @@ bool LMud_Rune_ByName(const char* name, LMud_Rune* rune)
         result = '\r';
     else if (LMud_CStr_EqualsIgnoreCase(ptr, "tab"))
         result = '\t';
+    else if (LMud_CStr_EqualsIgnoreCase(ptr, "backspace"))
+        result = '\b';
+    else if (LMud_CStr_EqualsIgnoreCase(ptr, "escape"))
+        result = '\e';
     else {
         LMud_Utf8_Decoder_Create(&decoder);
         {

@@ -392,35 +392,51 @@
    (defun char<= (a b) (<= (char-code a) (char-code b)))
    (defun char>= (a b) (>= (char-code a) (char-code b)))
 
-   (defun lmud.util:whitespacep (char)
+   (defun lmud.char:char=-ignore-case (a b)
+      (or (char= a b)
+          (char= (char-upcase a) (char-upcase b))))
+
+   (defun lmud.char:printable-char-p (char)
+      (let ((code (char-code char)))
+         (or (and (>= code #x20) (<= code #x7E))
+             (>= code #xA0))))
+
+   (defun lmud.char:whitespacep (char)
       (or (char= char #\Space)
           (char= char #\Tab)
           (char= char #\Newline)
           (char= char #\Return)))
 
-   (defun lmud.util:special-character-by-name (name)
-      (let ((capitalized (string-upcase name)))
-         (cond ((string= capitalized "SPACE")   #\Space)
-               ((string= capitalized "TAB")     #\Tab)
-               ((string= capitalized "NEWLINE") #\Newline)
-               ((string= capitalized "RETURN")  #\Return)
-               (t (lmud.util:simple-error "Unknown character name!")))))
+   (defparameter lmud.char:*special-character-names*
+      (list (cons #\Space     "Space")
+            (cons #\Tab       "Tab")
+            (cons #\Newline   "Newline")
+            (cons #\Return    "Return")
+            (cons #\Backspace "Backspace")
+            (cons #\Escape    "Escape")))
+
+   (defun lmud.char:special-character-by-name (name)
+      (dolist (pair lmud.char:*special-character-names*)
+         (when (string= name (cdr pair) :compare #'lmud.char:char=-ignore-case)
+            (return (car pair))))
+      (lmud.util:simple-error "Unknown character name!"))
    
-   (defun lmud.util:character-by-name (name)
+   (defun lmud.char:character-by-name (name)
       (if (= (length name) 1)
           (aref name 0)
-          (lmud.util:special-character-by-name name)))
+          (lmud.char:special-character-by-name name)))
    
-   (defun lmud.util:character-name-or-nil (char)
-      (cond ((char= char #\Space)   "SPACE")
-            ((char= char #\Tab)     "TAB")
-            ((char= char #\Newline) "NEWLINE")
-            ((char= char #\Return)  "RETURN")
-            (t                      nil)))
+   (defun lmud.char:character-name-or-nil (char)
+      (dolist (pair lmud.char:*special-character-names*)
+         (when (char= char (car pair))
+            (return (cdr pair))))
+      nil)
    
-   (defun lmud.util:character-name (char)
-      (or (lmud.util:character-name-or-nil char)
-          (string char)))
+   (defun lmud.char:character-name (char)
+      (or (lmud.char:character-name-or-nil char)
+          (if (lmud.char:printable-char-p char)
+              (string char)
+              "UNPRINTABLE_UNNAMED_CHAR")))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -581,16 +597,16 @@
    ;;;    String Operations
    ;;;
 
-   (defun string= (a b &optional (key #'identity))
+   (defun string= (a b &key (key #'identity) (compare #'char=))
       (and (stringp a)
            (stringp b)
            (or (eq a b)
-               (= (length a) (length b))
-               (progn (dosequence (i a)
-                  (unless (char= (funcall key (aref a i))
-                                 (funcall key (aref b i)))
-                     (return nil)))
-                  t))))
+               (and (= (length a) (length b))
+                    (progn (dotimes (i (length a))
+                              (unless (funcall compare (funcall key (aref a i))
+                                                       (funcall key (aref b i)))
+                                 (return nil)))
+                           t)))))
    
    (defun string-upcase (string)
       (conversions:->string (mapcar #'char-upcase (conversions:string->list string))))
@@ -1058,7 +1074,7 @@
    (defun io.reader:breaking-char-p (char)
       (or (char= char (code-char 40)) ; '('
           (char= char (code-char 41)) ; ')'
-          (lmud.util:whitespacep char)))
+          (lmud.char:whitespacep char)))
 
    (defun io.reader:check (stream char)
       (let ((parsed-char (read-char stream)))
@@ -1096,7 +1112,7 @@
          (conversions:->string (reverse result))))
       
    (defun io.reader:skip-whitespace (stream)
-      (io.reader:skip stream #'lmud.util:whitespacep))
+      (io.reader:skip stream #'lmud.char:whitespacep))
 
    (defun io.reader:read-until-breaking-char (stream)
       (io.reader:read-until stream #'io.reader:breaking-char-p))
@@ -1234,7 +1250,7 @@
          (intern (string-upcase text) (find-package "KEYWORD"))))
 
    (defun io.reader:parse-character (stream)
-      (lmud.util:character-by-name (io.reader:read-until-breaking-char stream)))
+      (lmud.char:character-by-name (io.reader:read-until-breaking-char stream)))
    
    (defun io.reader:parse-string (stream)
       (io.reader:read-escaped stream "\\" "\""))
@@ -1344,10 +1360,13 @@
    (defun io.printer:print-character (stream meta character)
       (if (io.printer:meta-escaped-p meta)
           (progn (io.printer:write-string stream meta "#\\")
-                 (let ((name (lmud.util:character-name-or-nil character)))
+                 (let ((name (lmud.char:character-name-or-nil character)))
                     (if name
                         (io.printer:write-string stream meta name)
-                        (io.printer:write-char stream meta character))))
+                        (if (lmud.char:printable-char-p character)
+                            (io.printer:write-char stream meta character)
+                              (progn (io.printer:write-string stream meta "U+")
+                                     (io.printer:print-integer stream meta (char-code character) 16))))))
           (write-char character stream)))
    
    (defun io.printer:print-string (stream meta string)
