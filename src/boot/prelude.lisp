@@ -1193,15 +1193,8 @@
    (defun io.reader:parse-integer-core (chars base)
       (setq chars (conversions:->list chars))
       
-      (let ((negative  nil)
-            (value       0)
+      (let ((value       0)
             (digits-read 0))
-         
-         (cond ((char= (car chars) #\-)
-                (pop chars)
-                (setq negative t))
-               ((char= (car chars) #\+)
-                (pop chars)))
          
          (while t
             (let* ((char  (car chars))
@@ -1211,7 +1204,7 @@
                          digits-read (+ digits-read 1))
                    (return (values (if (= digits-read 0)
                                        nil
-                                       (if negative (- value) value))
+                                       value)
                                    chars))))
             (pop chars))))
    
@@ -1219,8 +1212,20 @@
       (multiple-value-bind (number remaining-chars)
             (io.reader:parse-integer-core chars base)
          (and (null remaining-chars) number)))
+   
+   (defun io.reader:parse-trailing-fractional-part (chars base fraction denominator)
+      (if (endp chars)
+          (values fraction nil)
+          (let* ((char  (car chars))
+                 (digit (io.reader:char->digit char base)))
+             (if digit
+                 (io.reader:parse-trailing-fractional-part (cdr chars)
+                                                           base
+                                                           (+ fraction (/ digit denominator))
+                                                           (* denominator base))
+                 (values fraction chars)))))
 
-   (defun io.reader:parse-number (chars &optional (base 10))
+   (defun io.reader:parse-unsigned-number (chars &optional (base 10))
       (multiple-value-bind (numerator remaining-chars)
             (io.reader:parse-integer-core chars base)
          (cond ((null remaining-chars) numerator)
@@ -1229,8 +1234,32 @@
                      (io.reader:parse-integer-core (cdr remaining-chars) base)
                   (if (and denominator (null remaining-chars))
                       (values (/ numerator denominator) nil)
-                      (values nil nil))))
+                      (values nil remaining-chars))))
+               ((char= (car remaining-chars) #\.)
+                (multiple-value-bind (fraction remaining-chars)
+                     (io.reader:parse-trailing-fractional-part (cdr remaining-chars) base 0 base)
+                  (if (null remaining-chars)
+                      (if (minusp numerator)
+                          (- numerator fraction)
+                          (+ numerator fraction))
+                      (values nil remaining-chars))))
                (t (values nil remaining-chars)))))
+   
+   (defun io.reader:parse-number (chars &optional (base 10))
+      (let ((negative nil))
+         (setq chars (conversions:->list chars))
+         (cond ((char= (car chars) #\-)
+                (pop chars)
+                (setq negative t))
+               ((char= (car chars) #\+)
+                (pop chars)))
+         (multiple-value-bind (number remaining-chars)
+               (io.reader:parse-unsigned-number chars base)
+            (if number
+                (if negative
+                    (- number)
+                    number)
+                nil))))
 
    (defun io.reader:read-atom (stream)
       (let ((text (io.reader:read-until-breaking-char stream)))
