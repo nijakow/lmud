@@ -366,8 +366,17 @@
    (defun 1+ (n) (+ n 1))
    (defun 1- (n) (- n 1))
 
+   (defun zerop  (n) (= n 0))
+   (defun plusp  (n) (> n 0))
+   (defun minusp (n) (< n 0))
+
    (defun evenp (n) (= (mod n 2) 0))
    (defun oddp  (n) (not (evenp n)))
+
+   (defun gcd (a b)
+      (if (= b 0)
+          a
+          (gcd b (mod a b))))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1222,9 +1231,10 @@
    (defun io.printer:print-unsigned-nonzero-integer (stream meta n)
       (when (> n 0)
          (io.printer:print-unsigned-nonzero-integer stream meta (truncate n 10))
-         (write-char (code-char (+ (char-code #\0)
-                                   (mod n 10)))
-                     stream)))
+         (io.printer:write-char stream
+                                meta
+                                (code-char (+ (char-code #\0)
+                                              (mod n 10))))))
 
    (defun io.printer:print-integer (stream meta integer &optional (base 10))
       (cond ((= integer 0) (write-char #\0 stream))
@@ -1232,10 +1242,48 @@
                            (io.printer:print-unsigned-nonzero-integer stream meta (- integer)))
             (t             (io.printer:print-unsigned-nonzero-integer stream meta integer))))
    
+   (defun io.printer:print-floating-point-fractional-digits (stream meta fractional-part)
+      (until (= fractional-part 0)
+         (setq fractional-part (* fractional-part 10))
+         (let* ((digit         (truncate fractional-part))
+                (rest          (- fractional-part digit)))
+            (io.printer:write-char stream
+                                   meta
+                                   (code-char (+ (char-code #\0)
+                                                 (mod digit 10))))
+            (setq fractional-part rest))))
+
+   (defun io.printer:print-floating-point (stream meta ratio)
+      "Print a ratio as a floating point number"
+      (when (< ratio 0)
+         (write-char #\- stream)
+         (setq ratio (- ratio)))
+         (let* ((integer-part  (truncate ratio))
+                (fraction-part (- ratio integer-part)))
+            (io.printer:print-integer stream meta integer-part)
+            (write-char #\. stream)
+            (io.printer:print-floating-point-fractional-digits stream meta fraction-part)))
+
    (defun io.printer:print-ratio (stream meta ratio)
       (io.printer:print-integer stream meta (numerator ratio))
       (io.printer:write-char stream meta #\/)
       (io.printer:print-integer stream meta (denominator ratio)))
+
+   (defun io.printer:can-be-printed-as-floating-point-p (ratio)
+      (when (< ratio 0) (setq ratio (- ratio)))
+      (setq ratio (- ratio (truncate ratio)))
+      (let ((count 20))
+         (until (zerop ratio)
+            (when (zerop count) (return nil))
+            (setq ratio (* ratio 10))
+            (setq ratio (- ratio (truncate ratio)))
+            (decf count))
+         t))
+
+   (defun io.printer:print-rational (stream meta ratio)
+      (if (io.printer:can-be-printed-as-floating-point-p ratio)
+          (io.printer:print-floating-point stream meta ratio)
+          (io.printer:print-ratio          stream meta ratio)))
 
    (defun io.printer:print-character (stream meta character)
       (if (io.printer:meta-escaped-p meta)
@@ -1321,7 +1369,7 @@
             ((stringp            e) (io.printer:print-string    stream meta e))
             ((vectorp            e) (io.printer:print-vector    stream meta e))
             ((lmud.int:bytesp    e) (io.printer:print-bytes     stream meta e))
-            ((lmud.int:ratiop    e) (io.printer:print-ratio     stream meta e))
+            ((lmud.int:ratiop    e) (io.printer:print-rational  stream meta e))
             ((lmud.int:%customp  e) (io.printer:write-string    stream meta "#<CUSTOM>"))
             ((lmud.int:machine-function-p)
              (io.printer:write-string stream meta "#<MACHINE-CODE-FUNCTION ")

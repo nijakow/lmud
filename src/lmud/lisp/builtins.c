@@ -1017,10 +1017,20 @@ void LMud_Builtin_Truncate(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_S
     LMud_Any  result;
 
     /*
-     * TODO: Check arguments. Must have exactly two arguments.
+     * TODO: Check arguments.
      */
-    (void) argument_count;
-    LMud_Lisp_Truncate(fiber->lisp, arguments[0], arguments[1], &result);
+    if (argument_count == 1) {
+        LMud_Lisp_Truncate(fiber->lisp,
+                           LMud_Lisp_Numerator(fiber->lisp, arguments[0]),
+                           LMud_Lisp_Denominator(fiber->lisp, arguments[0]),
+                           &result);
+    } else if (argument_count == 2) {
+        LMud_Lisp_Truncate(fiber->lisp, arguments[0], arguments[1], &result);
+    } else {
+        // TODO: Error
+        result = LMud_Any_FromInteger(0);
+    }
+    
     LMud_Fiber_SetAccumulator(fiber, result);
 }
 
