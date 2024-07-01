@@ -6,12 +6,13 @@
 #include "servers.h"
 
 
-void LMud_Server_Create(struct LMud_Server* self, struct LMud_Net* net, LMud_Socket fd)
+void LMud_Server_Create(struct LMud_Server* self, struct LMud_Net* net, LMud_Socket fd, LMud_Any startup_function)
 {
-    self->net  = net;
-    self->prev = NULL;
-    self->next = NULL;
-    self->fd   = fd;
+    self->net          = net;
+    self->prev         = NULL;
+    self->next         = NULL;
+    self->fd           = fd;
+    self->startup_func = startup_function;
 }
 
 void LMud_Server_Destroy(struct LMud_Server* self)
@@ -21,7 +22,7 @@ void LMud_Server_Destroy(struct LMud_Server* self)
 }
 
 
-struct LMud_Server* LMud_Server_New(struct LMud_Net* net, LMud_Socket fd)
+struct LMud_Server* LMud_Server_New(struct LMud_Net* net, LMud_Socket fd, LMud_Any startup_function)
 {
     struct LMud_Server*  self;
 
@@ -29,7 +30,7 @@ struct LMud_Server* LMud_Server_New(struct LMud_Net* net, LMud_Socket fd)
 
     if (self != NULL)
     {
-        LMud_Server_Create(self, net, fd);
+        LMud_Server_Create(self, net, fd, startup_function);
     }
     
     return self;
@@ -113,11 +114,11 @@ void LMud_Servers_Destroy(struct LMud_Servers* self)
     }
 }
 
-static bool LMud_Servers_PushSocket(struct LMud_Servers* self, LMud_Socket socket)
+static bool LMud_Servers_PushSocket(struct LMud_Servers* self, LMud_Socket socket, LMud_Any startup_function)
 {
     struct LMud_Server*  server;
 
-    server = LMud_Server_New(self->net, socket);
+    server = LMud_Server_New(self->net, socket, startup_function);
 
     if (server != NULL)
     {
@@ -127,30 +128,30 @@ static bool LMud_Servers_PushSocket(struct LMud_Servers* self, LMud_Socket socke
     return (server != NULL);
 }
 
-static void LMud_Servers_PushSocketOrClose(struct LMud_Servers* self, LMud_Socket socket)
+static void LMud_Servers_PushSocketOrClose(struct LMud_Servers* self, LMud_Socket socket, LMud_Any startup_function)
 {
-    if (!LMud_Servers_PushSocket(self, socket))
+    if (!LMud_Servers_PushSocket(self, socket, startup_function))
         LMud_Inet_Close(socket);
 }
 
-bool LMud_Servers_OpenV4(struct LMud_Servers* self, const char* address, LMud_Port port)
+bool LMud_Servers_OpenV4(struct LMud_Servers* self, const char* address, LMud_Port port, LMud_Any startup_function)
 {
     LMud_Socket  socket;
 
     if (LMud_Inet_OpenServerV4(address, port, &socket)) {
-        LMud_Servers_PushSocketOrClose(self, socket);
+        LMud_Servers_PushSocketOrClose(self, socket, startup_function);
         return true;
     } else {
         return false;
     }
 }
 
-bool LMud_Servers_OpenV6(struct LMud_Servers* self, const char* address, LMud_Port port)
+bool LMud_Servers_OpenV6(struct LMud_Servers* self, const char* address, LMud_Port port, LMud_Any startup_function)
 {
     LMud_Socket  socket;
 
     if (LMud_Inet_OpenServerV6(address, port, &socket)) {
-        LMud_Servers_PushSocketOrClose(self, socket);
+        LMud_Servers_PushSocketOrClose(self, socket, startup_function);
         return true;
     } else {
         return false;

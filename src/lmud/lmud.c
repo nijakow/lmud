@@ -64,9 +64,8 @@ void LMud_Start(struct LMud* self)
 {
     LMud_Any  boot_function;
 
-    LMud_Net_OpenV4(&self->net, "0.0.0.0", 4242);
-
-    if (LMud_Lisp_LoadFile(&self->lisp, "../boot/prelude.lisp", &boot_function)) {
+    if (LMud_Lisp_LoadFile(&self->lisp, "../boot/prelude.lisp", &boot_function))
+    {
         LMud_Lisp_Kickstart(&self->lisp, boot_function);
     }
 }

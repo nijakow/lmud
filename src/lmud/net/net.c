@@ -21,14 +21,14 @@ void LMud_Net_Destroy(struct LMud_Net* self)
     LMud_Servers_Destroy(&self->servers);
 }
 
-bool LMud_Net_OpenV4(struct LMud_Net* self, const char* address, LMud_Port port)
+bool LMud_Net_OpenV4(struct LMud_Net* self, const char* address, LMud_Port port, LMud_Any startup_function)
 {
-    return LMud_Servers_OpenV4(&self->servers, address, port);
+    return LMud_Servers_OpenV4(&self->servers, address, port, startup_function);
 }
 
-bool LMud_Net_OpenV6(struct LMud_Net* self, const char* address, LMud_Port port)
+bool LMud_Net_OpenV6(struct LMud_Net* self, const char* address, LMud_Port port, LMud_Any startup_function)
 {
-    return LMud_Servers_OpenV6(&self->servers, address, port);
+    return LMud_Servers_OpenV6(&self->servers, address, port, startup_function);
 }
 
 bool LMud_Net_RegisterClientFileDescriptor(struct LMud_Net* self, int fd, bool close_on_error, struct LMud_Connection** connection)
