@@ -28,6 +28,7 @@
 
 #include <lmud/config.h>
 
+
 typedef size_t        LMud_Size;
 typedef int           LMud_Integer;
 typedef unsigned int  LMud_Rune;

@@ -1,4 +1,8 @@
 
+#include <lmud/log/log.h>
+#include <lmud/util/stringbuilder.h>
+#include <lmud/util/utf8.h>
+
 #include "stream.h"
 
 
@@ -130,5 +134,82 @@ void LMud_InputStream_SkipIf(struct LMud_InputStream* self, LMud_CharPredicate p
     while (!LMud_InputStream_Eof(self) && predicate(LMud_InputStream_Get(self)))
     {
         LMud_InputStream_Advance(self);
+    }
+}
+
+
+
+static void LMud_OutputStream_FputcWrapper(FILE* file, char c)
+{
+    fputc(c, file);
+}
+
+
+void LMud_OutputStream_Create(struct LMud_OutputStream* self, void* payload, LMud_OutputStreamWrite write)
+{
+    self->payload = payload;
+    self->write   = write;
+}
+
+void LMud_OutputStream_CreateOnFile(struct LMud_OutputStream* self, FILE* file)
+{
+    LMud_OutputStream_Create(self, file, (LMud_OutputStreamWrite) LMud_OutputStream_FputcWrapper);
+}
+
+void LMud_OutputStream_CreateOnStringBuilder(struct LMud_OutputStream* self, struct LMud_StringBuilder* builder)
+{
+    LMud_OutputStream_Create(self, builder, (LMud_OutputStreamWrite) LMud_StringBuilder_AppendChar);
+}
+
+void LMud_OutputStream_CreateOnLogComposer(struct LMud_OutputStream* self, struct LMud_LogComposer* composer)
+{
+    LMud_OutputStream_Create(self, composer, (LMud_OutputStreamWrite) LMud_LogComposer_AppendChar);
+}
+
+void LMud_OutputStream_Destroy(struct LMud_OutputStream* self)
+{
+    (void) self;
+}
+
+void LMud_OutputStream_WriteChar(struct LMud_OutputStream* self, char c)
+{
+    self->write(self->payload, c);
+}
+
+void LMud_OutputStream_WriteRune(struct LMud_OutputStream* self, LMud_Rune rune)
+{
+    struct LMud_Utf8_Encoder  encoder;
+    
+    LMud_Utf8_Encoder_Create(&encoder, rune);
+    LMud_OutputStream_WriteCString(self, LMud_Utf8_Encoder_AsString(&encoder));
+    LMud_Utf8_Encoder_Destroy(&encoder);
+}
+
+void LMud_OutputStream_WriteCString(struct LMud_OutputStream* self, const char* str)
+{
+    LMud_Size  index;
+
+    for (index = 0; str[index] != '\0'; index++)
+    {
+        LMud_OutputStream_WriteChar(self, str[index]);
+    }
+}
+
+void LMud_OutputStream_Printf(struct LMud_OutputStream* self, const char* format, ...)
+{
+    va_list    args;
+    int        result;
+    LMud_Size  length;
+    char       buffer[4096];
+
+    va_start(args, format);
+    result = vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+
+    length = (LMud_Size) result;
+
+    if (result >= 0 && length > 0 && length < sizeof(buffer))
+    {
+        LMud_OutputStream_WriteCString(self, buffer);
     }
 }
