@@ -234,6 +234,27 @@ void LMud_Builtin_Intern(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
         LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_InternInPackageLL(fiber->lisp, arguments[1], arguments[0]));
 }
 
+void LMud_Builtin_AllSymbols(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    struct LMud_Package*  package;
+    struct LMud_Symbol*   symbol;
+    LMud_Any              list;
+
+    NO_ARGS;
+
+    list = LMud_Lisp_Nil(fiber->lisp);
+
+    for (package = fiber->lisp->objects.packages; package != NULL; package = package->next)
+    {
+        for (symbol = package->symbols.symbols; symbol != NULL; symbol = symbol->next)
+        {
+            list = LMud_Lisp_Cons(fiber->lisp, LMud_Any_FromPointer(symbol), list);
+        }
+    }
+
+    LMud_Fiber_SetAccumulator(fiber, list);
+}
+
 void LMud_Builtin_Gensym(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     NO_ARGS;
@@ -1154,6 +1175,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "SET-CURRENT-PORT", LMud_Builtin_SetCurrentPort);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "OPEN-FD", LMud_Builtin_OpenFd);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "RATIOP", LMud_Builtin_Ratiop);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "ALL-SYMBOLS", LMud_Builtin_AllSymbols);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRIN1", LMud_Builtin_Prin1);
