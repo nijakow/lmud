@@ -210,6 +210,11 @@ bool LMud_Lisp_IsSymbol(struct LMud_Lisp* self, LMud_Any value)
     return LMud_Any_IsPointer(value) && LMud_Lisp_IsSymbolPointer(self, LMud_Any_AsPointer(value));
 }
 
+bool LMud_Lisp_IsGensym(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Lisp_IsSymbol(self, value) && LMud_Symbol_IsGensym(LMud_Any_AsPointer(value));
+}
+
 
 bool LMud_Lisp_IsNil(struct LMud_Lisp* self, LMud_Any value)
 {

@@ -66,6 +66,7 @@ bool LMud_Lisp_IsPort(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsRatio(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsString(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsSymbol(struct LMud_Lisp* self, LMud_Any value);
+bool LMud_Lisp_IsGensym(struct LMud_Lisp* self, LMud_Any value);
 
 bool LMud_Lisp_IsNil(struct LMud_Lisp* self, LMud_Any value);
 

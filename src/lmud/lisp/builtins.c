@@ -196,6 +196,15 @@ void LMud_Builtin_Symbolp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Si
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsSymbol(fiber->lisp, arguments[0])));
 }
 
+void LMud_Builtin_Gensymp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    /*
+     * TODO: Check arguments.
+     */
+    (void) argument_count;
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsGensym(fiber->lisp, arguments[0])));
+}
+
 void LMud_Builtin_FindPackage(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     /*
@@ -1332,6 +1341,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "FUNCALL-FORWARD-REST", LMud_Builtin_FuncallForwardRest);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%GIVEN-ARGUMENT-COUNT", LMud_Builtin_GivenArgumentCount);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%GIVEN-ARGUMENT-REF", LMud_Builtin_GivenArgumentRef);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "GENSYMP", LMud_Builtin_Gensymp);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-DISPATCHER-FUNCTION", LMud_Builtin_GetCustomDispatcherFunction);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%SET-CUSTOM-DISPATCHER-FUNCTION", LMud_Builtin_SetCustomDispatcherFunction);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOMP", LMud_Builtin_Customp);
