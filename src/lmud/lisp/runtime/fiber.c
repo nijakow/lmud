@@ -285,11 +285,9 @@ struct LMud_Frame* LMud_Fiber_PushFrame(struct LMud_Fiber* self, struct LMud_Fun
 
     if (argument_count < function->info.fixed_argument_count) {
         LMud_Fiber_PerformError(self, "Not enough arguments!");
-        assert(false);
         return NULL;
     } else if (extra_args > 0 && !function->info.variadic) {
-        LMud_Fiber_PerformError(self, "Function is not variadic!");
-        assert(false);
+        LMud_Fiber_PerformError(self, "Too many arguments! (Function is not variadic)");
         return NULL;
     }
     
@@ -327,18 +325,6 @@ void LMud_Fiber_PopFrame(struct LMud_Fiber* self)
         LMud_FrameList_Insert(&self->floating_frames, frame);
     } else {
         LMud_Frame_Destroy(frame);
-    }
-}
-
-
-void LMud_Fiber_Unwind(struct LMud_Fiber* self)
-{
-    /*
-     * TODO: Implement condition handling.
-     */
-    while (LMud_Fiber_HasFrames(self))
-    {
-        LMud_Fiber_PopFrame(self);
     }
 }
 
@@ -403,12 +389,6 @@ void LMud_Fiber_PerformReturn(struct LMud_Fiber* self)
     LMud_Fiber_PopFrame(self);
 }
 
-void LMud_Fiber_PerformError(struct LMud_Fiber* self, const char* message)
-{
-    printf(LMud_VT100_Italic "; " LMud_VT100_Red LMud_VT100_Blink "Error: %s" LMud_VT100_Normal "\n", message);
-    LMud_Fiber_Unwind(self);
-}
-
 void LMud_Fiber_SignalAndUnwind(struct LMud_Fiber* self)
 {
     LMud_Fiber_SetExecutionResumptionMode(self, LMud_ExecutionResumption_SIGNAL);
@@ -425,6 +405,23 @@ void LMud_Fiber_SignalAndUnwind(struct LMud_Fiber* self)
 
         LMud_Fiber_PopFrame(self);
     }
+}
+
+void LMud_Fiber_SignalAndUnwindWithValues(struct LMud_Fiber* self, LMud_Any* values, LMud_Size count)
+{
+    LMud_Fiber_Values(self, values, count);
+    LMud_Fiber_SignalAndUnwind(self);
+}
+
+void LMud_Fiber_PerformError(struct LMud_Fiber* self, const char* message)
+{
+    LMud_Any  exception;
+
+    printf(LMud_VT100_Italic "; " LMud_VT100_Red LMud_VT100_Blink "Error: %s" LMud_VT100_Normal "\n", message);
+    
+    exception = LMud_Lisp_String(self->lisp, message);
+
+    LMud_Fiber_SignalAndUnwindWithValues(self, &exception, 1);
 }
 
 

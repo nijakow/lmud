@@ -109,6 +109,7 @@ void LMud_Fiber_PerformReturn(struct LMud_Fiber* self);
 void LMud_Fiber_PerformError(struct LMud_Fiber* self, const char* message);
 
 void LMud_Fiber_SignalAndUnwind(struct LMud_Fiber* self);
+void LMud_Fiber_SignalAndUnwindWithValues(struct LMud_Fiber* self, LMud_Any* values, LMud_Size count);
 
 void LMud_Fiber_Tick(struct LMud_Fiber* self);
 
