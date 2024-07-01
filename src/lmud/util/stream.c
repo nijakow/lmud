@@ -195,21 +195,26 @@ void LMud_OutputStream_WriteCString(struct LMud_OutputStream* self, const char* 
     }
 }
 
-void LMud_OutputStream_Printf(struct LMud_OutputStream* self, const char* format, ...)
+void LMud_OutputStream_VPrintf(struct LMud_OutputStream* self, const char* format, va_list args)
 {
-    va_list    args;
     int        result;
     LMud_Size  length;
     char       buffer[4096];
 
-    va_start(args, format);
     result = vsnprintf(buffer, sizeof(buffer), format, args);
-    va_end(args);
-
     length = (LMud_Size) result;
 
     if (result >= 0 && length > 0 && length < sizeof(buffer))
     {
         LMud_OutputStream_WriteCString(self, buffer);
     }
+}
+
+void LMud_OutputStream_Printf(struct LMud_OutputStream* self, const char* format, ...)
+{
+    va_list    args;
+
+    va_start(args, format);
+    LMud_OutputStream_VPrintf(self, format, args);
+    va_end(args);
 }

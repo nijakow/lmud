@@ -51,4 +51,5 @@ void LMud_OutputStream_Destroy(struct LMud_OutputStream* self);
 void LMud_OutputStream_WriteChar(struct LMud_OutputStream* self, char c);
 void LMud_OutputStream_WriteRune(struct LMud_OutputStream* self, LMud_Rune rune);
 void LMud_OutputStream_WriteCString(struct LMud_OutputStream* self, const char* str);
+void LMud_OutputStream_VPrintf(struct LMud_OutputStream* self, const char* format, va_list args);
 void LMud_OutputStream_Printf(struct LMud_OutputStream* self, const char* format, ...);

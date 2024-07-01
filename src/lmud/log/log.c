@@ -35,10 +35,12 @@ void LMud_Line_Delete(struct LMud_Line* self)
 }
 
 
-void LMud_Log_Create(struct LMud_Log* self)
+bool LMud_Log_Create(struct LMud_Log* self)
 {
     self->first = NULL;
     self->last  = NULL;
+
+    return true;
 }
 
 void LMud_Log_Destroy(struct LMud_Log* self)

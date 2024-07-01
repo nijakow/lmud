@@ -23,7 +23,7 @@ struct LMud_Log
     struct LMud_Line*  last;
 };
 
-void LMud_Log_Create(struct LMud_Log* self);
+bool LMud_Log_Create(struct LMud_Log* self);
 void LMud_Log_Destroy(struct LMud_Log* self);
 
 void LMud_Log_Append(struct LMud_Log* self, const char* text);

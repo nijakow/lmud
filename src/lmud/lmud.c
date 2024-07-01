@@ -8,7 +8,8 @@
 bool LMud_Create(struct LMud* self)
 {
     self->running = true;
-    return LMud_Net_Create(&self->net, self)
+    return LMud_Log_Create(&self->log)
+        && LMud_Net_Create(&self->net, self)
         && LMud_Lisp_Create(&self->lisp, self);
 }
 
@@ -16,7 +17,43 @@ void LMud_Destroy(struct LMud* self)
 {
     LMud_Lisp_Destroy(&self->lisp);
     LMud_Net_Destroy(&self->net);
+    LMud_Log_Destroy(&self->log);
 }
+
+
+struct LMud_Log* LMud_GetLog(struct LMud* self)
+{
+    return &self->log;
+}
+
+struct LMud_Lisp* LMud_GetLisp(struct LMud* self)
+{
+    return &self->lisp;
+}
+
+struct LMud_Net* LMud_GetNet(struct LMud* self)
+{
+    return &self->net;
+}
+
+void LMud_Logf(struct LMud* mud, const char* format, ...)
+{
+    va_list                  args;
+    struct LMud_LogComposer  composer;
+    struct LMud_OutputStream stream;
+
+    va_start(args, format);
+    {
+        LMud_LogComposer_Create(&composer, LMud_GetLog(mud));
+        LMud_OutputStream_CreateOnLogComposer(&stream, &composer);
+        LMud_OutputStream_VPrintf(&stream, format, args);
+        LMud_OutputStream_Destroy(&stream);
+        LMud_LogComposer_Commit(&composer);
+        LMud_LogComposer_Destroy(&composer);
+    }
+    va_end(args);
+}
+
 
 void LMud_SignalInterrupt(struct LMud* self, int signal)
 {
