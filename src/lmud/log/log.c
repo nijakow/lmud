@@ -85,7 +85,18 @@ void LMud_Log_Append(struct LMud_Log* self, const char* text)
 
 static void LMud_LogComposer_FreshLine(struct LMud_LogComposer* self)
 {
-    LMud_StringBuilder_AppendCStr(&self->builder, "; ");
+    char  buffer[64];
+
+    snprintf(
+        buffer,
+        sizeof(buffer),
+        "; [%s%-7s%s]: ",
+        LMud_LogLevel_EscapeSequence(self->loglevel),
+        LMud_LogLevel_ToString(self->loglevel),
+        "\033[0m"
+    );
+
+    LMud_StringBuilder_AppendCStr(&self->builder, buffer);
 }
 
 void LMud_LogComposer_Create(struct LMud_LogComposer* self, struct LMud_Log* log, enum LMud_LogLevel loglevel)

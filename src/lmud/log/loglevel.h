@@ -12,3 +12,6 @@ enum LMud_LogLevel
     LMud_LogLevel_NOTE,
     LMud_LogLevel_FATAL
 };
+
+const char* LMud_LogLevel_ToString(enum LMud_LogLevel loglevel);
+const char* LMud_LogLevel_EscapeSequence(enum LMud_LogLevel loglevel);

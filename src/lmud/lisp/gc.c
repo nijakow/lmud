@@ -167,6 +167,14 @@ static void LMud_GC_InitialBookeeping(struct LMud_GC* self)
 
 static void LMud_GC_FinalBookeeping(struct LMud_GC* self)
 {
+    LMud_Logf(
+        self->lisp->mud,
+        LMud_LogLevel_INFO,
+        "GC: Freed %zu objects, kept %zu objects",
+        self->stats.objects_freed,
+        self->stats.objects_kept
+    );
+
     LMud_Objects_ClearGcAllocationCounter(&self->lisp->objects);
     LMud_TrimMalloc();
 }
