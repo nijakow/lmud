@@ -426,8 +426,8 @@ void LMud_Fiber_PerformError(struct LMud_Fiber* self, const char* message)
 {
     LMud_Any  exception;
 
-    printf(LMud_VT100_Italic "; " LMud_VT100_Red LMud_VT100_Blink "Error: %s" LMud_VT100_Normal "\n", message);
-    
+    LMud_Logf(self->lisp->mud, "Encountered an error on fiber %p: %s\n", self, message);
+
     exception = LMud_Lisp_String(self->lisp, message);
 
     LMud_Fiber_SignalAndUnwindWithValues(self, &exception, 1);

@@ -32,6 +32,7 @@ void LMud_Log_Append(struct LMud_Log* self, const char* text);
 struct LMud_LogComposer
 {
     struct LMud_Log*           log;
+    LMud_Size                  line_offset;
     struct LMud_StringBuilder  builder;
 };
 

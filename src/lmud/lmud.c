@@ -97,14 +97,21 @@ void LMud_Banner(struct LMud* self)
     printf("\n");
 }
 
-void LMud_Start(struct LMud* self)
+void LMud_Startup(struct LMud* self)
 {
     LMud_Any  boot_function;
+
+    LMud_Logf(self, "Starting up LMud v%s %s '%s'...\n", LMud_VERSION, LMud_VERSION_EXTRA, LMud_RELEASE_NAME);
 
     if (LMud_Lisp_LoadFile(&self->lisp, "../boot/prelude.lisp", &boot_function))
     {
         LMud_Lisp_Kickstart(&self->lisp, boot_function);
     }
+}
+
+void LMud_Shutdown(struct LMud* self)
+{
+    LMud_Logf(self, "Shutting down...\n");
 }
 
 void LMud_Main(struct LMud* self, int argc, char* argv[])
@@ -113,6 +120,7 @@ void LMud_Main(struct LMud* self, int argc, char* argv[])
     (void) argv;
 
     LMud_Banner(self);
-    LMud_Start(self);
+    LMud_Startup(self);
     LMud_Loop(self);
+    LMud_Shutdown(self);
 }

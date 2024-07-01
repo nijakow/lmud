@@ -627,7 +627,7 @@ void LMud_Lisp_GarbageCollect(struct LMud_Lisp* self, struct LMud_GCStats* stats
 {
     struct LMud_GC  gc;
 
-    printf(LMud_VT100_Italic "; " LMud_VT100_Blue "Garbage Collection..." LMud_VT100_Normal "\n");
+    LMud_Logf(self->mud, "Garbage Collection...\n");
 
     LMud_GC_Create(&gc, self);
     LMud_GC_Run(&gc);
@@ -680,16 +680,16 @@ bool LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename, LMud_Any* 
     file   = fopen(filename, "r");
     
     if (file == NULL)
-        fprintf(stderr, LMud_VT100_Italic "; " LMud_VT100_Red "Failed to open file: \"%s\"" LMud_VT100_Normal "\n", filename);
+        LMud_Logf(self->mud, "Failed to open file: \"%s\"!\n", filename);
     else {
-        printf(LMud_VT100_Italic "; Loading file: \"%s\"..." LMud_VT100_Normal "\n", filename);
+        LMud_Logf(self->mud, "Loading file: \"%s\"...\n", filename);
 
         LMud_InputStream_CreateFromFile(&stream, file);
 
         while (LMud_Lisp_Read(self, &stream, &program))
         {
             if (!LMud_Lisp_Compile(self, program, &program)) {
-                fprintf(stderr, LMud_VT100_Italic ";   " LMud_VT100_Red "--> Failed to compile an expression!" LMud_VT100_Normal "\n");
+                LMud_Logf(self->mud, " --> Failed to compile an expression!\n");
                 break;
             } else {
                 LMud_Scheduler_BlockAndRunThunk(&self->scheduler, program, result);

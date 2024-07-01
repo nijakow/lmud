@@ -82,9 +82,16 @@ void LMud_Log_Append(struct LMud_Log* self, const char* text)
     }
 }
 
+
+static void LMud_LogComposer_FreshLine(struct LMud_LogComposer* self)
+{
+    LMud_StringBuilder_AppendCStr(&self->builder, "; ");
+}
+
 void LMud_LogComposer_Create(struct LMud_LogComposer* self, struct LMud_Log* log)
 {
-    self->log = log;
+    self->log         = log;
+    self->line_offset = 0;
     LMud_StringBuilder_Create(&self->builder);
 }
 
@@ -95,10 +102,21 @@ void LMud_LogComposer_Destroy(struct LMud_LogComposer* self)
 
 void LMud_LogComposer_Commit(struct LMud_LogComposer* self)
 {
-    (void) self;
+    if (self->line_offset > 0)
+    {
+        LMud_StringBuilder_AppendChar(&self->builder, '\n');
+    }
+    printf("%s", self->builder.data);
 }
 
 void LMud_LogComposer_AppendChar(struct LMud_LogComposer* self, char c)
 {
+    if (self->line_offset == 0)
+    {
+        LMud_LogComposer_FreshLine(self);
+    }
+
+    self->line_offset = (c == '\n') ? 0 : self->line_offset + 1;
+
     LMud_StringBuilder_AppendChar(&self->builder, c);
 }

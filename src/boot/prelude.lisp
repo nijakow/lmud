@@ -1579,7 +1579,7 @@
    (defun lmud.bootstrap::safely-evaluate (expression)
       (%signal-handler (e)
             (eval expression)
-         (io:uformat t "~&~%Error: ~s~%" e)
+         (io:uformat t "~&Error: ~a~%" e)
          (values)))
 
    (defun lmud.bootstrap::repl (port)
