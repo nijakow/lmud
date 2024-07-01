@@ -1098,12 +1098,6 @@ void LMud_Compiler_WriteBeginSignalHandler(struct LMud_Compiler* self, LMud_Comp
     LMud_Compiler_WriteLabel(self, handler_label);
 }
 
-void LMud_Compiler_WriteSignal(struct LMud_Compiler* self)
-{
-    LMud_Compiler_PushBytecode(self, LMud_Bytecode_SIGNAL);
-}
-
-
 
 bool LMud_Compiler_WriteLoadRegister(struct LMud_Compiler* self, struct LMud_Register* reg)
 {

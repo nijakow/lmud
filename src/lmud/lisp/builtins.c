@@ -14,6 +14,36 @@
 #include "builtins.h"
 
 
+
+static void LMud_Fiber_CheckArgs_Error(struct LMud_Fiber* fiber, LMud_Any* args, LMud_Size size, LMud_Size min, LMud_Size max, const char* func, const char* file, unsigned int line)
+{
+    char  buffer[1024];
+
+    (void) args;
+
+    snprintf(buffer, sizeof(buffer), "Wrong number of arguments! Function: %s(...) in %s:%u, got %zu, expected %zu-%zu.", func, file, line, size, min, max);
+
+    LMud_Fiber_PerformError(fiber, buffer);
+}
+
+bool LMud_Fiber_CheckArgs(struct LMud_Fiber* fiber, LMud_Any* args, LMud_Size size, LMud_Size min, LMud_Size max, const char* func, const char* file, unsigned int line)
+{
+    (void) args;
+
+    if (size < min || size > max)
+    {
+        LMud_Fiber_CheckArgs_Error(fiber, args, size, min, max, func, file, line);
+        return false;
+    }
+    return true;
+}
+
+#define CHECK_ARGS_BASE(min, max) if (!LMud_Fiber_CheckArgs(fiber, arguments, argument_count, min, max, __func__, __FILE__, __LINE__)) return;
+#define CHECK_ARGS(min, max) CHECK_ARGS_BASE(min, max)
+#define CHECK_ARGS_VARIADIC(min) CHECK_ARGS(min, LMud_VARIADIC_ARGS)
+#define NO_ARGS CHECK_ARGS(0, 0)
+
+
 void LMud_Builtin_HelloWorld(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     (void) fiber;
@@ -25,10 +55,7 @@ void LMud_Builtin_HelloWorld(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud
 
 void LMud_Builtin_Quit(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
-    (void) fiber;
-    (void) arguments;
-    (void) argument_count;
-
+    NO_ARGS;
     printf("\n<<QUIT BUILTIN WAS TRIGGERED>>\n");
     exit(0);
 }
@@ -40,9 +67,7 @@ void LMud_Builtin_Apply(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size
     LMud_Size  extra_argument_count;
     LMud_Size  index;
 
-    /*
-     * TODO: Check arguments.
-     */
+    CHECK_ARGS_VARIADIC(1);
 
     function             = arguments[0];
     extra_argument_count = 0;
@@ -74,6 +99,7 @@ void LMud_Builtin_Apply(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size
 
 void LMud_Builtin_Funcall(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
+    CHECK_ARGS_VARIADIC(1);
     LMud_Fiber_Enter(fiber, arguments[0], &arguments[1], argument_count - 1);
 }
 
@@ -87,6 +113,8 @@ void LMud_Builtin_FuncallForward(struct LMud_Fiber* fiber, LMud_Any* arguments, 
     LMud_Size           total_new_arg_count;
     LMud_Size           index;
     LMud_Size           fill;
+
+    CHECK_ARGS_VARIADIC(1);
 
     top                       = fiber->top;
     function                  = arguments[0];
@@ -122,6 +150,8 @@ void LMud_Builtin_FuncallForwardRest(struct LMud_Fiber* fiber, LMud_Any* argumen
     LMud_Size           index;
     LMud_Size           fill;
 
+    CHECK_ARGS_VARIADIC(1);
+
     top                       = fiber->top;
     function                  = arguments[0];
 
@@ -145,20 +175,13 @@ void LMud_Builtin_FuncallForwardRest(struct LMud_Fiber* fiber, LMud_Any* argumen
 
 void LMud_Builtin_GivenArgumentCount(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
-    /*
-     * TODO: Check arguments.
-     */
-    (void) arguments;
-    (void) argument_count;
+    NO_ARGS;
     LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(LMud_Frame_GivenArgumentCount(fiber->top)));
 }
 
 void LMud_Builtin_GivenArgumentRef(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
-    /*
-     * TODO: Check arguments.
-     */
-    (void) argument_count;
+    CHECK_ARGS(1, 1);
     LMud_Fiber_SetAccumulator(fiber, *LMud_Frame_GivenArgumentRef(fiber->top, LMud_Any_AsInteger(arguments[0])));
 }
 
@@ -169,30 +192,20 @@ void LMud_Builtin_Values(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
 
 void LMud_Builtin_GetCustomDispatcherFunction(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
-    /*
-     * TODO: Check arguments.
-     */
-    (void) arguments;
-    (void) argument_count;
+    NO_ARGS;
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_CustomDispatcherFunction(fiber->lisp));
 }
 
 void LMud_Builtin_SetCustomDispatcherFunction(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
-    /*
-     * TODO: Check arguments.
-     */
-    (void) argument_count;
+    CHECK_ARGS(1, 1);
     LMud_Lisp_SetCustomDispatcherFunction(fiber->lisp, arguments[0]);
     LMud_Fiber_SetAccumulator(fiber, arguments[0]);
 }
 
 void LMud_Builtin_Symbolp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
-    /*
-     * TODO: Check arguments.
-     */
-    (void) argument_count;
+    CHECK_ARGS(1, 1);
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsSymbol(fiber->lisp, arguments[0])));
 }
 

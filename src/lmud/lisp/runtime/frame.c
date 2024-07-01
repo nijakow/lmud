@@ -462,7 +462,7 @@ void LMud_Frame_Dump(struct LMud_Frame* self, struct LMud_Lisp* lisp)
     printf("  Extension: %p\n", self->extension);
     printf("  Function:  %p\n", self->function);
     printf("  IP: %d\n", self->ip);
-    printf("  SB: %d\n", stack_base);
+    printf("  SB: %lu\n", stack_base);
     printf("  SP: %d\n", self->sp);
     printf("  AP: %d\n", self->ap);
     printf("  AC: %d\n", self->ac);

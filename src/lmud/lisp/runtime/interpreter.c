@@ -702,14 +702,6 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 break;
             }
 
-            case LMud_Bytecode_SIGNAL:
-            {
-                /*
-                 * TODO
-                 */
-                break;
-            }
-
             default:
             {
                 LMud_Interpreter_Flush(self);

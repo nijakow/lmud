@@ -39,7 +39,6 @@ enum LMud_Bytecode
     LMud_Bytecode_BEGIN_UNWIND_PROTECT,
     LMud_Bytecode_END_UNWIND_PROTECT,
     LMud_Bytecode_BEGIN_SIGNAL_HANDLER,
-    LMud_Bytecode_SIGNAL,
 };
 
 enum LMud_ExecutionResumption
