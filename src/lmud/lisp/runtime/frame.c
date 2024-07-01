@@ -1,4 +1,5 @@
 
+#include <lmud/lisp/io.h>
 #include <lmud/util/memory.h>
 
 #include "frame.h"
@@ -429,6 +430,58 @@ bool LMud_Frame_GetUnwindProtect(struct LMud_Frame* self, uint16_t* location)
 void LMud_Frame_SetUnwindProtect(struct LMud_Frame* self, uint16_t value)
 {
     self->unwind_protect = value;
+}
+
+void LMud_Frame_Dump(struct LMud_Frame* self, struct LMud_Lisp* lisp)
+{
+    LMud_Size  index;
+    LMud_Size  limit;
+    LMud_Size  space;
+    bool       sp_pointing;
+    bool       ap_pointing;
+    bool       ac_pointing;
+    bool       any_pointing;
+
+    printf(" --- Frame %p ---\n", self);
+    printf("  Previous:  %p\n", self->previous);
+    printf("  Child:     %p\n", self->child);
+    printf("  Extension: %p\n", self->extension);
+    printf("  Function:  %p\n", self->function);
+    printf("  IP: %d\n", self->ip);
+    printf("  SP: %d\n", self->sp);
+    printf("  AP: %d\n", self->ap);
+    printf("  AC: %d\n", self->ac);
+    printf("  UP: %d\n", self->unwind_protect);
+    printf("  In ship: %s\n", self->in_ship ? "yes" : "no");
+    printf("\n");
+    
+    printf("  Payload:\n");
+
+    limit = LMud_Frame_PayloadSizeInAnys(self);
+
+    for (index = 0; index < limit; index++)
+    {
+        sp_pointing  = (index == self->sp);
+        ap_pointing  = (index == self->ap);
+        ac_pointing  = (index == self->ac);
+        any_pointing = sp_pointing || ap_pointing || ac_pointing;
+
+        printf("  ");
+        if (any_pointing) {
+            printf("(");
+            if (sp_pointing) printf("S");
+            if (ap_pointing) printf("A");
+            if (ac_pointing) printf("C");
+            for (space = 0; space < 3 - (sp_pointing + ap_pointing + ac_pointing); space++)
+                printf(" ");
+            if (any_pointing) printf(") -->");
+        } else {
+            printf("         ");
+        }
+        printf(" [%3lu] ", index);
+        LMud_Lisp_Print(lisp, self->payload[index], stdout, true);
+        printf("\n");
+    }
 }
 
 

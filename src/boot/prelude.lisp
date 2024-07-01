@@ -1538,11 +1538,18 @@
    (defun lmud.bootstrap::banner (port)
       (io:uformat port "~&~%Welcome to the LMUD REPL!~%"))
 
+   (defun lmud.bootstrap::safely-evaluate (expression)
+      (%signal-handler (e)
+            (eval expression)
+         (io:uformat t "~&~%Error: ~s~%" e)
+         (values)))
+
    (defun lmud.bootstrap::repl (port)
       (while t
          (princ "⍝ " port)
-         (let ((expr (read port)))
-            (dolist (e (multiple-value-list (eval expr)))
+         (let* ((expr    (read port))
+                (results (multiple-value-list (lmud.bootstrap::safely-evaluate expr))))
+            (dolist (e results)
                (princ "  " port)
                (prin1 e port)
                (terpri port)))))

@@ -103,6 +103,8 @@ void      LMud_Frame_Drop(struct LMud_Frame* self, LMud_Size count);
 bool LMud_Frame_GetUnwindProtect(struct LMud_Frame* self, uint16_t* location);
 void LMud_Frame_SetUnwindProtect(struct LMud_Frame* self, uint16_t value);
 
+void LMud_Frame_Dump(struct LMud_Frame* self, struct LMud_Lisp* lisp);
+
 
 struct LMud_FrameShip
 {

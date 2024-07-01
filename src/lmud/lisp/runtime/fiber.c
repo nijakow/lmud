@@ -436,3 +436,22 @@ void LMud_Fiber_Tick(struct LMud_Fiber* self)
     LMud_Interpreter_Tick(&interpreter);
     LMud_Interpreter_Destroy(&interpreter);
 }
+
+
+void LMud_Fiber_Dump(struct LMud_Fiber* self)
+{
+    struct LMud_Frame*  frame;
+
+    printf("Fiber %p\n", self);
+    printf("  State: %d\n", self->state);
+    printf("\n");
+
+    printf("Frames:\n");
+
+    frame = self->top;
+    while (frame != NULL)
+    {
+        LMud_Frame_Dump(frame, self->lisp);
+        frame = frame->previous;
+    }
+}

@@ -551,8 +551,6 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 /*
                  * We push the resumption mode. This is the last of the three magic values
                  * needed for the unwinding process.
-                 * 
-                 * TODO: Grab this information from the frame.
                  */
                 LMud_Frame_Push(self->fiber->top, LMud_Any_FromInteger(LMud_Fiber_GetExecutionResumptionMode(self->fiber)));
 
@@ -562,16 +560,16 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                  */
                 LMud_Fiber_SetExecutionResumptionMode(self->fiber, LMud_ExecutionResumption_NORMAL);
 
-                /*
-                 * Now that the execution resumption mode is preserved, we can switch to normal mode again.
-                 */
-                LMud_Fiber_SetExecutionResumptionMode(self->fiber, LMud_ExecutionResumption_NORMAL);
-
                 break;
             }
 
             case LMud_Bytecode_END_UNWIND_PROTECT:
             {
+                LMud_Interpreter_Flush(self);
+                LMud_Interpreter_Restore(self);
+
+                LMud_Fiber_Dump(self->fiber);
+
                 /*
                  * First, we pop the resumption mode.
                  */
@@ -582,7 +580,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                  */
                 index2 = LMud_Any_AsInteger(LMud_Frame_Pop(self->fiber->top));
                 value  = LMud_Frame_Pop(self->fiber->top);
-                
+
                 /*
                  * In order to load the values, we need a dynamic array.
                  */
