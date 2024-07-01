@@ -78,6 +78,8 @@ LMud_Size LMud_Frame_ExtraArgumentCount(struct LMud_Frame* self);
 LMud_Size LMud_Frame_FixedArgumentCount(struct LMud_Frame* self);
 LMud_Size LMud_Frame_GivenArgumentCount(struct LMud_Frame* self);
 
+LMud_Size LMud_Frame_StackBase(struct LMud_Frame* self);
+
 LMud_Any* LMud_Frame_FixedArgumentRef(struct LMud_Frame* self, LMud_Size index);
 LMud_Any* LMud_Frame_ExtraArgumentRef(struct LMud_Frame* self, LMud_Size index);
 LMud_Any* LMud_Frame_GivenArgumentRef(struct LMud_Frame* self, LMud_Size index);
@@ -94,7 +96,8 @@ void     LMud_Frame_SetRegister(struct LMud_Frame* self, LMud_Size index, LMud_A
 
 void      LMud_Frame_SetInstructionPointer(struct LMud_Frame* self, uint16_t value);
 
-void      LMud_Frame_SetStackPointer(struct LMud_Frame* self, LMud_Size offset);
+void      LMud_Frame_SetStackPointerRelativeToPayloadOrigin(struct LMud_Frame* self, LMud_Size offset);
+void      LMud_Frame_SetStackPointerRelativeToStackOrigin(struct LMud_Frame* self, LMud_Size offset);
 void      LMud_Frame_Push(struct LMud_Frame* self, LMud_Any value);
 LMud_Any  LMud_Frame_Pop(struct LMud_Frame* self);
 LMud_Any* LMud_Frame_PopN(struct LMud_Frame* self, LMud_Size count);

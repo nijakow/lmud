@@ -285,6 +285,11 @@ LMud_Size LMud_Frame_GivenArgumentCount(struct LMud_Frame* self)
     return LMud_Frame_FixedArgumentCount(self) + LMud_Frame_ExtraArgumentCount(self);
 }
 
+LMud_Size LMud_Frame_StackBase(struct LMud_Frame* self)
+{
+    return self->function->info.register_count;
+}
+
 
 LMud_Any* LMud_Frame_FixedArgumentRef(struct LMud_Frame* self, LMud_Size index)
 {
@@ -392,9 +397,14 @@ void LMud_Frame_SetInstructionPointer(struct LMud_Frame* self, uint16_t value)
     self->ip = value;
 }
 
-void LMud_Frame_SetStackPointer(struct LMud_Frame* self, LMud_Size offset)
+void LMud_Frame_SetStackPointerRelativeToPayloadOrigin(struct LMud_Frame* self, LMud_Size offset)
 {
     self->sp = offset;
+}
+
+void LMud_Frame_SetStackPointerRelativeToStackOrigin(struct LMud_Frame* self, LMud_Size offset)
+{
+    self->sp = LMud_Frame_StackBase(self) + offset;
 }
 
 void LMud_Frame_Push(struct LMud_Frame* self, LMud_Any value)
@@ -437,10 +447,14 @@ void LMud_Frame_Dump(struct LMud_Frame* self, struct LMud_Lisp* lisp)
     LMud_Size  index;
     LMud_Size  limit;
     LMud_Size  space;
+    LMud_Size  stack_base;
+    bool       sb_pointing;
     bool       sp_pointing;
     bool       ap_pointing;
     bool       ac_pointing;
     bool       any_pointing;
+
+    stack_base = LMud_Frame_StackBase(self);
 
     printf(" --- Frame %p ---\n", self);
     printf("  Previous:  %p\n", self->previous);
@@ -448,6 +462,7 @@ void LMud_Frame_Dump(struct LMud_Frame* self, struct LMud_Lisp* lisp)
     printf("  Extension: %p\n", self->extension);
     printf("  Function:  %p\n", self->function);
     printf("  IP: %d\n", self->ip);
+    printf("  SB: %d\n", stack_base);
     printf("  SP: %d\n", self->sp);
     printf("  AP: %d\n", self->ap);
     printf("  AC: %d\n", self->ac);
@@ -461,22 +476,24 @@ void LMud_Frame_Dump(struct LMud_Frame* self, struct LMud_Lisp* lisp)
 
     for (index = 0; index < limit; index++)
     {
+        sb_pointing  = (index == stack_base);
         sp_pointing  = (index == self->sp);
         ap_pointing  = (index == self->ap);
         ac_pointing  = (index == self->ac);
-        any_pointing = sp_pointing || ap_pointing || ac_pointing;
+        any_pointing = sb_pointing || sp_pointing || ap_pointing || ac_pointing;
 
         printf("  ");
         if (any_pointing) {
             printf("(");
+            if (sb_pointing) printf("B");
             if (sp_pointing) printf("S");
             if (ap_pointing) printf("A");
             if (ac_pointing) printf("C");
-            for (space = 0; space < 3 - (sp_pointing + ap_pointing + ac_pointing); space++)
+            for (space = 0; space < ((LMud_Size) 4) - (sb_pointing + sp_pointing + ap_pointing + ac_pointing); space++)
                 printf(" ");
             if (any_pointing) printf(") -->");
         } else {
-            printf("         ");
+            printf("          ");
         }
         printf(" [%3lu] ", index);
         LMud_Lisp_Print(lisp, self->payload[index], stdout, true);

@@ -518,7 +518,7 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                 /*
                  * First, we restore the stack pointer.
                  */
-                LMud_Frame_SetStackPointer(self->fiber->top, LMud_InstructionStream_NextU8(&stream));
+                LMud_Frame_SetStackPointerRelativeToStackOrigin(self->fiber->top, LMud_InstructionStream_NextU8(&stream));
 
                 /*
                  * Then, we push the accumulator/values state.
@@ -567,8 +567,6 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
             {
                 LMud_Interpreter_Flush(self);
                 LMud_Interpreter_Restore(self);
-
-                LMud_Fiber_Dump(self->fiber);
 
                 /*
                  * First, we pop the resumption mode.
