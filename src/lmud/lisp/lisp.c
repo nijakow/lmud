@@ -627,7 +627,7 @@ void LMud_Lisp_GarbageCollect(struct LMud_Lisp* self, struct LMud_GCStats* stats
 {
     struct LMud_GC  gc;
 
-    LMud_Logf(self->mud, LMud_LogLevel_NOTE, "Garbage Collection...\n");
+    LMud_Logf(self->mud, LMud_LogLevel_INFO, "Garbage Collection...\n");
 
     LMud_GC_Create(&gc, self);
     LMud_GC_Run(&gc);
@@ -677,12 +677,12 @@ bool LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename, LMud_Any* 
     FILE*                    file;
     LMud_Any                 program;
 
-    file   = fopen(filename, "r");
+    file = fopen(filename, "r");
     
     if (file == NULL)
         LMud_Logf(self->mud, LMud_LogLevel_ERROR, "Failed to open file: \"%s\"!\n", filename);
     else {
-        LMud_Logf(self->mud, LMud_LogLevel_NOTE, "Loading file: \"%s\"...\n", filename);
+        LMud_Logf(self->mud, LMud_LogLevel_INFO, "Loading file: \"%s\"...\n", filename);
 
         LMud_InputStream_CreateFromFile(&stream, file);
 

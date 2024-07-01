@@ -22,7 +22,7 @@ void LMud_Scheduler_Destroy(struct LMud_Scheduler* self)
 
     if (self->fibers != NULL)
     {
-        printf("Warning: Destroying scheduler with fibers still alive.\n");
+        LMud_Logf(self->lisp->mud, LMud_LogLevel_WARNING, "Destroying scheduler with fibers still alive!");
 
         while (self->fibers != NULL)
         {
@@ -34,6 +34,8 @@ void LMud_Scheduler_Destroy(struct LMud_Scheduler* self)
 void LMud_Scheduler_Mark(struct LMud_GC* gc, struct LMud_Scheduler* self)
 {
     struct LMud_Fiber*  fiber;
+
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_DEBUG, "Marking fibers!");
 
     for (fiber = self->fibers; fiber != NULL; fiber = fiber->next)
     {

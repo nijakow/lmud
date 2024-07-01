@@ -101,7 +101,7 @@ void LMud_Startup(struct LMud* self)
 {
     LMud_Any  boot_function;
 
-    LMud_Logf(self, LMud_LogLevel_NOTE, "Starting up LMud v%s %s '%s'...\n", LMud_VERSION, LMud_VERSION_EXTRA, LMud_RELEASE_NAME);
+    LMud_Logf(self, LMud_LogLevel_INFO, "Starting up LMud v%s %s '%s'...\n", LMud_VERSION, LMud_VERSION_EXTRA, LMud_RELEASE_NAME);
 
     if (LMud_Lisp_LoadFile(&self->lisp, "../boot/prelude.lisp", &boot_function))
     {
@@ -111,7 +111,7 @@ void LMud_Startup(struct LMud* self)
 
 void LMud_Shutdown(struct LMud* self)
 {
-    LMud_Logf(self, LMud_LogLevel_NOTE, "Shutting down...\n");
+    LMud_Logf(self, LMud_LogLevel_INFO, "Shutting down...\n");
 }
 
 void LMud_Main(struct LMud* self, int argc, char* argv[])

@@ -79,6 +79,8 @@ void LMud_Fiber_Mark(struct LMud_GC* gc, struct LMud_Fiber* self)
 {
     LMud_Size  index;
 
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_DEBUG, "Marking fiber %p...", self);
+
     for (index = 0; index < self->accumulator_count; index++)
     {
         LMud_GC_MarkAny(gc, self->accumulator[index]);

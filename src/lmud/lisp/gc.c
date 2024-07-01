@@ -68,6 +68,8 @@ void LMud_GC_MarkFrame(struct LMud_GC* self, struct LMud_Frame* frame)
     LMud_Size  size;
     LMud_Size  index;
 
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_HALF_DEBUG, "Marking frame %p...");
+
     /*
      * TODO, FIXME, XXX: This might cause a crash if lexical frames still
      *                   have their previous pointers set to a frame that
@@ -169,7 +171,7 @@ static void LMud_GC_FinalBookeeping(struct LMud_GC* self)
 {
     LMud_Logf(
         self->lisp->mud,
-        LMud_LogLevel_INFO,
+        LMud_LogLevel_NOTE,
         "GC: Freed %zu objects, kept %zu objects",
         self->stats.objects_freed,
         self->stats.objects_kept
