@@ -14,7 +14,6 @@
 #include "builtins.h"
 
 
-
 static void LMud_Fiber_CheckArgs_Error(struct LMud_Fiber* fiber, LMud_Any* args, LMud_Size size, LMud_Size min, LMud_Size max, const char* func, const char* file, unsigned int line)
 {
     char  buffer[1024];
@@ -23,8 +22,10 @@ static void LMud_Fiber_CheckArgs_Error(struct LMud_Fiber* fiber, LMud_Any* args,
 
     if (max == LMud_VARIADIC_ARGS) {
         snprintf(buffer, sizeof(buffer), "Wrong number of arguments! Builtin: %s(...) in %s:%u got %zu, expected at least %zu.", func, file, line, size, min);
+    } else if (max == min) {
+        snprintf(buffer, sizeof(buffer), "Wrong number of arguments! Builtin: %s(...) in %s:%u got %zu, expected between exactly %zu.", func, file, line, size, max);
     } else {
-        snprintf(buffer, sizeof(buffer), "Wrong number of arguments! Builtin: %s(...) in %s:%u got %zu, expected %zu-%zu.", func, file, line, size, min, max);
+        snprintf(buffer, sizeof(buffer), "Wrong number of arguments! Builtin: %s(...) in %s:%u got %zu, expected between %zu and %zu.", func, file, line, size, min, max);
     }
 
     LMud_Fiber_PerformError(fiber, buffer);
