@@ -1172,7 +1172,7 @@
             ((io.reader:checkstr stream "(")
              (io.reader:read-list stream))
             ((io.reader:checkstr stream ":")
-             (io.reader:read-keyword))
+             (io.reader:read-keyword stream))
             ((io.reader:checkstr stream "'")
              (list 'quote (io.reader:read stream)))
             ((io.reader:checkstr stream "#'")
