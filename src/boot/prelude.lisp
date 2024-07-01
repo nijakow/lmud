@@ -1574,7 +1574,7 @@
             (io:uformat t "~&  [~s]: ~s~%" i (aref constants i)))))
 
    (defun lmud.bootstrap::banner (port)
-      (io:uformat port "~&~%Welcome to the LMUD REPL!~%"))
+      (io:uformat port "~&~%Welcome to the LMud REPL!~%"))
 
    (defun lmud.bootstrap::safely-evaluate (expression)
       (%signal-handler (e)
@@ -1592,11 +1592,13 @@
                (prin1 e port)
                (terpri port)))))
 
-   (lmud.int:on-connect
-      (lambda (port)
-         (lmud.int:set-current-port port)
-         (lmud.bootstrap::banner port)
-         (lmud.bootstrap::repl port)))
+   (defun lmud.bootstrap::hi (port)
+      (lmud.int:set-current-port port)
+      (lmud.bootstrap::banner port)
+      (lmud.bootstrap::repl port))
+
+   (lmud.int:open-v4 "127.0.0.1" 4242 #'lmud.bootstrap::hi)
+   (lmud.int:open-v6 "::1"       4244 #'lmud.bootstrap::hi)
 
    ))
 
