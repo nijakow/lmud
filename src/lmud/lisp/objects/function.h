@@ -19,14 +19,16 @@ struct LMud_Function
 
     LMud_Any             bytecodes;
     LMud_Any             constants;
+    LMud_Any             source_code;
 };
 
-void LMud_Function_Create(struct LMud_Function* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants);
+void LMud_Function_Create(struct LMud_Function* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants, LMud_Any source_code);
 void LMud_Function_Destroy(struct LMud_Function* self);
 void LMud_Function_Mark(struct LMud_GC* gc, struct LMud_Function* self);
 LMud_Size LMud_Function_CalculateSizeInBytes(struct LMud_Function* self);
 
 LMud_Any LMud_Function_Bytecodes(struct LMud_Function* self);
 LMud_Any LMud_Function_Constants(struct LMud_Function* self);
+LMud_Any LMud_Function_SourceCode(struct LMud_Function* self);
 
 bool LMud_Function_IsLexicalized(struct LMud_Function* self);

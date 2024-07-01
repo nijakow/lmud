@@ -53,6 +53,7 @@ void LMud_Constants_Mark(struct LMud_GC* gc, struct LMud_Constants* self)
     LMud_GC_MarkAny(gc, self->quote);
     LMud_GC_MarkAny(gc, self->function);
     LMud_GC_MarkAny(gc, self->custom_dispatcher_function);
+    LMud_GC_MarkAny(gc, self->new_connection_function);
 }
 
 
@@ -301,9 +302,9 @@ LMud_Any LMud_Lisp_Custom(struct LMud_Lisp* self, LMud_Any meta, LMud_Any* slots
     return LMud_Any_FromPointer(LMud_Objects_Custom(&self->objects, meta, slots, size));
 }
 
-LMud_Any LMud_Lisp_Function(struct LMud_Lisp* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants)
+LMud_Any LMud_Lisp_Function(struct LMud_Lisp* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants, LMud_Any source_code)
 {
-    return LMud_Any_FromPointer(LMud_Objects_Function(&self->objects, info, bytecodes, constants));
+    return LMud_Any_FromPointer(LMud_Objects_Function(&self->objects, info, bytecodes, constants, source_code));
 }
 
 LMud_Any LMud_Lisp_Package(struct LMud_Lisp* self, LMud_Any name)

@@ -1187,7 +1187,7 @@ void LMud_Compiler_CompileLambda(struct LMud_Compiler* self, LMud_Any arglist, L
     LMud_Compiler_ProcessArgumentList(&subcompiler, arglist);
     LMud_Compiler_CompileExpressions(&subcompiler, body);
     LMud_Compiler_EndBlock(&subcompiler);
-    lambda = LMud_Compiler_Build(&subcompiler);
+    lambda = LMud_Compiler_BuildWithSource(&subcompiler, LMud_Lisp_Cons(LMud_Compiler_GetLisp(self), arglist, body));
     LMud_Compiler_Destroy(&subcompiler);
 
     LMud_Compiler_WriteLambda(self, lambda);
@@ -1809,7 +1809,13 @@ void LMud_Compiler_ProcessArgumentList(struct LMud_Compiler* self, LMud_Any argl
     }
 }
 
+
 LMud_Any LMud_Compiler_Build(struct LMud_Compiler* self)
+{
+    return LMud_Compiler_BuildWithSource(self, LMud_Lisp_Nil(LMud_Compiler_GetLisp(self)));
+}
+
+LMud_Any LMud_Compiler_BuildWithSource(struct LMud_Compiler* self, LMud_Any source)
 {
     LMud_Compiler_WriteReturn(self);
 
@@ -1823,6 +1829,7 @@ LMud_Any LMud_Compiler_Build(struct LMud_Compiler* self)
             .variadic             = self->variadic,
         },
         LMud_Lisp_MakeBytes_FromData(LMud_Compiler_GetLisp(self), self->bytecodes_fill, (const char*) self->bytecodes),
-        LMud_Lisp_MakeArray_FromData(LMud_Compiler_GetLisp(self), self->constants_fill, self->constants)
+        LMud_Lisp_MakeArray_FromData(LMud_Compiler_GetLisp(self), self->constants_fill, self->constants),
+        source
     );
 }

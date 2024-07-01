@@ -87,7 +87,7 @@ LMud_Any LMud_Lisp_MakeBytes_FromData(struct LMud_Lisp* self, LMud_Size size, co
 LMud_Any LMud_Lisp_Closure(struct LMud_Lisp* self, struct LMud_Function* function, struct LMud_Frame* lexical);
 LMud_Any LMud_Lisp_Cons(struct LMud_Lisp* self, LMud_Any car, LMud_Any cdr);
 LMud_Any LMud_Lisp_Custom(struct LMud_Lisp* self, LMud_Any meta, LMud_Any* slots, LMud_Size size);
-LMud_Any LMud_Lisp_Function(struct LMud_Lisp* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants);
+LMud_Any LMud_Lisp_Function(struct LMud_Lisp* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants, LMud_Any source_code);
 LMud_Any LMud_Lisp_Package(struct LMud_Lisp* self, LMud_Any name);
 LMud_Any LMud_Lisp_PackageByName(struct LMud_Lisp* self, const char* name);
 LMud_Any LMud_Lisp_PackageByNameUpcase(struct LMud_Lisp* self, const char* name);

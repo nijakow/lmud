@@ -618,6 +618,15 @@ void LMud_Builtin_FunctionConstants(struct LMud_Fiber* fiber, LMud_Any* argument
     LMud_Fiber_SetAccumulator(fiber, LMud_Function_Constants(LMud_Any_AsPointer(arguments[0])));
 }
 
+void LMud_Builtin_FunctionSourceCode(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    LMud_Any  result;
+
+    CHECK_ARGS(1, 1);
+    result = LMud_Function_SourceCode(LMud_Any_AsPointer(arguments[0]));
+    LMud_Fiber_SetAccumulator(fiber, result);
+}
+
 void LMud_Builtin_Compile(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     LMud_Any  result;
@@ -1163,6 +1172,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "BYTECODE-FUNCTION-P", LMud_Builtin_BytecodeFunctionp);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "FUNCTION-BYTECODES", LMud_Builtin_FunctionBytecodes);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "FUNCTION-CONSTANTS", LMud_Builtin_FunctionConstants);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "FUNCTION-SOURCE-CODE", LMud_Builtin_FunctionSourceCode);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "GARBAGE-COLLECT", LMud_Builtin_GarbageCollect);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "KICKSTART-TASK", LMud_Builtin_KickstartTask);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "SIGNAL", LMud_Builtin_Signal);

@@ -79,7 +79,7 @@ struct LMud_Bytes*    LMud_Objects_MakeBytes_FromData(struct LMud_Objects* self,
 struct LMud_Closure*  LMud_Objects_Closure(struct LMud_Objects* self, struct LMud_Function* function, struct LMud_Frame* lexical);
 struct LMud_Cons*     LMud_Objects_Cons(struct LMud_Objects* self, LMud_Any car, LMud_Any cdr);
 struct LMud_Custom*   LMud_Objects_Custom(struct LMud_Objects* self, LMud_Any meta, LMud_Any* slots, LMud_Size size);
-struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants);
+struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants, LMud_Any source_code);
 struct LMud_Package*  LMud_Objects_Package(struct LMud_Objects* self, LMud_Any name);
 struct LMud_Port*     LMud_Objects_Port(struct LMud_Objects* self, struct LMud_Connection* connection);
 struct LMud_Ratio*    LMud_Objects_Ratio(struct LMud_Objects* self, LMud_Any numerator, LMud_Any denominator);

@@ -221,3 +221,4 @@ void LMud_Compiler_CompileExpressions(struct LMud_Compiler* self, LMud_Any expre
 void LMud_Compiler_ProcessArgumentList(struct LMud_Compiler* self, LMud_Any arglist);
 
 LMud_Any LMud_Compiler_Build(struct LMud_Compiler* self);
+LMud_Any LMud_Compiler_BuildWithSource(struct LMud_Compiler* self, LMud_Any source);

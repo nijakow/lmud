@@ -286,7 +286,7 @@ struct LMud_Custom* LMud_Objects_Custom(struct LMud_Objects* self, LMud_Any meta
     return custom;
 }
 
-struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants)
+struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants, LMud_Any source_code)
 {
     struct LMud_Function*  function;
 
@@ -294,7 +294,7 @@ struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LM
 
     if (function != NULL)
     {
-        LMud_Function_Create(function, info, bytecodes, constants);
+        LMud_Function_Create(function, info, bytecodes, constants, source_code);
         LMud_Objects_AfterAllocate(self, function);
     }
 
