@@ -293,7 +293,6 @@ struct LMud_Frame* LMud_Fiber_PushFrame(struct LMud_Fiber* self, struct LMud_Fun
     extra_args = argument_count - function->info.fixed_argument_count;
     frame_size = sizeof(struct LMud_Frame) + (function->info.register_count + function->info.stack_size + extra_args) * sizeof(LMud_Any);
 
-
     if (!LMud_Fiber_HasSpaceOnStack(self, frame_size)) {
         LMud_Fiber_PerformError(self, "Stack overflow!");
         return NULL;
@@ -304,10 +303,22 @@ struct LMud_Frame* LMud_Fiber_PushFrame(struct LMud_Fiber* self, struct LMud_Fun
         LMud_Fiber_PerformError(self, "Too many arguments! (Function is not variadic)");
         return NULL;
     }
-    
+
     frame               = LMud_Fiber_StackTop(self);
     self->stack_pointer = self->stack_pointer + frame_size;
 
+    LMud_Debugf(
+        self->lisp->mud,
+        LMud_LogLevel_ALL,
+        "Pushing stack frame of size %zu at %p (%zu args / %zu registers + %zu stack slots + %zu extra args)",
+        frame_size,
+        frame,
+        argument_count,
+        function->info.fixed_argument_count,
+        function->info.stack_size,
+        extra_args
+    );
+    
     LMud_Frame_Create(frame, self->top, lexical, function, arguments, extra_args);
 
     if (self->top != NULL) {
@@ -330,6 +341,13 @@ void LMud_Fiber_PopFrame(struct LMud_Fiber* self)
     frame               = self->top;
     self->top           = frame->previous;
     self->stack_pointer = (char*) frame;
+
+    LMud_Debugf(
+        self->lisp->mud,
+        LMud_LogLevel_ALL,
+        "Popping stack frame %p...",
+        frame
+    );
 
     if (self->top != NULL) {
         self->top->child = NULL;
