@@ -11,3 +11,37 @@ void LMud_Mark(struct LMud_GC* gc, struct LMud* self)
     LMud_Lisp_Mark(gc, &self->lisp);
     LMud_Net_Mark(gc, &self->net);
 }
+
+
+struct LMud_Log* LMud_GetLog(struct LMud* self)
+{
+    return &self->log;
+}
+
+struct LMud_Lisp* LMud_GetLisp(struct LMud* self)
+{
+    return &self->lisp;
+}
+
+struct LMud_Net* LMud_GetNet(struct LMud* self)
+{
+    return &self->net;
+}
+
+void LMud_Logf(struct LMud* mud, enum LMud_LogLevel loglevel, const char* format, ...)
+{
+    va_list                  args;
+    struct LMud_LogComposer  composer;
+    struct LMud_OutputStream stream;
+
+    va_start(args, format);
+    {
+        LMud_LogComposer_Create(&composer, LMud_GetLog(mud), loglevel);
+        LMud_OutputStream_CreateOnLogComposer(&stream, &composer);
+        LMud_OutputStream_VPrintf(&stream, format, args);
+        LMud_OutputStream_Destroy(&stream);
+        LMud_LogComposer_Commit(&composer);
+        LMud_LogComposer_Destroy(&composer);
+    }
+    va_end(args);
+}

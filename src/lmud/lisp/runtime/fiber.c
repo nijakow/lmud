@@ -69,6 +69,7 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct L
 
 void LMud_Fiber_Destroy(struct LMud_Fiber* self)
 {
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_HALF_DEBUG, "Destroying fiber %p");
     LMud_Fiber_UnlinkQueue(self);
     LMud_FrameList_Destroy(&self->floating_frames);
     LMud_Free(self->stack);
@@ -79,7 +80,7 @@ void LMud_Fiber_Mark(struct LMud_GC* gc, struct LMud_Fiber* self)
 {
     LMud_Size  index;
 
-    LMud_Debugf(self->lisp->mud, LMud_LogLevel_DEBUG, "Marking fiber %p...", self);
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Marking fiber %p...", self);
 
     for (index = 0; index < self->accumulator_count; index++)
     {

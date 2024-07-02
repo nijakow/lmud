@@ -1,4 +1,5 @@
 
+#include <lmud/decls.h>
 #include <lmud/lisp/gc.h>
 #include <lmud/lisp/lisp.h>
 #include <lmud/lisp/runtime/fiber.h>
@@ -35,7 +36,7 @@ void LMud_Scheduler_Mark(struct LMud_GC* gc, struct LMud_Scheduler* self)
 {
     struct LMud_Fiber*  fiber;
 
-    LMud_Debugf(self->lisp->mud, LMud_LogLevel_HALF_DEBUG, "Marking LMud_Scheduler!");
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Marking LMud_Scheduler!");
 
     for (fiber = self->fibers; fiber != NULL; fiber = fiber->next)
     {
@@ -54,6 +55,7 @@ struct LMud_Fiber* LMud_Scheduler_SpawnFiber(struct LMud_Scheduler* self)
     {
         LMud_Fiber_Create(fiber, self->lisp, self);
         LMud_Fiber_Link(fiber, &self->fibers);
+        LMud_Debugf(self->lisp->mud, LMud_LogLevel_HALF_DEBUG, "Created fiber %p", fiber);
     }
 
     return fiber;
@@ -62,6 +64,8 @@ struct LMud_Fiber* LMud_Scheduler_SpawnFiber(struct LMud_Scheduler* self)
 void LMud_Scheduler_RequestDeleteFiber(struct LMud_Scheduler* self, struct LMud_Fiber* fiber)
 {
     (void) self;
+
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Requesting a delete of fiber %p", fiber);
 
     LMud_Fiber_Destroy(fiber);
     LMud_Free(fiber);
@@ -108,6 +112,8 @@ bool LMud_Scheduler_BlockAndRunThunk(struct LMud_Scheduler* self, LMud_Any thunk
 
     fiber = LMud_Scheduler_SpawnFiber(self);
 
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_DEBUG, "Block-running fiber %p");
+
     if (fiber == NULL)
         return false;
 
@@ -121,6 +127,8 @@ bool LMud_Scheduler_BlockAndRunThunk(struct LMud_Scheduler* self, LMud_Any thunk
         LMud_Lisp_PeriodicInterrupt(self->lisp);
     }
 
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_HALF_DEBUG, "Block-running of fiber %p has stopped");
+
     /*
      * Yielding and Waiting are illegal operations in this run mode.
      * If any of these operations are attempted, the fiber will be terminated
@@ -129,9 +137,7 @@ bool LMud_Scheduler_BlockAndRunThunk(struct LMud_Scheduler* self, LMud_Any thunk
 
     if (!LMud_Fiber_HasTerminated(fiber))
     {
-        /*
-         * TODO: Issue a warning.
-         */
+        LMud_Debugf(self->lisp->mud, LMud_LogLevel_WARNING, "Fiber %p did not terminate after block-running it!");
     }
 
     if (result != NULL)
@@ -154,8 +160,12 @@ void LMud_Scheduler_Tick(struct LMud_Scheduler* self)
 
     fiber = self->running_fibers.fibers;
 
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Ticking fibers...", fiber);
+
     while (fiber != NULL)
     {
+        LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Ticking fiber %p...", fiber);
+
         next = fiber->queue_next;
 
         if (LMud_Fiber_IsYielding(fiber))
@@ -167,7 +177,7 @@ void LMud_Scheduler_Tick(struct LMud_Scheduler* self)
 
         if (LMud_Fiber_HasTerminated(fiber))
         {
-            printf("[Note]: Fiber terminated.\n");
+            LMud_Debugf(self->lisp->mud, LMud_LogLevel_HALF_DEBUG, "Fiber %p terminated.");
             LMud_Fiber_UnlinkQueue(fiber);
             LMud_Scheduler_RequestDeleteFiber(self, fiber);
         }
