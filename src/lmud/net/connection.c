@@ -1,5 +1,7 @@
 
+#include <lmud/glue.h>
 #include <lmud/net/net.h>
+#include <lmud/lisp/lisp.h>
 #include <lmud/util/memory.h>
 
 #include "connection.h"
@@ -112,12 +114,12 @@ void LMud_Connection_RegisterOnSelector(struct LMud_Connection* self, struct LMu
 }
 
 
-static void LMud_Connection_ReleaseFibers(struct LMud_Connection* self, char byte)
+static void LMud_Connection_ReleaseFibers(struct LMud_Connection* self, LMud_Any value)
 {
     while (self->waiting_fibers.fibers != NULL)
     {
         LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Fiber %p released from the waiting fiber list!");
-        LMud_Fiber_ControlRestartWithValue(self->waiting_fibers.fibers, LMud_Any_FromInteger(((LMud_Integer) 0) | (unsigned char) byte));
+        LMud_Fiber_ControlRestartWithValue(self->waiting_fibers.fibers, value);
     }
 }
 
@@ -131,9 +133,16 @@ static void LMud_Connection_MaybeReleaseFibers(struct LMud_Connection* self)
     {
         if (LMud_Ringbuffer_ReadByte(&self->inbuf, &byte))
         {
-            LMud_Connection_ReleaseFibers(self, byte);
+            LMud_Connection_ReleaseFibers(self, LMud_Any_FromInteger(((LMud_Integer) 0) | (unsigned char) byte));
         }
     }
+}
+
+static void LMud_Connection_ReleaseFibersWithEof(struct LMud_Connection* self)
+{
+    LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Releasing fibers with EOF...");
+
+    LMud_Connection_ReleaseFibers(self, LMud_Lisp_Nil(LMud_GetLisp(self->net->mud)));
 }
 
 void LMud_Connection_AddWaitingFiber(struct LMud_Connection* self, struct LMud_Fiber* fiber)
@@ -162,6 +171,7 @@ bool LMud_Connection_WriteByte(struct LMud_Connection* self, char byte)
 void LMud_Connection_HandleError(struct LMud_Connection* self)
 {
     LMud_Debugf(self->net->mud, LMud_LogLevel_HALF_DEBUG, "FD(%d): Handling connection error!");
+    LMud_Connection_ReleaseFibersWithEof(self);
 }
 
 void LMud_Connection_HandleDisconnect(struct LMud_Connection* self)
