@@ -1080,6 +1080,12 @@ void LMud_Builtin_OpenFile(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_S
     }
 }
 
+void LMud_Builtin_PortEof(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    CHECK_ARGS(1, 1);
+    LMud_Port_Eof(LMud_Any_AsPointer(arguments[0]), fiber);
+}
+
 void LMud_Builtin_PortReadByte(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
@@ -1217,6 +1223,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "OPEN-V4", LMud_Builtin_OpenV4);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "OPEN-V6", LMud_Builtin_OpenV6);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PORTP", LMud_Builtin_Portp);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PORT-EOF-P", LMud_Builtin_PortEof);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PORT-READ-BYTE", LMud_Builtin_PortReadByte);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PORT-WRITE-BYTE", LMud_Builtin_PortWriteByte);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PORT-UNREAD-BYTE", LMud_Builtin_PortUnreadByte);

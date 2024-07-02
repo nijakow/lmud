@@ -94,11 +94,7 @@
    ;;;
 
    (defun lmud.util:simple-error (&optional (message nil))
-      (lmud.dummy::%terpri)
-      (lmud.dummy::%princ "Error: ")
-      (lmud.dummy::%princ message)
-      (lmud.dummy::%terpri)
-      (lmud.int::%quit))
+      (lmud.int:signal message))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1014,6 +1010,9 @@
    
    (tos:defmethod io:unread-raw-char-from-stream ((stream lmud.classes:<port>) char)
       (lmud.int:port-unread-char stream char))
+   
+   (defun io:raw-eof-p (stream)
+      (lmud.int:port-eof-p stream))
 
    (tos:defmethod io:write-byte-to-stream (stream byte)
       (io:write-raw-byte-to-stream stream byte))
@@ -1038,19 +1037,35 @@
                                  (io:write-byte-to-stream stream (logior #x80 (logand code #x3F)))))))
    
    (defun io:read-utf8-char (stream)
-      (code-char
-         (let ((byte (io:read-byte-from-stream stream)))
-            (cond ((< byte #x80) byte)
-                  ((< byte #xE0) (logior (ash (logand byte #x1F) 6)
-                                         (logand (io:read-byte-from-stream stream) #x3F)))
-                  ((< byte #xF0) (logior (ash (logand byte #xF) 12)
-                                         (ash (logand (io:read-byte-from-stream stream) #x3F) 6)
-                                         (logand (io:read-byte-from-stream stream) #x3F)))
-                  ((< byte #xF8) (logior (ash (logand byte #x7) 18)
-                                         (ash (logand (io:read-byte-from-stream stream) #x3F) 12)
-                                         (ash (logand (io:read-byte-from-stream stream) #x3F) 6)
-                                         (logand (io:read-byte-from-stream stream) #x3F)))
-                  (t (lmud.util:simple-error "Invalid UTF-8 encoding!"))))))
+      (let ((byte (io:read-byte-from-stream stream)))
+         (when byte
+            (code-char
+               (cond ((< byte #x80) byte)
+                     ((< byte #xE0)
+                      (let ((b1 (io:read-byte-from-stream stream)))
+                         (and b1
+                              (logior (ash (logand byte #x1F) 6)
+                                      (logand b1 #x3F)))))
+                     ((< byte #xF0)
+                      (let ((b1 (io:read-byte-from-stream stream))
+                            (b2 (io:read-byte-from-stream stream)))
+                         (and b1
+                              b2
+                              (logior (ash (logand byte #xF) 12)
+                                      (ash (logand (io:read-byte-from-stream stream) #x3F) 6)
+                                      (logand (io:read-byte-from-stream stream) #x3F)))))
+                     ((< byte #xF8)
+                      (let ((b1 (io:read-byte-from-stream stream))
+                            (b2 (io:read-byte-from-stream stream))
+                            (b3 (io:read-byte-from-stream stream)))
+                         (and b1
+                              b2
+                              b3
+                              (logior (ash (logand byte #x7) 18)
+                                      (ash (logand b1 #x3F) 12)
+                                      (ash (logand b2 #x3F) 6)
+                                      (logand b3 #x3F)))))
+                     (t (lmud.util:simple-error "Invalid UTF-8 encoding!")))))))
 
    (tos:defmethod io:read-char-from-stream (stream)
       (io:read-utf8-char stream))
@@ -1058,22 +1073,23 @@
    (tos:defmethod io:write-char-to-stream (stream char)
       (io:write-utf8-char char stream))
    
-   (defun io:eof-p (stream) nil) ; TODO
+   (defun io:eof-p (&optional stream)
+      (io:raw-eof-p (io:the-stream stream)))
 
-   (defun write-byte (byte stream)
-      (io:write-byte-to-stream stream byte))
+   (defun write-byte (byte &optional stream)
+      (io:write-byte-to-stream (io:the-stream stream) byte))
    
-   (defun read-byte (stream)
-      (io:read-byte-from-stream stream))
+   (defun read-byte (&optional stream)
+      (io:read-byte-from-stream (io:the-stream stream)))
    
-   (defun write-char (char stream)
-      (io:write-char-to-stream stream char))
+   (defun write-char (char &optional stream)
+      (io:write-char-to-stream (io:the-stream stream) char))
    
-   (defun read-char (stream)
-      (io:read-char-from-stream stream))
+   (defun read-char (&optional stream)
+      (io:read-char-from-stream (io:the-stream stream)))
    
-   (defun unread-char (char stream)
-      (io:unread-char-from-stream stream char))
+   (defun unread-char (char &optional stream)
+      (io:unread-char-from-stream (io:the-stream stream) char))
    
    (defun peek-char (stream)
       (let ((char (read-char stream)))
@@ -1572,6 +1588,14 @@
       (let ((constants (lmud.int:function-constants function)))
          (dotimes (i (length constants))
             (io:uformat t "~&  [~s]: ~s~%" i (aref constants i)))))
+
+   (defun load (path)
+      (let ((port (lmud.int:open-file path)))
+         (unless port (lmud.util:simple-error "Could not open file!"))
+         (let ((char (read-char port)))
+            (while char
+               (write-char char)
+               (setq char (read-char port))))))
 
    (defun lmud.bootstrap::banner (port)
       (io:uformat port "~&~%Welcome to the LMud REPL!~%"))

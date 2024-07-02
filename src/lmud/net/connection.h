@@ -34,9 +34,12 @@ struct LMud_Connection
     struct LMud_ConnectionRef*  refs;
 
     struct LMud_FiberQueue      waiting_fibers;
+    struct LMud_FiberQueue      waiting_fibers_eof;
 
     struct LMud_Ringbuffer      inbuf;
     struct LMud_Ringbuffer      outbuf;
+
+    bool                        eof;
 };
 
 void LMud_Connection_Create(struct LMud_Connection* self, struct LMud_Net* net, int fd);
@@ -45,10 +48,14 @@ void LMud_Connection_Destroy(struct LMud_Connection* self);
 void LMud_Connection_Link(struct LMud_Connection* self, struct LMud_Connection** list);
 void LMud_Connection_Unlink(struct LMud_Connection* self);
 
+bool LMud_Connection_Eof(struct LMud_Connection* self);
+
 void LMud_Connection_RegisterOnSelector(struct LMud_Connection* self, struct LMud_Selector* selector);
 
 void LMud_Connection_AddWaitingFiber(struct LMud_Connection* self, struct LMud_Fiber* fiber);
+void LMud_Connection_AddWaitingFiberEof(struct LMud_Connection* self, struct LMud_Fiber* fiber);
 void LMud_Connection_FiberReadByte(struct LMud_Connection* self, struct LMud_Fiber* fiber);
+void LMud_Connection_FiberEof(struct LMud_Connection* self, struct LMud_Fiber* fiber);
 
 bool LMud_Connection_WriteByte(struct LMud_Connection* self, char byte);
 

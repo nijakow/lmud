@@ -1,4 +1,5 @@
 
+#include <lmud/lisp/lisp.h>
 #include <lmud/util/memory.h>
 #include <lmud/util/utf8.h>
 
@@ -28,6 +29,18 @@ LMud_Size LMud_Port_CalculateSizeInBytes(struct LMud_Port* self)
 {
     (void) self;
     return sizeof(struct LMud_Port) + self->pushbacks_alloc;
+}
+
+void LMud_Port_Eof(struct LMud_Port* self, struct LMud_Fiber* fiber)
+{
+    struct LMud_Connection*  connection;
+
+    connection = self->connection.connection;
+
+    if (connection == NULL)
+        LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, true));
+    else
+        LMud_Connection_FiberEof(connection, fiber);
 }
 
 bool LMud_Port_PushbackByte(struct LMud_Port* self, char byte)

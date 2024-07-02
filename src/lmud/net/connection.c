@@ -62,12 +62,14 @@ void LMud_Connection_Create(struct LMud_Connection* self, struct LMud_Net* net, 
     self->net  = net;
 
     self->fd   = fd;
+    self->eof  = false;
 
     self->prev = NULL;
     self->next = NULL;
     self->refs = NULL;
 
     LMud_FiberQueue_Create(&self->waiting_fibers);
+    LMud_FiberQueue_Create(&self->waiting_fibers_eof);
 
     LMud_Ringbuffer_Create(&self->inbuf,  4096);
     LMud_Ringbuffer_Create(&self->outbuf, 4096);
@@ -79,6 +81,7 @@ void LMud_Connection_Destroy(struct LMud_Connection* self)
     LMud_Connection_Unlink(self);
     LMud_Connection_KillRefs(self);
     LMud_FiberQueue_Destroy(&self->waiting_fibers); // TODO, FIXME, XXX: What shall we do with the drunken fiber? ;-)
+    LMud_FiberQueue_Destroy(&self->waiting_fibers_eof);
     LMud_Ringbuffer_Destroy(&self->inbuf);
     LMud_Ringbuffer_Destroy(&self->outbuf);
 }
@@ -104,22 +107,39 @@ void LMud_Connection_Unlink(struct LMud_Connection* self)
     self->next = NULL;
 }
 
+bool LMud_Connection_Eof(struct LMud_Connection* self)
+{
+    return self->eof;
+}
+
 void LMud_Connection_RegisterOnSelector(struct LMud_Connection* self, struct LMud_Selector* selector)
 {
-    if (LMud_Ringbuffer_HasData(&self->outbuf))
-        LMud_Selector_AddWrite(selector, self->fd);
+    if (!LMud_Connection_Eof(self))
+    {
+        if (LMud_Ringbuffer_HasData(&self->outbuf))
+            LMud_Selector_AddWrite(selector, self->fd);
 
-    LMud_Selector_AddRead(selector, self->fd);
-    LMud_Selector_AddExcept(selector, self->fd);
+        LMud_Selector_AddRead(selector, self->fd);
+        LMud_Selector_AddExcept(selector, self->fd);
+    }
 }
 
 
-static void LMud_Connection_ReleaseFibers(struct LMud_Connection* self, LMud_Any value)
+static void LMud_Connection_ReleaseFibersWithByte(struct LMud_Connection* self, char byte)
 {
     while (self->waiting_fibers.fibers != NULL)
     {
         LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Fiber %p released from the waiting fiber list!");
-        LMud_Fiber_ControlRestartWithValue(self->waiting_fibers.fibers, value);
+        LMud_Fiber_ControlRestartWithValue(self->waiting_fibers.fibers, LMud_Any_FromInteger(((LMud_Integer) 0) | (unsigned char) byte));
+    }
+}
+
+static void LMud_Connection_ReleaseEofFibers(struct LMud_Connection* self, bool eof)
+{
+    while (self->waiting_fibers_eof.fibers != NULL)
+    {
+        LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Fiber %p released from the waiting EOF fiber list (signalling no EOF)!");
+        LMud_Fiber_ControlRestartWithValue(self->waiting_fibers_eof.fibers, LMud_Lisp_Boolean(LMud_GetLisp(self->net->mud), eof));
     }
 }
 
@@ -127,14 +147,19 @@ static void LMud_Connection_MaybeReleaseFibers(struct LMud_Connection* self)
 {
     char  byte;
 
-    LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Releasing fibers...");
+    LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Releasing fibers...", self->fd);
 
     if (LMud_FiberQueue_HasFibers(&self->waiting_fibers))
     {
         if (LMud_Ringbuffer_ReadByte(&self->inbuf, &byte))
         {
-            LMud_Connection_ReleaseFibers(self, LMud_Any_FromInteger(((LMud_Integer) 0) | (unsigned char) byte));
+            LMud_Connection_ReleaseFibersWithByte(self, byte);
         }
+    }
+
+    if (LMud_FiberQueue_HasFibers(&self->waiting_fibers_eof))
+    {
+        LMud_Connection_ReleaseEofFibers(self, self->eof);
     }
 }
 
@@ -142,7 +167,17 @@ static void LMud_Connection_ReleaseFibersWithEof(struct LMud_Connection* self)
 {
     LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Releasing fibers with EOF...");
 
-    LMud_Connection_ReleaseFibers(self, LMud_Lisp_Nil(LMud_GetLisp(self->net->mud)));
+    while (self->waiting_fibers.fibers != NULL)
+    {
+        LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Fiber %p released from the waiting fiber list!");
+        LMud_Fiber_ControlRestartWithValue(self->waiting_fibers.fibers, LMud_Lisp_Nil(LMud_GetLisp(self->net->mud)));
+    }
+
+    /*
+     * TODO, FIXME: Use `self->eof` here? This would be a bit more logical,
+     * but then self->eof must be set before this function is called...
+     */
+    LMud_Connection_ReleaseEofFibers(self, true);
 }
 
 void LMud_Connection_AddWaitingFiber(struct LMud_Connection* self, struct LMud_Fiber* fiber)
@@ -151,14 +186,33 @@ void LMud_Connection_AddWaitingFiber(struct LMud_Connection* self, struct LMud_F
     LMud_Fiber_ControlWaitOnQueue(fiber, &self->waiting_fibers);
 }
 
+void LMud_Connection_AddWaitingFiberEof(struct LMud_Connection* self, struct LMud_Fiber* fiber)
+{
+    LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Fiber %p queued into the waiting EOF fibers list!", self->fd);
+    LMud_Fiber_ControlWaitOnQueue(fiber, &self->waiting_fibers_eof);
+}
+
 void LMud_Connection_FiberReadByte(struct LMud_Connection* self, struct LMud_Fiber* fiber)
 {
     char  byte;
 
     if (LMud_Ringbuffer_ReadByte(&self->inbuf, &byte)) {
         LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(((LMud_Integer) 0) | (unsigned char) byte));
+    } else if (self->eof) {
+        LMud_Fiber_ControlRestartWithValue(fiber, LMud_Lisp_Nil(LMud_GetLisp(self->net->mud)));
     } else {
         LMud_Connection_AddWaitingFiber(self, fiber);
+    }
+}
+
+void LMud_Connection_FiberEof(struct LMud_Connection* self, struct LMud_Fiber* fiber)
+{
+    if (LMud_Ringbuffer_HasData(&self->inbuf)) {
+        LMud_Fiber_ControlRestartWithValue(fiber, LMud_Lisp_Nil(LMud_GetLisp(self->net->mud)));
+    } else if (self->eof) {
+        LMud_Fiber_ControlRestartWithValue(fiber, LMud_Lisp_T(LMud_GetLisp(self->net->mud)));
+    } else {
+        LMud_Connection_AddWaitingFiberEof(self, fiber);
     }
 }
 
@@ -171,6 +225,7 @@ bool LMud_Connection_WriteByte(struct LMud_Connection* self, char byte)
 void LMud_Connection_HandleError(struct LMud_Connection* self)
 {
     LMud_Debugf(self->net->mud, LMud_LogLevel_HALF_DEBUG, "FD(%d): Handling connection error!");
+    self->eof = true;
     LMud_Connection_ReleaseFibersWithEof(self);
 }
 
