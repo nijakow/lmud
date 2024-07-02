@@ -1150,7 +1150,7 @@
                   ((io.reader:checkstr stream terminator)
                    (return (conversions:->string (reverse result))))
                   (t (push (read-char stream) result))))
-         (lmud.util:simple-error "Unexpected end of file!")))
+         (io.reader:eof-error stream)))
    
    (defun io.reader:generate-letcond (clauses)
       (if (endp clauses)
@@ -1309,12 +1309,15 @@
    (defun io.reader:parse-string (stream)
       (io.reader:read-escaped stream "\\" "\""))
 
-   (defun io.reader:read (stream)
+   (defun io.reader:read (stream &key (eof-error-p t) (eof-value nil))
       (io.reader:skip-whitespace stream)
-      (cond ((io:eof-p stream) nil)
+      (cond ((io:eof-p stream)
+             (if eof-error-p
+                 (io.reader:eof-error stream)
+                 eof-value))
             ((io.reader:checkstr stream ";")
              (io.reader:skip stream (lambda (char) (not (char= char #\Newline))))
-             (io.reader:read stream))
+             (io.reader:read stream :eof-error-p eof-error-p :eof-value eof-value))
             ((io.reader:checkstr stream "(")
              (io.reader:read-list stream))
             ((io.reader:checkstr stream ":")
@@ -1341,8 +1344,8 @@
              (io.reader:read-integer stream 16))
             (t (io.reader:read-atom stream))))
 
-   (defun read (stream)
-      (io.reader:read stream))
+   (defun read (stream &ignore-rest)
+      (lmud.int:funcall-forward #'io.reader:read))
 
 
    (defun io.printer:meta-escaped-p (meta) meta)
@@ -1589,13 +1592,20 @@
          (dotimes (i (length constants))
             (io:uformat t "~&  [~s]: ~s~%" i (aref constants i)))))
 
+   (defun slurp-port (port)
+      (let ((expression (read port :eof-error-p nil :eof-value :eof)))
+         (if (eq expression :eof)
+             nil
+             (cons expression (slurp-port port)))))
+
    (defun load (path)
       (let ((port (lmud.int:open-file path)))
          (unless port (lmud.util:simple-error "Could not open file!"))
-         (let ((char (read-char port)))
-            (while char
-               (write-char char)
-               (setq char (read-char port))))))
+         (while t
+            (let ((expr (read port :eof-error-p nil :eof-value :eof)))
+               (if (eq expr :eof)
+                   (return)
+                   (eval expr))))))
 
    (defun lmud.bootstrap::banner (port)
       (io:uformat port "~&~%Welcome to the LMud REPL!~%"))
