@@ -702,6 +702,18 @@
    ;;;    The Type- and Object System
    ;;;
 
+   (defun tos.int:%class-supers  (class) (lmud.int:%custom-at class 0))
+   (defun tos.int:%class-methods (class) (lmud.int:%custom-at class 1))
+   (defun tos.int:%class-vars    (class) (lmud.int:%custom-at class 2))
+
+   (defun tos.int:%class-supers!  (class supers)  (lmud.int:%custom-set class 0 supers))
+   (defun tos.int:%class-methods! (class methods) (lmud.int:%custom-set class 1 methods))
+   (defun tos.int:%class-vars!    (class vars)    (lmud.int:%custom-set class 2 vars))
+
+   (defun tos.int:%class-push-method! (class name method)
+      (let ((methods (tos.int:%class-methods class)))
+         (tos.int:%class-methods! class (cons (cons name method) methods))))
+
    (defun tos.int:pre-make-class (supers)
       (lmud.int:%make-custom 'class supers nil nil))
    
@@ -712,7 +724,7 @@
       (and (lmud.int:%customp object)
            (eq (lmud.int:%custom-meta object) nil)))
       
-   (defun tos.int:instancep (object)
+   (defun tos.int:oopp (object)
       (and (lmud.int:%customp object)
            (tos.int:classp (lmud.int:%custom-meta object))))
    
@@ -721,15 +733,45 @@
    (defparameter tos.classes:<port>  (tos.int:pre-make-class (list tos.classes:<t>)))
 
    (defun tos.int:class-of (object)
-      (cond ((tos.int:instancep object) (lmud.int:%custom-meta object))
+      (cond ((tos.int:oopp      object) (lmud.int:%custom-meta object))
             ((tos.int:classp    object) tos.classes:<class>)
-            ((lmud.int:portp    object) tos.classes:<port>)))
+            ((lmud.int:portp    object) tos.classes:<port>)
+            (t                          tos.classes:<t>)))
    
-   (defun tos.int:lookup-method-in-object (object message)
-      (tos.int:lookup-method-in-class (tos.int:class-of object) message))
+   (defun tos.int:subclassp (class1 class2)
+      (or (eq class1 class2)
+          (dolist (super (tos.int:%class-supers class1))
+             (when (tos.int:subclassp super class2)
+                (return t)))))
+   
+   (defun tos.int:instancep (object class)
+      (tos.int:subclassp (tos.int:class-of object) class))
+   
+   (defun tos.int:lookup-method-in-class (class message)
+      (dolist (method (tos.int:%class-methods class))
+         (when (eq (car method) message)
+            (return (cdr method))))
+      (dolist (super (tos.int:%class-supers class))
+         (let ((result (tos.int:lookup-method-in-class super message)))
+            (when result
+               (return result))))
+      nil)
 
-   (defun tos:send (object message &ignore-rest args)
-      (lmud.int:funcall-forward-rest (tos:lookup-method-in-object object message)))
+   (defun tos.int:error-method (object)
+      (lmud.util:simple-error "No method found!"))
+
+   (defun tos.int:lookup-method-in-object (object message)
+      (or (tos.int:lookup-method-in-class (tos.int:class-of object) message)
+          #'tos.int:error-method))
+
+   (defmacro tos:defmethod (info params &body body)
+      (let ((class       (car info))
+            (method-name (cadr info)))
+         (let ((method (list 'lambda (cons 'self params) (list* 'block method-name body))))
+            (list 'tos.int:%class-push-method! class (list 'quote method-name) method))))
+
+   (defun tos:send (object message &ignore-rest)
+      (lmud.int:funcall-forward-rest (tos.int:lookup-method-in-object object message) object))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -740,28 +782,28 @@
    (defun io:the-stream (stream)
       (or stream (lmud.int:current-port)))
 
-   (tos:defmethod io:write-raw-byte-to-stream ((stream lmud.classes:<port>)byte)
+   (defun io:write-raw-byte-to-stream (stream byte)
       (lmud.int:port-write-byte stream byte))
    
-   (tos:defmethod io:read-raw-byte-from-stream ((stream lmud.classes:<port>))
+   (defun io:read-raw-byte-from-stream (stream)
       (lmud.int:port-read-byte stream))
    
-   (tos:defmethod io:unread-raw-char-from-stream ((stream lmud.classes:<port>) char)
+   (defun io:unread-raw-char-from-stream (stream char)
       (lmud.int:port-unread-char stream char))
    
-   (tos:defmethod io:close-stream ((stream lmud.classes:<port>))
+   (defun io:close-stream (stream)
       (lmud.int:close-port stream))
    
    (defun io:raw-eof-p (stream)
       (lmud.int:port-eof-p stream))
 
-   (tos:defmethod io:write-byte-to-stream (stream byte)
+   (defun io:write-byte-to-stream (stream byte)
       (io:write-raw-byte-to-stream stream byte))
    
-   (tos:defmethod io:read-byte-from-stream (stream)
+   (defun io:read-byte-from-stream (stream)
       (io:read-raw-byte-from-stream stream))
    
-   (tos:defmethod io:unread-char-from-stream (stream char)
+   (defun io:unread-char-from-stream (stream char)
       (lmud.int:port-unread-char stream char))
    
    (defun io:write-utf8-char (char stream)
@@ -808,10 +850,10 @@
                                       (logand b3 #x3F)))))
                      (t (lmud.util:simple-error "Invalid UTF-8 encoding!")))))))
 
-   (tos:defmethod io:read-char-from-stream (stream)
+   (defun io:read-char-from-stream (stream)
       (io:read-utf8-char stream))
    
-   (tos:defmethod io:write-char-to-stream (stream char)
+   (defun io:write-char-to-stream (stream char)
       (io:write-utf8-char char stream))
    
    (defun io:eof-p (&optional stream)
