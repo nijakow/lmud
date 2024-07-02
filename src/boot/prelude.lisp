@@ -417,7 +417,8 @@
       (or (char= char #\Space)
           (char= char #\Tab)
           (char= char #\Newline)
-          (char= char #\Return)))
+          (char= char #\Return)
+          (char= char #\Backspace)))
 
    (defparameter lmud.char:*special-character-names*
       (list (cons #\Space     "Space")
@@ -1115,7 +1116,8 @@
    (defun io.reader:breaking-char-p (char)
       (or (char= char (code-char 40)) ; '('
           (char= char (code-char 41)) ; ')'
-          (lmud.char:whitespacep char)))
+          (lmud.char:whitespacep char)
+          (char= char #\Escape)))
 
    (defun io.reader:check (stream char)
       (let ((parsed-char (read-char stream)))
@@ -1304,6 +1306,7 @@
 
    (defun io.reader:read-atom (stream)
       (let ((text (io.reader:read-until-breaking-char stream)))
+         (when (= (length text) 0) (io.reader:eof-error stream))
          (or (io.reader:parse-number text)
              (multiple-value-bind (part-1 part-2)
                    (multiple-value-bind (a b)
