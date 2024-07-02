@@ -705,6 +705,7 @@
    (defun tos.int:%class-supers  (class) (lmud.int:%custom-at class 0))
    (defun tos.int:%class-methods (class) (lmud.int:%custom-at class 1))
    (defun tos.int:%class-vars    (class) (lmud.int:%custom-at class 2))
+   (defun tos.int:%class-name    (class) (lmud.int:%custom-at class 3))
 
    (defun tos.int:%class-supers!  (class supers)  (lmud.int:%custom-set class 0 supers))
    (defun tos.int:%class-methods! (class methods) (lmud.int:%custom-set class 1 methods))
@@ -718,15 +719,15 @@
       (let ((vars (tos.int:%class-vars class)))
          (tos.int:%class-vars! class (cons (cons name value) vars))))
 
-   (defun tos.int:pre-make-class (supers)
-      (lmud.int:%make-custom 'class supers nil nil))
+   (defun tos.int:pre-make-class (supers &key name)
+      (lmud.int:%make-custom 'class supers nil nil name))
    
    (defun tos.int:pre-make-instance (class)
       (lmud.int:%make-custom class nil))
 
    (defun tos.int:classp (object)
       (and (lmud.int:%customp object)
-           (eq (lmud.int:%custom-meta object) nil)))
+           (eq (lmud.int:%custom-meta object) 'class)))
       
    (defun tos.int:oopp (object)
       (and (lmud.int:%customp object)
@@ -777,6 +778,23 @@
    (defun tos.int:lookup-method-in-object (object message)
       (or (tos.int:lookup-method-in-class (tos.int:class-of object) message)
           #'tos.int:error-method))
+
+   (defmacro tos:defclass (name supers &body body)
+      (when (null supers)
+         (setq supers (list tos.classes:<t>)))
+      (let ((class (gensym)))
+         (list* 'let (list (list class (list 'tos.int:pre-make-class (cons 'list supers) ':name (list 'quote name))))
+            (list 'defparameter name class)
+            (apply #'append
+               (domap (clause body)
+                  (cond ((listp clause)
+                         (case (car clause)
+                            ((:with with)
+                             (domap (var (cdr clause))
+                                (cond ((symbolp var) (list 'tos.int:%class-push-var! class (list 'quote var) nil))
+                                      ((consp var)   (list 'tos.int:%class-push-var! class (list 'quote (car var)) (cons 'progn (cdr var))))
+                                      (t (lmud.util:simple-error "Invalid tos:defclass variable definition!")))))))
+                        (t (lmud.util:simple-error "Invalid tos:defclass clause!"))))))))
 
    (defmacro tos:defmethod (info params &body body)
       (let ((class       (car info))
@@ -1332,7 +1350,6 @@
             ((vectorp            e) (io.printer:print-vector    stream meta e))
             ((lmud.int:bytesp    e) (io.printer:print-bytes     stream meta e))
             ((lmud.int:ratiop    e) (io.printer:print-rational  stream meta e))
-            ((lmud.int:%customp  e) (io.printer:write-string    stream meta "#<CUSTOM>"))
             ((lmud.int:machine-function-p e)
              (io.printer:write-string stream meta "#<MACHINE-CODE-FUNCTION ")
              (io.printer:write-string stream meta (lmud.int:machine-function-name e))
@@ -1343,6 +1360,19 @@
              (io.printer:write-string stream meta "#<CLOSURE>"))
             ((lmud.int:portp e)
              (io.printer:write-string stream meta "#<PORT>"))
+            ((tos.int:classp e)
+             (let ((class-name (tos.int:%class-name e)))
+                (if class-name
+                    (progn (io.printer:write-string stream meta "#<CLASS:")
+                           (io.printer:print-expression stream meta class-name)
+                           (io.printer:write-string stream meta ">"))
+                    (io.printer:write-string stream meta "#<CLASS>"))))
+            ((tos.int:oopp e)
+             (io.printer:write-string stream meta "#S(")
+             (io.printer:print-expression stream meta (lmud.int:%custom-meta e))
+             (io.printer:write-string stream meta ")"))
+            ((lmud.int:%customp e)
+             (io.printer:write-string stream meta "#<CUSTOM>"))
             (t (io.printer:write-string stream meta "#<UNKNOWN>"))))
 
    (defun io.printer:prin1 (stream e)
