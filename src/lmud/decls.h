@@ -21,12 +21,12 @@ struct LMud_Net;
 
 #define LMud_XLogf(lmud, loglevel, format, ...) \
     { \
-        if (loglevel >= LMud_LOG_LEVEL) \
+        if (loglevel >= LMud_HARDCODED_LOG_LEVEL) \
         { \
             LMud_Logf(lmud, loglevel, format, ##__VA_ARGS__); \
         } \
     }
-#define LMud_Debugf_Impl(lmud, loglevel, function, file, line, format, ...) LMud_XLogf(lmud, loglevel, "%s(...) in %s:%d: " format, function, file, line, ##__VA_ARGS__)
-#define LMud_Debugf(lmud, loglevel, format, ...) LMud_Debugf_Impl(lmud, loglevel, __func__, __FILE__, __LINE__, format, ##__VA_ARGS__)
+#define LMud_Debugf_Impl(lmud, loglevel, function, file, line, format, ...) LMud_XLogf(lmud, (loglevel), "%s(...) in %s:%d: " format, function, file, line, ##__VA_ARGS__)
+#define LMud_Debugf(lmud, loglevel, format, ...) LMud_Debugf_Impl(lmud, (loglevel), __func__, __FILE__, __LINE__, format, ##__VA_ARGS__)
 
 void LMud_Logf(struct LMud* lmud, enum LMud_LogLevel loglevel, const char* format, ...);

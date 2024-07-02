@@ -5,6 +5,7 @@ const char* LMud_LogLevel_ToString(enum LMud_LogLevel loglevel)
 {
     switch (loglevel)
     {
+        case LMud_LogLevel_ALL:        return "   *   ";
         case LMud_LogLevel_FULL_DEBUG: return "DEBUG*";
         case LMud_LogLevel_HALF_DEBUG: return "DEBUG+";
         case LMud_LogLevel_DEBUG:      return "DEBUG";
@@ -21,6 +22,7 @@ const char* LMud_LogLevel_EscapeSequence(enum LMud_LogLevel loglevel)
 {
     switch (loglevel)
     {
+        case LMud_LogLevel_ALL:        return "\033[1;34m";
         case LMud_LogLevel_FULL_DEBUG: return "\033[1;34m";
         case LMud_LogLevel_HALF_DEBUG: return "\033[1;34m";
         case LMud_LogLevel_DEBUG:      return "\033[1;34m";

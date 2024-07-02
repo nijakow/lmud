@@ -1,4 +1,5 @@
 
+#include <lmud/log/log.h>
 #include <lmud/lisp/io.h>
 #include <lmud/lisp/runtime/fiber.h>
 
@@ -97,11 +98,51 @@ void LMud_Banner(struct LMud* self)
     printf("\n");
 }
 
+void LMud_StartupInfo(struct LMud* self)
+{
+    LMud_Banner(self);
+
+    LMud_Logf(self, LMud_LogLevel_INFO, "Starting up LMud v%s %s '%s'...\n", LMud_VERSION, LMud_VERSION_EXTRA, LMud_RELEASE_NAME);
+
+    {
+        struct LMud_LogComposer   composer;
+        struct LMud_OutputStream  stream;
+
+        LMud_LogComposer_Create(&composer, &self->log, LMud_LogLevel_NOTE);
+        LMud_OutputStream_CreateOnLogComposer(&stream, &composer);
+        {
+            LMud_OutputStream_Printf(&stream, "Compiled with the following properties:\n");
+            LMud_OutputStream_Printf(&stream, "  - Hardcoded Log Level:       %s\n", LMud_LogLevel_ToString(LMud_HARDCODED_LOG_LEVEL));
+            LMud_OutputStream_Printf(
+                &stream,
+                "  - Compressed LMud_Any:       %s\n",
+#ifdef LMud_ENABLE_COMPRESSED_ANYS
+                "true"
+#else
+                "false"
+#endif
+            );
+            LMud_OutputStream_Printf(
+                &stream,
+                "  - Support for malloc_trim(): %s\n",
+#ifdef LMud_ENABLE_MALLOC_TRIM
+                "true"
+#else
+                "false"
+#endif
+            );
+        }
+        LMud_OutputStream_Destroy(&stream);
+        LMud_LogComposer_Commit(&composer);
+        LMud_LogComposer_Destroy(&composer);
+    }
+}
+
 void LMud_Startup(struct LMud* self)
 {
     LMud_Any  boot_function;
 
-    LMud_Logf(self, LMud_LogLevel_INFO, "Starting up LMud v%s %s '%s'...\n", LMud_VERSION, LMud_VERSION_EXTRA, LMud_RELEASE_NAME);
+    LMud_StartupInfo(self);
 
     if (LMud_Lisp_LoadFile(&self->lisp, "../boot/prelude.lisp", &boot_function))
     {
@@ -119,7 +160,6 @@ void LMud_Main(struct LMud* self, int argc, char* argv[])
     (void) argc;
     (void) argv;
 
-    LMud_Banner(self);
     LMud_Startup(self);
     LMud_Loop(self);
     LMud_Shutdown(self);

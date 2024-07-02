@@ -1,4 +1,5 @@
 
+#include <lmud/net/net.h>
 #include <lmud/util/memory.h>
 
 #include "connection.h"
@@ -54,8 +55,10 @@ static void LMud_Connection_KillRefs(struct LMud_Connection* self)
     }
 }
 
-void LMud_Connection_Create(struct LMud_Connection* self, int fd)
+void LMud_Connection_Create(struct LMud_Connection* self, struct LMud_Net* net, int fd)
 {
+    self->net  = net;
+
     self->fd   = fd;
 
     self->prev = NULL;
@@ -113,6 +116,7 @@ static void LMud_Connection_ReleaseFibers(struct LMud_Connection* self, char byt
 {
     while (self->waiting_fibers.fibers != NULL)
     {
+        LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Fiber %p released from the waiting fiber list!");
         LMud_Fiber_ControlRestartWithValue(self->waiting_fibers.fibers, LMud_Any_FromInteger(((LMud_Integer) 0) | (unsigned char) byte));
     }
 }
@@ -120,6 +124,8 @@ static void LMud_Connection_ReleaseFibers(struct LMud_Connection* self, char byt
 static void LMud_Connection_MaybeReleaseFibers(struct LMud_Connection* self)
 {
     char  byte;
+
+    LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Releasing fibers...");
 
     if (LMud_FiberQueue_HasFibers(&self->waiting_fibers))
     {
@@ -132,6 +138,7 @@ static void LMud_Connection_MaybeReleaseFibers(struct LMud_Connection* self)
 
 void LMud_Connection_AddWaitingFiber(struct LMud_Connection* self, struct LMud_Fiber* fiber)
 {
+    LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Fiber %p queued into the waiting fibers list!", self->fd);
     LMud_Fiber_ControlWaitOnQueue(fiber, &self->waiting_fibers);
 }
 
@@ -154,11 +161,12 @@ bool LMud_Connection_WriteByte(struct LMud_Connection* self, char byte)
 
 void LMud_Connection_HandleError(struct LMud_Connection* self)
 {
-    (void) self;
+    LMud_Debugf(self->net->mud, LMud_LogLevel_HALF_DEBUG, "FD(%d): Handling connection error!");
 }
 
 void LMud_Connection_HandleDisconnect(struct LMud_Connection* self)
 {
+    LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Handling disconnect!");
     LMud_Connection_HandleError(self);
 }
 
@@ -172,6 +180,8 @@ void LMud_Connection_Tick(struct LMud_Connection* self, struct LMud_Selector* se
     if (LMud_Selector_IsRead(selector, self->fd))
     {
         ssize = read(self->fd, buffer, sizeof(buffer));
+
+        LMud_Debugf(self->net->mud, LMud_LogLevel_HALF_DEBUG, "FD(%d): Read  %4ld bytes", self->fd, ssize);
 
         if (ssize <= 0) {
             LMud_Connection_HandleDisconnect(self);
@@ -189,12 +199,14 @@ void LMud_Connection_Tick(struct LMud_Connection* self, struct LMud_Selector* se
         if (size > 0)
         {
             written = write(self->fd, buffer, size);
-        }
 
-        if (written < 0) {
-            LMud_Connection_HandleDisconnect(self);
-        } else {
-            LMud_Ringbuffer_SkipBytes(&self->outbuf, written);
+            LMud_Debugf(self->net->mud, LMud_LogLevel_HALF_DEBUG, "FD(%d): Wrote %4ld bytes out of %4lu", self->fd, written, size);
+
+            if (written < 0) {
+                LMud_Connection_HandleDisconnect(self);
+            } else {
+                LMud_Ringbuffer_SkipBytes(&self->outbuf, written);
+            }
         }
     }
 
@@ -212,8 +224,9 @@ static void LMud_Connections_DeleteConnection(struct LMud_Connections* self, str
     LMud_Free(connection);
 }
 
-void LMud_Connections_Create(struct LMud_Connections* self)
+void LMud_Connections_Create(struct LMud_Connections* self, struct LMud_Net* net)
 {
+    self->net         = net;
     self->connections = NULL;
 }
 
@@ -233,7 +246,7 @@ bool LMud_Connections_RegisterFileDescriptor(struct LMud_Connections* self, int 
 
     if (connection != NULL)
     {
-        LMud_Connection_Create(connection, fd);
+        LMud_Connection_Create(connection, self->net, fd);
         LMud_Connection_Link(connection, &self->connections);
     }
 

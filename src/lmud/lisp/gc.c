@@ -53,7 +53,7 @@ void LMud_GC_MarkObject(struct LMud_GC* self, void* object)
 {
     struct LMud_Header*  header;
 
-    LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Marking object %p...", object);
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_ALL, "Marking object %p...", object);
 
     header = LMud_ToHeader(object);
 
@@ -70,7 +70,7 @@ void LMud_GC_MarkFrame(struct LMud_GC* self, struct LMud_Frame* frame)
     LMud_Size  size;
     LMud_Size  index;
 
-    LMud_Debugf(self->lisp->mud, LMud_LogLevel_HALF_DEBUG, "Marking frame %p...");
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_ALL, "Marking frame %p...");
 
     /*
      * TODO, FIXME, XXX: This might cause a crash if lexical frames still
@@ -143,7 +143,7 @@ static void LMud_GC_Collect(struct LMud_GC* self)
             case LMud_GCBits_White:
                 LMud_Debugf(
                     self->lisp->mud,
-                    LMud_LogLevel_FULL_DEBUG,
+                    LMud_LogLevel_ALL,
                     "Freeing object %p (%s): %zu bytes...",
                     object,
                     header->type->name,
@@ -158,7 +158,7 @@ static void LMud_GC_Collect(struct LMud_GC* self)
             case LMud_GCBits_Black:
                 LMud_Debugf(
                     self->lisp->mud,
-                    LMud_LogLevel_FULL_DEBUG,
+                    LMud_LogLevel_ALL,
                     "Keeping object %p (%s)...",
                     object,
                     header->type->name
@@ -172,12 +172,12 @@ static void LMud_GC_Collect(struct LMud_GC* self)
             default:
                 LMud_Debugf(
                     self->lisp->mud,
-                    ignore_greys ? LMud_LogLevel_HALF_DEBUG : LMud_LogLevel_WARNING,
+                    ignore_greys ? LMud_LogLevel_ALL : LMud_LogLevel_WARNING,
                     "Garbage Collector encountered an invalid object mark (%p, %s: %d), marking it as white%s...",
                     object,
                     header->type->name,
                     LMud_Header_GetGCBits(header),
-                    ignore_greys ? " and ignoring further occurrences" : ""
+                    ignore_greys ? "" : " and ignoring further occurrences"
                 );
                 ignore_greys = true;
                 break;

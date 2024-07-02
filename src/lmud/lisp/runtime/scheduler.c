@@ -35,7 +35,7 @@ void LMud_Scheduler_Mark(struct LMud_GC* gc, struct LMud_Scheduler* self)
 {
     struct LMud_Fiber*  fiber;
 
-    LMud_Debugf(self->lisp->mud, LMud_LogLevel_DEBUG, "Marking fibers!");
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_HALF_DEBUG, "Marking LMud_Scheduler!");
 
     for (fiber = self->fibers; fiber != NULL; fiber = fiber->next)
     {

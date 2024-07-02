@@ -160,7 +160,7 @@ static void LMud_Objects_AfterAllocate(struct LMud_Objects* self, void* object)
     self->bytes_allocated          += size;
     self->bytes_allocated_since_gc += size;
     
-    LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Allocated %zu bytes for %s (%p), now %zu bytes allocated", size, header->type->name, object, self->bytes_allocated);
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_ALL, "Allocated %zu bytes for %s (%p), now %zu bytes allocated", size, header->type->name, object, self->bytes_allocated);
 }
 
 struct LMud_Array*  LMud_Objects_MakeArray(struct LMud_Objects* self, LMud_Size size, LMud_Any fill)

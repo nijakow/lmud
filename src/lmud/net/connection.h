@@ -6,6 +6,7 @@
 #include <lmud/lisp/runtime/fiber.h>
 #include <lmud/util/ringbuffer.h>
 
+
 struct LMud_ConnectionRef
 {
     struct LMud_Connection*      connection;
@@ -24,7 +25,9 @@ void LMud_ConnectionRef_Kill(struct LMud_ConnectionRef* self);
 
 struct LMud_Connection
 {
-    int  fd;
+    struct LMud_Net*            net;
+
+    int                         fd;
 
     struct LMud_Connection**    prev;
     struct LMud_Connection*     next;
@@ -36,7 +39,7 @@ struct LMud_Connection
     struct LMud_Ringbuffer      outbuf;
 };
 
-void LMud_Connection_Create(struct LMud_Connection* self, int fd);
+void LMud_Connection_Create(struct LMud_Connection* self, struct LMud_Net* net, int fd);
 void LMud_Connection_Destroy(struct LMud_Connection* self);
 
 void LMud_Connection_Link(struct LMud_Connection* self, struct LMud_Connection** list);
@@ -52,10 +55,11 @@ bool LMud_Connection_WriteByte(struct LMud_Connection* self, char byte);
 
 struct LMud_Connections
 {
+    struct LMud_Net*         net;
     struct LMud_Connection*  connections;
 };
 
-void LMud_Connections_Create(struct LMud_Connections* self);
+void LMud_Connections_Create(struct LMud_Connections* self, struct LMud_Net* net);
 void LMud_Connections_Destroy(struct LMud_Connections* self);
 
 bool LMud_Connections_RegisterFileDescriptor(struct LMud_Connections* self, int fd, struct LMud_Connection** connection);
