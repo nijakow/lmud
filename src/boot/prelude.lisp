@@ -1147,6 +1147,8 @@
              (io.reader:read-integer stream 8))
             ((io.reader:checkstr stream "#x")
              (io.reader:read-integer stream 16))
+            ((io.reader:checkstr stream ".")
+             (list 'tos:at 'self (list 'quote (io.reader:read stream))))
             (t (io.reader:read-atom stream))))
 
    (defun read (stream &ignore-rest)
