@@ -50,6 +50,8 @@ void LMud_Connection_Unlink(struct LMud_Connection* self);
 
 bool LMud_Connection_Eof(struct LMud_Connection* self);
 
+void LMud_Connection_Close(struct LMud_Connection* self);
+
 void LMud_Connection_RegisterOnSelector(struct LMud_Connection* self, struct LMud_Selector* selector);
 
 void LMud_Connection_AddWaitingFiber(struct LMud_Connection* self, struct LMud_Fiber* fiber);

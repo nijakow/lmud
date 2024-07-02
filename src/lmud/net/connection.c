@@ -49,6 +49,8 @@ void LMud_ConnectionRef_Kill(struct LMud_ConnectionRef* self)
 }
 
 
+static void LMud_Connection_ReleaseFibersWithEof(struct LMud_Connection* self);
+
 static void LMud_Connection_KillRefs(struct LMud_Connection* self)
 {
     while (self->refs != NULL)
@@ -77,7 +79,7 @@ void LMud_Connection_Create(struct LMud_Connection* self, struct LMud_Net* net, 
 
 void LMud_Connection_Destroy(struct LMud_Connection* self)
 {
-    close(self->fd);
+    LMud_Connection_Close(self);
     LMud_Connection_Unlink(self);
     LMud_Connection_KillRefs(self);
     LMud_FiberQueue_Destroy(&self->waiting_fibers); // TODO, FIXME, XXX: What shall we do with the drunken fiber? ;-)
@@ -110,6 +112,18 @@ void LMud_Connection_Unlink(struct LMud_Connection* self)
 bool LMud_Connection_Eof(struct LMud_Connection* self)
 {
     return self->eof;
+}
+
+void LMud_Connection_Close(struct LMud_Connection* self)
+{
+    LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Closing connection!", self->fd);
+    if (self->fd >= 0)
+    {
+        close(self->fd);
+        self->fd = -1;
+    }
+    self->eof = true;
+    LMud_Connection_ReleaseFibersWithEof(self);
 }
 
 void LMud_Connection_RegisterOnSelector(struct LMud_Connection* self, struct LMud_Selector* selector)

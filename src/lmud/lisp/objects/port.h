@@ -20,6 +20,8 @@ LMud_Size LMud_Port_CalculateSizeInBytes(struct LMud_Port* self);
 
 void LMud_Port_Eof(struct LMud_Port* self, struct LMud_Fiber* fiber);
 
+void LMud_Port_Close(struct LMud_Port* self);
+
 bool LMud_Port_PushbackByte(struct LMud_Port* self, char byte);
 bool LMud_Port_PushbackRune(struct LMud_Port* self, LMud_Rune rune);
 

@@ -261,6 +261,8 @@
          (dolist (item list)
             (setq result (cons item result)))
          result))
+   
+   (defun nreverse (list) (reverse list))
 
    (defun member (item list)
       (cond ((endp list) nil)
@@ -1028,6 +1030,9 @@
    (tos:defmethod io:unread-raw-char-from-stream ((stream lmud.classes:<port>) char)
       (lmud.int:port-unread-char stream char))
    
+   (tos:defmethod io:close-stream ((stream lmud.classes:<port>))
+      (lmud.int:close-port stream))
+   
    (defun io:raw-eof-p (stream)
       (lmud.int:port-eof-p stream))
 
@@ -1112,6 +1117,9 @@
       (let ((char (read-char stream)))
          (unread-char char stream)
          char))
+   
+   (defun close (stream)
+      (io:close-stream stream))
    
    (defun io.reader:breaking-char-p (char)
       (or (char= char (code-char 40)) ; '('
@@ -1564,7 +1572,8 @@
       (io.printer:print-expression stream nil e))
    
    (defun io.printer:terpri (stream)
-      (io.printer:princ stream #\Newline))
+      (io.printer:write-char stream nil #\Return)
+      (io.printer:write-char stream nil #\Newline))
    
    (defun prin1 (e &optional stream)
       (io.printer:prin1 (io:the-stream stream) e))
@@ -1668,6 +1677,8 @@
 
    (lmud.int:open-v4 "127.0.0.1" 4242 #'lmud.bootstrap::hi)
    (lmud.int:open-v6 "::1"       4244 #'lmud.bootstrap::hi)
+
+   (load "../boot/test.lisp")
 
    ))
 

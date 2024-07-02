@@ -43,6 +43,16 @@ void LMud_Port_Eof(struct LMud_Port* self, struct LMud_Fiber* fiber)
         LMud_Connection_FiberEof(connection, fiber);
 }
 
+void LMud_Port_Close(struct LMud_Port* self)
+{
+    struct LMud_Connection*  connection;
+
+    connection = self->connection.connection;
+
+    if (connection != NULL)
+        LMud_Connection_Close(connection);
+}
+
 bool LMud_Port_PushbackByte(struct LMud_Port* self, char byte)
 {
     if (self->pushbacks_fill == self->pushbacks_alloc)
