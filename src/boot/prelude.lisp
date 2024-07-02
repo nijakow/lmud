@@ -702,321 +702,40 @@
    ;;;    The Type- and Object System
    ;;;
 
-   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   ;;;
-   ;;; TOS internals
-   ;;;
-
-   (defun (setf lmud.int:%custom-meta) (value object)
-      (list 'lmud.int:%custom-set-meta object value))
+   (defun tos.int:pre-make-class (supers)
+      (lmud.int:%make-custom 'class supers nil nil))
    
-   (defun (setf lmud.int:%custom-at) (value object index)
-      (list 'lmud.int:%custom-set object index value))
+   (defun tos.int:pre-make-instance (class)
+      (lmud.int:%make-custom class nil))
 
-   (defun tos.int:%class-constructor        (class) (lmud.int:%custom-at class 0))
-   (defun tos.int:%class-layout             (class) (lmud.int:%custom-at class 1))
-   (defun tos.int:%class-inheritance-chain  (class) (lmud.int:%custom-at class 2))
-   (defun tos.int:%class-superclasses       (class) (lmud.int:%custom-at class 3))
-   (defun tos.int:%class-slots              (class) (lmud.int:%custom-at class 4))
-   (defun tos.int:%class-funcall-dispatcher (class) (lmud.int:%custom-at class 5))
-
-   (defun (setf tos.int:%class-constructor)        (value class) (list 'lmud.int:%custom-set class 0 value))
-   (defun (setf tos.int:%class-layout)             (value class) (list 'lmud.int:%custom-set class 1 value))
-   (defun (setf tos.int:%class-inheritance-chain)  (value class) (list 'lmud.int:%custom-set class 2 value))
-   (defun (setf tos.int:%class-superclasses)       (value class) (list 'lmud.int:%custom-set class 3 value))
-   (defun (setf tos.int:%class-slots)              (value class) (list 'lmud.int:%custom-set class 4 value))
-   (defun (setf tos.int:%class-funcall-dispatcher) (value class) (list 'lmud.int:%custom-set class 5 value))
-
-   (defun tos.int:%slot-name          (slot) (lmud.int:%custom-at slot 0))
-   (defun tos.int:%slot-default-value (slot) (lmud.int:%custom-at slot 1))
-
-   (defun (setf tos.int:%slot-name)          (value slot) (list 'lmud.int:%custom-set slot 0 value))
-   (defun (setf tos.int:%slot-default-value) (value slot) (list 'lmud.int:%custom-set slot 1 value))
-
-
-   (defparameter tos.int:<class> (lmud.int:%make-custom nil nil nil nil nil nil nil))
-
-   (setf (lmud.int:%custom-meta tos.int:<class>) tos.int:<class>)
-
-   (defun tos.int:make-class (&key (constructor nil) (superclasses nil) (slots nil) (funcall-dispatcher nil))
-      (let ((instance (lmud.int:%make-custom tos.int:<class> constructor nil nil superclasses slots funcall-dispatcher)))
-         (tos.int:rebuild-class-layout instance)
-         (when constructor
-            (setf (tos.int:%class-constructor instance) constructor))
-         instance))
+   (defun tos.int:classp (object)
+      (and (lmud.int:%customp object)
+           (eq (lmud.int:%custom-meta object) nil)))
+      
+   (defun tos.int:instancep (object)
+      (and (lmud.int:%customp object)
+           (tos.int:classp (lmud.int:%custom-meta object))))
    
-   (defun tos.int:class-instance-slot-index-by-name (class name)
-      (let ((allslots (tos.int:%class-layout class)))
-         (dotimes (i (length allslots))
-            (let ((slot (aref allslots i)))
-               (if (eq name (tos.int:%slot-name slot))
-                   (return i)))))
-      nil)
-   
-   (defun tos.int:soft-class-of (object)
-      (cond ((lmud.int:%customp object) (lmud.int:%custom-meta object))
-            ((characterp        object) lmud.classes:<character>)
-            ((lmud.int:portp    object) lmud.classes:<port>)
-            (t                          lmud.classes:<t>)))
-
-   (defun tos.int:classy-object-p (object)
-      (not (null (tos.int:soft-class-of object))))
+   (defparameter tos.classes:<t>     (tos.int:pre-make-class '()))
+   (defparameter tos.classes:<class> (tos.int:pre-make-class (list tos.classes:<t>)))
+   (defparameter tos.classes:<port>  (tos.int:pre-make-class (list tos.classes:<t>)))
 
    (defun tos.int:class-of (object)
-      (or (tos.int:soft-class-of object)
-          (lmud.util:simple-error "Not a classy object!")))
+      (cond ((tos.int:instancep object) (lmud.int:%custom-meta object))
+            ((tos.int:classp    object) tos.classes:<class>)
+            ((lmud.int:portp    object) tos.classes:<port>)))
+   
+   (defun tos.int:lookup-method-in-object (object message)
+      (tos.int:lookup-method-in-class (tos.int:class-of object) message))
 
-   (defun tos.int:slot-value-by-name (object slot-name)
-      (let ((slot-index (tos.int:class-instance-slot-index-by-name (tos.int:class-of object) slot-name)))
-         (when (null slot-index)
-            (lmud.util:simple-error "Slot not found!"))
-         (lmud.int:%custom-at object slot-index)))
-   
-   (defun tos.int:set-slot-value-by-name (object slot-name value)
-      (let ((slot-index (tos.int:class-instance-slot-index-by-name (tos.int:class-of object) slot-name)))
-         (when (null slot-index)
-            (lmud.util:simple-error "Slot not found!"))
-         (setf (lmud.int:%custom-at object slot-index) value)))
-   
-   (defun tos.int:funcall-dispatcher-of (object)
-      (let ((class (tos.int:class-of object)))
-         (or (tos.int:%class-funcall-dispatcher class)
-             (dolist (superclass (tos.int:%class-inheritance-chain class))
-                (when (tos.int:%class-funcall-dispatcher superclass)
-                   (return (tos.int:%class-funcall-dispatcher superclass)))))))
-   
-   (defun tos.int:funcall-dispatcher (object &ignore-rest)
-      (lmud.int:funcall-forward (tos.int:funcall-dispatcher-of object)))
-   
-   (lmud.int:%set-custom-dispatcher-function #'tos.int:funcall-dispatcher)
-
-   (defun tos.int:rebuild-class-layout (class)
-      (let* ((slots  (tos.int:%class-slots class))
-             (layout (conversions:->vector slots))
-             (inheritance-chain (apply #'append
-                                       (domap (superclass (tos.int:%class-superclasses class))
-                                          (cons superclass (tos.int:%class-inheritance-chain superclass)))))
-             (constructor-source
-               (let ((class-var (gensym)))
-                  (list 'lambda (list* class-var '&key
-                                    (domap (slot slots)
-                                       (list (tos.int:%slot-name          slot)
-                                             (tos.int:%slot-default-value slot))))
-                     (list* 'lmud.int:%make-custom class-var
-                        (domap (slot slots) (tos.int:%slot-name slot)))))))
-         (setf (tos.int:%class-constructor       class) (eval constructor-source))
-         (setf (tos.int:%class-layout            class) layout)
-         (setf (tos.int:%class-inheritance-chain class) inheritance-chain))
-      class)
-   
-   (defun tos.int:class-add-slots (class slots)
-      (setf (tos.int:%class-slots class)
-            (append (tos.int:%class-slots class)
-                    (copy-list slots)))
-      (tos.int:rebuild-class-layout class))
-   
-   (defun tos.int:class-add-slot (class slot)
-      (tos.int:class-add-slots class (list slot)))
-
-   (defparameter tos.int:<slot>
-      (tos.int:make-class :constructor
-         (lambda (class &key name default-value)
-            (lmud.int:%make-custom class name default-value))))
-
-   (defun tos.int:make-instance (class &ignore-rest)
-      (lmud.int:funcall-forward (tos.int:%class-constructor class)))
-   
-   (tos.int:class-add-slots tos.int:<class>
-      (list (tos.int:make-instance tos.int:<slot> :name 'constructor)
-            (tos.int:make-instance tos.int:<slot> :name 'layout)
-            (tos.int:make-instance tos.int:<slot> :name 'inheritance-chain)
-            (tos.int:make-instance tos.int:<slot> :name 'superclasses)
-            (tos.int:make-instance tos.int:<slot> :name 'slots)))
-   
-   (tos.int:class-add-slots tos.int:<slot>
-      (list (tos.int:make-instance tos.int:<slot> :name 'name)
-            (tos.int:make-instance tos.int:<slot> :name 'default-value)))
-   
-   (defun tos.int:construct-class (name superclasses slot-descriptions)
-      (let ((slots (domap (slot-description slot-descriptions)
-                                    (apply (lambda (name &key initform)
-                                             (tos.int:make-instance tos.int:<slot> :name name :default-value initform))
-                                           slot-description))))
-         (tos.int:make-class :superclasses superclasses
-                             :slots        slots)))
-
-   (defun tos.int:defclass-execute (name superclasses slot-descriptions)
-      (set-symbol-value name
-         (tos.int:construct-class name
-                                  (or superclasses
-                                      (and lmud.classes:<t> (list lmud.classes:<t>)))
-                                  slot-descriptions)))
-
-   (defun tos.int:specific-< (class1 class2)
-      (conversions:->bool
-         (member class1 (tos.int:%class-inheritance-chain class2))))
-
-   (defun tos.int:specific-> (class1 class2)
-      (tos.int:specific-< class2 class1))
-   
-   (defun tos.int:strict-subclassp (class parent-class)
-      (tos.int:specific-< parent-class class))
-
-   (defun tos.int:subclassp (class parent-class)
-      (or (eq class parent-class)
-          (tos.int:strict-subclassp class parent-class)))
-   
-   (defun tos.int:instancep (object class)
-      (and (tos.int:classy-object-p object)
-           (tos.int:subclassp (tos.int:class-of object) class)))
-
-   (defmacro tos.int:defclass (name superclasses slot-descriptions)
-      (let ((class-var (gensym))
-            (expr      (list 'tos.int:defclass-execute (list 'quote name)
-                                                       (list* 'list superclasses)
-                                                       (list 'quote slot-descriptions))))
-         (list 'let (list (list class-var expr))
-            (list* 'prog1 class-var
-               (domap (slot-description slot-descriptions)
-                  (apply #'(lambda (name &key accessor)
-                              (when accessor
-                                 (list 'tos:defmethod accessor (list (list 'object class-var))
-                                      (list 'tos.int:slot-value-by-name 'object (list 'quote name)))))
-                         slot-description))))))
-   
-   (tos.int:defclass lmud.classes:<t> () ())
-
-   (tos.int:defclass tos.classes:<generic-function> ()
-      ((dispatch-table)
-       (dispatch-function)))
-   
-   (defun tos.int:%generic-function-dispatch-table (gf)
-      (tos.int:slot-value-by-name gf 'dispatch-table))
-   
-   (defun (setf tos.int:%generic-function-dispatch-table) (value gf)
-      (list 'tos.int:set-slot-value-by-name gf ''dispatch-table value))
-   
-   (defun tos.int:%generic-function-dispatch-function (gf)
-      (tos.int:slot-value-by-name gf 'dispatch-function))
-   
-   (defun (setf tos.int:%generic-function-dispatch-function) (value gf)
-      (list 'tos.int:set-slot-value-by-name gf ''dispatch-function value))
-
-   (defun tos.int:typed-arglist-equal-arity-specific-> (t1 t2)
-      (cond ((endp t1) nil)
-            ((endp t2) (lmud.util:simple-error "Arity mismatch!"))
-            (t (let ((a (cdar t1))
-                     (b (cdar t2)))
-                  (or (tos.int:specific-> a b)
-                      (and (not (tos.int:specific-> b a))
-                           (tos.int:typed-arglist-equal-arity-specific-> (cdr t1) (cdr t2))))))))
-
-   (defun tos.int:typed-arglist-specific-> (t1 t2)
-      (let ((l1 (length t1))
-            (l2 (length t2)))
-         (cond ((> l1 l2) t)
-               ((< l1 l2) nil)
-               (t (tos.int:typed-arglist-equal-arity-specific-> t1 t2)))))
-   
-   (defun tos.int:generic-function-resort-methods (gf)
-      (setf (tos.int:%generic-function-dispatch-table gf)
-            (sort (tos.int:%generic-function-dispatch-table gf)
-                  #'tos.int:typed-arglist-specific->
-                  :key #'car))
-      (let ((dispatcher-source
-               (list 'lambda '(&ignore-rest)
-                     (list* 'cond
-                        (domap (clause (tos.int:%generic-function-dispatch-table gf))
-                           (list (list* 'and
-                                    (list '>= '(lmud.int:%given-argument-count) (length (car clause)))
-                                    (let ((arg-index 0))
-                                       (domap (arg (car clause))
-                                          (prog1 (list 'tos.int:instancep (list 'lmud.int:%given-argument-ref arg-index) (cdr arg))
-                                             (incf arg-index)))))
-                                 (list 'lmud.int:funcall-forward (cdr clause))))))))
-         (setf (tos.int:%generic-function-dispatch-function gf)
-               (eval dispatcher-source)))
-      gf)
-
-   (defun tos.int:generic-function-add-method (gf fixed-args lambda)
-      ;; TODO: Check for duplicate methods, replace them
-      (push (cons fixed-args lambda) (tos.int:%generic-function-dispatch-table gf))
-      (tos.int:generic-function-resort-methods gf))
-   
-   (defun tos.int:generic-function-invoke (gf &ignore-rest)
-      (lmud.int:funcall-forward-rest (tos.int:%generic-function-dispatch-function gf)))
-   (setf (tos.int:%class-funcall-dispatcher tos.classes:<generic-function>) #'tos.int:generic-function-invoke)
-
-   (defun tos.int:extract-typed-args (arglist)
-      (cond ((endp arglist) (values nil nil))
-            ((member (car arglist) '(&optional &key &rest &body &ignore-rest)) (values nil arglist))
-            (t (multiple-value-bind (typed untyped)
-                     (tos.int:extract-typed-args (cdr arglist))
-                  (values (cons (if (consp (car arglist))
-                                    (car arglist)
-                                    (list (car arglist) lmud.classes:<t>))
-                                typed)
-                           untyped)))))
-   
-   (defmacro tos.int:defmethod-on-generic-function (gf args &body body)
-      (multiple-value-bind (typed-args untyped-args)
-            (tos.int:extract-typed-args args)
-         (let ((real-arglist (append (mapcar #'car typed-args) untyped-args)))
-            (list 'tos.int:generic-function-add-method
-                     gf
-                     (list* 'list
-                            (domap (argdef typed-args)
-                               (list 'cons (list 'quote (car argdef)) (list* 'progn (cdr argdef)))))
-                     (list* 'lambda real-arglist body)))))
-
-   (defun tos.int:ensure-generic-function (symbol)
-      (let ((value (symbol-function symbol)))
-         (if (tos.int:instancep value tos.classes:<generic-function>)
-             value
-             (progn (when (not (null value))
-                       (lmud.util:simple-error "Symbol already bound to a non-generic-function!"))
-                    (let ((gf (tos.int:make-instance tos.classes:<generic-function>)))
-                       (set-symbol-function symbol gf)
-                       gf)))))
-
-   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   ;;;
-   ;;; These are the public TOS macros
-   ;;;
-
-   (defun tos:class-of (object)
-      (tos.int:class-of object))
-   
-   (defun tos:instancep (object class)
-      (tos.int:instancep object class))
-   
-   (defmacro tos:defclass (name superclasses slot-descriptions)
-      (list 'tos.int:defclass name superclasses slot-descriptions))
-   
-   (defmacro tos:defgeneric (name args &body body)
-      (list 'tos.int:ensure-generic-function (list 'quote name)))
-
-   (defmacro tos:defmethod (name args &body body)
-      (list* 'tos.int:defmethod-on-generic-function (list 'tos.int:ensure-generic-function (list 'quote name)) args body))
-   
-   (defun tos:make-instance (class &ignore-rest)
-      (lmud.int:funcall-forward #'tos.int:make-instance))
-   
-   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-   ;;;
-   ;;; The TOS standard classes
-   ;;;
-
-   (tos:defclass lmud.classes:<character> () ())
-   (tos:defclass lmud.classes:<port>      () ())
+   (defun tos:send (object message &ignore-rest args)
+      (lmud.int:funcall-forward-rest (tos:lookup-method-in-object object message)))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
    ;;;    Streams and I/O
    ;;;
-
-   (tos:defclass io.stream:<stream> () ())
 
    (defun io:the-stream (stream)
       (or stream (lmud.int:current-port)))
