@@ -58,6 +58,13 @@ void LMud_Builtin_HelloWorld(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud
     printf("  Hello, world!\n");
 }
 
+void LMud_Builtin_Log(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    CHECK_ARGS(2, 2);
+
+    LMud_Logf(fiber->lisp->mud, LMud_Any_AsInteger(arguments[0]), "%s", LMud_String_Chars(LMud_Any_AsPointer(arguments[1])));
+}
+
 void LMud_Builtin_Quit(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     NO_ARGS;
@@ -1191,6 +1198,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "RANDOM", LMud_Builtin_Random);
 
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.TEST", "HELLO-WORLD", LMud_Builtin_HelloWorld);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "LOG", LMud_Builtin_Log);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%QUIT", LMud_Builtin_Quit);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "FUNCALL-FORWARD", LMud_Builtin_FuncallForward);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "FUNCALL-FORWARD-REST", LMud_Builtin_FuncallForwardRest);

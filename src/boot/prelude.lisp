@@ -330,6 +330,22 @@
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
+   ;;;    Case analysis
+   ;;;
+
+   (defmacro case (key &rest clauses)
+      (let ((temp (gensym)))
+         (list 'let (list (list temp key))
+            (cons 'cond
+                  (domap (clause clauses)
+                     (if (listp (car clause))
+                         (cons (list 'member temp (list 'quote (car clause)))
+                               (cdr clause))
+                         (cons 't (cdr clause))))))))
+
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
    ;;;    Association Lists and Property Lists
    ;;;
 
@@ -1582,6 +1598,21 @@
    ;;;    REPL and Tools
    ;;;
 
+   (defun lmud:log (level format)
+      (let ((message format))
+         (lmud.int:log (case level
+                          ((:all)                    0)
+                          ((:debug-full :full-debug) 1)
+                          ((:debug-half :half-debug) 2)
+                          ((:debug)                  3)
+                          ((:note)                   4)
+                          ((:warning)                5)
+                          ((:error)                  6)
+                          ((:info)                   7)
+                          ((:fatal)                  8)
+                          (t (lmud.util:simple-error "Unknown log level!")))
+                       message)))
+
    (defun disassemble (function &optional stream)
       (unless (lmud.int:bytecode-function-p function)
          (lmud.util:simple-error "Not a bytecode-compiled function!"))
@@ -1601,6 +1632,7 @@
    (defun load (path)
       (let ((port (lmud.int:open-file path)))
          (unless port (lmud.util:simple-error "Could not open file!"))
+         (lmud:log :info "Loading file...")
          (while t
             (let ((expr (read port :eof-error-p nil :eof-value :eof)))
                (if (eq expr :eof)
