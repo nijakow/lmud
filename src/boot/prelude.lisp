@@ -713,6 +713,10 @@
    (defun tos.int:%class-push-method! (class name method)
       (let ((methods (tos.int:%class-methods class)))
          (tos.int:%class-methods! class (cons (cons name method) methods))))
+   
+   (defun tos.int:%class-push-var! (class name value)
+      (let ((vars (tos.int:%class-vars class)))
+         (tos.int:%class-vars! class (cons (cons name value) vars))))
 
    (defun tos.int:pre-make-class (supers)
       (lmud.int:%make-custom 'class supers nil nil))
@@ -756,6 +760,16 @@
             (when result
                (return result))))
       nil)
+   
+   (defun tos.int:lookup-variable-in-class (class variable)
+      (dolist (var (tos.int:%class-vars class))
+         (when (eq (car var) variable)
+            (return (cdr var))))
+      (dolist (super (tos.int:%class-supers class))
+         (let ((result (tos.int:lookup-variable-in-class super variable)))
+            (when result
+               (return result))))
+      nil)
 
    (defun tos.int:error-method (object)
       (lmud.util:simple-error "No method found!"))
@@ -769,6 +783,9 @@
             (method-name (cadr info)))
          (let ((method (list 'lambda (cons 'self params) (list* 'block method-name body))))
             (list 'tos.int:%class-push-method! class (list 'quote method-name) method))))
+
+   (defun tos:at (object variable)
+      (tos.int:lookup-variable-in-class (tos.int:class-of object) variable))
 
    (defun tos:send (object message &ignore-rest)
       (lmud.int:funcall-forward-rest (tos.int:lookup-method-in-object object message) object))
