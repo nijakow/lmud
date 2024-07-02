@@ -627,8 +627,6 @@ void LMud_Lisp_GarbageCollect(struct LMud_Lisp* self, struct LMud_GCStats* stats
 {
     struct LMud_GC  gc;
 
-    LMud_Logf(self->mud, LMud_LogLevel_INFO, "Garbage Collection...\n");
-
     LMud_GC_Create(&gc, self);
     LMud_GC_Run(&gc);
     LMud_GC_FetchStats(&gc, stats);

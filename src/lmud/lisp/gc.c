@@ -53,6 +53,8 @@ void LMud_GC_MarkObject(struct LMud_GC* self, void* object)
 {
     struct LMud_Header*  header;
 
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Marking object %p...", object);
+
     header = LMud_ToHeader(object);
 
     if (LMud_Header_GetGCBits(header) == LMud_GCBits_White)
@@ -124,24 +126,43 @@ static void LMud_GC_Collect(struct LMud_GC* self)
     struct LMud_Header**  iterator;
     struct LMud_Header**  next;
     struct LMud_Header*   header;
+    struct LMud_Object*   object;
+    bool                  ignore_greys;
 
-    iterator = &self->lisp->objects.objects;
-    next     = iterator;
+    iterator     = &self->lisp->objects.objects;
+    next         = iterator;
+    ignore_greys = false;
 
     while (*iterator != NULL)
     {
         header = *iterator;
+        object = LMud_Header_ToObject(header);
 
         switch (LMud_Header_GetGCBits(header))
         {
             case LMud_GCBits_White:
+                LMud_Debugf(
+                    self->lisp->mud,
+                    LMud_LogLevel_FULL_DEBUG,
+                    "Freeing object %p (%s): %zu bytes...",
+                    object,
+                    header->type->name,
+                    header->type->size_func(object)
+                );
                 *iterator = header->next;
-                header->type->destructor(LMud_Header_ToObject(header));
+                header->type->destructor(object);
                 LMud_Free(header);
                 self->stats.objects_freed++;
                 break;
 
             case LMud_GCBits_Black:
+                LMud_Debugf(
+                    self->lisp->mud,
+                    LMud_LogLevel_FULL_DEBUG,
+                    "Keeping object %p (%s)...",
+                    object,
+                    header->type->name
+                );
                 LMud_Header_SetGCBits(header, LMud_GCBits_White);
                 next = &header->next;
                 self->stats.objects_kept++;
@@ -149,7 +170,16 @@ static void LMud_GC_Collect(struct LMud_GC* self)
             
             case LMud_GCBits_Grey:
             default:
-                assert(false);  // Should not happen
+                LMud_Debugf(
+                    self->lisp->mud,
+                    ignore_greys ? LMud_LogLevel_HALF_DEBUG : LMud_LogLevel_WARNING,
+                    "Garbage Collector encountered an invalid object mark (%p, %s: %d), marking it as white%s...",
+                    object,
+                    header->type->name,
+                    LMud_Header_GetGCBits(header),
+                    ignore_greys ? " and ignoring further occurrences" : ""
+                );
+                ignore_greys = true;
                 break;
         }
 
@@ -183,6 +213,8 @@ static void LMud_GC_FinalBookeeping(struct LMud_GC* self)
 
 void LMud_GC_Run(struct LMud_GC* self)
 {
+    LMud_Logf(self->lisp->mud, LMud_LogLevel_NOTE, "Garbage Collection...\n");
+
     LMud_GC_InitialBookeeping(self);
     LMud_GC_MarkRoots(self);
     LMud_GC_Loop(self);

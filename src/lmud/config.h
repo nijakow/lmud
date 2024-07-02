@@ -13,3 +13,5 @@
 
 #define LMud_UNWIND_PROTECT_UNDEFINED   0xffff
 #define LMud_UNWIND_PROTECT_MAX_NESTING 8
+
+#define LMud_LOG_LEVEL LMud_LogLevel_INFO
