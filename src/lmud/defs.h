@@ -14,9 +14,8 @@
 #include <unistd.h>
 
 #include <ctype.h>
-
+#include <fcntl.h>
 #include <signal.h>
-
 #include <time.h>
 
 // Networking stuff

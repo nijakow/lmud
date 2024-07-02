@@ -1064,6 +1064,22 @@ void LMud_Builtin_OpenFd(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
     }
 }
 
+void LMud_Builtin_OpenFile(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    struct LMud_Connection*  connection;
+    int                      fd;
+
+    CHECK_ARGS(1, 1);
+
+    fd = open(LMud_String_Chars(LMud_Any_AsPointer(arguments[0])), O_RDWR);
+
+    if (fd >= 0 && LMud_Net_RegisterClientFileDescriptor(&fiber->lisp->mud->net, fd, true, &connection)) {
+        LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Port(fiber->lisp, connection));
+    } else {
+        LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
+    }
+}
+
 void LMud_Builtin_PortReadByte(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
@@ -1208,6 +1224,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "CURRENT-PORT", LMud_Builtin_CurrentPort);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "SET-CURRENT-PORT", LMud_Builtin_SetCurrentPort);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "OPEN-FD", LMud_Builtin_OpenFd);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "OPEN-FILE", LMud_Builtin_OpenFile);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "RATIOP", LMud_Builtin_Ratiop);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "ALL-SYMBOLS", LMud_Builtin_AllSymbols);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
