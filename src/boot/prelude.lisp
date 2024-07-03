@@ -165,6 +165,11 @@
          (list 'let (list (list temp expr))
             (cons 'progn body)
             temp)))
+   
+   (defmacro prog1e (expr &rest body)
+      (list 'progn
+         (cons 'progn body)
+         expr))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
