@@ -760,6 +760,7 @@
    (defparameter tos.classes:<function>  (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<function>))
    (defparameter tos.classes:<string>    (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<string>))
    (defparameter tos.classes:<port>      (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<port>))
+   (defparameter tos.classes:<process>   (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<process>))
 
    (defun tos.int:class-of (object)
       (cond ((tos.int:oopp      object) (lmud.int:%custom-meta object))
@@ -773,6 +774,7 @@
             ((functionp         object) tos.classes:<function>)
             ((stringp           object) tos.classes:<string>)
             ((lmud.int:portp    object) tos.classes:<port>)
+            ((lmud.int:processp object) tos.classes:<process>)
             (t                          tos.classes:<t>)))
    
    (defun tos.int:subclassp (class1 class2)
@@ -1392,6 +1394,8 @@
              (io.printer:write-string stream meta "#<CLOSURE>"))
             ((lmud.int:portp e)
              (io.printer:write-string stream meta "#<PORT>"))
+            ((lmud.int:processp e)
+             (io.printer:write-string stream meta "#<PROCESS>"))
             ((tos.int:classp e)
              (let ((class-name (tos.int:%class-name e)))
                 (if class-name

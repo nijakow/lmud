@@ -12,6 +12,7 @@
 #include <lmud/lisp/objects/function.h>
 #include <lmud/lisp/objects/package.h>
 #include <lmud/lisp/objects/port.h>
+#include <lmud/lisp/objects/process.h>
 #include <lmud/lisp/objects/ratio.h>
 #include <lmud/lisp/objects/string.h>
 #include <lmud/lisp/objects/symbol.h>
@@ -28,6 +29,7 @@ struct LMud_Types
     struct LMud_Type     function;
     struct LMud_Type     package;
     struct LMud_Type     port;
+    struct LMud_Type     process;
     struct LMud_Type     ratio;
     struct LMud_Type     string;
     struct LMud_Type     symbol;
@@ -45,6 +47,7 @@ bool LMud_Types_IsCustom(struct LMud_Types* self, void* object);
 bool LMud_Types_IsFunction(struct LMud_Types* self, void* object);
 bool LMud_Types_IsPackage(struct LMud_Types* self, void* object);
 bool LMud_Types_IsPort(struct LMud_Types* self, void* object);
+bool LMud_Types_IsProcess(struct LMud_Types* self, void* object);
 bool LMud_Types_IsRatio(struct LMud_Types* self, void* object);
 bool LMud_Types_IsString(struct LMud_Types* self, void* object);
 bool LMud_Types_IsSymbol(struct LMud_Types* self, void* object);
@@ -82,6 +85,7 @@ struct LMud_Custom*   LMud_Objects_Custom(struct LMud_Objects* self, LMud_Any me
 struct LMud_Function* LMud_Objects_Function(struct LMud_Objects* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants, LMud_Any source_code);
 struct LMud_Package*  LMud_Objects_Package(struct LMud_Objects* self, LMud_Any name);
 struct LMud_Port*     LMud_Objects_Port(struct LMud_Objects* self, struct LMud_Connection* connection);
+struct LMud_Process*  LMud_Objects_Process(struct LMud_Objects* self, struct LMud_Fiber* fiber);
 struct LMud_Ratio*    LMud_Objects_Ratio(struct LMud_Objects* self, LMud_Any numerator, LMud_Any denominator);
 struct LMud_String*   LMud_Objects_String(struct LMud_Objects* self, const char* text);
 struct LMud_Symbol*   LMud_Objects_PrimitiveIntern(struct LMud_Objects* self, struct LMud_Package* package, const char* name);

@@ -26,6 +26,7 @@ void LMud_Types_Create(struct LMud_Types* self)
     LMud_Types_CreateType(LMud_Function, function);
     LMud_Types_CreateType(LMud_Package, package);
     LMud_Types_CreateType(LMud_Port, port);
+    LMud_Types_CreateType(LMud_Process, process);
     LMud_Types_CreateType(LMud_Ratio, ratio);
     LMud_Types_CreateType(LMud_String, string);
     LMud_Types_CreateType(LMud_Symbol, symbol);
@@ -79,6 +80,11 @@ bool LMud_Types_IsPackage(struct LMud_Types* self, void* object)
 bool LMud_Types_IsPort(struct LMud_Types* self, void* object)
 {
     return LMud_Type_TypeCheckObject(&self->port, object);
+}
+
+bool LMud_Types_IsProcess(struct LMud_Types* self, void* object)
+{
+    return LMud_Type_TypeCheckObject(&self->process, object);
 }
 
 bool LMud_Types_IsRatio(struct LMud_Types* self, void* object)
@@ -338,6 +344,21 @@ struct LMud_Port* LMud_Objects_Port(struct LMud_Objects* self, struct LMud_Conne
     }
 
     return port;
+}
+
+struct LMud_Process* LMud_Objects_Process(struct LMud_Objects* self, struct LMud_Fiber* fiber)
+{
+    struct LMud_Process*  process;
+
+    process = LMud_Objects_Allocate(self, &self->types.process, 0);
+
+    if (process != NULL)
+    {
+        LMud_Process_Create(process, fiber);
+        LMud_Objects_AfterAllocate(self, process);
+    }
+
+    return process;
 }
 
 struct LMud_Ratio* LMud_Objects_Ratio(struct LMud_Objects* self, LMud_Any numerator, LMud_Any denominator)

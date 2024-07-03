@@ -135,6 +135,11 @@ bool LMud_Lisp_IsPortPointer(struct LMud_Lisp* self, void* object)
     return LMud_Types_IsPort(LMud_Lisp_Types(self), object);
 }
 
+bool LMud_Lisp_IsProcessPointer(struct LMud_Lisp* self, void* object)
+{
+    return LMud_Types_IsProcess(LMud_Lisp_Types(self), object);
+}
+
 bool LMud_Lisp_IsRatioPointer(struct LMud_Lisp* self, void* object)
 {
     return LMud_Types_IsRatio(LMud_Lisp_Types(self), object);
@@ -194,6 +199,11 @@ bool LMud_Lisp_IsPackage(struct LMud_Lisp* self, LMud_Any value)
 bool LMud_Lisp_IsPort(struct LMud_Lisp* self, LMud_Any value)
 {
     return LMud_Any_IsPointer(value) && LMud_Lisp_IsPortPointer(self, LMud_Any_AsPointer(value));
+}
+
+bool LMud_Lisp_IsProcess(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Any_IsPointer(value) && LMud_Lisp_IsProcessPointer(self, LMud_Any_AsPointer(value));
 }
 
 bool LMud_Lisp_IsRatio(struct LMud_Lisp* self, LMud_Any value)
@@ -333,6 +343,11 @@ LMud_Any LMud_Lisp_PackageByNameUpcase(struct LMud_Lisp* self, const char* name)
 LMud_Any LMud_Lisp_Port(struct LMud_Lisp* self, struct LMud_Connection* connection)
 {
     return LMud_Any_FromPointer(LMud_Objects_Port(&self->objects, connection));
+}
+
+LMud_Any LMud_Lisp_Process(struct LMud_Lisp* self, struct LMud_Fiber* fiber)
+{
+    return LMud_Any_FromPointer(LMud_Objects_Process(&self->objects, fiber));
 }
 
 LMud_Any LMud_Lisp_Ratio(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator)

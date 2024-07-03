@@ -91,6 +91,14 @@ void LMud_FiberRef_Destroy(struct LMud_FiberRef* self)
     }
 }
 
+void LMud_FiberRef_Mark(struct LMud_GC* gc, struct LMud_FiberRef* self)
+{
+    // Do nothing, the fibers will be marked automatically
+    (void) gc;
+    (void) self;
+}
+
+
 void LMud_FiberRef_Link(struct LMud_FiberRef* self, struct LMud_FiberRef** list)
 {
     LMud_FiberRef_Unlink(self);
@@ -160,6 +168,8 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct L
     self->accumulator_count = 1;
     self->accumulator[0]    = LMud_Lisp_Nil(lisp);
 
+    self->self_process  = LMud_Objects_Process(&lisp->objects, self);
+
     self->port          = LMud_Lisp_Nil(lisp);
 
     LMud_FrameList_Create(&self->floating_frames);
@@ -198,6 +208,8 @@ void LMud_Fiber_Mark(struct LMud_GC* gc, struct LMud_Fiber* self)
     {
         LMud_GC_MarkAny(gc, self->accumulator[index]);
     }
+
+    LMud_GC_MarkObject(gc, self->self_process);
 
     LMud_GC_MarkAny(gc, self->port);
 
@@ -261,6 +273,11 @@ enum LMud_FiberState LMud_Fiber_GetState(struct LMud_Fiber* self)
 static void LMud_Fiber_SetState(struct LMud_Fiber* self, enum LMud_FiberState state)
 {
     self->state = state;
+}
+
+struct LMud_Process* LMud_Fiber_GetProcess(struct LMud_Fiber* self)
+{
+    return self->self_process;
 }
 
 bool LMud_Fiber_IsRunning(struct LMud_Fiber* self)

@@ -34,6 +34,7 @@ struct LMud_FiberRef
 
 void LMud_FiberRef_Create(struct LMud_FiberRef* self, struct LMud_Fiber* fiber);
 void LMud_FiberRef_Destroy(struct LMud_FiberRef* self);
+void LMud_FiberRef_Mark(struct LMud_GC* gc, struct LMud_FiberRef* self);
 
 void LMud_FiberRef_Link(struct LMud_FiberRef* self, struct LMud_FiberRef** list);
 void LMud_FiberRef_Unlink(struct LMud_FiberRef* self);
@@ -74,6 +75,8 @@ struct LMud_Fiber
     LMud_Size                      accumulator_count;
     LMud_Any                       accumulator[LMud_Fiber_MAX_ACCUMULATORS];
 
+    struct LMud_Process*           self_process;
+
     LMud_Any                       port;
 
     struct LMud_FrameList          floating_frames;
@@ -96,6 +99,8 @@ void LMud_Fiber_UnlinkQueue(struct LMud_Fiber* self);
 void LMud_Fiber_MoveToQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* queue);
 
 enum LMud_FiberState LMud_Fiber_GetState(struct LMud_Fiber* self);
+
+struct LMud_Process* LMud_Fiber_GetProcess(struct LMud_Fiber* self);
 
 bool LMud_Fiber_IsRunning(struct LMud_Fiber* self);
 bool LMud_Fiber_IsWaiting(struct LMud_Fiber* self);
