@@ -720,6 +720,40 @@
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
+   ;;;    A new Macroexpander
+   ;;;
+
+   (defun macroexpand (expression &optional environment)
+      (flet ((find-macro-function (object environment)
+               (when (symbolp object)
+                  (let ((handle (assoc object environment)))
+                     (when handle
+                        (return (cdr handle)))
+                     (symbol-macro object)))))
+         (cond ((consp expression)
+                (let ((head (car expression))
+                      (args (cdr expression)))
+                   (cond ((eq head 'quote) expression)
+                         ((eq head 'lmud.qq:quasiquote)
+                          (macroexpand (lmud.qq:expand-quasiquote (cadr expression)) environment))
+                         ((eq head 'macrolet)
+                          (let ((macros (car args))
+                                (body   (cdr args)))
+                             (let ((new-env (append (domap (macro macros)
+                                                      (cons (car macro)
+                                                            (eval (cons 'lambda (cdr macro)))))
+                                                    environment)))
+                                (cons 'progn
+                                   (domap (e body) (macroexpand e new-env))))))
+                         (t (let ((func (find-macro-function head environment)))
+                               (if func
+                                   (macroexpand (apply func args) environment)
+                                   (mapcar #'(lambda (e) (macroexpand e environment)) expression)))))))
+               (t expression))))
+
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
    ;;;    The Type- and Object System
    ;;;
 
