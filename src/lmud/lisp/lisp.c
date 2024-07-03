@@ -155,6 +155,11 @@ bool LMud_Lisp_IsRatioPointer(struct LMud_Lisp* self, void* object)
     return LMud_Types_IsRatio(LMud_Lisp_Types(self), object);
 }
 
+bool LMud_Lisp_IsStackFramePointer(struct LMud_Lisp* self, void* object)
+{
+    return LMud_Types_IsStackFrame(LMud_Lisp_Types(self), object);
+}
+
 bool LMud_Lisp_IsStringPointer(struct LMud_Lisp* self, void* object)
 {
     return LMud_Types_IsString(LMud_Lisp_Types(self), object);
@@ -219,6 +224,11 @@ bool LMud_Lisp_IsProcess(struct LMud_Lisp* self, LMud_Any value)
 bool LMud_Lisp_IsRatio(struct LMud_Lisp* self, LMud_Any value)
 {
     return LMud_Any_IsPointer(value) && LMud_Lisp_IsRatioPointer(self, LMud_Any_AsPointer(value));
+}
+
+bool LMud_Lisp_IsStackFrame(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Any_IsPointer(value) && LMud_Lisp_IsStackFramePointer(self, LMud_Any_AsPointer(value));
 }
 
 bool LMud_Lisp_IsString(struct LMud_Lisp* self, LMud_Any value)
@@ -363,6 +373,11 @@ LMud_Any LMud_Lisp_Process(struct LMud_Lisp* self, struct LMud_Fiber* fiber)
 LMud_Any LMud_Lisp_Ratio(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator)
 {
     return LMud_Any_FromPointer(LMud_Objects_Ratio(&self->objects, numerator, denominator));
+}
+
+LMud_Any LMud_Lisp_StackFrame(struct LMud_Lisp* self, struct LMud_Frame* frame, struct LMud_StackFrame** slot)
+{
+    return LMud_Any_FromPointer(LMud_Objects_StackFrame(&self->objects, frame, slot));
 }
 
 LMud_Any LMud_Lisp_String(struct LMud_Lisp* self, const char* text)

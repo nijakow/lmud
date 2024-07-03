@@ -1,5 +1,7 @@
 
+#include <lmud/lisp/lisp.h>
 #include <lmud/lisp/io.h>
+#include <lmud/lisp/objects/stackframe.h>
 #include <lmud/util/memory.h>
 
 #include "frame.h"
@@ -54,14 +56,23 @@ void LMud_FrameExtension_Create(struct LMud_FrameExtension* self, struct LMud_Fr
 {
     LMud_FrameRef_Create(&self->lexical, lexical);
     
-    self->references = NULL;
-    self->return_to  = owner;
+    self->references       = NULL;
+    self->return_to        = owner;
+    self->lisp_stack_frame = NULL;
 }
 
 void LMud_FrameExtension_Destroy(struct LMud_FrameExtension* self)
 {
     assert(self->references == NULL);
     LMud_FrameRef_Destroy(&self->lexical);
+
+    /*
+     * TODO, FIXME, XXX:
+     *
+     * This is rather messy. Fix that.
+     */
+    if (self->lisp_stack_frame != NULL)
+        self->lisp_stack_frame->slot = NULL;
 }
 
 struct LMud_FrameExtension* LMud_FrameExtension_New(struct LMud_Frame* owner, struct LMud_Frame* lexical)
@@ -214,14 +225,62 @@ struct LMud_Frame* LMud_Frame_GetLexical(struct LMud_Frame* self)
         return LMud_FrameRef_GetFrame(&self->extension->lexical);
 }
 
+
+LMud_Any LMud_Frame_GetLispStackFrame(struct LMud_Frame* self, struct LMud_Lisp* lisp)
+{
+    struct LMud_FrameExtension*  extension;
+
+    extension = LMud_Frame_EnsureExtension(self);
+
+    if (extension->lisp_stack_frame == NULL) {
+        /*
+         * The `LMud_Lisp_StackFrame(...)` constructor function will install a
+         * reference to the lispy object in `extension->lisp_stack_frame`.
+         */
+        return LMud_Lisp_StackFrame(lisp, self, &extension->lisp_stack_frame);
+    } else {
+        return LMud_Any_FromPointer(extension->lisp_stack_frame);
+    }
+}
+
+
 bool LMud_Frame_ShouldBeMovedToShip(struct LMud_Frame* self)
 {
-    return !self->in_ship && (self->extension != NULL && self->extension->references != NULL);
+    if (self->in_ship)
+        return false;
+    
+    if (self->extension != NULL)
+    {
+        return (self->extension->references != NULL)
+            || (self->extension->lisp_stack_frame != NULL);
+    }
+
+    return false;
 }
 
 bool LMud_Frame_IsReadyForShipDeletion(struct LMud_Frame* self)
 {
-    return self->in_ship && (self->extension == NULL || self->extension->references == NULL) && self->child == NULL;
+    /*
+     * We can't get deleted if we aren't in a ship.
+     */
+    if (!self->in_ship)
+        return false;
+    
+    /*
+     * If we have children depending on us, don't delete ourselves either.
+     */
+    if (self->child != NULL)
+        return false;
+
+    if (self->extension != NULL)
+    {
+        if (self->extension->references != NULL)
+            return false;
+        if (self->extension->lisp_stack_frame != NULL)
+            return false;
+    }
+
+    return true;
 }
 
 bool LMud_Frame_HasPendingReferences(struct LMud_Frame* self)

@@ -54,6 +54,7 @@ bool LMud_Lisp_IsPackagePointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsPortPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsProcessPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsRatioPointer(struct LMud_Lisp* self, void* object);
+bool LMud_Lisp_IsStackFramePointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsStringPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsSymbolPointer(struct LMud_Lisp* self, void* object);
 
@@ -68,6 +69,7 @@ bool LMud_Lisp_IsPackage(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsPort(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsProcess(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsRatio(struct LMud_Lisp* self, LMud_Any value);
+bool LMud_Lisp_IsStackFrame(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsString(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsSymbol(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsGensym(struct LMud_Lisp* self, LMud_Any value);
@@ -98,6 +100,7 @@ LMud_Any LMud_Lisp_PackageByNameUpcase(struct LMud_Lisp* self, const char* name)
 LMud_Any LMud_Lisp_Port(struct LMud_Lisp* self, struct LMud_Connection* connection);
 LMud_Any LMud_Lisp_Process(struct LMud_Lisp* self, struct LMud_Fiber* fiber);
 LMud_Any LMud_Lisp_Ratio(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator);
+LMud_Any LMud_Lisp_StackFrame(struct LMud_Lisp* self, struct LMud_Frame* frame, struct LMud_StackFrame** slot);
 LMud_Any LMud_Lisp_String(struct LMud_Lisp* self, const char* text);
 LMud_Any LMud_Lisp_InternInPackage(struct LMud_Lisp* self, LMud_Any package, const char* name);
 LMud_Any LMud_Lisp_InternUpcaseInPackage(struct LMud_Lisp* self, LMud_Any package, const char* name);

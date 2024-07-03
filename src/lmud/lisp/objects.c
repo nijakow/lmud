@@ -28,6 +28,7 @@ void LMud_Types_Create(struct LMud_Types* self)
     LMud_Types_CreateType(LMud_Port, port);
     LMud_Types_CreateType(LMud_Process, process);
     LMud_Types_CreateType(LMud_Ratio, ratio);
+    LMud_Types_CreateType(LMud_StackFrame, stack_frame);
     LMud_Types_CreateType(LMud_String, string);
     LMud_Types_CreateType(LMud_Symbol, symbol);
 }
@@ -90,6 +91,11 @@ bool LMud_Types_IsProcess(struct LMud_Types* self, void* object)
 bool LMud_Types_IsRatio(struct LMud_Types* self, void* object)
 {
     return LMud_Type_TypeCheckObject(&self->ratio, object);
+}
+
+bool LMud_Types_IsStackFrame(struct LMud_Types* self, void* object)
+{
+    return LMud_Type_TypeCheckObject(&self->stack_frame, object);
 }
 
 bool LMud_Types_IsString(struct LMud_Types* self, void* object)
@@ -374,6 +380,21 @@ struct LMud_Ratio* LMud_Objects_Ratio(struct LMud_Objects* self, LMud_Any numera
     }
 
     return ratio;
+}
+
+struct LMud_StackFrame* LMud_Objects_StackFrame(struct LMud_Objects* self, struct LMud_Frame* frame, struct LMud_StackFrame** slot)
+{
+    struct LMud_StackFrame*  stack_frame;
+
+    stack_frame = LMud_Objects_Allocate(self, &self->types.stack_frame, 0);
+
+    if (stack_frame != NULL)
+    {
+        LMud_StackFrame_Create(stack_frame, frame, slot);
+        LMud_Objects_AfterAllocate(self, stack_frame);
+    }
+
+    return stack_frame;
 }
 
 struct LMud_String* LMud_Objects_String(struct LMud_Objects* self, const char* text)

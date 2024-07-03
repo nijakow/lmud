@@ -22,9 +22,10 @@ void LMud_FrameRef_TransferWithoutRemoval(struct LMud_FrameRef* self, struct LMu
 
 struct LMud_FrameExtension
 {
-    struct LMud_FrameRef   lexical;
-    struct LMud_FrameRef*  references;
-    struct LMud_Frame*     return_to;
+    struct LMud_FrameRef     lexical;
+    struct LMud_FrameRef*    references;
+    struct LMud_Frame*       return_to;
+    struct LMud_StackFrame*  lisp_stack_frame;
 };
 
 void LMud_FrameExtension_Create(struct LMud_FrameExtension* self, struct LMud_Frame* owner, struct LMud_Frame* lexical);
@@ -64,6 +65,8 @@ struct LMud_Frame* LMud_Frame_GetReturnTo(struct LMud_Frame* self);
 void               LMud_Frame_SetReturnTo(struct LMud_Frame* self, struct LMud_Frame* value);
 
 struct LMud_Frame* LMud_Frame_GetLexical(struct LMud_Frame* self);
+
+LMud_Any LMud_Frame_GetLispStackFrame(struct LMud_Frame* self, struct LMud_Lisp* lisp);
 
 bool LMud_Frame_ShouldBeMovedToShip(struct LMud_Frame* self);
 bool LMud_Frame_IsReadyForShipDeletion(struct LMud_Frame* self);
