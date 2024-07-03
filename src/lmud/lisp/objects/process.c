@@ -27,11 +27,10 @@ LMud_Size LMud_Process_CalculateSizeInBytes(struct LMud_Process* self)
     return sizeof(struct LMud_Process);
 }
 
-static struct LMud_Fiber* LMud_Process_GetFiber(struct LMud_Process* process)
+struct LMud_Fiber* LMud_Process_GetFiber(struct LMud_Process* process)
 {
     return process->fiber;
 }
-
 
 LMud_Any LMud_Process_GetStateAsLispValue(struct LMud_Process* self, struct LMud_Lisp* lisp)
 {

@@ -217,12 +217,27 @@ void LMud_Frame_SetReturnTo(struct LMud_Frame* self, struct LMud_Frame* value)
     LMud_Frame_EnsureExtension(self)->return_to = value;
 }
 
+struct LMud_Frame* LMud_Frame_GetParent(struct LMud_Frame* self)
+{
+    return self->previous;
+}
+
 struct LMud_Frame* LMud_Frame_GetLexical(struct LMud_Frame* self)
 {
     if (self->extension == NULL)
         return NULL;
     else
         return LMud_FrameRef_GetFrame(&self->extension->lexical);
+}
+
+struct LMud_Function* LMud_Frame_GetFunction(struct LMud_Frame* self)
+{
+    return self->function;
+}
+
+LMud_Size LMud_Frame_GetIP(struct LMud_Frame* self)
+{
+    return self->ip;
 }
 
 

@@ -516,6 +516,12 @@ void LMud_Fiber_PopFrame(struct LMud_Fiber* self)
     }
 
     if (LMud_Frame_ShouldBeMovedToShip(frame)) {
+        LMud_Debugf(
+            self->lisp->mud,
+            LMud_LogLevel_ALL,
+            "Moving frame %p to floating frames list...",
+            frame
+        );
         LMud_FrameList_Insert(&self->floating_frames, frame);
     } else {
         LMud_Frame_Destroy(frame);

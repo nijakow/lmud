@@ -64,7 +64,10 @@ struct LMud_FrameExtension* LMud_Frame_EnsureExtension(struct LMud_Frame* self);
 struct LMud_Frame* LMud_Frame_GetReturnTo(struct LMud_Frame* self);
 void               LMud_Frame_SetReturnTo(struct LMud_Frame* self, struct LMud_Frame* value);
 
-struct LMud_Frame* LMud_Frame_GetLexical(struct LMud_Frame* self);
+struct LMud_Frame*    LMud_Frame_GetParent(struct LMud_Frame* self);
+struct LMud_Frame*    LMud_Frame_GetLexical(struct LMud_Frame* self);
+struct LMud_Function* LMud_Frame_GetFunction(struct LMud_Frame* self);
+LMud_Size             LMud_Frame_GetIP(struct LMud_Frame* self);
 
 LMud_Any LMud_Frame_GetLispStackFrame(struct LMud_Frame* self, struct LMud_Lisp* lisp);
 

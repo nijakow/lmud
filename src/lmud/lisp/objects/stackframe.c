@@ -31,3 +31,8 @@ LMud_Size LMud_StackFrame_CalculateSizeInBytes(struct LMud_StackFrame* self)
     (void) self;
     return sizeof(struct LMud_StackFrame);
 }
+
+struct LMud_Frame* LMud_StackFrame_GetFrame(struct LMud_StackFrame* self)
+{
+    return self->frame;
+}

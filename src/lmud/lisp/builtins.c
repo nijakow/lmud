@@ -1189,6 +1189,100 @@ void LMud_Builtin_AllProcesses(struct LMud_Fiber* fiber, LMud_Any* arguments, LM
     LMud_Fiber_SetAccumulator(fiber, list);
 }
 
+void LMud_Builtin_StackFrameP(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    CHECK_ARGS(1, 1);
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsStackFrame(fiber->lisp, arguments[0])));
+}
+
+void LMud_Builtin_ProcessStackFrames(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    struct LMud_Process*  process;
+    struct LMud_Fiber*    process_fiber;
+
+    CHECK_ARGS(1, 1);
+
+    if (!LMud_Lisp_IsProcess(fiber->lisp, arguments[0])) {
+        LMud_Fiber_PerformError(fiber, "Expected a process.");
+        return;
+    } else {
+        process       = LMud_Any_AsPointer(arguments[0]);
+        process_fiber = LMud_Process_GetFiber(process);
+
+        if (process_fiber->top == NULL) {
+            LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
+        } else {
+            LMud_Fiber_SetAccumulator(fiber, LMud_Frame_GetLispStackFrame(process_fiber->top, fiber->lisp));
+        }
+    }
+}
+
+void LMud_Builtin_StackFramePrevious(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    struct LMud_StackFrame*  frame;
+    struct LMud_Frame*       prev;
+
+    CHECK_ARGS(1, 1);
+
+    if (!LMud_Lisp_IsStackFrame(fiber->lisp, arguments[0])) {
+        LMud_Fiber_PerformError(fiber, "Expected a stack frame.");
+        return;
+    } else {
+        frame = LMud_Any_AsPointer(arguments[0]);
+        prev  = LMud_Frame_GetParent(LMud_StackFrame_GetFrame(frame));
+        if (prev == NULL) {
+            LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
+        } else {
+            LMud_Fiber_SetAccumulator(fiber, LMud_Frame_GetLispStackFrame(prev, fiber->lisp));
+        }
+    }
+}
+
+void LMud_Builtin_StackFrameLexical(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    struct LMud_StackFrame*  frame;
+
+    CHECK_ARGS(1, 1);
+
+    if (!LMud_Lisp_IsStackFrame(fiber->lisp, arguments[0])) {
+        LMud_Fiber_PerformError(fiber, "Expected a stack frame.");
+        return;
+    } else {
+        frame = LMud_Any_AsPointer(arguments[0]);
+        LMud_Fiber_SetAccumulator(fiber, LMud_Frame_GetLispStackFrame(LMud_Frame_GetParent(LMud_StackFrame_GetFrame(frame)), fiber->lisp));
+    }
+}
+
+void LMud_Builtin_StackFrameFunction(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    struct LMud_StackFrame*  frame;
+
+    CHECK_ARGS(1, 1);
+
+    if (!LMud_Lisp_IsStackFrame(fiber->lisp, arguments[0])) {
+        LMud_Fiber_PerformError(fiber, "Expected a stack frame.");
+        return;
+    } else {
+        frame = LMud_Any_AsPointer(arguments[0]);
+        LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromPointer(LMud_Frame_GetFunction(LMud_StackFrame_GetFrame(frame))));
+    }
+}
+
+void LMud_Builtin_StackFrameIp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    struct LMud_StackFrame*  frame;
+
+    CHECK_ARGS(1, 1);
+
+    if (!LMud_Lisp_IsStackFrame(fiber->lisp, arguments[0])) {
+        LMud_Fiber_PerformError(fiber, "Expected a stack frame.");
+        return;
+    } else {
+        frame = LMud_Any_AsPointer(arguments[0]);
+        LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(LMud_Frame_GetIP(LMud_StackFrame_GetFrame(frame))));
+    }
+}
+
 
 void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
 {
@@ -1303,6 +1397,12 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "CREATE-PROCESS", LMud_Builtin_CreateProcess);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "WAIT-FOR-PROCESS", LMud_Builtin_WaitForProcess);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "ALL-PROCESSES", LMud_Builtin_AllProcesses);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "STACK-FRAME-P", LMud_Builtin_StackFrameP);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PROCESS-STACK-FRAMES", LMud_Builtin_ProcessStackFrames);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "STACK-FRAME-PREVIOUS", LMud_Builtin_StackFramePrevious);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "STACK-FRAME-LEXICAL", LMud_Builtin_StackFrameLexical);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "STACK-FRAME-FUNCTION", LMud_Builtin_StackFrameFunction);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "STACK-FRAME-IP", LMud_Builtin_StackFrameIp);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRIN1", LMud_Builtin_Prin1);
