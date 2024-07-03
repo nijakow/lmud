@@ -171,6 +171,18 @@ bool LMud_Lisp_IsSymbolPointer(struct LMud_Lisp* self, void* object)
 }
 
 
+bool LMud_Lisp_IsInteger(struct LMud_Lisp* self, LMud_Any value)
+{
+    (void) self;
+    return LMud_Any_IsInteger(value);
+}
+
+bool LMud_Lisp_IsCharacter(struct LMud_Lisp* self, LMud_Any value)
+{
+    (void) self;
+    return LMud_Any_IsCharacter(value);
+}
+
 bool LMud_Lisp_IsArray(struct LMud_Lisp* self, LMud_Any value)
 {
     return LMud_Any_IsPointer(value) && LMud_Lisp_IsArrayPointer(self, LMud_Any_AsPointer(value));
@@ -244,6 +256,11 @@ bool LMud_Lisp_IsSymbol(struct LMud_Lisp* self, LMud_Any value)
 bool LMud_Lisp_IsGensym(struct LMud_Lisp* self, LMud_Any value)
 {
     return LMud_Lisp_IsSymbol(self, value) && LMud_Symbol_IsGensym(LMud_Any_AsPointer(value));
+}
+
+bool LMud_Lisp_IsNumber(struct LMud_Lisp* self, LMud_Any value)
+{
+    return LMud_Lisp_IsInteger(self, value) || LMud_Lisp_IsRatio(self, value);
 }
 
 

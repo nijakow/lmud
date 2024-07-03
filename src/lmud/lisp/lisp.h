@@ -58,6 +58,8 @@ bool LMud_Lisp_IsStackFramePointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsStringPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsSymbolPointer(struct LMud_Lisp* self, void* object);
 
+bool LMud_Lisp_IsInteger(struct LMud_Lisp* self, LMud_Any value);
+bool LMud_Lisp_IsCharacter(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsArray(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsBuiltin(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsBytes(struct LMud_Lisp* self, LMud_Any value);
@@ -73,6 +75,7 @@ bool LMud_Lisp_IsStackFrame(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsString(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsSymbol(struct LMud_Lisp* self, LMud_Any value);
 bool LMud_Lisp_IsGensym(struct LMud_Lisp* self, LMud_Any value);
+bool LMud_Lisp_IsNumber(struct LMud_Lisp* self, LMud_Any value);
 
 bool LMud_Lisp_IsNil(struct LMud_Lisp* self, LMud_Any value);
 

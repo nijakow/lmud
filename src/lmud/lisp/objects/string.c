@@ -43,6 +43,11 @@ const char* LMud_String_Chars(struct LMud_String* self)
     return self->chars;
 }
 
+bool LMud_String_IsEmpty(struct LMud_String* self)
+{
+    return self->chars[0] == '\0';
+}
+
 bool LMud_String_Equals(struct LMud_String* self, const char* value)
 {
     return LMud_CStr_Equals(self->chars, value);

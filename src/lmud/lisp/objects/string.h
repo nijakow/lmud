@@ -17,6 +17,7 @@ LMud_Size LMud_String_CalculateSizeInBytes(struct LMud_String* self);
 
 const char* LMud_String_Chars(struct LMud_String* self);
 
+bool LMud_String_IsEmpty(struct LMud_String* self);
 bool LMud_String_Equals(struct LMud_String* self, const char* value);
 
 bool      LMud_String_RuneAt(struct LMud_String* self, size_t index, LMud_Rune* result);

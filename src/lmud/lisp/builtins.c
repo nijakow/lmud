@@ -49,18 +49,26 @@ bool LMud_Fiber_CheckArgs(struct LMud_Fiber* fiber, LMud_Any* args, LMud_Size si
 #define NO_ARGS CHECK_ARGS(0, 0)
 
 
-void LMud_Builtin_HelloWorld(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+static void LMud_Fiber_CheckType_Error(struct LMud_Fiber* fiber, LMud_Any value, const char* expected, const char* func, const char* file, unsigned int line)
 {
-    (void) fiber;
-    (void) arguments;
-    (void) argument_count;
+    char  buffer[1024];
 
-    printf("  Hello, world!\n");
+    (void) value;
+
+    snprintf(buffer, sizeof(buffer), "Wrong type of argument! Builtin: %s(...) in %s:%u expected %s.", func, file, line, expected);
+
+    LMud_Fiber_PerformError(fiber, buffer);
 }
+
+#define CHECK_TYPE(value, expected) if (!(LMud_Lisp_Is ## expected(fiber->lisp, value))) { LMud_Fiber_CheckType_Error(fiber, value, "" #expected, __func__, __FILE__, __LINE__); return; }
+#define CHECK_ARG_TYPE(index, expected) CHECK_TYPE(arguments[index], expected)
+
 
 void LMud_Builtin_Log(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(2, 2);
+
+    CHECK_ARG_TYPE(0, Integer);
 
     LMud_Logf(fiber->lisp->mud, LMud_Any_AsInteger(arguments[0]), "%s", LMud_String_Chars(LMud_Any_AsPointer(arguments[1])));
 }
@@ -194,6 +202,7 @@ void LMud_Builtin_GivenArgumentCount(struct LMud_Fiber* fiber, LMud_Any* argumen
 void LMud_Builtin_GivenArgumentRef(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Integer);
     LMud_Fiber_SetAccumulator(fiber, *LMud_Frame_GivenArgumentRef(fiber->top, LMud_Any_AsInteger(arguments[0])));
 }
 
@@ -230,16 +239,27 @@ void LMud_Builtin_Gensymp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Si
 void LMud_Builtin_FindPackage(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
-    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Package(fiber->lisp, arguments[0]));
+    CHECK_ARG_TYPE(0, String);
+    if (LMud_String_IsEmpty(LMud_Any_AsPointer(arguments[0])))
+        LMud_Fiber_PerformError(fiber, "Package name cannot be empty.");
+    else
+        LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Package(fiber->lisp, arguments[0]));
 }
 
 void LMud_Builtin_Intern(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 2);
-    if (argument_count == 1)
+
+    CHECK_ARG_TYPE(0, String);
+
+    if (LMud_String_IsEmpty(LMud_Any_AsPointer(arguments[0]))) {
+        LMud_Fiber_PerformError(fiber, "Symbol name cannot be empty.");
+    } else if (argument_count == 1) {
         LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_InternInPackageLL(fiber->lisp, fiber->lisp->constants.default_package, arguments[0]));
-    else
+    } else {
+        CHECK_ARG_TYPE(1, Package);
         LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_InternInPackageLL(fiber->lisp, arguments[1], arguments[0]));
+    }
 }
 
 void LMud_Builtin_AllSymbols(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -272,24 +292,28 @@ void LMud_Builtin_Gensym(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
 void LMud_Builtin_SymbolPackage(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Symbol);
     LMud_Fiber_SetAccumulator(fiber, LMud_Symbol_Package(LMud_Any_AsPointer(arguments[0])));
 }
 
 void LMud_Builtin_SymbolName(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Symbol);
     LMud_Fiber_SetAccumulator(fiber, LMud_Symbol_Name(LMud_Any_AsPointer(arguments[0])));
 }
 
 void LMud_Builtin_SymbolValue(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Symbol);
     LMud_Fiber_SetAccumulator(fiber, LMud_Symbol_Value(LMud_Any_AsPointer(arguments[0])));
 }
 
 void LMud_Builtin_SetSymbolValue(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(2, 2);
+    CHECK_ARG_TYPE(0, Symbol);
     LMud_Symbol_SetValue(LMud_Any_AsPointer(arguments[0]), arguments[1]);
     LMud_Fiber_SetAccumulator(fiber, arguments[1]);
 }
@@ -297,12 +321,14 @@ void LMud_Builtin_SetSymbolValue(struct LMud_Fiber* fiber, LMud_Any* arguments, 
 void LMud_Builtin_SymbolFunction(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Symbol);
     LMud_Fiber_SetAccumulator(fiber, LMud_Symbol_Function(LMud_Any_AsPointer(arguments[0])));
 }
 
 void LMud_Builtin_SetSymbolFunction(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(2, 2);
+    CHECK_ARG_TYPE(0, Symbol);
     LMud_Symbol_SetFunction(LMud_Any_AsPointer(arguments[0]), arguments[1]);
     LMud_Fiber_SetAccumulator(fiber, arguments[1]);
 }
@@ -310,12 +336,14 @@ void LMud_Builtin_SetSymbolFunction(struct LMud_Fiber* fiber, LMud_Any* argument
 void LMud_Builtin_SymbolMacro(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Symbol);
     LMud_Fiber_SetAccumulator(fiber, LMud_Symbol_Macro(LMud_Any_AsPointer(arguments[0])));
 }
 
 void LMud_Builtin_SetSymbolMacro(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(2, 2);
+    CHECK_ARG_TYPE(0, Symbol);
     LMud_Symbol_SetMacro(LMud_Any_AsPointer(arguments[0]), arguments[1]);
     LMud_Fiber_SetAccumulator(fiber, arguments[1]);
 }
@@ -323,12 +351,14 @@ void LMud_Builtin_SetSymbolMacro(struct LMud_Fiber* fiber, LMud_Any* arguments, 
 void LMud_Builtin_SymbolPlist(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Symbol);
     LMud_Fiber_SetAccumulator(fiber, LMud_Symbol_Plist(LMud_Any_AsPointer(arguments[0])));
 }
 
 void LMud_Builtin_SetSymbolPlist(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(2, 2);
+    CHECK_ARG_TYPE(0, Symbol);
     LMud_Symbol_SetPlist(LMud_Any_AsPointer(arguments[0]), arguments[1]);
     LMud_Fiber_SetAccumulator(fiber, arguments[1]);
 }
@@ -342,6 +372,7 @@ void LMud_Builtin_Packagep(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_S
 void LMud_Builtin_PackageName(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Package);
     LMud_Fiber_SetAccumulator(fiber, LMud_Package_Name(LMud_Any_AsPointer(arguments[0])));
 }
 
@@ -372,6 +403,7 @@ void LMud_Builtin_Cdr(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size a
 void LMud_Builtin_Rplaca(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(2, 2);
+    CHECK_ARG_TYPE(0, Cons);
     LMud_Lisp_Rplaca(fiber->lisp, arguments[0], arguments[1]);
     LMud_Fiber_SetAccumulator(fiber, arguments[1]);
 }
@@ -379,6 +411,7 @@ void LMud_Builtin_Rplaca(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
 void LMud_Builtin_Rplacd(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(2, 2);
+    CHECK_ARG_TYPE(0, Cons);
     LMud_Lisp_Rplacd(fiber->lisp, arguments[0], arguments[1]);
     LMud_Fiber_SetAccumulator(fiber, arguments[1]);
 }
@@ -398,12 +431,14 @@ void LMud_Builtin_MakeCustom(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud
 void LMud_Builtin_CustomMeta(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Custom);
     LMud_Fiber_SetAccumulator(fiber, LMud_Custom_Meta(LMud_Any_AsPointer(arguments[0])));
 }
 
 void LMud_Builtin_CustomSetMeta(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(2, 2);
+    CHECK_ARG_TYPE(0, Custom);
     LMud_Custom_SetMeta(LMud_Any_AsPointer(arguments[0]), arguments[1]);
     LMud_Fiber_SetAccumulator(fiber, arguments[1]);
 }
@@ -411,18 +446,21 @@ void LMud_Builtin_CustomSetMeta(struct LMud_Fiber* fiber, LMud_Any* arguments, L
 void LMud_Builtin_CustomSize(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Custom);
     LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(LMud_Custom_Size(LMud_Any_AsPointer(arguments[0]))));
 }
 
 void LMud_Builtin_CustomAt(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(2, 2);
+    CHECK_ARG_TYPE(0, Custom);
     LMud_Fiber_SetAccumulator(fiber, LMud_Custom_At(LMud_Any_AsPointer(arguments[0]), LMud_Any_AsInteger(arguments[1])));
 }
 
 void LMud_Builtin_CustomSet(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(3, 3);
+    CHECK_ARG_TYPE(0, Custom);
     LMud_Custom_Set(LMud_Any_AsPointer(arguments[0]), LMud_Any_AsInteger(arguments[1]), arguments[2]);
     LMud_Fiber_SetAccumulator(fiber, arguments[2]);
 }
@@ -507,7 +545,7 @@ void LMud_Builtin_Length(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
         LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(length));
     }
     else
-        LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(0));
+        LMud_Fiber_PerformError(fiber, "Argument is not a sequence.");
 }
 
 void LMud_Builtin_Bytesp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -523,6 +561,7 @@ void LMud_Builtin_Bytes(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size
 
     for (index = 0; index < argument_count; index++)
     {
+        CHECK_ARG_TYPE(index, Integer);
         data[index] = LMud_Any_AsInteger(arguments[index]);
     }
 
@@ -558,8 +597,7 @@ void LMud_Builtin_String(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
     {
         for (index = 0; index < argument_count; index++)
         {
-            if (!LMud_Any_IsCharacter(arguments[index]))
-                continue;
+            CHECK_ARG_TYPE(index, Character);
             
             LMud_Utf8_Encoder_Create(&encoder, LMud_Any_AsCharacter(arguments[index]));
             LMud_StringBuilder_AppendCStr(&builder, LMud_Utf8_Encoder_AsString(&encoder));
@@ -578,15 +616,19 @@ void LMud_Builtin_Aref(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size 
     LMud_Any  result;
 
     CHECK_ARGS(2, 2);
-    LMud_Lisp_Aref(fiber->lisp, arguments[0], arguments[1], &result);
-    LMud_Fiber_SetAccumulator(fiber, result);
+    if (!LMud_Lisp_Aref(fiber->lisp, arguments[0], arguments[1], &result))
+        LMud_Fiber_PerformError(fiber, "AREF failed.");
+    else
+        LMud_Fiber_SetAccumulator(fiber, result);
 }
 
 void LMud_Builtin_Aset(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(3, 3);
-    LMud_Lisp_Aset(fiber->lisp, arguments[0], arguments[1], arguments[2]);
-    LMud_Fiber_SetAccumulator(fiber, arguments[2]);
+    if (!LMud_Lisp_Aset(fiber->lisp, arguments[0], arguments[1], arguments[2]))
+        LMud_Fiber_PerformError(fiber, "ASET failed.");
+    else
+        LMud_Fiber_SetAccumulator(fiber, arguments[2]);
 }
 
 void LMud_Builtin_MachineFunctionp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -598,6 +640,7 @@ void LMud_Builtin_MachineFunctionp(struct LMud_Fiber* fiber, LMud_Any* arguments
 void LMud_Builtin_MachineFunctionName(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Builtin);
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_String(fiber->lisp, LMud_Builtin_GetName(LMud_Any_AsPointer(arguments[0]))));
 }
 
@@ -616,12 +659,14 @@ void LMud_Builtin_BytecodeFunctionp(struct LMud_Fiber* fiber, LMud_Any* argument
 void LMud_Builtin_FunctionBytecodes(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Function);
     LMud_Fiber_SetAccumulator(fiber, LMud_Function_Bytecodes(LMud_Any_AsPointer(arguments[0])));
 }
 
 void LMud_Builtin_FunctionConstants(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Function);
     LMud_Fiber_SetAccumulator(fiber, LMud_Function_Constants(LMud_Any_AsPointer(arguments[0])));
 }
 
@@ -630,6 +675,7 @@ void LMud_Builtin_FunctionSourceCode(struct LMud_Fiber* fiber, LMud_Any* argumen
     LMud_Any  result;
 
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Function);
     result = LMud_Function_SourceCode(LMud_Any_AsPointer(arguments[0]));
     LMud_Fiber_SetAccumulator(fiber, result);
 }
@@ -692,18 +738,21 @@ void LMud_Builtin_Characterp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud
 void LMud_Builtin_CharCode(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Character);
     LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(LMud_Rune_AsInteger(LMud_Any_AsCharacter(arguments[0]))));
 }
 
 void LMud_Builtin_CodeChar(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Integer);
     LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromCharacter(LMud_Rune_FromInteger(LMud_Any_AsInteger(arguments[0]))));
 }
 
 void LMud_Builtin_CharUpcase(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Character);
     LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromCharacter(LMud_Rune_UpperCase(LMud_Any_AsCharacter(arguments[0]))));
 }
 
@@ -745,10 +794,14 @@ static void LMud_Builtin_NumericComparison(struct LMud_Fiber* fiber, LMud_Any* a
 
     CHECK_ARGS(2, LMud_VARIADIC_ARGS);
     
+    CHECK_ARG_TYPE(0, Number);
+
     value = arguments[0];
 
     for (index = 1; index < argument_count; index++)
     {
+        CHECK_ARG_TYPE(index, Number);
+
         if (!comparison(fiber->lisp, value, arguments[index]))
         {
             LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
@@ -795,6 +848,7 @@ void LMud_Builtin_Plus(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size 
 
     for (index = 0; index < argument_count; index++)
     {
+        CHECK_ARG_TYPE(index, Number);
         LMud_Lisp_Add2(fiber->lisp, result, arguments[index], &result);
     }
 
@@ -811,12 +865,16 @@ void LMud_Builtin_Minus(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size
     if (argument_count == 0) {
         result = LMud_Any_FromInteger(0);
     } else if (argument_count == 1) {
+        CHECK_ARG_TYPE(0, Number);
         LMud_Lisp_Sub2(fiber->lisp, LMud_Any_FromInteger(0), arguments[0], &result);
     } else {
+        CHECK_ARG_TYPE(0, Number);
+
         result = arguments[0];
 
         for (index = 1; index < argument_count; index++)
         {
+            CHECK_ARG_TYPE(index, Number);
             LMud_Lisp_Sub2(fiber->lisp, result, arguments[index], &result);
         }
     }
@@ -833,6 +891,7 @@ void LMud_Builtin_Multiply(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_S
 
     for (index = 0; index < argument_count; index++)
     {
+        CHECK_ARG_TYPE(index, Number);
         LMud_Lisp_Mul2(fiber->lisp, result, arguments[index], &result);
     }
 
@@ -849,12 +908,16 @@ void LMud_Builtin_Divide(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
     if (argument_count == 0) {
         result = LMud_Any_FromInteger(1);
     } else if (argument_count == 1) {
+        CHECK_ARG_TYPE(0, Number);
         result = arguments[0];
     } else {
+        CHECK_ARG_TYPE(0, Number);
+
         result = arguments[0];
 
         for (index = 1; index < argument_count; index++)
         {
+            CHECK_ARG_TYPE(index, Number);
             LMud_Lisp_Div2(fiber->lisp, result, arguments[index], &result);
         }
     }
@@ -869,10 +932,13 @@ void LMud_Builtin_Modulo(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
 
     CHECK_ARGS(2, LMud_VARIADIC_ARGS);
 
+    CHECK_ARG_TYPE(0, Number);
+
     result = arguments[0];
 
     for (index = 1; index < argument_count; index++)
     {
+        CHECK_ARG_TYPE(index, Number);
         LMud_Lisp_Mod2(fiber->lisp, result, arguments[index], &result);
     }
 
@@ -886,11 +952,14 @@ void LMud_Builtin_Truncate(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_S
     CHECK_ARGS(1, 2);
 
     if (argument_count == 1) {
+        CHECK_ARG_TYPE(0, Number);
         LMud_Lisp_Truncate(fiber->lisp,
                            LMud_Lisp_Numerator(fiber->lisp, arguments[0]),
                            LMud_Lisp_Denominator(fiber->lisp, arguments[0]),
                            &result);
     } else if (argument_count == 2) {
+        CHECK_ARG_TYPE(0, Number);
+        CHECK_ARG_TYPE(1, Number);
         LMud_Lisp_Truncate(fiber->lisp, arguments[0], arguments[1], &result);
     } else {
         result = LMud_Any_FromInteger(0);
@@ -904,14 +973,11 @@ void LMud_Builtin_LogAnd(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
     LMud_Any   result;
     LMud_Size  index;
 
-    /*
-     * TODO: Check arguments.
-     */
-
     result = LMud_Any_FromInteger(-1);
 
     for (index = 0; index < argument_count; index++)
     {
+        CHECK_ARG_TYPE(index, Integer);
         LMud_Lisp_LogAnd2(fiber->lisp, result, arguments[index], &result);
     }
 
@@ -923,14 +989,11 @@ void LMud_Builtin_LogIor(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
     LMud_Any   result;
     LMud_Size  index;
 
-    /*
-     * TODO: Check arguments.
-     */
-
     result = LMud_Any_FromInteger(0);
 
     for (index = 0; index < argument_count; index++)
     {
+        CHECK_ARG_TYPE(index, Integer);
         LMud_Lisp_LogIor2(fiber->lisp, result, arguments[index], &result);
     }
 
@@ -942,14 +1005,11 @@ void LMud_Builtin_LogXor(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
     LMud_Any   result;
     LMud_Size  index;
 
-    /*
-     * TODO: Check arguments.
-     */
-
     result = LMud_Any_FromInteger(0);
 
     for (index = 0; index < argument_count; index++)
     {
+        CHECK_ARG_TYPE(index, Integer);
         LMud_Lisp_LogXor2(fiber->lisp, result, arguments[index], &result);
     }
 }
@@ -958,10 +1018,8 @@ void LMud_Builtin_LogNot(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
 {
     LMud_Any  result;
 
-    /*
-     * TODO: Check arguments.
-     */
-    (void) argument_count;
+    CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Integer);
 
     LMud_Lisp_LogNot(fiber->lisp, arguments[0], &result);
 
@@ -972,10 +1030,9 @@ void LMud_Builtin_Ash(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size a
 {
     LMud_Any  result;
 
-    /*
-     * TODO: Check arguments.
-     */
-    (void) argument_count;
+    CHECK_ARGS(2, 2);
+    CHECK_ARG_TYPE(0, Integer);
+    CHECK_ARG_TYPE(1, Integer);
 
     LMud_Lisp_Ash(fiber->lisp, arguments[0], arguments[1], &result);
 
@@ -1011,6 +1068,7 @@ void LMud_Builtin_KickstartTask(struct LMud_Fiber* fiber, LMud_Any* arguments, L
 void LMud_Builtin_Random(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Integer);
     LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(rand() % LMud_Any_AsInteger(arguments[0])));
 }
 
@@ -1031,6 +1089,10 @@ void LMud_Builtin_OpenV4(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
 {
     CHECK_ARGS(4, 4);
 
+    CHECK_ARG_TYPE(0, String);
+    CHECK_ARG_TYPE(1, Integer);
+    CHECK_ARG_TYPE(3, String);
+
     if (LMud_Net_OpenV4(&fiber->lisp->mud->net, LMud_String_Chars(LMud_Any_AsPointer(arguments[3])), LMud_String_Chars(LMud_Any_AsPointer(arguments[0])), LMud_Any_AsInteger(arguments[1]), arguments[2])) {
         LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_T(fiber->lisp));
     } else {
@@ -1042,6 +1104,10 @@ void LMud_Builtin_OpenV6(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
 {
     CHECK_ARGS(4, 4);
 
+    CHECK_ARG_TYPE(0, String);
+    CHECK_ARG_TYPE(1, Integer);
+    CHECK_ARG_TYPE(3, String);
+
     if (LMud_Net_OpenV6(&fiber->lisp->mud->net, LMud_String_Chars(LMud_Any_AsPointer(arguments[3])), LMud_String_Chars(LMud_Any_AsPointer(arguments[0])), LMud_Any_AsInteger(arguments[1]), arguments[2])) {
         LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_T(fiber->lisp));
     } else {
@@ -1051,10 +1117,7 @@ void LMud_Builtin_OpenV6(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
 
 void LMud_Builtin_Portp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
-    /*
-     * TODO: Check arguments.
-     */
-    (void) argument_count;
+    CHECK_ARGS(1, 1);
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsPort(fiber->lisp, arguments[0])));
 }
 
@@ -1063,6 +1126,7 @@ void LMud_Builtin_OpenFd(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
     struct LMud_Connection*  connection;
 
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Integer);
 
     if (LMud_Net_RegisterClientFileDescriptor(&fiber->lisp->mud->net, LMud_Any_AsInteger(arguments[0]), false, &connection)) {
         LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Port(fiber->lisp, connection));
@@ -1077,6 +1141,7 @@ void LMud_Builtin_OpenFile(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_S
     int                      fd;
 
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, String);
 
     fd = open(LMud_String_Chars(LMud_Any_AsPointer(arguments[0])), O_RDWR);
 
@@ -1090,6 +1155,7 @@ void LMud_Builtin_OpenFile(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_S
 void LMud_Builtin_Close(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Port);
     LMud_Port_Close(LMud_Any_AsPointer(arguments[0]));
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
 }
@@ -1097,12 +1163,14 @@ void LMud_Builtin_Close(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size
 void LMud_Builtin_PortEof(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Port);
     LMud_Port_Eof(LMud_Any_AsPointer(arguments[0]), fiber);
 }
 
 void LMud_Builtin_PortReadByte(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Port);
     LMud_Port_FiberReadByte(LMud_Any_AsPointer(arguments[0]), fiber);
 }
 
@@ -1111,6 +1179,8 @@ void LMud_Builtin_PortWriteByte(struct LMud_Fiber* fiber, LMud_Any* arguments, L
     bool  success;
 
     CHECK_ARGS(2, 2);
+    CHECK_ARG_TYPE(0, Port);
+    CHECK_ARG_TYPE(1, Integer);
     success = LMud_Port_WriteByte(LMud_Any_AsPointer(arguments[0]), LMud_Any_AsInteger(arguments[1]));
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, success));
 }
@@ -1118,6 +1188,8 @@ void LMud_Builtin_PortWriteByte(struct LMud_Fiber* fiber, LMud_Any* arguments, L
 void LMud_Builtin_PortUnreadByte(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(2, 2);
+    CHECK_ARG_TYPE(0, Port);
+    CHECK_ARG_TYPE(1, Integer);
     LMud_Port_PushbackByte(LMud_Any_AsPointer(arguments[0]), LMud_Any_AsInteger(arguments[1]));
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
 }
@@ -1125,19 +1197,22 @@ void LMud_Builtin_PortUnreadByte(struct LMud_Fiber* fiber, LMud_Any* arguments, 
 void LMud_Builtin_PortUnreadCharacter(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(2, 2);
+    CHECK_ARG_TYPE(0, Port);
+    CHECK_ARG_TYPE(1, Character);
     LMud_Port_PushbackRune(LMud_Any_AsPointer(arguments[0]), LMud_Any_AsCharacter(arguments[1]));
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
 }
 
 void LMud_Builtin_CurrentPort(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
-    CHECK_ARGS(0, 0);
+    NO_ARGS;
     LMud_Fiber_SetAccumulator(fiber, LMud_Fiber_GetPort(fiber));
 }
 
 void LMud_Builtin_SetCurrentPort(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Port);
     LMud_Fiber_SetPort(fiber, arguments[0]);
     LMud_Fiber_SetAccumulator(fiber, arguments[0]);
 }
@@ -1150,13 +1225,14 @@ void LMud_Builtin_Processp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_S
 
 void LMud_Builtin_CurrentProcess(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
-    CHECK_ARGS(0, 0);
+    NO_ARGS;
     LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromPointer(LMud_Fiber_GetProcess(fiber)));
 }
 
 void LMud_Builtin_ProcessState(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Process);
     LMud_Fiber_SetAccumulator(fiber, LMud_Process_GetStateAsLispValue(LMud_Any_AsPointer(arguments[0]), fiber->lisp));
 }
 
@@ -1169,6 +1245,7 @@ void LMud_Builtin_CreateProcess(struct LMud_Fiber* fiber, LMud_Any* arguments, L
 void LMud_Builtin_WaitForProcess(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Process);
     LMud_Process_FiberWait(LMud_Any_AsPointer(arguments[0]), fiber);
 }
 
@@ -1201,6 +1278,7 @@ void LMud_Builtin_ProcessStackFrames(struct LMud_Fiber* fiber, LMud_Any* argumen
     struct LMud_Fiber*    process_fiber;
 
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Process);
 
     if (!LMud_Lisp_IsProcess(fiber->lisp, arguments[0])) {
         LMud_Fiber_PerformError(fiber, "Expected a process.");
@@ -1223,6 +1301,7 @@ void LMud_Builtin_StackFramePrevious(struct LMud_Fiber* fiber, LMud_Any* argumen
     struct LMud_Frame*       prev;
 
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, StackFrame);
 
     if (!LMud_Lisp_IsStackFrame(fiber->lisp, arguments[0])) {
         LMud_Fiber_PerformError(fiber, "Expected a stack frame.");
@@ -1243,6 +1322,7 @@ void LMud_Builtin_StackFrameLexical(struct LMud_Fiber* fiber, LMud_Any* argument
     struct LMud_StackFrame*  frame;
 
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, StackFrame);
 
     if (!LMud_Lisp_IsStackFrame(fiber->lisp, arguments[0])) {
         LMud_Fiber_PerformError(fiber, "Expected a stack frame.");
@@ -1258,6 +1338,7 @@ void LMud_Builtin_StackFrameFunction(struct LMud_Fiber* fiber, LMud_Any* argumen
     struct LMud_StackFrame*  frame;
 
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, StackFrame);
 
     if (!LMud_Lisp_IsStackFrame(fiber->lisp, arguments[0])) {
         LMud_Fiber_PerformError(fiber, "Expected a stack frame.");
@@ -1273,6 +1354,7 @@ void LMud_Builtin_StackFrameIp(struct LMud_Fiber* fiber, LMud_Any* arguments, LM
     struct LMud_StackFrame*  frame;
 
     CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, StackFrame);
 
     if (!LMud_Lisp_IsStackFrame(fiber->lisp, arguments[0])) {
         LMud_Fiber_PerformError(fiber, "Expected a stack frame.");
@@ -1345,7 +1427,6 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "ASH", LMud_Builtin_Ash);
     LMud_Lisp_InstallBuiltin(lisp, "RANDOM", LMud_Builtin_Random);
 
-    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.TEST", "HELLO-WORLD", LMud_Builtin_HelloWorld);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "LOG", LMud_Builtin_Log);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%QUIT", LMud_Builtin_Quit);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "FUNCALL-FORWARD", LMud_Builtin_FuncallForward);

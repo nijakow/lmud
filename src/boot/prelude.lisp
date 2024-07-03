@@ -955,7 +955,8 @@
       (lmud.int:port-read-byte stream))
    
    (defun io:unread-raw-char-from-stream (stream char)
-      (lmud.int:port-unread-char stream char))
+      (when char
+         (lmud.int:port-unread-char stream char)))
    
    (defun io:close-stream (stream)
       (lmud.int:close-port stream))
@@ -970,7 +971,8 @@
       (io:read-raw-byte-from-stream stream))
    
    (defun io:unread-char-from-stream (stream char)
-      (lmud.int:port-unread-char stream char))
+      (when char
+         (lmud.int:port-unread-char stream char)))
    
    (defun io:write-utf8-char (char stream)
       (let ((code (char-code char)))
@@ -1056,6 +1058,8 @@
 
    (defun io.reader:check (stream char)
       (let ((parsed-char (read-char stream)))
+         (unless (characterp parsed-char)
+            (return (values nil nil)))
          (if (char= parsed-char char)
              parsed-char
              (progn (unread-char parsed-char stream)
@@ -1063,6 +1067,8 @@
    
    (defun io.reader:checkpred (stream predicate)
       (let ((parsed-char (read-char stream)))
+         (unless (characterp parsed-char)
+            (return nil))
          (if (funcall predicate parsed-char)
              parsed-char
              (progn (unread-char parsed-char stream)
@@ -1083,7 +1089,8 @@
       (let ((result '()))
          (while (not (io:eof-p stream))
             (let ((char (read-char stream)))
-               (when (funcall predicate char)
+               (when (or (not (characterp char))
+                         (funcall predicate char))
                   (unread-char char stream)
                   (return (conversions:->string (reverse result))))
                (push char result)))
@@ -1141,7 +1148,7 @@
                      (io.reader:read-list stream)))))
 
    (defun io.reader:char->digit (char &optional (base 10))
-      (let ((value (cond ((and (char>= char #\0) (char<= char #\9)) (- (char-code char) (char-code #\0)))
+      (let ((value (cond ((and (char>= char #\0) (char<= char #\9))       (- (char-code char) (char-code #\0)))
                          ((and (char>= char #\A) (char<= char #\Z)) (+ 10 (- (char-code char) (char-code #\A))))
                          ((and (char>= char #\a) (char<= char #\z)) (+ 10 (- (char-code char) (char-code #\a))))
                          (t nil))))
@@ -1158,7 +1165,8 @@
 
          (while t
             (let* ((char  (read-char stream))
-                   (digit (io.reader:char->digit char base)))
+                   (digit (and (characterp char)
+                               (io.reader:char->digit char base))))
                (if digit
                    (setq value       (+ (* value base) digit)
                          digits-read (+ digits-read 1))
@@ -1176,7 +1184,8 @@
          
          (while t
             (let* ((char  (car chars))
-                   (digit (io.reader:char->digit char base)))
+                   (digit (and (characterp char)
+                               (io.reader:char->digit char base))))
                (if digit
                    (setq value       (+ (* value base) digit)
                          digits-read (+ digits-read 1))
