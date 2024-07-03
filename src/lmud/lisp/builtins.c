@@ -1029,9 +1029,9 @@ void LMud_Builtin_OnConnect(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_
 
 void LMud_Builtin_OpenV4(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
-    CHECK_ARGS(3, 3);
+    CHECK_ARGS(4, 4);
 
-    if (LMud_Net_OpenV4(&fiber->lisp->mud->net, LMud_String_Chars(LMud_Any_AsPointer(arguments[0])), LMud_Any_AsInteger(arguments[1]), arguments[2])) {
+    if (LMud_Net_OpenV4(&fiber->lisp->mud->net, LMud_String_Chars(LMud_Any_AsPointer(arguments[3])), LMud_String_Chars(LMud_Any_AsPointer(arguments[0])), LMud_Any_AsInteger(arguments[1]), arguments[2])) {
         LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_T(fiber->lisp));
     } else {
         LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
@@ -1040,9 +1040,9 @@ void LMud_Builtin_OpenV4(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
 
 void LMud_Builtin_OpenV6(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
-    CHECK_ARGS(3, 3);
+    CHECK_ARGS(4, 4);
 
-    if (LMud_Net_OpenV6(&fiber->lisp->mud->net, LMud_String_Chars(LMud_Any_AsPointer(arguments[0])), LMud_Any_AsInteger(arguments[1]), arguments[2])) {
+    if (LMud_Net_OpenV6(&fiber->lisp->mud->net, LMud_String_Chars(LMud_Any_AsPointer(arguments[3])), LMud_String_Chars(LMud_Any_AsPointer(arguments[0])), LMud_Any_AsInteger(arguments[1]), arguments[2])) {
         LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_T(fiber->lisp));
     } else {
         LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));

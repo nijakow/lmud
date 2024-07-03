@@ -40,4 +40,4 @@
       (close port)))
 
 
-(lmud.int:open-v4 "127.0.0.1" 8080 #'webserver::new-connection)
+(lmud.int:open-v4 "127.0.0.1" 8080 #'webserver::new-connection "http")

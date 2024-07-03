@@ -27,15 +27,15 @@ void LMud_Net_Mark(struct LMud_GC* gc, struct LMud_Net* self)
     LMud_Servers_Mark(gc, &self->servers);
 }
 
-bool LMud_Net_OpenV4(struct LMud_Net* self, const char* address, LMud_Port port, LMud_Any startup_function)
+bool LMud_Net_OpenV4(struct LMud_Net* self, const char* protocol, const char* address, LMud_Port port, LMud_Any startup_function)
 {
-    LMud_Logf(self->mud, LMud_LogLevel_INFO, "Opening IPv4 server on %s:%d ...", address, port);
+    LMud_Logf(self->mud, LMud_LogLevel_INFO, "Opening IPv4 server on %s://%s:%d ...", protocol, address, port);
     return LMud_Servers_OpenV4(&self->servers, address, port, startup_function);
 }
 
-bool LMud_Net_OpenV6(struct LMud_Net* self, const char* address, LMud_Port port, LMud_Any startup_function)
+bool LMud_Net_OpenV6(struct LMud_Net* self, const char* protocol, const char* address, LMud_Port port, LMud_Any startup_function)
 {
-    LMud_Logf(self->mud, LMud_LogLevel_INFO, "Opening IPv6 server on [%s]:%d ...", address, port);
+    LMud_Logf(self->mud, LMud_LogLevel_INFO, "Opening IPv6 server on %s://[%s]:%d ...", protocol, address, port);
     return LMud_Servers_OpenV6(&self->servers, address, port, startup_function);
 }
 

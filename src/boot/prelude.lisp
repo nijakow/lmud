@@ -1591,8 +1591,8 @@
       (lmud.bootstrap::banner port)
       (lmud.bootstrap::repl port))
 
-   (lmud.int:open-v4 "127.0.0.1" 4242 #'lmud.bootstrap::hi)
-   (lmud.int:open-v6 "::1"       4244 #'lmud.bootstrap::hi)
+   (lmud.int:open-v4 "127.0.0.1" 4242 #'lmud.bootstrap::hi "telnet")
+   (lmud.int:open-v6 "::1"       4244 #'lmud.bootstrap::hi "telnet")
 
    (load "../boot/test.lisp")
 
