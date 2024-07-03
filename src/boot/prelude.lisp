@@ -95,6 +95,9 @@
 
    (defun lmud.util:simple-error (&optional (message nil))
       (lmud.int:signal message))
+   
+   (defun lmud:todo! ()
+      (lmud.util:simple-error "TODO!"))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -813,12 +816,28 @@
       (or (tos.int:lookup-method-in-class (tos.int:class-of object) message)
           #'tos.int:error-method))
 
+   (defun tos.int:ensure-class (e)
+      (cond ((tos.int:classp e) e)
+            ((tos.int:oopp   e)  (tos.int:class-of e))
+            ((symbolp        e)
+             (let ((symbol-value (symbol-value e)))
+                (if (tos.int:classp symbol-value)
+                    symbol-value
+                    (let ((the-class (tos.int:pre-make-class (list tos.classes:<t>) :name e)))
+                       (set-symbol-value e the-class)
+                       the-class))))
+            (t (lmud.util:simple-error "Invalid class!"))))
+
+   (defun tos.int:ensure-singleton-class (e)
+      (lmud:todo!))
+
    (defmacro tos:defclass (name supers &body body)
       (when (null supers)
          (setq supers (list tos.classes:<t>)))
       (let ((class (gensym)))
-         (list* 'let (list (list class (list 'tos.int:pre-make-class (cons 'list supers) ':name (list 'quote name))))
-            (list 'defparameter name class)
+         (list* 'let (list (list class (list 'tos.int:ensure-class (if (symbolp name) (list 'quote name) name))))
+            ;; TODO: Clear class methods and vars
+            (list 'tos.int:%class-supers! class (cons 'list supers))
             (apply #'append
                (domap (clause body)
                   (cond ((listp clause)
@@ -829,6 +848,11 @@
                                       ((consp var)   (list 'tos.int:%class-push-var! class (list 'quote (car var)) (cons 'progn (cdr var))))
                                       (t (lmud.util:simple-error "Invalid tos:defclass variable definition!")))))))
                         (t (lmud.util:simple-error "Invalid tos:defclass clause!"))))))))
+
+   (defmacro tos:defobject (name supers &body body)
+      (list 'tos:defclass (list 'tos.int:ensure-singleton-class (if (symbolp name) (list 'quote name) name))
+            supers
+            body))
 
    (defmacro tos:defmethod (info params &body body)
       (let ((class       (car info))
