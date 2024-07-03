@@ -20,6 +20,9 @@ bool LMud_FiberQueue_HasFibers(struct LMud_FiberQueue* self);
 
 void LMud_FiberQueue_AddFiber(struct LMud_FiberQueue* self, struct LMud_Fiber* fiber);
 
+void LMud_FiberQueue_WakeUpAllWithValues(struct LMud_FiberQueue* self, LMud_Any* values, LMud_Size count);
+void LMud_FiberQueue_WakeUpAllWithValue(struct LMud_FiberQueue* self, LMud_Any value);
+
 
 struct LMud_FiberRef
 {
@@ -74,6 +77,8 @@ struct LMud_Fiber
     LMud_Any                       port;
 
     struct LMud_FrameList          floating_frames;
+
+    struct LMud_FiberQueue         waiting_for_result;
 
     enum LMud_FiberState           state;
     enum LMud_ExecutionResumption  execution_mode;

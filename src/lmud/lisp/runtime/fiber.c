@@ -17,6 +17,21 @@ void LMud_FiberQueue_Create(struct LMud_FiberQueue* self)
 
 void LMud_FiberQueue_Destroy(struct LMud_FiberQueue* self)
 {
+    /*
+     * TODO, FIXME, XXX:
+     *
+     * In most cases, a FiberQueue acts as a list of waiting fibers that want to be
+     * reactivated as soon as a specific condition is met.
+     * 
+     * Just clearing this list by unlinking the fiber would result in a bunch of zombies
+     * that are never going to be reactivated.
+     */
+
+    if (self->fibers != NULL)
+    {
+        LMud_Debugf(self->fibers->lisp->mud, LMud_LogLevel_WARNING, "Fiber queue %p is being destroyed with fibers still in it!", self);
+    }
+
     while (self->fibers != NULL)
     {
         LMud_Fiber_UnlinkQueue(self->fibers);
@@ -38,6 +53,22 @@ void LMud_FiberQueue_AddFiber(struct LMud_FiberQueue* self, struct LMud_Fiber* f
     LMud_Fiber_MoveToQueue(fiber, self);
 }
 
+void LMud_FiberQueue_WakeUpAllWithValues(struct LMud_FiberQueue* self, LMud_Any* values, LMud_Size count)
+{
+    struct LMud_Fiber*  fiber;
+
+    while (self->fibers != NULL)
+    {
+        fiber = self->fibers;
+        LMud_Fiber_Values(fiber, values, count);
+        LMud_Fiber_ControlStart(fiber);
+    }
+}
+
+void LMud_FiberQueue_WakeUpAllWithValue(struct LMud_FiberQueue* self, LMud_Any value)
+{
+    LMud_FiberQueue_WakeUpAllWithValues(self, &value, 1);
+}
 
 
 void LMud_FiberRef_Create(struct LMud_FiberRef* self, struct LMud_Fiber* fiber)
@@ -133,6 +164,8 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct L
 
     LMud_FrameList_Create(&self->floating_frames);
 
+    LMud_FiberQueue_Create(&self->waiting_for_result);
+
     self->state          = LMud_FiberState_CREATED;
     self->execution_mode = LMud_ExecutionResumption_NORMAL;
 }
@@ -140,7 +173,16 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct L
 void LMud_Fiber_Destroy(struct LMud_Fiber* self)
 {
     LMud_Debugf(self->lisp->mud, LMud_LogLevel_HALF_DEBUG, "Destroying fiber %p");
+    
+    // TODO, FIXME, XXX: Remove all references to this fiber.
+    
+    if (self->references != NULL)
+    {
+        LMud_Debugf(self->lisp->mud, LMud_LogLevel_FATAL, "Fiber %p is being destroyed with references still pointing to it! System might be unstable due to dangling pointers!", self);
+    }
+
     LMud_Fiber_UnlinkQueue(self);
+    LMud_FiberQueue_Destroy(&self->waiting_for_result);
     LMud_FrameList_Destroy(&self->floating_frames);
     LMud_Free(self->stack);
     LMud_Fiber_Unlink(self);
@@ -271,10 +313,21 @@ void LMud_Fiber_ControlUnyield(struct LMud_Fiber* self)
 
 void LMud_Fiber_ControlTerminate(struct LMud_Fiber* self)
 {
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_HALF_DEBUG, "Terminating fiber %p...", self);
+
+    LMud_Fiber_SetState(self, LMud_FiberState_TERMINATED);
     /*
      * TODO: Completely unwind the stack and run all unwind-protects.
      */
-    LMud_Fiber_SetState(self, LMud_FiberState_TERMINATED);
+
+    /*
+     * Wake up all waiting fibers with our accumulator value(s).
+     */
+    LMud_FiberQueue_WakeUpAllWithValues(&self->waiting_for_result, self->accumulator, self->accumulator_count);
+
+    /*
+     * TODO, FIXME, XXX: Should the fiber still remain in its queue?
+     */
     LMud_Fiber_UnlinkQueue(self);
 }
 
