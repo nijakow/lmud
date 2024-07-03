@@ -10,6 +10,7 @@ struct LMud_Scheduler
     struct LMud_Lisp*       lisp;
     struct LMud_Fiber*      fibers;
     struct LMud_FiberQueue  running_fibers;
+    struct LMud_FiberQueue  zombies;
 };
 
 bool LMud_Scheduler_Create(struct LMud_Scheduler* self, struct LMud_Lisp* lisp);

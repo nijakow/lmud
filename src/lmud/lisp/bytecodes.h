@@ -47,4 +47,5 @@ enum LMud_ExecutionResumption
     LMud_ExecutionResumption_DIRECT,
     LMud_ExecutionResumption_RETURN,
     LMud_ExecutionResumption_SIGNAL,
+    LMud_ExecutionResumption_TERMINATING,
 };

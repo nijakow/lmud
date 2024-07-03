@@ -160,7 +160,6 @@ struct LMud_Frame* LMud_Interpreter_LexicalFrame(struct LMud_Interpreter* self, 
 
 #define TERMINATE \
     { \
-        LMud_Fiber_ControlTerminate(self->fiber); \
         goto end; \
     }
 
@@ -643,6 +642,14 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                         LMud_Interpreter_Flush(self);
                         LMud_Fiber_Values(self->fiber, values, index2);
                         LMud_Fiber_SignalAndUnwind(self->fiber);
+                        LMud_Interpreter_Restore(self);
+                        break;
+                    case LMud_ExecutionResumption_TERMINATING:
+                        /*
+                         * We set the values, and continue terminating the fiber.
+                         */
+                        LMud_Interpreter_Flush(self);
+                        LMud_Fiber_ContinueTerminate_FRIEND(self->fiber);
                         LMud_Interpreter_Restore(self);
                         break;
                     default:

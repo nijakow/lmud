@@ -260,7 +260,7 @@ void LMud_Connection_Tick(struct LMud_Connection* self, struct LMud_Selector* se
     {
         ssize = read(self->fd, buffer, sizeof(buffer));
 
-        LMud_Debugf(self->net->mud, LMud_LogLevel_HALF_DEBUG, "FD(%d): Read  %4ld bytes", self->fd, ssize);
+        LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Read  %4ld bytes", self->fd, ssize);
 
         if (ssize <= 0) {
             LMud_Connection_HandleDisconnect(self);
@@ -279,7 +279,7 @@ void LMud_Connection_Tick(struct LMud_Connection* self, struct LMud_Selector* se
         {
             written = write(self->fd, buffer, size);
 
-            LMud_Debugf(self->net->mud, LMud_LogLevel_HALF_DEBUG, "FD(%d): Wrote %4ld bytes out of %4lu", self->fd, written, size);
+            LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Wrote %4ld bytes out of %4lu", self->fd, written, size);
 
             if (written < 0) {
                 LMud_Connection_HandleDisconnect(self);

@@ -147,3 +147,7 @@ void LMud_Fiber_Tick(struct LMud_Fiber* self);
 void LMud_Fiber_AddWaitingForResult(struct LMud_Fiber* self, struct LMud_Fiber* fiber);
 
 void LMud_Fiber_Dump(struct LMud_Fiber* self);
+
+
+void LMud_Fiber_ContinueTerminate_FRIEND(struct LMud_Fiber* self);
+void LMud_Fiber_FinalizeTerminate_FRIEND(struct LMud_Fiber* self);

@@ -10,6 +10,9 @@
 #include "fiber.h"
 
 
+static void LMud_Fiber_Unwind(struct LMud_Fiber* self, enum LMud_ExecutionResumption resumption);
+
+
 void LMud_FiberQueue_Create(struct LMud_FiberQueue* self)
 {
     self->fibers = NULL;
@@ -251,6 +254,8 @@ void LMud_Fiber_LinkQueue(struct LMud_Fiber* self, struct LMud_Fiber** list)
 
 void LMud_Fiber_UnlinkQueue(struct LMud_Fiber* self)
 {
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Unlinking fiber %p from queue...", self);
+
     if (self->queue_prev != NULL)
         *self->queue_prev = self->queue_next;
     if (self->queue_next != NULL)
@@ -272,6 +277,7 @@ enum LMud_FiberState LMud_Fiber_GetState(struct LMud_Fiber* self)
 
 static void LMud_Fiber_SetState(struct LMud_Fiber* self, enum LMud_FiberState state)
 {
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Setting state of fiber %p to %d", self, state);
     self->state = state;
 }
 
@@ -302,8 +308,11 @@ bool LMud_Fiber_HasTerminated(struct LMud_Fiber* self)
 
 void LMud_Fiber_ControlStart(struct LMud_Fiber* self)
 {
-    LMud_Fiber_SetState(self, LMud_FiberState_RUNNING);
-    LMud_Scheduler_MoveToRunningQueue(self->scheduler, self);
+    if (!LMud_Fiber_IsRunning(self))
+    {
+        LMud_Fiber_SetState(self, LMud_FiberState_RUNNING);
+        LMud_Scheduler_MoveToRunningQueue(self->scheduler, self);
+    }
 }
 
 void LMud_Fiber_ControlRestartWithValue(struct LMud_Fiber* self, LMud_Any value)
@@ -328,24 +337,32 @@ void LMud_Fiber_ControlUnyield(struct LMud_Fiber* self)
     LMud_Fiber_SetState(self, LMud_FiberState_RUNNING);
 }
 
-void LMud_Fiber_ControlTerminate(struct LMud_Fiber* self)
+void LMud_Fiber_ContinueTerminate_FRIEND(struct LMud_Fiber* self)
 {
-    LMud_Debugf(self->lisp->mud, LMud_LogLevel_HALF_DEBUG, "Terminating fiber %p...", self);
-
-    LMud_Fiber_SetState(self, LMud_FiberState_TERMINATED);
     /*
-     * TODO: Completely unwind the stack and run all unwind-protects.
+     * Make sure that we are running, so that the scheduler
+     * can properly handle the termination.
      */
+    LMud_Fiber_ControlStart(self);
+    LMud_Fiber_Unwind(self, LMud_ExecutionResumption_TERMINATING);
+}
 
+void LMud_Fiber_FinalizeTerminate_FRIEND(struct LMud_Fiber* self)
+{
+    LMud_Fiber_SetState(self, LMud_FiberState_TERMINATED);
+    LMud_Fiber_UnlinkQueue(self);
     /*
      * Wake up all waiting fibers with our accumulator value(s).
      */
     LMud_FiberQueue_WakeUpAllWithValues(&self->waiting_for_result, self->accumulator, self->accumulator_count);
+}
 
-    /*
-     * TODO, FIXME, XXX: Should the fiber still remain in its queue?
-     */
+void LMud_Fiber_ControlTerminate(struct LMud_Fiber* self)
+{
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_HALF_DEBUG, "Terminating fiber %p ...", self);
+
     LMud_Fiber_UnlinkQueue(self);
+    LMud_Fiber_ContinueTerminate_FRIEND(self);
 }
 
 enum LMud_ExecutionResumption LMud_Fiber_GetExecutionResumptionMode(struct LMud_Fiber* self)
@@ -566,9 +583,9 @@ void LMud_Fiber_PerformReturn(struct LMud_Fiber* self)
     LMud_Fiber_PopFrame(self);
 }
 
-void LMud_Fiber_SignalAndUnwind(struct LMud_Fiber* self)
+static void LMud_Fiber_Unwind(struct LMud_Fiber* self, enum LMud_ExecutionResumption resumption)
 {
-    LMud_Fiber_SetExecutionResumptionMode(self, LMud_ExecutionResumption_SIGNAL);
+    LMud_Fiber_SetExecutionResumptionMode(self, resumption);
 
     while (self->top != NULL)
     {
@@ -580,6 +597,11 @@ void LMud_Fiber_SignalAndUnwind(struct LMud_Fiber* self)
 
         LMud_Fiber_PopFrame(self);
     }
+}
+
+void LMud_Fiber_SignalAndUnwind(struct LMud_Fiber* self)
+{
+    LMud_Fiber_Unwind(self, LMud_ExecutionResumption_NORMAL);
 }
 
 void LMud_Fiber_SignalAndUnwindWithValues(struct LMud_Fiber* self, LMud_Any* values, LMud_Size count)
