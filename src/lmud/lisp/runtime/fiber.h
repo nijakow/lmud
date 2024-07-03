@@ -124,6 +124,7 @@ void       LMud_Fiber_SetAccumulator(struct LMud_Fiber* self, LMud_Any value);
 void       LMud_Fiber_Values(struct LMud_Fiber* self, LMud_Any* values, LMud_Size count);
 LMud_Size  LMud_Fiber_ValueCount(struct LMud_Fiber* self);
 LMud_Any   LMud_Fiber_GetValue(struct LMud_Fiber* self, LMud_Size index);
+LMud_Any*  LMud_Fiber_RawValues_UNSAFE(struct LMud_Fiber* self);
 
 LMud_Any   LMud_Fiber_GetPort(struct LMud_Fiber* self);
 void       LMud_Fiber_SetPort(struct LMud_Fiber* self, LMud_Any port);
@@ -142,5 +143,7 @@ void LMud_Fiber_SignalAndUnwind(struct LMud_Fiber* self);
 void LMud_Fiber_SignalAndUnwindWithValues(struct LMud_Fiber* self, LMud_Any* values, LMud_Size count);
 
 void LMud_Fiber_Tick(struct LMud_Fiber* self);
+
+void LMud_Fiber_AddWaitingForResult(struct LMud_Fiber* self, struct LMud_Fiber* fiber);
 
 void LMud_Fiber_Dump(struct LMud_Fiber* self);

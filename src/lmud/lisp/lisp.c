@@ -84,6 +84,16 @@ void LMud_Lisp_Mark(struct LMud_GC* gc, struct LMud_Lisp* self)
 }
 
 
+struct LMud_Objects* LMud_Lisp_Objects(struct LMud_Lisp* self)
+{
+    return &self->objects;
+}
+
+struct LMud_Scheduler* LMud_Lisp_Scheduler(struct LMud_Lisp* self)
+{
+    return &self->scheduler;
+}
+
 struct LMud_Types* LMud_Lisp_Types(struct LMud_Lisp* self)
 {
     return &self->objects.types;

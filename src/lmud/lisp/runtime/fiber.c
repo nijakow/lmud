@@ -402,6 +402,11 @@ LMud_Any LMud_Fiber_GetValue(struct LMud_Fiber* self, LMud_Size index)
     return self->accumulator[index];
 }
 
+LMud_Any* LMud_Fiber_RawValues_UNSAFE(struct LMud_Fiber* self)
+{
+    return self->accumulator;
+}
+
 
 LMud_Any LMud_Fiber_GetPort(struct LMud_Fiber* self)
 {
@@ -602,6 +607,13 @@ void LMud_Fiber_Tick(struct LMud_Fiber* self)
     LMud_Interpreter_Create(&interpreter, self);
     LMud_Interpreter_Tick(&interpreter);
     LMud_Interpreter_Destroy(&interpreter);
+}
+
+
+void LMud_Fiber_AddWaitingForResult(struct LMud_Fiber* self, struct LMud_Fiber* fiber)
+{
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Fiber %p is waiting for result from fiber %p", self, fiber);
+    LMud_Fiber_ControlWaitOnQueue(fiber, &self->waiting_for_result);
 }
 
 

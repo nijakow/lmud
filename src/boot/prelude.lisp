@@ -1395,7 +1395,9 @@
             ((lmud.int:portp e)
              (io.printer:write-string stream meta "#<PORT>"))
             ((lmud.int:processp e)
-             (io.printer:write-string stream meta "#<PROCESS>"))
+             (io.printer:write-string stream meta "#<PROCESS ")
+             (io.printer:print-expression stream meta (lmud.int:process-state e))
+             (io.printer:write-string stream meta ">"))
             ((tos.int:classp e)
              (let ((class-name (tos.int:%class-name e)))
                 (if class-name

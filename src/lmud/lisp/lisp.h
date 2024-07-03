@@ -39,7 +39,9 @@ bool LMud_Lisp_Create(struct LMud_Lisp* self, struct LMud* mud);
 void LMud_Lisp_Destroy(struct LMud_Lisp* self);
 void LMud_Lisp_Mark(struct LMud_GC* gc, struct LMud_Lisp* self);
 
-struct LMud_Types* LMud_Lisp_Types(struct LMud_Lisp* self);
+struct LMud_Objects*   LMud_Lisp_Objects(struct LMud_Lisp* self);
+struct LMud_Scheduler* LMud_Lisp_Scheduler(struct LMud_Lisp* self);
+struct LMud_Types*     LMud_Lisp_Types(struct LMud_Lisp* self);
 
 bool LMud_Lisp_IsArrayPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsBuiltinPointer(struct LMud_Lisp* self, void* object);
