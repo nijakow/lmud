@@ -723,6 +723,12 @@
    ;;;    A new Macroexpander
    ;;;
 
+   (defun lmud.util:macroexpand-list (expression environment)
+      (if (endp expression)
+          nil
+          (cons (macroexpand (car expression) environment)
+                (lmud.util:macroexpand-list (cdr expression) environment))))
+
    (defun macroexpand (expression &optional environment)
       (flet ((find-macro-function (object environment)
                (when (symbolp object)
@@ -748,7 +754,7 @@
                          (t (let ((func (find-macro-function head environment)))
                                (if func
                                    (macroexpand (apply func args) environment)
-                                   (mapcar #'(lambda (e) (macroexpand e environment)) expression)))))))
+                                   (lmud.util:macroexpand-list expression environment)))))))
                (t expression))))
 
 
