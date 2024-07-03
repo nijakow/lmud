@@ -566,6 +566,9 @@
 
    (defun (setf aref) (value vector index)
       (list 'lmud.int:%aset vector index value))
+   
+   (defun (setf get) (value symbol property)
+      (list 'put symbol property value))
 
    (defmacro push (item place)
       (list 'setf place (list 'cons item place)))
@@ -740,8 +743,16 @@
    (defun tos.int:pre-make-class (supers &key name)
       (lmud.int:%make-custom 'class supers nil nil name))
    
-   (defun tos.int:pre-make-instance (class)
-      (lmud.int:%make-custom class nil))
+   (defun tos.int:%object-class (object) (lmud.int:%custom-meta object))
+   (defun tos.int:%object-name  (object) (lmud.int:%custom-at object 0))
+   (defun tos.int:%object-vars  (object) (lmud.int:%custom-at object 1))
+
+   (defun tos.int:%object-class! (object class) (lmud.int:%custom-set object 0 class))
+   (defun tos.int:%object-name!  (object name)  (lmud.int:%custom-set object 0 name))
+   (defun tos.int:%object-vars!  (object vars)  (lmud.int:%custom-set object 1 vars))
+
+   (defun tos.int:pre-make-instance (class &key name)
+      (lmud.int:%make-custom class name nil))
 
    (defun tos.int:classp (object)
       (and (lmud.int:%customp object)
@@ -865,6 +876,23 @@
 
    (defun tos:send (object message &ignore-rest)
       (lmud.int:funcall-forward-rest (tos.int:lookup-method-in-object object message) object))
+
+   (defun tos:find (symbol)
+      (unless (symbolp symbol)
+         (lmud.util:simple-error "Expected a symbol!"))
+      (or (get symbol 'tos.int:object-value)
+          (let ((object (tos.int:pre-make-instance (tos.int:pre-make-class (list tos.classes:<t>)) :name symbol)))
+             (setf (get symbol 'tos.int:object-value) object)
+             object)))
+   
+   (defun tos:all-bound-object-symbols ()
+      (remove-if-not #'(lambda (symbol)
+                          (get symbol 'tos.int:object-value))
+                     (lmud.int:all-symbols)))
+   
+   (defun tos:all-bound-objects ()
+      (domap (symbol (tos:all-bound-object-symbols))
+         (get symbol 'tos.int:object-value)))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1225,6 +1253,8 @@
              (io.reader:read-integer stream 16))
             ((io.reader:checkstr stream ".")
              (list 'tos:at 'self (list 'quote (io.reader:read stream))))
+            ((io.reader:checkstr stream "~")
+             (list 'tos:find (list 'quote (io.reader:read stream))))
             (t (io.reader:read-atom stream))))
 
    (defun read (stream &ignore-rest)
@@ -1432,9 +1462,13 @@
                            (io.printer:write-string stream meta ")"))
                     (io.printer:write-string stream meta "#S(CLASS)"))))
             ((tos.int:oopp e)
-             (io.printer:write-string stream meta "#S(")
-             (io.printer:print-expression stream meta (lmud.int:%custom-meta e))
-             (io.printer:write-string stream meta ")"))
+             (let ((name (tos.int:%object-name e)))
+                (if name
+                    (progn (io.printer:write-string stream meta "~")
+                           (io.printer:print-expression stream meta name))
+                    (progn (io.printer:write-string stream meta "#S(")
+                           (io.printer:print-expression stream meta (lmud.int:%custom-meta e))
+                           (io.printer:write-string stream meta ")")))))
             ((lmud.int:%customp e)
              (io.printer:write-string stream meta "#<CUSTOM>"))
             (t (io.printer:write-string stream meta "#<UNKNOWN>"))))

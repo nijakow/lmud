@@ -607,7 +607,7 @@ static void LMud_Fiber_Unwind(struct LMud_Fiber* self, enum LMud_ExecutionResump
 
 void LMud_Fiber_SignalAndUnwind(struct LMud_Fiber* self)
 {
-    LMud_Fiber_Unwind(self, LMud_ExecutionResumption_NORMAL);
+    LMud_Fiber_Unwind(self, LMud_ExecutionResumption_SIGNAL);
 }
 
 void LMud_Fiber_SignalAndUnwindWithValues(struct LMud_Fiber* self, LMud_Any* values, LMud_Size count)

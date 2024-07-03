@@ -46,6 +46,7 @@ void LMud_InstructionStream_Flush(struct LMud_InstructionStream* self)
 void LMud_InstructionStream_Restore(struct LMud_InstructionStream* self, struct LMud_Frame* frame)
 {
     assert(self->frame == NULL);
+    assert(frame       != NULL);
     self->frame     = frame;
     self->ip        = LMud_Bytes_GetData(LMud_InstructionStream_GetBytecodes(self)) + frame->ip;
     self->constants = LMud_Array_GetData(LMud_InstructionStream_GetConstants(self));
@@ -471,6 +472,8 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
                 LMud_Interpreter_Flush(self);
                 LMud_Fiber_PerformCall(self->fiber, value, index);
+                if (!LMud_Fiber_HasFrames(self->fiber))
+                    TERMINATE;
                 LMud_Interpreter_Restore(self);
 
                 AGAIN_WITH_CHECK;
