@@ -1227,7 +1227,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%COMPILE", LMud_Builtin_Compile);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "MACHINE-FUNCTION-P", LMud_Builtin_MachineFunctionp);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "MACHINE-FUNCTION-NAME", LMud_Builtin_MachineFunctionName);
-    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "CLOSURE-P", LMud_Builtin_Closurep);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "CLOSUREP", LMud_Builtin_Closurep);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "BYTECODE-FUNCTION-P", LMud_Builtin_BytecodeFunctionp);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "FUNCTION-BYTECODES", LMud_Builtin_FunctionBytecodes);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "FUNCTION-CONSTANTS", LMud_Builtin_FunctionConstants);

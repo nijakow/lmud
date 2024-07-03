@@ -379,6 +379,10 @@
    ;;;    Math
    ;;;
 
+   (defun numberp (e)
+      (or (integerp e)
+          (lmud.int:ratiop e)))
+
    (defun 1+ (n) (+ n 1))
    (defun 1- (n) (- n 1))
 
@@ -519,6 +523,17 @@
             ((listp e)                  (conversions:list->bytes    e))
             ((conversions:vectoric-p e) (conversions:sequence->bytes e))
             (t (lmud.util:simple-error "Cannot convert to bytes!"))))
+
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
+   ;;;    Functions
+   ;;;
+
+   (defun functionp (e)
+      (or (lmud.int:bytecode-function-p e)
+          (lmud.int:machine-function-p  e)
+          (lmud.int:closurep            e)))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -733,13 +748,30 @@
       (and (lmud.int:%customp object)
            (tos.int:classp (lmud.int:%custom-meta object))))
    
-   (defparameter tos.classes:<t>     (tos.int:pre-make-class '()))
-   (defparameter tos.classes:<class> (tos.int:pre-make-class (list tos.classes:<t>)))
-   (defparameter tos.classes:<port>  (tos.int:pre-make-class (list tos.classes:<t>)))
+   (defparameter tos.classes:<t>         (tos.int:pre-make-class '() :name 'tos.classes:<t>))
+   (defparameter tos.classes:<class>     (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<class>))
+   (defparameter tos.classes:<symbol>    (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<symbol>))
+   (defparameter tos.classes:<cons>      (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<cons>))
+   (defparameter tos.classes:<number>    (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<number>))
+   (defparameter tos.classes:<integer>   (tos.int:pre-make-class (list tos.classes:<number>) :name 'tos.classes:<integer>))
+   (defparameter tos.classes:<rational>  (tos.int:pre-make-class (list tos.classes:<number>) :name 'tos.classes:<rational>))
+   (defparameter tos.classes:<ratio>     (tos.int:pre-make-class (list tos.classes:<rational>) :name 'tos.classes:<ratio>))
+   (defparameter tos.classes:<character> (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<character>))
+   (defparameter tos.classes:<function>  (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<function>))
+   (defparameter tos.classes:<string>    (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<string>))
+   (defparameter tos.classes:<port>      (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<port>))
 
    (defun tos.int:class-of (object)
       (cond ((tos.int:oopp      object) (lmud.int:%custom-meta object))
             ((tos.int:classp    object) tos.classes:<class>)
+            ((symbolp           object) tos.classes:<symbol>)
+            ((consp             object) tos.classes:<cons>)
+            ((integerp          object) tos.classes:<integer>)
+            ((lmud.int:ratiop   object) tos.classes:<ratio>)
+            ((numberp           object) tos.classes:<number>)
+            ((characterp        object) tos.classes:<character>)
+            ((functionp         object) tos.classes:<function>)
+            ((stringp           object) tos.classes:<string>)
             ((lmud.int:portp    object) tos.classes:<port>)
             (t                          tos.classes:<t>)))
    
@@ -1356,17 +1388,17 @@
              (io.printer:write-string stream meta ">"))
             ((lmud.int:bytecode-function-p e)
              (io.printer:write-string stream meta "#<BYTE-COMPILED-FUNCTION>"))
-            ((lmud.int:closure-p e)
+            ((lmud.int:closurep e)
              (io.printer:write-string stream meta "#<CLOSURE>"))
             ((lmud.int:portp e)
              (io.printer:write-string stream meta "#<PORT>"))
             ((tos.int:classp e)
              (let ((class-name (tos.int:%class-name e)))
                 (if class-name
-                    (progn (io.printer:write-string stream meta "#<CLASS:")
+                    (progn (io.printer:write-string stream meta "#S(CLASS ")
                            (io.printer:print-expression stream meta class-name)
-                           (io.printer:write-string stream meta ">"))
-                    (io.printer:write-string stream meta "#<CLASS>"))))
+                           (io.printer:write-string stream meta ")"))
+                    (io.printer:write-string stream meta "#S(CLASS)"))))
             ((tos.int:oopp e)
              (io.printer:write-string stream meta "#S(")
              (io.printer:print-expression stream meta (lmud.int:%custom-meta e))
