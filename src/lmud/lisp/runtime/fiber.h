@@ -21,6 +21,24 @@ bool LMud_FiberQueue_HasFibers(struct LMud_FiberQueue* self);
 void LMud_FiberQueue_AddFiber(struct LMud_FiberQueue* self, struct LMud_Fiber* fiber);
 
 
+struct LMud_FiberRef
+{
+    struct LMud_Fiber*      fiber;
+
+    struct LMud_FiberRef**  prev;
+    struct LMud_FiberRef*   next;
+};
+
+void LMud_FiberRef_Create(struct LMud_FiberRef* self, struct LMud_Fiber* fiber);
+void LMud_FiberRef_Destroy(struct LMud_FiberRef* self);
+
+void LMud_FiberRef_Link(struct LMud_FiberRef* self, struct LMud_FiberRef** list);
+void LMud_FiberRef_Unlink(struct LMud_FiberRef* self);
+
+struct LMud_Fiber* LMud_FiberRef_Get(struct LMud_FiberRef* self);
+
+void LMud_FiberRef_Set(struct LMud_FiberRef* self, struct LMud_Fiber* fiber);
+
 
 enum LMud_FiberState
 {
@@ -39,6 +57,8 @@ struct LMud_Fiber
 
     struct LMud_Fiber**            prev;
     struct LMud_Fiber*             next;
+
+    struct LMud_FiberRef*          references;
 
     struct LMud_Fiber**            queue_prev;
     struct LMud_Fiber*             queue_next;

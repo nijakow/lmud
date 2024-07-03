@@ -39,6 +39,74 @@ void LMud_FiberQueue_AddFiber(struct LMud_FiberQueue* self, struct LMud_Fiber* f
 }
 
 
+
+void LMud_FiberRef_Create(struct LMud_FiberRef* self, struct LMud_Fiber* fiber)
+{
+    self->fiber = fiber;
+    self->prev  = NULL;
+    self->next  = NULL;
+
+    if (fiber != NULL)
+    {
+        LMud_FiberRef_Link(self, &fiber->references);
+    }
+}
+
+void LMud_FiberRef_Destroy(struct LMud_FiberRef* self)
+{
+    if (self->fiber != NULL)
+    {
+        LMud_FiberRef_Unlink(self);
+    }
+}
+
+void LMud_FiberRef_Link(struct LMud_FiberRef* self, struct LMud_FiberRef** list)
+{
+    LMud_FiberRef_Unlink(self);
+
+    self->prev =  list;
+    self->next = *list;
+    if (*list != NULL)
+        (*list)->prev = &self->next;
+    *list = self;
+}
+
+void LMud_FiberRef_Unlink(struct LMud_FiberRef* self)
+{
+    if (self->prev != NULL)
+        *self->prev = self->next;
+    if (self->next != NULL)
+        self->next->prev = self->prev;
+    self->prev  = NULL;
+    self->next  = NULL;
+    self->fiber = NULL;
+}
+
+struct LMud_Fiber* LMud_FiberRef_Get(struct LMud_FiberRef* self)
+{
+    return self->fiber;
+}
+
+void LMud_FiberRef_Set(struct LMud_FiberRef* self, struct LMud_Fiber* fiber)
+{
+    if (self->fiber != fiber)
+    {
+        if (self->fiber != NULL)
+        {
+            LMud_FiberRef_Unlink(self);
+        }
+
+        self->fiber = fiber;
+
+        if (fiber != NULL)
+        {
+            LMud_FiberRef_Link(self, &fiber->references);
+        }
+    }
+}
+
+
+
 void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct LMud_Scheduler* scheduler)
 {
     self->lisp          = lisp;
@@ -46,6 +114,8 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct L
 
     self->prev          = NULL;
     self->next          = NULL;
+
+    self->references    = NULL;
 
     self->queue_prev    = NULL;
     self->queue_next    = NULL;
