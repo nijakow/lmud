@@ -683,6 +683,15 @@ bool LMud_Lisp_KickstartNewConnectionTask(struct LMud_Lisp* self, LMud_Any funct
     return LMud_Scheduler_KickstartWithArgs(&self->scheduler, function, &connection_any, 1);
 }
 
+LMud_Any LMud_Lisp_KickstartProcess(struct LMud_Lisp* self, LMud_Any function, LMud_Any* arguments, LMud_Size argument_count)
+{
+    struct LMud_Fiber*  fiber;
+    
+    fiber = LMud_Scheduler_KickstartWithArgs(&self->scheduler, function, arguments, argument_count);
+
+    return (fiber == NULL) ? LMud_Lisp_Nil(self) : LMud_Lisp_Process(self, fiber);
+}
+
 
 bool LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename, LMud_Any* result)
 {

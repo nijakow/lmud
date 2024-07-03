@@ -1160,6 +1160,12 @@ void LMud_Builtin_ProcessState(struct LMud_Fiber* fiber, LMud_Any* arguments, LM
     LMud_Fiber_SetAccumulator(fiber, LMud_Process_GetStateAsLispValue(LMud_Any_AsPointer(arguments[0]), fiber->lisp));
 }
 
+void LMud_Builtin_CreateProcess(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    CHECK_ARGS(1, LMud_VARIADIC_ARGS);
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_KickstartProcess(fiber->lisp, arguments[0], arguments + 1, argument_count - 1));
+}
+
 
 void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
 {
@@ -1271,6 +1277,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PROCESSP", LMud_Builtin_Processp);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "CURRENT-PROCESS", LMud_Builtin_CurrentProcess);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PROCESS-STATE", LMud_Builtin_ProcessState);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "CREATE-PROCESS", LMud_Builtin_CreateProcess);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRIN1", LMud_Builtin_Prin1);
