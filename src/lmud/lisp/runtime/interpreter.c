@@ -722,4 +722,5 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
 
   end:
     LMud_InstructionStream_Destroy(&stream);
+    LMud_Debugf(self->fiber->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Interpreter ticked %lu steps", (64 * 1024 - steps_remaining));
 }

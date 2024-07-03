@@ -579,11 +579,11 @@
             (list 'setf place (list 'cdr temp))
             (list 'car temp))))
    
-   (defmacro incf (place)
-      (list 'setf place (list '+ place 1)))
+   (defmacro incf (place &optional (amount 1))
+      (list 'setf place (list '+ place amount)))
    
-   (defmacro decf (place)
-      (list 'setf place (list '- place 1)))
+   (defmacro decf (place &optional (amount 1))
+      (list 'setf place (list '- place amount)))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

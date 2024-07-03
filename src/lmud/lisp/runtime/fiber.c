@@ -593,10 +593,15 @@ static void LMud_Fiber_Unwind(struct LMud_Fiber* self, enum LMud_ExecutionResump
 {
     LMud_Fiber_SetExecutionResumptionMode(self, resumption);
 
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Unwinding fiber %p to resumption %d ...", self, resumption);
+
     while (self->top != NULL)
     {
+        LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Now unwinding frame %p ...", self->top);
+
         if (self->top->unwind_protect != LMud_UNWIND_PROTECT_UNDEFINED)
         {
+            LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Found an UNWIND-PROTECT block at frame %p", self->top);
             LMud_Frame_SetInstructionPointer(self->top, self->top->unwind_protect);
             break;
         }
@@ -607,11 +612,13 @@ static void LMud_Fiber_Unwind(struct LMud_Fiber* self, enum LMud_ExecutionResump
 
 void LMud_Fiber_SignalAndUnwind(struct LMud_Fiber* self)
 {
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Signaling and unwinding fiber %p ...", self);
     LMud_Fiber_Unwind(self, LMud_ExecutionResumption_SIGNAL);
 }
 
 void LMud_Fiber_SignalAndUnwindWithValues(struct LMud_Fiber* self, LMud_Any* values, LMud_Size count)
 {
+    LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Signaling and unwinding fiber %p with %zu values...", self, count);
     LMud_Fiber_Values(self, values, count);
     LMud_Fiber_SignalAndUnwind(self);
 }
