@@ -927,22 +927,47 @@
                (return result))))
       nil)
    
-   (defun tos.int:lookup-variable-in-class (class variable)
+   (defun tos.int:lookup-variable-slot-in-class (class variable)
       (dolist (var (tos.int:%class-vars class))
          (when (eq (car var) variable)
-            (return (cdr var))))
+            (return var)))
       (dolist (super (tos.int:%class-supers class))
-         (let ((result (tos.int:lookup-variable-in-class super variable)))
+         (let ((result (tos.int:lookup-variable-slot-in-class super variable)))
             (when result
                (return result))))
       nil)
-
+   
    (defun tos.int:error-method (object)
       (lmud.util:simple-error "No method found!"))
 
    (defun tos.int:lookup-method-in-object (object message)
       (or (tos.int:lookup-method-in-class (tos.int:class-of object) message)
           #'tos.int:error-method))
+
+   (defun tos.int:lookup-variable-slot-in-object (object variable)
+      (dolist (var (tos.int:%object-vars object))
+         (when (eq (car var) variable)
+            (return var)))
+      nil)
+   
+   (defun tos.int:lookup-variable-slot (object variable)
+      (or (and (tos.int:oopp object)
+               (tos.int:lookup-variable-slot-in-object object variable))
+          (tos.int:lookup-variable-slot-in-class (tos.int:class-of object) variable)))
+
+   (defun tos.int:get-variable-value (object variable)
+      (let ((slot (tos.int:lookup-variable-slot object variable)))
+         (if slot
+             (cdr slot)
+             (lmud.util:simple-error "No such variable!"))))
+   
+   (defun tos.int:set-variable-value (object variable value)
+      (unless (tos.int:oopp object)
+         (lmud.util:simple-error "Cannot set variable in an immutable object type!"))
+      (let ((slot (tos.int:lookup-variable-slot-in-object object variable)))
+         (if slot
+             (rplacd slot value)
+             (tos.int:%object-vars! object (cons (cons variable value) (tos.int:%object-vars object))))))
 
    (defun tos.int:ensure-class (e)
       (cond ((tos.int:classp e) e)
@@ -989,7 +1014,10 @@
             (list 'tos.int:%class-push-method! class (list 'quote method-name) method))))
 
    (defun tos:at (object variable)
-      (tos.int:lookup-variable-in-class (tos.int:class-of object) variable))
+      (tos.int:get-variable-value object variable))
+   
+   (defun (setf tos:at) (value object variable)
+      (list 'tos.int:set-variable-value object variable value))
 
    (defun tos:send (object message &ignore-rest)
       (lmud.int:funcall-forward-rest (tos.int:lookup-method-in-object object message) object))

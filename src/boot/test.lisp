@@ -24,3 +24,15 @@
       (if (eq expression :eof)
           nil
           (cons expression (slurp-port port)))))
+
+(tos:defclass <point> ()
+   (with (x 0)
+         (y 0)))
+
+(tos:defmethod (<point> get-x) () .x)
+(tos:defmethod (<point> get-y) () .y)
+
+(tos:defmethod (<point> set-x) (v) (setf .x v))
+(tos:defmethod (<point> set-y) (v) (setf .y v))
+
+(defvar *p* (tos.int:pre-make-instance <point>))
