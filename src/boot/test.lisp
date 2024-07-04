@@ -35,4 +35,18 @@
 (tos:defmethod (<point> set-x) (v) (setf .x v))
 (tos:defmethod (<point> set-y) (v) (setf .y v))
 
-(defvar *p* (tos.int:pre-make-instance <point>))
+
+(tos:defclass <3d-mixin> ()
+   (with (z 0)))
+
+(tos:defmethod (<3d-mixin> get-z) () .z)
+(tos:defmethod (<3d-mixin> set-z) (v) (setf .z v))
+
+(tos:defclass <3d-point> (<point> <3d-mixin>))
+
+(defvar *p* (tos.int:pre-make-instance <3d-point>))
+
+(defun point-values (p)
+   (list (tos:send p 'get-x)
+         (tos:send p 'get-y)
+         (tos:send p 'get-z)))

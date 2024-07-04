@@ -433,6 +433,9 @@
           (char= char #\Newline)
           (char= char #\Return)
           (char= char #\Backspace)))
+   
+   (defun lmud.char:newlinep (char)
+      (char= char #\Newline))
 
    (defparameter lmud.char:*special-character-names*
       (list (cons #\Space     "Space")
@@ -1185,17 +1188,18 @@
    (defun io.reader:skip (stream predicate)
       (while (io.reader:checkpred stream predicate)))
    
-   (defun io.reader:read-until (stream predicate)
+   (defun io.reader:read-until (stream predicate &key slurp-last)
       (let ((result '()))
          (while (not (io:eof-p stream))
             (let ((char (read-char stream)))
                (when (or (not (characterp char))
                          (funcall predicate char))
-                  (unread-char char stream)
+                  (unless slurp-last
+                     (unread-char char stream))
                   (return (conversions:->string (reverse result))))
                (push char result)))
          (conversions:->string (reverse result))))
-      
+   
    (defun io.reader:skip-whitespace (stream)
       (io.reader:skip stream #'lmud.char:whitespacep))
 
@@ -1411,8 +1415,11 @@
              (list 'tos:find (list 'quote (io.reader:read stream))))
             (t (io.reader:read-atom stream))))
 
-   (defun read (stream &ignore-rest)
-      (lmud.int:funcall-forward #'io.reader:read))
+   (defun read (&optional stream &rest rest)
+      (apply #'io.reader:read (io:the-stream stream) rest))
+   
+   (defun read-line (&optional stream)
+      (io.reader:read-until (io:the-stream stream) #'lmud.char:newlinep :slurp-last t))
 
 
    (defun io.printer:meta-escaped-p (meta) meta)
@@ -1637,6 +1644,8 @@
       (io.printer:write-char stream nil #\Return)
       (io.printer:write-char stream nil #\Newline))
    
+   (defun io.printer:fresh-line (stream))
+
    (defun prin1 (e &optional stream)
       (io.printer:prin1 (io:the-stream stream) e))
    
@@ -1645,6 +1654,9 @@
    
    (defun terpri (&optional stream)
       (io.printer:terpri (io:the-stream stream)))
+   
+   (defun fresh-line (&optional stream)
+      (io.printer:fresh-line (io:the-stream stream)))
 
    (defun io:uformat (stream format-string &rest args)
       (setq stream
@@ -1659,7 +1671,7 @@
                    (progn (incf index)
                           (let ((directive (aref format-string index)))
                              (cond ((char= directive #\%) (terpri stream))
-                                   ((char= directive #\&) nil)
+                                   ((char= directive #\&) (fresh-line stream))
                                    ((char= directive #\a) (princ (pop args) stream))
                                    ((char= directive #\s) (prin1 (pop args) stream))
                                    (t (lmud.util:simple-error "Unknown format directive!")))))
@@ -1712,7 +1724,7 @@
    (defun lmud.bootstrap::repl (port)
       (while t
          (princ "⍝ " port)
-         (let* ((expr    (read port))
+         (let* ((expr    (prog1 (read port) (read-line port)))
                 (results (multiple-value-list (lmud.bootstrap::safely-evaluate expr))))
             (dolist (e results)
                (princ "  " port)
@@ -1724,11 +1736,12 @@
       (lmud.bootstrap::banner port)
       (lmud.bootstrap::repl port))
 
-   (lmud.int:open-v4 "127.0.0.1" 4242 #'lmud.bootstrap::hi "telnet")
-   (lmud.int:open-v6 "::1"       4244 #'lmud.bootstrap::hi "telnet")
-
    (load-module "webserver")
+   (load-module "game")
    (load-module "test")
+
+   (lmud.int:open-v4 "127.0.0.1" 4242 #'game::start-from-telnet "telnet")
+   (lmud.int:open-v6 "::1"       4244 #'game::start-from-telnet "telnet")
 
    ))
 
