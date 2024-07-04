@@ -1051,8 +1051,10 @@ void LMud_Builtin_GarbageCollect(struct LMud_Fiber* fiber, LMud_Any* arguments, 
      */
     LMud_Lisp_GarbageCollect(fiber->lisp, &stats);
 
-    LMud_Any  values[2] = {
+    LMud_Any  values[4] = {
+        LMud_Any_FromInteger(stats.bytes_kept),
         LMud_Any_FromInteger(stats.objects_kept),
+        LMud_Any_FromInteger(stats.bytes_freed),
         LMud_Any_FromInteger(stats.objects_freed)
     };
 

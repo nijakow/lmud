@@ -11,6 +11,8 @@ void LMud_GCStats_Create(struct LMud_GCStats* self)
 {
     self->objects_freed = 0;
     self->objects_kept  = 0;
+    self->bytes_freed   = 0;
+    self->bytes_kept    = 0;
 }
 
 void LMud_GCStats_Destroy(struct LMud_GCStats* self)
@@ -127,6 +129,7 @@ static void LMud_GC_Collect(struct LMud_GC* self)
     struct LMud_Header**  next;
     struct LMud_Header*   header;
     struct LMud_Object*   object;
+    LMud_Size             object_size;
     bool                  ignore_greys;
 
     iterator     = &self->lisp->objects.objects;
@@ -135,8 +138,9 @@ static void LMud_GC_Collect(struct LMud_GC* self)
 
     while (*iterator != NULL)
     {
-        header = *iterator;
-        object = LMud_Header_ToObject(header);
+        header      = *iterator;
+        object      = LMud_Header_ToObject(header);
+        object_size = header->type->size_func(object);
 
         switch (LMud_Header_GetGCBits(header))
         {
@@ -153,6 +157,7 @@ static void LMud_GC_Collect(struct LMud_GC* self)
                 header->type->destructor(object);
                 LMud_Free(header);
                 self->stats.objects_freed++;
+                self->stats.bytes_freed += object_size;
                 break;
 
             case LMud_GCBits_Black:
@@ -166,6 +171,7 @@ static void LMud_GC_Collect(struct LMud_GC* self)
                 LMud_Header_SetGCBits(header, LMud_GCBits_White);
                 next = &header->next;
                 self->stats.objects_kept++;
+                self->stats.bytes_kept += object_size;
                 break;
             
             case LMud_GCBits_Grey:
@@ -180,6 +186,8 @@ static void LMud_GC_Collect(struct LMud_GC* self)
                     ignore_greys ? "" : " and ignoring further occurrences"
                 );
                 ignore_greys = true;
+                self->stats.objects_kept++;
+                self->stats.bytes_kept += object_size;
                 break;
         }
 
@@ -202,9 +210,11 @@ static void LMud_GC_FinalBookeeping(struct LMud_GC* self)
     LMud_Logf(
         self->lisp->mud,
         LMud_LogLevel_NOTE,
-        "GC: Freed %zu objects, kept %zu objects",
+        "GC: Freed %zu objects (%zu bytes), kept %zu objects (%zu bytes)",
         self->stats.objects_freed,
-        self->stats.objects_kept
+        self->stats.bytes_freed,
+        self->stats.objects_kept,
+        self->stats.bytes_kept
     );
 
     LMud_Objects_ClearGcAllocationCounter(&self->lisp->objects);

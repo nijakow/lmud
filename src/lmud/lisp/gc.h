@@ -16,6 +16,8 @@ struct LMud_GCStats
 {
     LMud_Size  objects_freed;
     LMud_Size  objects_kept;
+    LMud_Size  bytes_freed;
+    LMud_Size  bytes_kept;
 };
 
 void LMud_GCStats_Create(struct LMud_GCStats* self);
