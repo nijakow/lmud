@@ -11,7 +11,7 @@
       (dotimes (i (length constants))
          (io:uformat t "~&  [~s]: ~s~%" i (aref constants i)))))
 
-(defun stack-trace-process (process)
+(defun tools:stack-trace-process (process)
    (let ((frame (lmud.int:process-stack-frames process)))
       (until (null frame)
          (io:uformat t "~&---~%")
@@ -19,11 +19,9 @@
          (io:uformat t "~&IP:       ~s~%" (lmud.int:stack-frame-ip frame))
          (setq frame (lmud.int:stack-frame-previous frame)))))
 
-(defun slurp-port (port)
-   (let ((expression (read port :eof-error-p nil :eof-value :eof)))
-      (if (eq expression :eof)
-          nil
-          (cons expression (slurp-port port)))))
+(defun tools:all-functions ()
+   (remove-if-not #'fboundp (lmud.int:all-symbols)))
+
 
 (tos:defclass <point> ()
    (with (x 0)

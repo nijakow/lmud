@@ -571,6 +571,8 @@ void LMud_Builtin_Length(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
 
         LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(length));
     }
+    else if (LMud_Lisp_IsNil(fiber->lisp, sequence))
+        LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(0));
     else
         LMud_Fiber_PerformError(fiber, "Argument is not a sequence.");
 }

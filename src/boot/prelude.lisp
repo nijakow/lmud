@@ -566,6 +566,11 @@
           (lmud.int:machine-function-p  e)
           (lmud.int:closurep            e)))
 
+   (defun fboundp (e)
+      (unless (symbolp e)
+         (lmud.util:simple-error "Fboundp expects a symbol!"))
+      (functionp (symbol-function e)))
+
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
