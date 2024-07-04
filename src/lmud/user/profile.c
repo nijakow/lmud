@@ -46,6 +46,11 @@ void LMud_ProfileRef_Unlink(struct LMud_ProfileRef* self)
     self->next = NULL;
 }
 
+struct LMud_Profile* LMud_ProfileRef_GetProfile(struct LMud_ProfileRef* self)
+{
+    return self->profile;
+}
+
 
 void LMud_Profile_Create(struct LMud_Profile* self, struct LMud_Profiles* profiles, const char* name)
 {
@@ -113,17 +118,35 @@ static void LMud_Profiles_DeleteProfile(struct LMud_Profiles* self, struct LMud_
     LMud_Free(profile);
 }
 
-void LMud_Profiles_Create(struct LMud_Profiles* self)
+bool LMud_Profiles_Create(struct LMud_Profiles* self)
 {
     self->profiles = NULL;
+
+    LMud_ProfileRef_Create(&self->system_profile, LMud_Profiles_FindOrCreate(self, "!SYSTEM"));
+    LMud_ProfileRef_Create(&self->unprivileged_profile, LMud_Profiles_FindOrCreate(self, "!UNPRIVILEGED"));
+
+    return true;
 }
 
 void LMud_Profiles_Destroy(struct LMud_Profiles* self)
 {
+    LMud_ProfileRef_Destroy(&self->system_profile);
+    LMud_ProfileRef_Destroy(&self->unprivileged_profile);
+
     while (self->profiles != NULL)
     {
         LMud_Profiles_DeleteProfile(self, self->profiles);
     }
+}
+
+struct LMud_Profile* LMud_Profiles_GetSystemProfile(struct LMud_Profiles* self)
+{
+    return LMud_ProfileRef_GetProfile(&self->system_profile);
+}
+
+struct LMud_Profile* LMud_Profiles_GetUnprivilegedProfile(struct LMud_Profiles* self)
+{
+    return LMud_ProfileRef_GetProfile(&self->unprivileged_profile);
 }
 
 struct LMud_Profile* LMud_Profiles_Find(struct LMud_Profiles* self, const char* name)

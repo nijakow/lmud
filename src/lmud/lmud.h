@@ -6,14 +6,16 @@
 #include <lmud/net/net.h>
 #include <lmud/lisp/lisp.h>
 #include <lmud/lisp/runtime/scheduler.h>
+#include <lmud/user/profile.h>
 #include <lmud/util/stream.h>
 
 struct LMud
 {
-    struct LMud_Log   log;
-    struct LMud_Net   net;
-    struct LMud_Lisp  lisp;
-    bool              running;
+    struct LMud_Log       log;
+    struct LMud_Profiles  profiles;
+    struct LMud_Net       net;
+    struct LMud_Lisp      lisp;
+    bool                  running;
 };
 
 bool LMud_Create(struct LMud* self);

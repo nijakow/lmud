@@ -711,31 +711,31 @@ void LMud_Lisp_Tick(struct LMud_Lisp* self)
 }
 
 
-bool LMud_Lisp_Kickstart(struct LMud_Lisp* self, LMud_Any function)
+bool LMud_Lisp_Kickstart(struct LMud_Lisp* self, struct LMud_Profile* profile, LMud_Any function)
 {
-    return LMud_Scheduler_Kickstart(&self->scheduler, function) != NULL;
+    return LMud_Scheduler_Kickstart(&self->scheduler, profile, function) != NULL;
 }
 
-bool LMud_Lisp_KickstartNewConnectionTask(struct LMud_Lisp* self, LMud_Any function, struct LMud_Connection* connection)
+bool LMud_Lisp_KickstartNewConnectionTask(struct LMud_Lisp* self, struct LMud_Profile* profile, LMud_Any function, struct LMud_Connection* connection)
 {
     LMud_Any  connection_any;
 
     connection_any = LMud_Lisp_Port(self, connection);
 
-    return LMud_Scheduler_KickstartWithArgs(&self->scheduler, function, &connection_any, 1);
+    return LMud_Scheduler_KickstartWithArgs(&self->scheduler, profile, function, &connection_any, 1);
 }
 
-LMud_Any LMud_Lisp_KickstartProcess(struct LMud_Lisp* self, LMud_Any function, LMud_Any* arguments, LMud_Size argument_count)
+LMud_Any LMud_Lisp_KickstartProcess(struct LMud_Lisp* self, struct LMud_Profile* profile, LMud_Any function, LMud_Any* arguments, LMud_Size argument_count)
 {
     struct LMud_Fiber*  fiber;
     
-    fiber = LMud_Scheduler_KickstartWithArgs(&self->scheduler, function, arguments, argument_count);
+    fiber = LMud_Scheduler_KickstartWithArgs(&self->scheduler, profile, function, arguments, argument_count);
 
     return (fiber == NULL) ? LMud_Lisp_Nil(self) : LMud_Lisp_Process(self, fiber);
 }
 
 
-bool LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename, LMud_Any* result)
+bool LMud_Lisp_LoadFile(struct LMud_Lisp* self, struct LMud_Profile* profile, const char* filename, LMud_Any* result)
 {
     struct LMud_InputStream  stream;
     FILE*                    file;
@@ -756,11 +756,11 @@ bool LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename, LMud_Any* 
                 LMud_Logf(self->mud, LMud_LogLevel_WARNING, " --> Failed to compile an expression!\n");
                 break;
             } else {
-                LMud_Scheduler_BlockAndRunThunk(&self->scheduler, program, result);
+                LMud_Scheduler_BlockAndRunThunk(&self->scheduler, profile, program, result);
             }
         }
 
-        LMud_InputStream_Destroy(&stream);        
+        LMud_InputStream_Destroy(&stream);
         fclose(file);
     }
 

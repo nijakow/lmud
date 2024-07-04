@@ -147,8 +147,8 @@ bool LMud_Lisp_NeedsControlBackImmediately(struct LMud_Lisp* self);
 void LMud_Lisp_PeriodicInterrupt(struct LMud_Lisp* self);
 void LMud_Lisp_Tick(struct LMud_Lisp* self);
 
-bool     LMud_Lisp_Kickstart(struct LMud_Lisp* self, LMud_Any function);
-bool     LMud_Lisp_KickstartNewConnectionTask(struct LMud_Lisp* self, LMud_Any function, struct LMud_Connection* connection);
-LMud_Any LMud_Lisp_KickstartProcess(struct LMud_Lisp* self, LMud_Any function, LMud_Any* arguments, LMud_Size argument_count);
+bool     LMud_Lisp_Kickstart(struct LMud_Lisp* self, struct LMud_Profile* profile, LMud_Any function);
+bool     LMud_Lisp_KickstartNewConnectionTask(struct LMud_Lisp* self, struct LMud_Profile* profile, LMud_Any function, struct LMud_Connection* connection);
+LMud_Any LMud_Lisp_KickstartProcess(struct LMud_Lisp* self, struct LMud_Profile* profile, LMud_Any function, LMud_Any* arguments, LMud_Size argument_count);
 
-bool LMud_Lisp_LoadFile(struct LMud_Lisp* self, const char* filename, LMud_Any* result);
+bool LMud_Lisp_LoadFile(struct LMud_Lisp* self, struct LMud_Profile* profile, const char* filename, LMud_Any* result);

@@ -53,7 +53,7 @@ struct LMud_Fiber* LMud_Scheduler_GetAllFibers_UNSAFE(struct LMud_Scheduler* sel
 }
 
 
-struct LMud_Fiber* LMud_Scheduler_SpawnFiber(struct LMud_Scheduler* self)
+struct LMud_Fiber* LMud_Scheduler_SpawnFiber(struct LMud_Scheduler* self, struct LMud_Profile* profile)
 {
     struct LMud_Fiber*  fiber;
 
@@ -61,7 +61,7 @@ struct LMud_Fiber* LMud_Scheduler_SpawnFiber(struct LMud_Scheduler* self)
 
     if (fiber != NULL)
     {
-        LMud_Fiber_Create(fiber, self->lisp, self);
+        LMud_Fiber_Create(fiber, self->lisp, self, profile);
         LMud_Fiber_Link(fiber, &self->fibers);
         LMud_Debugf(self->lisp->mud, LMud_LogLevel_HALF_DEBUG, "Created fiber %p ...", fiber);
     }
@@ -88,11 +88,11 @@ void LMud_Scheduler_MoveToRunningQueue(struct LMud_Scheduler* self, struct LMud_
     LMud_Fiber_MoveToQueue(fiber, &self->running_fibers);
 }
 
-struct LMud_Fiber* LMud_Scheduler_Kickstart(struct LMud_Scheduler* self, LMud_Any thunk)
+struct LMud_Fiber* LMud_Scheduler_Kickstart(struct LMud_Scheduler* self, struct LMud_Profile* profile, LMud_Any thunk)
 {
     struct LMud_Fiber*  fiber;
 
-    fiber = LMud_Scheduler_SpawnFiber(self);
+    fiber = LMud_Scheduler_SpawnFiber(self, profile);
 
     if (fiber != NULL)
     {
@@ -103,11 +103,11 @@ struct LMud_Fiber* LMud_Scheduler_Kickstart(struct LMud_Scheduler* self, LMud_An
     return fiber;
 }
 
-struct LMud_Fiber* LMud_Scheduler_KickstartWithArgs(struct LMud_Scheduler* self, LMud_Any function, LMud_Any* arguments, LMud_Size argument_count)
+struct LMud_Fiber* LMud_Scheduler_KickstartWithArgs(struct LMud_Scheduler* self, struct LMud_Profile* profile, LMud_Any function, LMud_Any* arguments, LMud_Size argument_count)
 {
     struct LMud_Fiber*  fiber;
 
-    fiber = LMud_Scheduler_SpawnFiber(self);
+    fiber = LMud_Scheduler_SpawnFiber(self, profile);
 
     if (fiber != NULL)
     {
@@ -153,11 +153,11 @@ static bool LMud_Scheduler_TickFiber(struct LMud_Scheduler* self, struct LMud_Fi
     return true;
 }
 
-bool LMud_Scheduler_BlockAndRunThunk(struct LMud_Scheduler* self, LMud_Any thunk, LMud_Any* result)
+bool LMud_Scheduler_BlockAndRunThunk(struct LMud_Scheduler* self, struct LMud_Profile* profile, LMud_Any thunk, LMud_Any* result)
 {
     struct LMud_Fiber*  fiber;
 
-    fiber = LMud_Scheduler_SpawnFiber(self);
+    fiber = LMud_Scheduler_SpawnFiber(self, profile);
 
     LMud_Debugf(self->lisp->mud, LMud_LogLevel_DEBUG, "Block-running fiber %p ...");
 

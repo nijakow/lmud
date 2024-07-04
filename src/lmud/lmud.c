@@ -1,4 +1,5 @@
 
+#include <lmud/glue.h>
 #include <lmud/log/log.h>
 #include <lmud/lisp/io.h>
 #include <lmud/lisp/runtime/fiber.h>
@@ -10,6 +11,7 @@ bool LMud_Create(struct LMud* self)
 {
     self->running = true;
     return LMud_Log_Create(&self->log)
+        && LMud_Profiles_Create(&self->profiles)
         && LMud_Net_Create(&self->net, self)
         && LMud_Lisp_Create(&self->lisp, self);
 }
@@ -105,13 +107,16 @@ void LMud_StartupInfo(struct LMud* self)
 
 void LMud_Startup(struct LMud* self)
 {
-    LMud_Any  boot_function;
+    struct LMud_Profile*  system_profile;
+    LMud_Any              boot_function;
+
+    system_profile = LMud_Profiles_GetSystemProfile(&self->profiles);
 
     LMud_StartupInfo(self);
 
-    if (LMud_Lisp_LoadFile(&self->lisp, "../boot/prelude.lisp", &boot_function))
+    if (LMud_Lisp_LoadFile(&self->lisp, system_profile, "../boot/prelude.lisp", &boot_function))
     {
-        LMud_Lisp_Kickstart(&self->lisp, boot_function);
+        LMud_Lisp_Kickstart(&self->lisp, system_profile, boot_function);
     }
 }
 

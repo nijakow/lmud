@@ -18,6 +18,8 @@ void LMud_ProfileRef_Destroy(struct LMud_ProfileRef* self);
 void LMud_ProfileRef_Link(struct LMud_ProfileRef* self, struct LMud_ProfileRef** list);
 void LMud_ProfileRef_Unlink(struct LMud_ProfileRef* self);
 
+struct LMud_Profile* LMud_ProfileRef_GetProfile(struct LMud_ProfileRef* self);
+
 
 struct LMud_Profile
 {
@@ -41,11 +43,17 @@ const char* LMud_Profile_GetName(struct LMud_Profile* self);
 
 struct LMud_Profiles
 {
-    struct LMud_Profile*  profiles;
+    struct LMud_Profile*    profiles;
+
+    struct LMud_ProfileRef  system_profile;
+    struct LMud_ProfileRef  unprivileged_profile;
 };
 
-void LMud_Profiles_Create(struct LMud_Profiles* self);
+bool LMud_Profiles_Create(struct LMud_Profiles* self);
 void LMud_Profiles_Destroy(struct LMud_Profiles* self);
+
+struct LMud_Profile* LMud_Profiles_GetSystemProfile(struct LMud_Profiles* self);
+struct LMud_Profile* LMud_Profiles_GetUnprivilegedProfile(struct LMud_Profiles* self);
 
 struct LMud_Profile* LMud_Profiles_Find(struct LMud_Profiles* self, const char* name);
 struct LMud_Profile* LMud_Profiles_FindOrCreate(struct LMud_Profiles* self, const char* name);

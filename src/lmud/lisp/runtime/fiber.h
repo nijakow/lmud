@@ -4,6 +4,7 @@
 #include <lmud/lisp/base.h>
 #include <lmud/lisp/bytecodes.h>
 #include <lmud/lisp/runtime/frame.h>
+#include <lmud/user/profile.h>
 
 #define LMud_Fiber_MAX_ACCUMULATORS 16
 
@@ -85,9 +86,11 @@ struct LMud_Fiber
 
     enum LMud_FiberState           state;
     enum LMud_ExecutionResumption  execution_mode;
+
+    struct LMud_ProfileRef         profile_ref;
 };
 
-void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct LMud_Scheduler* scheduler);
+void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct LMud_Scheduler* scheduler, struct LMud_Profile* profile);
 void LMud_Fiber_Destroy(struct LMud_Fiber* self);
 void LMud_Fiber_Mark(struct LMud_GC* gc, struct LMud_Fiber* self);
 
@@ -99,8 +102,8 @@ void LMud_Fiber_UnlinkQueue(struct LMud_Fiber* self);
 void LMud_Fiber_MoveToQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* queue);
 
 enum LMud_FiberState LMud_Fiber_GetState(struct LMud_Fiber* self);
-
 struct LMud_Process* LMud_Fiber_GetProcess(struct LMud_Fiber* self);
+struct LMud_Profile* LMud_Fiber_GetProfile(struct LMud_Fiber* self);
 
 bool LMud_Fiber_IsRunning(struct LMud_Fiber* self);
 bool LMud_Fiber_IsWaiting(struct LMud_Fiber* self);

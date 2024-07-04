@@ -149,7 +149,7 @@ void LMud_FiberRef_Set(struct LMud_FiberRef* self, struct LMud_Fiber* fiber)
 
 
 
-void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct LMud_Scheduler* scheduler)
+void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct LMud_Scheduler* scheduler, struct LMud_Profile* profile)
 {
     self->lisp          = lisp;
     self->scheduler     = scheduler;
@@ -181,6 +181,8 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct L
 
     self->state          = LMud_FiberState_CREATED;
     self->execution_mode = LMud_ExecutionResumption_NORMAL;
+
+    LMud_ProfileRef_Create(&self->profile_ref, profile);
 }
 
 void LMud_Fiber_Destroy(struct LMud_Fiber* self)
@@ -199,6 +201,7 @@ void LMud_Fiber_Destroy(struct LMud_Fiber* self)
     LMud_FrameList_Destroy(&self->floating_frames);
     LMud_Free(self->stack);
     LMud_Fiber_Unlink(self);
+    LMud_ProfileRef_Destroy(&self->profile_ref);
 }
 
 void LMud_Fiber_Mark(struct LMud_GC* gc, struct LMud_Fiber* self)
@@ -284,6 +287,11 @@ static void LMud_Fiber_SetState(struct LMud_Fiber* self, enum LMud_FiberState st
 struct LMud_Process* LMud_Fiber_GetProcess(struct LMud_Fiber* self)
 {
     return self->self_process;
+}
+
+struct LMud_Profile* LMud_Fiber_GetProfile(struct LMud_Fiber* self)
+{
+    return LMud_ProfileRef_GetProfile(&self->profile_ref);
 }
 
 bool LMud_Fiber_IsRunning(struct LMud_Fiber* self)

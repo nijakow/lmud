@@ -45,6 +45,11 @@ LMud_Any LMud_Process_GetStateAsLispValue(struct LMud_Process* self, struct LMud
     }
 }
 
+const char* LMud_Process_GetProfileName(struct LMud_Process* self)
+{
+    return LMud_Profile_GetName(LMud_Fiber_GetProfile(LMud_Process_GetFiber(self)));
+}
+
 
 void LMud_Process_FiberWait(struct LMud_Process* self, struct LMud_Fiber* fiber)
 {
