@@ -2,8 +2,8 @@
 #pragma once
 
 #define LMud_VERSION "0.1"
-#define LMud_VERSION_EXTRA "alpha"
-#define LMud_RELEASE_NAME "Patchy Phoenix"
+#define LMud_VERSION_EXTRA "beta"
+#define LMud_RELEASE_NAME "Beta Banana"
 
 #define LMud_ENABLE_COMPRESSED_ANYS
 
