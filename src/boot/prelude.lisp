@@ -775,6 +775,58 @@
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
+   ;;;    The Struct System
+   ;;;
+
+   (defun struct:structp (e)
+      (and (lmud.int:%customp e)
+           (consp (lmud.int:%custom-meta e))
+           (eq (car (lmud.int:%custom-meta e)) 'struct:struct)))
+   
+   (defun struct:struct-with-tag-p (e tag)
+      (and (struct:structp e)
+           (eq (cdr (lmud.int:%custom-meta e)) tag)))
+   
+   (defun struct:ensure-struct (e tag)
+      (if (struct:struct-with-tag-p e tag)
+          e
+          (lmud.util:simple-error "Not a struct!")))
+
+   (defmacro defstruct (name &rest slots)
+      (unless (symbolp name)
+         (lmud.util:simple-error "The name of a struct must be a symbol!"))
+      (flet ((intern-func-pre  (text)
+               (intern (string:concatenate text (symbol-name name))
+                       (symbol-package name)))
+            (intern-func-post (text)
+               (intern (string:concatenate (symbol-name name) text)
+                       (symbol-package name)))
+            (intern-func-post2 (t1 t2)
+               (intern (string:concatenate (symbol-name name) t1 t2)
+                       (symbol-package name))))
+         (let ((type-tag name))
+            (list* 'progn
+               (list 'defun (intern-func-pre "MAKE-") (cons '&key slots)
+                  (list* 'lmud.int:%make-custom (list 'quote (cons 'struct:struct type-tag))
+                                                slots))
+               (list 'defun (intern-func-post "-P") '(object)
+                  (list 'struct:struct-with-tag-p 'object (list 'quote type-tag)))
+               (let ((slot-count 0))
+                  (domap (slot slots)
+                     (let ((slot-accessor-symbol (intern-func-post2 "-" (symbol-name slot))))
+                        (prog1 (list 'progn
+                                  (list 'defun slot-accessor-symbol '(object)
+                                     (list 'struct:ensure-struct 'object (list 'quote type-tag))
+                                     (list 'lmud.int:%custom-at 'object slot-count))
+                                  (list 'defun (list 'setf slot-accessor-symbol) '(value object)
+                                     (list 'list ''progn
+                                        (list 'list ''struct:ensure-struct 'object (list 'list ''quote (list 'quote type-tag)))
+                                        (list 'list ''lmud.int:%custom-set 'object slot-count 'value)))
+                           (incf slot-count))))))))))
+
+
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+   ;;;
    ;;;    The Type- and Object System
    ;;;
 
