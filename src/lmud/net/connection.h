@@ -40,6 +40,7 @@ struct LMud_Connection
     struct LMud_Ringbuffer      outbuf;
 
     bool                        eof;
+    bool                        closing;
 };
 
 void LMud_Connection_Create(struct LMud_Connection* self, struct LMud_Net* net, int fd);
@@ -49,8 +50,10 @@ void LMud_Connection_Link(struct LMud_Connection* self, struct LMud_Connection**
 void LMud_Connection_Unlink(struct LMud_Connection* self);
 
 bool LMud_Connection_Eof(struct LMud_Connection* self);
+bool LMud_Connection_IsClosed(struct LMud_Connection* self);
 
-void LMud_Connection_Close(struct LMud_Connection* self);
+void LMud_Connection_CloseImmediately(struct LMud_Connection* self);
+void LMud_Connection_RequestClose(struct LMud_Connection* self);
 
 void LMud_Connection_RegisterOnSelector(struct LMud_Connection* self, struct LMud_Selector* selector);
 

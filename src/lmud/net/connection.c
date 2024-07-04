@@ -63,8 +63,9 @@ void LMud_Connection_Create(struct LMud_Connection* self, struct LMud_Net* net, 
 {
     self->net  = net;
 
-    self->fd   = fd;
-    self->eof  = false;
+    self->fd      = fd;
+    self->eof     = false;
+    self->closing = false;
 
     self->prev = NULL;
     self->next = NULL;
@@ -79,7 +80,7 @@ void LMud_Connection_Create(struct LMud_Connection* self, struct LMud_Net* net, 
 
 void LMud_Connection_Destroy(struct LMud_Connection* self)
 {
-    LMud_Connection_Close(self);
+    LMud_Connection_CloseImmediately(self);
     LMud_Connection_Unlink(self);
     LMud_Connection_KillRefs(self);
     LMud_FiberQueue_Destroy(&self->waiting_fibers); // TODO, FIXME, XXX: What shall we do with the drunken fiber? ;-)
@@ -114,7 +115,12 @@ bool LMud_Connection_Eof(struct LMud_Connection* self)
     return self->eof;
 }
 
-void LMud_Connection_Close(struct LMud_Connection* self)
+bool LMud_Connection_IsClosed(struct LMud_Connection* self)
+{
+    return self->fd < 0;
+}
+
+void LMud_Connection_CloseImmediately(struct LMud_Connection* self)
 {
     LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Closing connection!", self->fd);
     if (self->fd >= 0)
@@ -126,6 +132,13 @@ void LMud_Connection_Close(struct LMud_Connection* self)
     LMud_Connection_ReleaseFibersWithEof(self);
 }
 
+void LMud_Connection_RequestClose(struct LMud_Connection* self)
+{
+    LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Requesting connection close!", self->fd);
+    self->closing = true;
+}
+
+
 void LMud_Connection_RegisterOnSelector(struct LMud_Connection* self, struct LMud_Selector* selector)
 {
     if (!LMud_Connection_Eof(self))
@@ -133,7 +146,9 @@ void LMud_Connection_RegisterOnSelector(struct LMud_Connection* self, struct LMu
         if (LMud_Ringbuffer_HasData(&self->outbuf))
             LMud_Selector_AddWrite(selector, self->fd);
 
-        LMud_Selector_AddRead(selector, self->fd);
+        if (!self->closing)
+            LMud_Selector_AddRead(selector, self->fd);
+        
         LMud_Selector_AddExcept(selector, self->fd);
     }
 }
@@ -256,6 +271,9 @@ void LMud_Connection_Tick(struct LMud_Connection* self, struct LMud_Selector* se
     ssize_t  written;
     char     buffer[1024];
 
+    if (LMud_Connection_IsClosed(self))
+        return;
+
     if (LMud_Selector_IsRead(selector, self->fd))
     {
         ssize = read(self->fd, buffer, sizeof(buffer));
@@ -292,6 +310,11 @@ void LMud_Connection_Tick(struct LMud_Connection* self, struct LMud_Selector* se
     if (LMud_Selector_IsExcept(selector, self->fd))
     {
         LMud_Connection_HandleError(self);
+    }
+
+    if (self->closing && LMud_Ringbuffer_IsEmpty(&self->outbuf))
+    {
+        LMud_Connection_CloseImmediately(self);
     }
 }
 

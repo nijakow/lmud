@@ -16,25 +16,32 @@
             (return)
             nil))))
 
+(defun webserver::standard-page ()
+   "
+<!DOCTYPE html>
+<html>
+   <head>
+      <title>LMUD</title>
+   </head>
+   <body>
+      <h1>LMUD</h1>
+      <p>
+         This is a test page.
+      </p>
+   </body>
+</html>
+")
+
 (defun webserver::new-connection (port)
    (lmud.int:set-current-port port)
-   (let ((head (webserver::read-header port)))
+   (let* ((head (webserver::read-header port))
+          (page (webserver::standard-page)))
       (io:uformat port "HTTP/1.1 200 OK~%")
+      (io:uformat port "Server: LMud/0.1~%")
       (io:uformat port "Content-Type: text/html~%")
       (io:uformat port "Connection: close~%")
       (io:uformat port "~%")
-      (io:uformat port "<!DOCTYPE html>~%")
-      (io:uformat port "<html>~%")
-      (io:uformat port "  <head>~%")
-      (io:uformat port "    <title>LMUD</title>~%")
-      (io:uformat port "  </head>~%")
-      (io:uformat port "  <body>~%")
-      (io:uformat port "    <h1>LMUD</h1>~%")
-      (io:uformat port "    <p>~%")
-      (io:uformat port "      This is a test page.~%")
-      (io:uformat port "    </p>~%")
-      (io:uformat port "  </body>~%")
-      (io:uformat port "</html>~%")
+      (io:uformat port "~a~%" page)
       (close port)))
 
 (lmud.int:open-v4 "127.0.0.1" 8080 #'webserver::new-connection "http")

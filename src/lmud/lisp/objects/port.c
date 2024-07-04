@@ -50,7 +50,7 @@ void LMud_Port_Close(struct LMud_Port* self)
     connection = self->connection.connection;
 
     if (connection != NULL)
-        LMud_Connection_Close(connection);
+        LMud_Connection_RequestClose(connection);
 }
 
 bool LMud_Port_PushbackByte(struct LMud_Port* self, char byte)
