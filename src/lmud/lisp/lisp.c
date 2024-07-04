@@ -20,13 +20,13 @@ bool LMud_Constants_Create(struct LMud_Constants* self, struct LMud_Lisp* lisp)
      * them. So we have to do this manually.
      */
     self->nil      = LMud_Lisp_Intern(lisp, "NIL");
-    LMud_Symbol_SetValue(LMud_Any_AsPointer(self->nil), self->nil);
-    LMud_Symbol_SetFunction(LMud_Any_AsPointer(self->nil), self->nil);
-    LMud_Symbol_SetMacro(LMud_Any_AsPointer(self->nil), self->nil);
-    LMud_Symbol_SetPlist(LMud_Any_AsPointer(self->nil), self->nil);
+    LMud_Symbol_SetValue(LMud_Any_AsPointer(self->nil), self->nil, true);
+    LMud_Symbol_SetFunction(LMud_Any_AsPointer(self->nil), self->nil, true);
+    LMud_Symbol_SetMacro(LMud_Any_AsPointer(self->nil), self->nil, true);
+    LMud_Symbol_SetPlist(LMud_Any_AsPointer(self->nil), self->nil, true);
     self->t        = LMud_Lisp_Intern(lisp, "T");
-    LMud_Symbol_MakeConstant(LMud_Any_AsPointer(self->nil));
-    LMud_Symbol_MakeConstant(LMud_Any_AsPointer(self->t));
+    LMud_Symbol_MakeConstant(LMud_Any_AsPointer(self->nil), true);
+    LMud_Symbol_MakeConstant(LMud_Any_AsPointer(self->t), true);
 
     self->quote    = LMud_Lisp_Intern(lisp, "QUOTE");
     self->function = LMud_Lisp_Intern(lisp, "FUNCTION");
@@ -415,7 +415,7 @@ LMud_Any LMud_Lisp_InternInPackage(struct LMud_Lisp* self, LMud_Any package, con
      */
     if (LMud_Any_Eq(package, self->constants.keyword_package))
     {
-        LMud_Symbol_MakeConstant(symbol);
+        LMud_Symbol_MakeConstant(symbol, true);
     }
 
     return LMud_Any_FromPointer(symbol);
@@ -484,7 +484,7 @@ LMud_Any LMud_Lisp_InternInPackageLL(struct LMud_Lisp* self, LMud_Any package, L
      */
     if (LMud_Any_Eq(package, self->constants.keyword_package))
     {
-        LMud_Symbol_MakeConstant(symbol);
+        LMud_Symbol_MakeConstant(symbol, true);
     }
 
     return LMud_Any_FromPointer(symbol);
@@ -665,7 +665,7 @@ void LMud_Lisp_InstallBuiltin(struct LMud_Lisp* self, const char* name, LMud_Bui
     symbol  = LMud_Any_AsPointer(LMud_Lisp_Intern(self, name));
     builtin = LMud_Lisp_Builtin(self, name, function);
 
-    LMud_Symbol_SetFunction(symbol, builtin);
+    LMud_Symbol_SetFunction(symbol, builtin, true);
 }
 
 void LMud_Lisp_InstallPackagedBuiltin(struct LMud_Lisp* self, const char* package_name, const char* name, LMud_BuiltinFunction function)
@@ -676,7 +676,7 @@ void LMud_Lisp_InstallPackagedBuiltin(struct LMud_Lisp* self, const char* packag
     symbol  = LMud_Any_AsPointer(LMud_Lisp_EasyIntern(self, package_name, name));
     builtin = LMud_Lisp_Builtin(self, name, function);
 
-    LMud_Symbol_SetFunction(symbol, builtin);
+    LMud_Symbol_SetFunction(symbol, builtin, true);
 }
 
 

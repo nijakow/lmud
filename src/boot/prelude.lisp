@@ -1724,7 +1724,7 @@
    (defun lmud.bootstrap::repl (port)
       (while t
          (princ "⍝ " port)
-         (let* ((expr    (prog1 (read port) (read-line port)))
+         (let* ((expr    (read port))
                 (results (multiple-value-list (lmud.bootstrap::safely-evaluate expr))))
             (dolist (e results)
                (princ "  " port)

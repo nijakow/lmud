@@ -368,10 +368,10 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                     LMud_Interpreter_ERROR("Invalid symbol!");
                 }
 
-                LMud_Symbol_SetValue(
-                    (struct LMud_Symbol*) LMud_Any_AsPointer(value),
-                    LMud_Interpreter_GetAccu(self)
-                );
+                if (!LMud_Symbol_SetValue((struct LMud_Symbol*) LMud_Any_AsPointer(value), LMud_Interpreter_GetAccu(self), false))
+                {
+                    LMud_Interpreter_ERROR("Symbol is locked!");
+                }
 
                 break;
             }
@@ -404,10 +404,10 @@ void LMud_Interpreter_Tick(struct LMud_Interpreter* self)
                     LMud_Interpreter_ERROR("Invalid symbol!");
                 }
 
-                LMud_Symbol_SetFunction(
-                    (struct LMud_Symbol*) LMud_Any_AsPointer(value),
-                    LMud_Interpreter_GetAccu(self)
-                );
+                if (!LMud_Symbol_SetFunction((struct LMud_Symbol*) LMud_Any_AsPointer(value), LMud_Interpreter_GetAccu(self), false))
+                {
+                    LMud_Interpreter_ERROR("Symbol is locked!");
+                }
 
                 break;
             }

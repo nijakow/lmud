@@ -92,6 +92,7 @@ void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_SymbolTable* table
     self->plist    = plist;
 
     self->gensym   = false;
+    self->locked   = false;
 
     if (table != NULL)
     {
@@ -162,6 +163,16 @@ void LMud_Symbol_MakeGensym(struct LMud_Symbol* self)
     self->gensym = true;
 }
 
+bool LMud_Symbol_IsLocked(struct LMud_Symbol* self)
+{
+    return self->locked;
+}
+
+void LMud_Symbol_SetLocked(struct LMud_Symbol* self, bool value)
+{
+    self->locked = value;
+}
+
 LMud_Any LMud_Symbol_Package(struct LMud_Symbol* self)
 {
     return self->package;
@@ -198,30 +209,42 @@ LMud_Any LMud_Symbol_Plist(struct LMud_Symbol* self)
 }
 
 
-void LMud_Symbol_SetValue(struct LMud_Symbol* self, LMud_Any value)
+bool LMud_Symbol_SetValue(struct LMud_Symbol* self, LMud_Any value, bool override)
 {
+    if (LMud_Symbol_IsLocked(self) && !override)
+        return false;
     self->value = value;
+    return true;
 }
 
-void LMud_Symbol_SetFunction(struct LMud_Symbol* self, LMud_Any function)
+bool LMud_Symbol_SetFunction(struct LMud_Symbol* self, LMud_Any function, bool override)
 {
+    if (LMud_Symbol_IsLocked(self) && !override)
+        return false;
     self->function = function;
+    return true;
 }
 
-void LMud_Symbol_SetMacro(struct LMud_Symbol* self, LMud_Any macro)
+bool LMud_Symbol_SetMacro(struct LMud_Symbol* self, LMud_Any macro, bool override)
 {
+    if (LMud_Symbol_IsLocked(self) && !override)
+        return false;
     self->macro = macro;
+    return true;
 }
 
-void LMud_Symbol_SetPlist(struct LMud_Symbol* self, LMud_Any plist)
+bool LMud_Symbol_SetPlist(struct LMud_Symbol* self, LMud_Any plist, bool override)
 {
+    if (LMud_Symbol_IsLocked(self) && !override)
+        return false;
     self->plist = plist;
+    return true;
 }
 
 
-void LMud_Symbol_MakeConstant(struct LMud_Symbol* self)
+void LMud_Symbol_MakeConstant(struct LMud_Symbol* self, bool override)
 {
-    LMud_Symbol_SetValue(self, LMud_Any_FromPointer(self));
+    LMud_Symbol_SetValue(self, LMud_Any_FromPointer(self), override);
 }
 
 bool LMud_Symbol_IsWorthless(struct LMud_Symbol* self, struct LMud_Lisp* lisp)

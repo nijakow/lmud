@@ -237,6 +237,24 @@ void LMud_Builtin_Gensymp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Si
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Lisp_IsGensym(fiber->lisp, arguments[0])));
 }
 
+void LMud_Builtin_LockSymbol(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    CHECK_ARGS(1, 2);
+    CHECK_ARG_TYPE(0, Symbol);
+
+    if (argument_count == 1) {
+        LMud_Symbol_SetLocked(LMud_Any_AsPointer(arguments[0]), true);
+    } else if (LMud_Any_Eq(arguments[1], LMud_Lisp_T(fiber->lisp))) {
+        LMud_Symbol_SetLocked(LMud_Any_AsPointer(arguments[0]), true);
+    } else if (LMud_Any_Eq(arguments[1], LMud_Lisp_Nil(fiber->lisp))) {
+        LMud_Symbol_SetLocked(LMud_Any_AsPointer(arguments[0]), false);
+    } else {
+        LMud_Fiber_PerformError(fiber, "Second argument must be T or NIL.");
+    }
+
+    LMud_Fiber_SetAccumulator(fiber, arguments[0]);
+}
+
 void LMud_Builtin_FindPackage(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
@@ -315,8 +333,10 @@ void LMud_Builtin_SetSymbolValue(struct LMud_Fiber* fiber, LMud_Any* arguments, 
 {
     CHECK_ARGS(2, 2);
     CHECK_ARG_TYPE(0, Symbol);
-    LMud_Symbol_SetValue(LMud_Any_AsPointer(arguments[0]), arguments[1]);
-    LMud_Fiber_SetAccumulator(fiber, arguments[1]);
+    if (!LMud_Symbol_SetValue(LMud_Any_AsPointer(arguments[0]), arguments[1], false))
+        LMud_Fiber_PerformError(fiber, "Cannot set the value of a constant symbol.");
+    else
+        LMud_Fiber_SetAccumulator(fiber, arguments[1]);
 }
 
 void LMud_Builtin_SymbolFunction(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -330,8 +350,10 @@ void LMud_Builtin_SetSymbolFunction(struct LMud_Fiber* fiber, LMud_Any* argument
 {
     CHECK_ARGS(2, 2);
     CHECK_ARG_TYPE(0, Symbol);
-    LMud_Symbol_SetFunction(LMud_Any_AsPointer(arguments[0]), arguments[1]);
-    LMud_Fiber_SetAccumulator(fiber, arguments[1]);
+    if (!LMud_Symbol_SetFunction(LMud_Any_AsPointer(arguments[0]), arguments[1], false))
+        LMud_Fiber_PerformError(fiber, "Cannot set the function of a constant symbol.");
+    else
+        LMud_Fiber_SetAccumulator(fiber, arguments[1]);
 }
 
 void LMud_Builtin_SymbolMacro(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -345,8 +367,10 @@ void LMud_Builtin_SetSymbolMacro(struct LMud_Fiber* fiber, LMud_Any* arguments, 
 {
     CHECK_ARGS(2, 2);
     CHECK_ARG_TYPE(0, Symbol);
-    LMud_Symbol_SetMacro(LMud_Any_AsPointer(arguments[0]), arguments[1]);
-    LMud_Fiber_SetAccumulator(fiber, arguments[1]);
+    if (!LMud_Symbol_SetMacro(LMud_Any_AsPointer(arguments[0]), arguments[1], false))
+        LMud_Fiber_PerformError(fiber, "Cannot set the macro of a constant symbol.");
+    else
+        LMud_Fiber_SetAccumulator(fiber, arguments[1]);
 }
 
 void LMud_Builtin_SymbolPlist(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -360,8 +384,10 @@ void LMud_Builtin_SetSymbolPlist(struct LMud_Fiber* fiber, LMud_Any* arguments, 
 {
     CHECK_ARGS(2, 2);
     CHECK_ARG_TYPE(0, Symbol);
-    LMud_Symbol_SetPlist(LMud_Any_AsPointer(arguments[0]), arguments[1]);
-    LMud_Fiber_SetAccumulator(fiber, arguments[1]);
+    if (!LMud_Symbol_SetPlist(LMud_Any_AsPointer(arguments[0]), arguments[1], false))
+        LMud_Fiber_PerformError(fiber, "Cannot set the plist of a constant symbol.");
+    else
+        LMud_Fiber_SetAccumulator(fiber, arguments[1]);
 }
 
 void LMud_Builtin_Packagep(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -1470,6 +1496,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%GIVEN-ARGUMENT-COUNT", LMud_Builtin_GivenArgumentCount);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%GIVEN-ARGUMENT-REF", LMud_Builtin_GivenArgumentRef);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "GENSYMP", LMud_Builtin_Gensymp);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "LOCK-SYMBOL", LMud_Builtin_LockSymbol);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOM-DISPATCHER-FUNCTION", LMud_Builtin_GetCustomDispatcherFunction);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%SET-CUSTOM-DISPATCHER-FUNCTION", LMud_Builtin_SetCustomDispatcherFunction);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "%CUSTOMP", LMud_Builtin_Customp);
