@@ -359,9 +359,9 @@
    ;;;    Association Lists and Property Lists
    ;;;
 
-   (defun assoc (item alist)
+   (defun assoc (item alist &key (key #'car) (test #'eq))
       (dolist (pair alist)
-         (if (eq item (car pair))
+         (if (funcall test item (funcall key pair))
              (return pair)))
       nil)
    
@@ -541,6 +541,16 @@
    (defun string:concatenate (&rest strings)
       (conversions:->string
              (apply #'append (mapcar #'conversions:string->list strings))))
+
+   (defun string:partition (string separator)
+      (lmud.util:string-partition string separator))
+   
+   (defun string:split (string separator)
+      (let ((index (lmud.util:string-find-subsequence string separator)))
+         (if index
+             (cons (substring string 0 index)
+                   (string:split (substring string (+ index (length separator)) (length string)) separator))
+             (list string))))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
