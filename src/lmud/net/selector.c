@@ -66,5 +66,14 @@ void LMud_Selector_Select(struct LMud_Selector* self, bool block)
         timeout_ptr = &timeout;
     }
 
-    select(self->max_fd + 1, &self->read_fds, &self->write_fds, &self->except_fds, timeout_ptr);
+    /*
+     * TODO, FIXME, XXX:
+     *
+     * The exception set does not seem to work on macOS/Darwin.
+     * We disable it for now, but we should investigate this further.
+     */
+    FD_ZERO(&self->except_fds);
+
+    if (select(self->max_fd + 1, &self->read_fds, &self->write_fds, &self->except_fds, timeout_ptr) < 0)
+        printf("select() failed: %s\n", strerror(errno));
 }
