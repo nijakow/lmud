@@ -63,3 +63,5 @@ void LMud_Symbol_SetMacro(struct LMud_Symbol* self, LMud_Any macro);
 void LMud_Symbol_SetPlist(struct LMud_Symbol* self, LMud_Any plist);
 
 void LMud_Symbol_MakeConstant(struct LMud_Symbol* self);
+
+bool LMud_Symbol_IsWorthless(struct LMud_Symbol* self, struct LMud_Lisp* lisp);

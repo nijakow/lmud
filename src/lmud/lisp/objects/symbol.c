@@ -25,7 +25,11 @@ void LMud_SymbolTable_Mark(struct LMud_GC* gc, struct LMud_SymbolTable* self)
 
     for (symbol = self->symbols; symbol != NULL; symbol = symbol->next)
     {
-        LMud_GC_MarkObject(gc, symbol);
+        if (LMud_Symbol_IsWorthless(symbol, gc->lisp)) {
+            LMud_Debugf(gc->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Symbol %s is considered worthless and might be collected.", LMud_Symbol_NameChars(symbol));
+        } else {
+            LMud_GC_MarkObject(gc, symbol);
+        }
     }
 }
 
@@ -218,4 +222,12 @@ void LMud_Symbol_SetPlist(struct LMud_Symbol* self, LMud_Any plist)
 void LMud_Symbol_MakeConstant(struct LMud_Symbol* self)
 {
     LMud_Symbol_SetValue(self, LMud_Any_FromPointer(self));
+}
+
+bool LMud_Symbol_IsWorthless(struct LMud_Symbol* self, struct LMud_Lisp* lisp)
+{
+    return (LMud_Lisp_IsNil(lisp, self->value)
+         && LMud_Lisp_IsNil(lisp, self->function)
+         && LMud_Lisp_IsNil(lisp, self->macro)
+         && LMud_Lisp_IsNil(lisp, self->plist));
 }
