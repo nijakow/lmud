@@ -51,6 +51,21 @@ struct LMud_Profile* LMud_ProfileRef_GetProfile(struct LMud_ProfileRef* self)
     return self->profile;
 }
 
+void LMud_ProfileRef_SetProfile(struct LMud_ProfileRef* self, struct LMud_Profile* profile)
+{
+    if (profile != self->profile)
+    {
+        LMud_ProfileRef_Unlink(self);
+
+        self->profile = profile;
+
+        if (profile != NULL)
+        {
+            LMud_ProfileRef_Link(self, &profile->references);
+        }
+    }
+}
+
 
 void LMud_Profile_Create(struct LMud_Profile* self, struct LMud_Profiles* profiles, const char* name)
 {

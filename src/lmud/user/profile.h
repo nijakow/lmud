@@ -19,6 +19,7 @@ void LMud_ProfileRef_Link(struct LMud_ProfileRef* self, struct LMud_ProfileRef**
 void LMud_ProfileRef_Unlink(struct LMud_ProfileRef* self);
 
 struct LMud_Profile* LMud_ProfileRef_GetProfile(struct LMud_ProfileRef* self);
+void                 LMud_ProfileRef_SetProfile(struct LMud_ProfileRef* self, struct LMud_Profile* profile);
 
 
 struct LMud_Profile

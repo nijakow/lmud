@@ -105,6 +105,8 @@ enum LMud_FiberState LMud_Fiber_GetState(struct LMud_Fiber* self);
 struct LMud_Process* LMud_Fiber_GetProcess(struct LMud_Fiber* self);
 struct LMud_Profile* LMud_Fiber_GetProfile(struct LMud_Fiber* self);
 
+void LMud_Fiber_SetProfile(struct LMud_Fiber* self, struct LMud_Profile* profile);
+
 bool LMud_Fiber_IsRunning(struct LMud_Fiber* self);
 bool LMud_Fiber_IsWaiting(struct LMud_Fiber* self);
 bool LMud_Fiber_IsYielding(struct LMud_Fiber* self);

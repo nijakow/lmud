@@ -1,5 +1,6 @@
 
 #include <lmud/lmud.h>
+#include <lmud/glue.h>
 #include <lmud/net/net.h>
 #include <lmud/lisp/gc.h>
 #include <lmud/lisp/objects/builtin.h>
@@ -1243,6 +1244,32 @@ void LMud_Builtin_ProcessProfileName(struct LMud_Fiber* fiber, LMud_Any* argumen
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_String(fiber->lisp, LMud_Process_GetProfileName(LMud_Any_AsPointer(arguments[0]))));
 }
 
+void LMud_Builtin_Login(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    struct LMud_Profile*  profile;
+    const char*           profile_name;
+    const char*           password;
+
+    CHECK_ARGS(2, 2);
+
+    CHECK_ARG_TYPE(0, String);
+    CHECK_ARG_TYPE(1, String);
+
+    profile_name = LMud_String_Chars(LMud_Any_AsPointer(arguments[0]));
+    password     = LMud_String_Chars(LMud_Any_AsPointer(arguments[1]));
+
+    profile = LMud_Profiles_Find(LMud_GetProfiles(fiber->lisp->mud), profile_name);
+    
+    (void) password;
+
+    if (profile != NULL) {
+        LMud_Fiber_SetProfile(fiber, profile);
+        LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_T(fiber->lisp));
+    } else {
+        LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
+    }
+}
+
 void LMud_Builtin_CreateProcess(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, LMud_VARIADIC_ARGS);
@@ -1483,6 +1510,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "CURRENT-PROCESS", LMud_Builtin_CurrentProcess);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PROCESS-STATE", LMud_Builtin_ProcessState);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PROCESS-PROFILE-NAME", LMud_Builtin_ProcessProfileName);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "LOGIN", LMud_Builtin_Login);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "CREATE-PROCESS", LMud_Builtin_CreateProcess);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "WAIT-FOR-PROCESS", LMud_Builtin_WaitForProcess);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "ALL-PROCESSES", LMud_Builtin_AllProcesses);

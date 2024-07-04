@@ -294,6 +294,11 @@ struct LMud_Profile* LMud_Fiber_GetProfile(struct LMud_Fiber* self)
     return LMud_ProfileRef_GetProfile(&self->profile_ref);
 }
 
+void LMud_Fiber_SetProfile(struct LMud_Fiber* self, struct LMud_Profile* profile)
+{
+    LMud_ProfileRef_SetProfile(&self->profile_ref, profile);
+}
+
 bool LMud_Fiber_IsRunning(struct LMud_Fiber* self)
 {
     return LMud_Fiber_GetState(self) == LMud_FiberState_RUNNING;
