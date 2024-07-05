@@ -69,18 +69,26 @@ struct LMud_Fiber* LMud_Scheduler_SpawnFiber(struct LMud_Scheduler* self, struct
     return fiber;
 }
 
+bool LMud_Scheduler_TryDeleteFiber(struct LMud_Scheduler* self, struct LMud_Fiber* fiber)
+{
+    if (LMud_Fiber_IsReadyForDeletion(fiber)) {
+        LMud_Debugf(self->lisp->mud, LMud_LogLevel_HALF_DEBUG, "Deleting fiber %p ...", fiber);
+        LMud_Fiber_Destroy(fiber);
+        LMud_Free(fiber);
+        return true;
+    } else {
+        LMud_Debugf(self->lisp->mud, LMud_LogLevel_WARNING, "Deletion of fiber %p has been deactivated!", fiber);
+        return false;
+    }
+}
+
 void LMud_Scheduler_RequestDeleteFiber(struct LMud_Scheduler* self, struct LMud_Fiber* fiber)
 {
     (void) self;
 
     LMud_Debugf(self->lisp->mud, LMud_LogLevel_FULL_DEBUG, "Requesting a delete of fiber %p ...", fiber);
 
-
-    LMud_Debugf(self->lisp->mud, LMud_LogLevel_WARNING, "Deletion of fiber %p has been deactivated!", fiber);
-    /*
-    LMud_Fiber_Destroy(fiber);
-    LMud_Free(fiber);
-    */
+    LMud_Scheduler_TryDeleteFiber(self, fiber);
 }
 
 void LMud_Scheduler_MoveToRunningQueue(struct LMud_Scheduler* self, struct LMud_Fiber* fiber)

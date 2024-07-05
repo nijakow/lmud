@@ -273,6 +273,12 @@ void LMud_Fiber_MoveToQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* que
 }
 
 
+bool LMud_Fiber_IsReadyForDeletion(struct LMud_Fiber* self)
+{
+    return (self->references == NULL);
+}
+
+
 enum LMud_FiberState LMud_Fiber_GetState(struct LMud_Fiber* self)
 {
     return self->state;
