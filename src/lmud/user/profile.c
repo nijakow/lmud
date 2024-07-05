@@ -71,6 +71,8 @@ void LMud_Profile_Create(struct LMud_Profile* self, struct LMud_Profiles* profil
 {
     self->profiles   = profiles;
     self->references = NULL;
+    self->prev       = NULL;
+    self->next       = NULL;
     self->name       = LMud_Strdup(name);
 }
 
