@@ -1031,6 +1031,9 @@
    (defun tos:send (object message &ignore-rest)
       (lmud.int:funcall-forward-rest (tos.int:lookup-method-in-object object message) object))
 
+   (defun tos:make-instance (class &ignore-rest)
+      (lmud.int:funcall-forward-rest #'tos.int:pre-make-instance class))
+
    (defun tos:find (symbol)
       (unless (symbolp symbol)
          (lmud.util:simple-error "Expected a symbol!"))
