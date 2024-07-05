@@ -989,9 +989,6 @@
                        the-class))))
             (t (lmud.util:simple-error "Invalid class!"))))
 
-   (defun tos.int:ensure-singleton-class (e)
-      (lmud:todo!))
-
    (defmacro tos:defclass (name supers &body body)
       (when (null supers)
          (setq supers (list tos.classes:<t>)))
@@ -1010,6 +1007,10 @@
                                       (t (lmud.util:simple-error "Invalid tos:defclass variable definition!")))))))
                         (t (lmud.util:simple-error "Invalid tos:defclass clause!"))))))))
 
+   (defun tos.int:ensure-singleton-class (e)
+      (cond ((tos.int:oopp e) e)
+            (t (lmud.util:simple-error "Expected an object!"))))
+   
    (defmacro tos:defobject (name supers &body body)
       (list 'tos:defclass (list 'tos.int:ensure-singleton-class (if (symbolp name) (list 'quote name) name))
             supers
@@ -1019,7 +1020,7 @@
       (let ((class       (car info))
             (method-name (cadr info)))
          (let ((method (list 'lambda (cons 'self params) (list* 'block method-name body))))
-            (list 'tos.int:%class-push-method! class (list 'quote method-name) method))))
+            (list 'tos.int:%class-push-method! (list 'tos.int:ensure-class class) (list 'quote method-name) method))))
 
    (defun tos:at (object variable)
       (tos.int:get-variable-value object variable))
