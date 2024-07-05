@@ -6,6 +6,7 @@
 
 #include "symbol.h"
 
+
 void LMud_SymbolTable_Create(struct LMud_SymbolTable* self)
 {
     self->symbols = NULL;
@@ -77,6 +78,10 @@ void LMud_SymbolTable_Dump(struct LMud_SymbolTable* self)
 }
 
 
+
+static LMud_Any LMud_Symbol_GetSlot_FORCE(struct LMud_Symbol* self, enum LMud_SymbolSlot slot);
+static void     LMud_Symbol_SetSlot_FORCE(struct LMud_Symbol* self, enum LMud_SymbolSlot slot, LMud_Any value);
+
 void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_SymbolTable* table, LMud_Any package, LMud_Any name, LMud_Any value, LMud_Any function, LMud_Any macro, LMud_Any plist)
 {
     self->prev = NULL;
@@ -85,11 +90,10 @@ void LMud_Symbol_Create(struct LMud_Symbol* self, struct LMud_SymbolTable* table
     self->package = package;
     self->name    = name;
 
-    self->value    = value;
-    self->function = function;
-    self->macro    = macro;
-
-    self->plist    = plist;
+    LMud_Symbol_SetSlot_FORCE(self, LMud_SymbolSlot_Value,    value);
+    LMud_Symbol_SetSlot_FORCE(self, LMud_SymbolSlot_Function, function);
+    LMud_Symbol_SetSlot_FORCE(self, LMud_SymbolSlot_Macro,    macro);
+    LMud_Symbol_SetSlot_FORCE(self, LMud_SymbolSlot_Plist,    plist);
 
     self->gensym   = false;
     self->locked   = false;
@@ -107,12 +111,15 @@ void LMud_Symbol_Destroy(struct LMud_Symbol* self)
 
 void LMud_Symbol_Mark(struct LMud_GC* gc, struct LMud_Symbol* self)
 {
+    LMud_Size  index;
+
     LMud_GC_MarkAny(gc, self->package);
     LMud_GC_MarkAny(gc, self->name);
-    LMud_GC_MarkAny(gc, self->value);
-    LMud_GC_MarkAny(gc, self->function);
-    LMud_GC_MarkAny(gc, self->macro);
-    LMud_GC_MarkAny(gc, self->plist);
+
+    for (index = 0; index < LMud_SymbolSlot_COUNT; index++)
+    {
+        LMud_GC_MarkAny(gc, self->slots[index]);
+    }
 }
 
 LMud_Size LMud_Symbol_CalculateSizeInBytes(struct LMud_Symbol* self)
@@ -188,24 +195,60 @@ const char* LMud_Symbol_NameChars(struct LMud_Symbol* self)
     return LMud_String_Chars((struct LMud_String*) LMud_Any_AsPointer(self->name));
 }
 
+
+static LMud_Any LMud_Symbol_GetSlot_FORCE(struct LMud_Symbol* self, enum LMud_SymbolSlot slot)
+{
+    return self->slots[slot];
+}
+
+static void LMud_Symbol_SetSlot_FORCE(struct LMud_Symbol* self, enum LMud_SymbolSlot slot, LMud_Any value)
+{
+    self->slots[slot] = value;
+}
+
+bool LMud_Symbol_GetSlot(struct LMud_Symbol* self, enum LMud_SymbolSlot slot, LMud_Any* value, bool override)
+{
+    (void) override;
+    /*
+     * TODO: Check if the symbol was locked for the specific slot and user combination.
+     */
+    if (slot < 0 || slot >= LMud_SymbolSlot_COUNT)
+        return false;
+    *value = self->slots[slot];
+    return true;
+}
+
+bool LMud_Symbol_SetSlot(struct LMud_Symbol* self, enum LMud_SymbolSlot slot, LMud_Any value, bool override)
+{
+    (void) override;
+    /*
+     * TODO: Check if the symbol was locked for the specific slot and user combination.
+     */
+    if (slot < 0 || slot >= LMud_SymbolSlot_COUNT)
+        return false;
+    self->slots[slot] = value;
+    return true;
+}
+
+
 LMud_Any LMud_Symbol_Value(struct LMud_Symbol* self)
 {
-    return self->value;
+    return LMud_Symbol_GetSlot_FORCE(self, LMud_SymbolSlot_Value);
 }
 
 LMud_Any LMud_Symbol_Function(struct LMud_Symbol* self)
 {
-    return self->function;
+    return LMud_Symbol_GetSlot_FORCE(self, LMud_SymbolSlot_Function);
 }
 
 LMud_Any LMud_Symbol_Macro(struct LMud_Symbol* self)
 {
-    return self->macro;
+    return LMud_Symbol_GetSlot_FORCE(self, LMud_SymbolSlot_Macro);
 }
 
 LMud_Any LMud_Symbol_Plist(struct LMud_Symbol* self)
 {
-    return self->plist;
+    return LMud_Symbol_GetSlot_FORCE(self, LMud_SymbolSlot_Plist);
 }
 
 
@@ -213,7 +256,7 @@ bool LMud_Symbol_SetValue(struct LMud_Symbol* self, LMud_Any value, bool overrid
 {
     if (LMud_Symbol_IsLocked(self) && !override)
         return false;
-    self->value = value;
+    LMud_Symbol_SetSlot_FORCE(self, LMud_SymbolSlot_Value, value);
     return true;
 }
 
@@ -221,7 +264,7 @@ bool LMud_Symbol_SetFunction(struct LMud_Symbol* self, LMud_Any function, bool o
 {
     if (LMud_Symbol_IsLocked(self) && !override)
         return false;
-    self->function = function;
+    LMud_Symbol_SetSlot_FORCE(self, LMud_SymbolSlot_Function, function);
     return true;
 }
 
@@ -229,7 +272,7 @@ bool LMud_Symbol_SetMacro(struct LMud_Symbol* self, LMud_Any macro, bool overrid
 {
     if (LMud_Symbol_IsLocked(self) && !override)
         return false;
-    self->macro = macro;
+    LMud_Symbol_SetSlot_FORCE(self, LMud_SymbolSlot_Macro, macro);
     return true;
 }
 
@@ -237,7 +280,7 @@ bool LMud_Symbol_SetPlist(struct LMud_Symbol* self, LMud_Any plist, bool overrid
 {
     if (LMud_Symbol_IsLocked(self) && !override)
         return false;
-    self->plist = plist;
+    LMud_Symbol_SetSlot_FORCE(self, LMud_SymbolSlot_Plist, plist);
     return true;
 }
 
@@ -249,8 +292,8 @@ void LMud_Symbol_MakeConstant(struct LMud_Symbol* self, bool override)
 
 bool LMud_Symbol_IsWorthless(struct LMud_Symbol* self, struct LMud_Lisp* lisp)
 {
-    return (LMud_Lisp_IsNil(lisp, self->value)
-         && LMud_Lisp_IsNil(lisp, self->function)
-         && LMud_Lisp_IsNil(lisp, self->macro)
-         && LMud_Lisp_IsNil(lisp, self->plist));
+    return (LMud_Lisp_IsNil(lisp, LMud_Symbol_Value(self))
+         && LMud_Lisp_IsNil(lisp, LMud_Symbol_Function(self))
+         && LMud_Lisp_IsNil(lisp, LMud_Symbol_Macro(self))
+         && LMud_Lisp_IsNil(lisp, LMud_Symbol_Plist(self)));
 }

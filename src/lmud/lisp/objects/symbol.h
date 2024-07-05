@@ -19,6 +19,15 @@ struct LMud_Symbol* LMud_SymbolTable_Intern(struct LMud_SymbolTable* self, struc
 void LMud_SymbolTable_Dump(struct LMud_SymbolTable* self);
 
 
+enum LMud_SymbolSlot
+{
+    LMud_SymbolSlot_Value,
+    LMud_SymbolSlot_Function,
+    LMud_SymbolSlot_Macro,
+    LMud_SymbolSlot_Plist,
+    LMud_SymbolSlot_COUNT
+};
+
 struct LMud_Symbol
 {
     struct LMud_Symbol** prev;
@@ -27,11 +36,7 @@ struct LMud_Symbol
     LMud_Any             package;
     LMud_Any             name;
 
-    LMud_Any             value;
-    LMud_Any             function;
-    LMud_Any             macro;
-
-    LMud_Any             plist;
+    LMud_Any             slots[LMud_SymbolSlot_COUNT];
 
     bool                 gensym;
     bool                 locked;
@@ -55,6 +60,9 @@ void LMud_Symbol_SetLocked(struct LMud_Symbol* self, bool value);
 LMud_Any    LMud_Symbol_Package(struct LMud_Symbol* self);
 LMud_Any    LMud_Symbol_Name(struct LMud_Symbol* self);
 const char* LMud_Symbol_NameChars(struct LMud_Symbol* self);
+
+bool    LMud_Symbol_GetSlot(struct LMud_Symbol* self, enum LMud_SymbolSlot slot, LMud_Any* value, bool override);
+bool    LMud_Symbol_SetSlot(struct LMud_Symbol* self, enum LMud_SymbolSlot slot, LMud_Any value, bool override);
 
 LMud_Any    LMud_Symbol_Value(struct LMud_Symbol* self);
 LMud_Any    LMud_Symbol_Function(struct LMud_Symbol* self);
