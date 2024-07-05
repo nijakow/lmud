@@ -1160,8 +1160,12 @@
       (io:close-stream stream))
    
    (defun io.reader:breaking-char-p (char)
-      (or (char= char (code-char 40)) ; '('
-          (char= char (code-char 41)) ; ')'
+      (or (char= char (code-char 40))  ; '('
+          (char= char (code-char 41))  ; ')'
+          (char= char (code-char 91))  ; '['
+          (char= char (code-char 93))  ; ']'
+          (char= char (code-char 123)) ; '{'
+          (char= char (code-char 125)) ; '}'
           (lmud.char:whitespacep char)
           (char= char #\Escape)))
 
@@ -1256,6 +1260,13 @@
                          (lmud.util:simple-error "Expected ')' after '.'!"))))
             (t (cons (io.reader:read stream)
                      (io.reader:read-list stream)))))
+   
+   (defun io.reader:read-sequence (stream terminator)
+      (io.reader:skip-whitespace stream)
+      (cond ((io:eof-p stream) (io.reader:eof-error stream))
+            ((io.reader:checkstr stream terminator) nil)
+            (t (cons (io.reader:read stream)
+                     (io.reader:read-sequence stream terminator)))))
 
    (defun io.reader:char->digit (char &optional (base 10))
       (let ((value (cond ((and (char>= char #\0) (char<= char #\9))       (- (char-code char) (char-code #\0)))
@@ -1419,6 +1430,12 @@
              (list 'tos:at 'self (list 'quote (io.reader:read stream))))
             ((io.reader:checkstr stream "~")
              (list 'tos:find (list 'quote (io.reader:read stream))))
+            ((io.reader:checkstr stream "[")
+             (let ((sequence (io.reader:read-sequence stream "]")))
+               (list* 'tos:send
+                      (car sequence)
+                      (list 'quote (cadr sequence))
+                      (cddr sequence))))
             (t (io.reader:read-atom stream))))
 
    (defun read (&optional stream &rest rest)
