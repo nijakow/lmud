@@ -88,7 +88,7 @@ struct LMud_Custom*     LMud_Objects_Custom(struct LMud_Objects* self, LMud_Any 
 struct LMud_Function*   LMud_Objects_Function(struct LMud_Objects* self, struct LMud_ArgInfo info, LMud_Any bytecodes, LMud_Any constants, LMud_Any source_code);
 struct LMud_Package*    LMud_Objects_Package(struct LMud_Objects* self, LMud_Any name);
 struct LMud_Port*       LMud_Objects_Port(struct LMud_Objects* self, struct LMud_Connection* connection);
-struct LMud_Process*    LMud_Objects_Process(struct LMud_Objects* self, struct LMud_Fiber* fiber);
+struct LMud_Process*    LMud_Objects_Process(struct LMud_Objects* self, struct LMud_Fiber* fiber, struct LMud_Process** slot);
 struct LMud_Ratio*      LMud_Objects_Ratio(struct LMud_Objects* self, LMud_Any numerator, LMud_Any denominator);
 struct LMud_String*     LMud_Objects_String(struct LMud_Objects* self, const char* text);
 struct LMud_StackFrame* LMud_Objects_StackFrame(struct LMud_Objects* self, struct LMud_Frame* frame, struct LMud_StackFrame** slot);

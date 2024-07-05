@@ -101,7 +101,7 @@ LMud_Any LMud_Lisp_Package(struct LMud_Lisp* self, LMud_Any name);
 LMud_Any LMud_Lisp_PackageByName(struct LMud_Lisp* self, const char* name);
 LMud_Any LMud_Lisp_PackageByNameUpcase(struct LMud_Lisp* self, const char* name);
 LMud_Any LMud_Lisp_Port(struct LMud_Lisp* self, struct LMud_Connection* connection);
-LMud_Any LMud_Lisp_Process(struct LMud_Lisp* self, struct LMud_Fiber* fiber);
+LMud_Any LMud_Lisp_Process(struct LMud_Lisp* self, struct LMud_Fiber* fiber, struct LMud_Process** slot);
 LMud_Any LMud_Lisp_Ratio(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator);
 LMud_Any LMud_Lisp_StackFrame(struct LMud_Lisp* self, struct LMud_Frame* frame, struct LMud_StackFrame** slot);
 LMud_Any LMud_Lisp_String(struct LMud_Lisp* self, const char* text);

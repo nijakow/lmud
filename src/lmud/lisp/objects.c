@@ -352,7 +352,7 @@ struct LMud_Port* LMud_Objects_Port(struct LMud_Objects* self, struct LMud_Conne
     return port;
 }
 
-struct LMud_Process* LMud_Objects_Process(struct LMud_Objects* self, struct LMud_Fiber* fiber)
+struct LMud_Process* LMud_Objects_Process(struct LMud_Objects* self, struct LMud_Fiber* fiber, struct LMud_Process** slot)
 {
     struct LMud_Process*  process;
 
@@ -360,7 +360,7 @@ struct LMud_Process* LMud_Objects_Process(struct LMud_Objects* self, struct LMud
 
     if (process != NULL)
     {
-        LMud_Process_Create(process, fiber);
+        LMud_Process_Create(process, fiber, slot);
         LMud_Objects_AfterAllocate(self, process);
     }
 

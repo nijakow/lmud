@@ -171,7 +171,7 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct L
     self->accumulator_count = 1;
     self->accumulator[0]    = LMud_Lisp_Nil(lisp);
 
-    self->self_process  = LMud_Objects_Process(&lisp->objects, self);
+    self->self_process  = NULL;
 
     self->port          = LMud_Lisp_Nil(lisp);
 
@@ -275,7 +275,7 @@ void LMud_Fiber_MoveToQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* que
 
 bool LMud_Fiber_IsReadyForDeletion(struct LMud_Fiber* self)
 {
-    return (self->references == NULL);
+    return (self->references == NULL) && (self->self_process == NULL);
 }
 
 
@@ -290,8 +290,13 @@ static void LMud_Fiber_SetState(struct LMud_Fiber* self, enum LMud_FiberState st
     self->state = state;
 }
 
-struct LMud_Process* LMud_Fiber_GetProcess(struct LMud_Fiber* self)
+struct LMud_Process* LMud_Fiber_GetProcess(struct LMud_Fiber* self, struct LMud_Lisp* lisp)
 {
+    if (self->self_process == NULL)
+    {
+        LMud_Objects_Process(&lisp->objects, self, &self->self_process);
+    }
+
     return self->self_process;
 }
 

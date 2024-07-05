@@ -104,7 +104,7 @@ void LMud_Fiber_MoveToQueue(struct LMud_Fiber* self, struct LMud_FiberQueue* que
 bool LMud_Fiber_IsReadyForDeletion(struct LMud_Fiber* self);
 
 enum LMud_FiberState LMud_Fiber_GetState(struct LMud_Fiber* self);
-struct LMud_Process* LMud_Fiber_GetProcess(struct LMud_Fiber* self);
+struct LMud_Process* LMud_Fiber_GetProcess(struct LMud_Fiber* self, struct LMud_Lisp* lisp);
 struct LMud_Profile* LMud_Fiber_GetProfile(struct LMud_Fiber* self);
 
 void LMud_Fiber_SetProfile(struct LMud_Fiber* self, struct LMud_Profile* profile);

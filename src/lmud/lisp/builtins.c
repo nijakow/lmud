@@ -1257,7 +1257,7 @@ void LMud_Builtin_Processp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_S
 void LMud_Builtin_CurrentProcess(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     NO_ARGS;
-    LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromPointer(LMud_Fiber_GetProcess(fiber)));
+    LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromPointer(LMud_Fiber_GetProcess(fiber, fiber->lisp)));
 }
 
 void LMud_Builtin_ProcessState(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
@@ -1324,7 +1324,7 @@ void LMud_Builtin_AllProcesses(struct LMud_Fiber* fiber, LMud_Any* arguments, LM
 
     for (iterator = LMud_Scheduler_GetAllFibers_UNSAFE(LMud_Lisp_Scheduler(fiber->lisp)); iterator != NULL; iterator = iterator->next)
     {
-        list = LMud_Lisp_Cons(fiber->lisp, LMud_Any_FromPointer(LMud_Fiber_GetProcess(iterator)), list);
+        list = LMud_Lisp_Cons(fiber->lisp, LMud_Any_FromPointer(LMud_Fiber_GetProcess(iterator, fiber->lisp)), list);
     }
 
     LMud_Fiber_SetAccumulator(fiber, list);

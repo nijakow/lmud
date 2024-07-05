@@ -382,9 +382,9 @@ LMud_Any LMud_Lisp_Port(struct LMud_Lisp* self, struct LMud_Connection* connecti
     return LMud_Any_FromPointer(LMud_Objects_Port(&self->objects, connection));
 }
 
-LMud_Any LMud_Lisp_Process(struct LMud_Lisp* self, struct LMud_Fiber* fiber)
+LMud_Any LMud_Lisp_Process(struct LMud_Lisp* self, struct LMud_Fiber* fiber, struct LMud_Process** slot)
 {
-    return LMud_Any_FromPointer(LMud_Objects_Process(&self->objects, fiber));
+    return LMud_Any_FromPointer(LMud_Objects_Process(&self->objects, fiber, slot));
 }
 
 LMud_Any LMud_Lisp_Ratio(struct LMud_Lisp* self, LMud_Any numerator, LMud_Any denominator)
@@ -731,7 +731,7 @@ LMud_Any LMud_Lisp_KickstartProcess(struct LMud_Lisp* self, struct LMud_Profile*
     
     fiber = LMud_Scheduler_KickstartWithArgs(&self->scheduler, profile, function, arguments, argument_count);
 
-    return (fiber == NULL) ? LMud_Lisp_Nil(self) : LMud_Lisp_Process(self, fiber);
+    return (fiber == NULL) ? LMud_Lisp_Nil(self) : LMud_Any_FromPointer(LMud_Fiber_GetProcess(fiber, self));
 }
 
 
