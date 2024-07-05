@@ -1106,6 +1106,7 @@ void LMud_Builtin_Random(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Siz
 void LMud_Builtin_Signal(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     LMud_Fiber_Values(fiber, arguments, argument_count);
+    LMud_Debugf(fiber->lisp->mud, LMud_LogLevel_FULL_DEBUG, "SIGNAL builtin called.");
     LMud_Fiber_SignalAndUnwind(fiber);
 }
 

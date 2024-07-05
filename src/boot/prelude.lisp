@@ -1062,7 +1062,7 @@
    
    (tos:defmethod (io:<port-stream> construct) (port)
       (prog1 self
-         (setf .port 42)))
+         (setf .port port)))
    
    (tos:defmethod (io:<port-stream> port) () .port)
    
@@ -1102,8 +1102,8 @@
 
    
    (defun io:wrap-port (port)
-      ;; [(tos:make-instance io:<port-stream>) construct port])
-      port)
+      [(tos:make-instance io:<port-stream>) construct port])
+      ;; port)
    
    (defun io:unwrap-port (stream)
       [stream port])

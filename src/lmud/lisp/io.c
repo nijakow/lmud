@@ -522,7 +522,7 @@ bool LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMu
                     LMud_Lisp_Intern(lisp, "SELF"),
                     LMud_Lisp_Cons(
                         lisp,
-                        value,
+                        LMud_Lisp_Quote(lisp, value),
                         LMud_Lisp_Nil(lisp)
                     )
                 )
