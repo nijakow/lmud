@@ -55,6 +55,9 @@ void LMud_GC_MarkObject(struct LMud_GC* self, void* object)
 {
     struct LMud_Header*  header;
 
+    if (object == NULL)
+        return;
+
     LMud_Debugf(self->lisp->mud, LMud_LogLevel_ALL, "Marking object %p...", object);
 
     header = LMud_ToHeader(object);
