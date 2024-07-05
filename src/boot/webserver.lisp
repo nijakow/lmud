@@ -22,6 +22,15 @@
                 (string:partition header ":")))
          (cons part-1 part-2))))
 
+(defun http::header-equal-p (header-1 header-2)
+   (string= header-1 header-2 :key #'char-upcase))
+
+(defun http:find-header (header request)
+   (let ((slot (assoc header (http:request-headers request) :test #'http::header-equal-p)))
+      (if slot
+          (cdr slot)
+          nil)))
+
 (defun http:parse-request (request-line headers)
    (let ((split-request-line (string:split request-line " ")))
       (http:make-request :method  (http:parse-method (first split-request-line))
@@ -71,6 +80,9 @@
                                 (cons :uri    (http:request-uri request))
                                 (cons :version (http:request-version request))
                                 (cons :headers (http:request-headers request))))
+      (lmud.dummy::%terpri)
+      (lmud.dummy::%prin1 (list (http:find-header "Host" request)
+                                (http:find-header "Connection" request)))
       (lmud.dummy::%terpri)
       (io:uformat port "HTTP/1.1 200 OK~%")
       (io:uformat port "Server: LMud/0.1~%")
