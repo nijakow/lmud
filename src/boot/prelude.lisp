@@ -1064,6 +1064,8 @@
       (prog1 self
          (setf .port 42)))
    
+   (tos:defmethod (io:<port-stream> port) () .port)
+   
    (tos:defmethod (io:<port-stream> read-byte) ()
       (lmud.int:port-read-byte .port))
    
@@ -1079,37 +1081,43 @@
    (tos:defmethod (io:<port-stream> close) ()
       (lmud.int:close-port .port))
    
+   (tos:defmethod (tos.classes:<port> port) () self)
+   
    (defun io:wrap-port (port)
-      [(tos:make-instance io:<port-stream>) construct port])
+      ;; [(tos:make-instance io:<port-stream>) construct port])
+      port)
+   
+   (defun io:unwrap-port (stream)
+      [stream port])
 
    (defun io:the-stream (stream)
       (or stream (lmud.int:current-port)))
 
    (defun io:write-raw-byte-to-stream (stream byte)
-      (lmud.int:port-write-byte stream byte))
+      (lmud.int:port-write-byte (io:unwrap-port stream) byte))
    
    (defun io:read-raw-byte-from-stream (stream)
-      (lmud.int:port-read-byte stream))
+      (lmud.int:port-read-byte (io:unwrap-port stream)))
    
    (defun io:unread-raw-char-from-stream (stream char)
       (when char
-         (lmud.int:port-unread-char stream char)))
+         (lmud.int:port-unread-char (io:unwrap-port stream) char)))
    
    (defun io:close-stream (stream)
-      (lmud.int:close-port stream))
+      (lmud.int:close-port (io:unwrap-port stream)))
    
    (defun io:raw-eof-p (stream)
-      (lmud.int:port-eof-p stream))
+      (lmud.int:port-eof-p (io:unwrap-port stream)))
 
    (defun io:write-byte-to-stream (stream byte)
-      (io:write-raw-byte-to-stream stream byte))
+      (io:write-raw-byte-to-stream (io:unwrap-port stream) byte))
    
    (defun io:read-byte-from-stream (stream)
-      (io:read-raw-byte-from-stream stream))
+      (io:read-raw-byte-from-stream (io:unwrap-port stream)))
    
    (defun io:unread-char-from-stream (stream char)
       (when char
-         (lmud.int:port-unread-char stream char)))
+         (lmud.int:port-unread-char (io:unwrap-port stream) char)))
    
    (defun io:write-utf8-char (char stream)
       (let ((code (char-code char)))
@@ -1753,6 +1761,7 @@
    (defun load (path)
       (let ((port (lmud.int:open-file path)))
          (unless port (lmud.util:simple-error "Could not open file!"))
+         (setq port (io:wrap-port port))
          (lmud:log :info (string:concatenate "Loading file '" path "' ..."))
          (while t
             (let ((expr (read port :eof-error-p nil :eof-value :eof)))
@@ -1783,7 +1792,7 @@
                (terpri port)))))
 
    (defun lmud.bootstrap::hi (port)
-      (lmud.int:set-current-port port)
+      (lmud.int:set-current-port (io:wrap-port port))
       (lmud.bootstrap::banner port)
       (lmud.bootstrap::repl port))
 
@@ -1797,6 +1806,6 @@
    ))
 
    (let ((port (lmud.int::open-fd 0)))
-      (lmud.int:set-current-port port)
+      (lmud.int:set-current-port (io:wrap-port port))
       (lmud.bootstrap::repl port))
 )

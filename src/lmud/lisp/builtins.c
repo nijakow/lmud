@@ -1243,7 +1243,6 @@ void LMud_Builtin_CurrentPort(struct LMud_Fiber* fiber, LMud_Any* arguments, LMu
 void LMud_Builtin_SetCurrentPort(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
-    CHECK_ARG_TYPE(0, Port);
     LMud_Fiber_SetPort(fiber, arguments[0]);
     LMud_Fiber_SetAccumulator(fiber, arguments[0]);
 }
