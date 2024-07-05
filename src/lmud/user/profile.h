@@ -4,6 +4,7 @@
 #include <lmud/defs.h>
 #include <lmud/decls.h>
 
+#include <lmud/user/changes/changelist.h>
 
 struct LMud_ProfileRef
 {
@@ -31,6 +32,8 @@ struct LMud_Profile
     struct LMud_Profile*     next;
 
     char*                    name;
+
+    struct LMud_ChangeList   changelist;
 };
 
 void LMud_Profile_Create(struct LMud_Profile* self, struct LMud_Profiles* profiles, const char* name);

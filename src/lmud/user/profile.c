@@ -74,12 +74,16 @@ void LMud_Profile_Create(struct LMud_Profile* self, struct LMud_Profiles* profil
     self->prev       = NULL;
     self->next       = NULL;
     self->name       = LMud_Strdup(name);
+
+    LMud_ChangeList_Create(&self->changelist);
 }
 
 void LMud_Profile_Destroy(struct LMud_Profile* self)
 {
     assert(self->references == NULL);
+    LMud_ChangeList_Destroy(&self->changelist);
     LMud_Profile_Unlink(self);
+    LMud_Free(self->name);
 }
 
 void LMud_Profile_Link(struct LMud_Profile* self, struct LMud_Profile** list)
