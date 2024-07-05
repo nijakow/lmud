@@ -93,6 +93,6 @@
       (close port)))
 
 (defun webserver::start-with-new-connection (port)
-   (webserver::new-connection port))
+   (webserver::new-connection (io:wrap-port port)))
 
 (lmud.int:open-v4 "127.0.0.1" 8080 #'webserver::start-with-new-connection "http")

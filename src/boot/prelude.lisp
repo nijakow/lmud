@@ -1057,6 +1057,31 @@
    ;;;    Streams and I/O
    ;;;
 
+   (tos:defclass io:<port-stream> ()
+      (with (port nil)))
+   
+   (tos:defmethod (io:<port-stream> construct) (port)
+      (prog1 self
+         (setf .port 42)))
+   
+   (tos:defmethod (io:<port-stream> read-byte) ()
+      (lmud.int:port-read-byte .port))
+   
+   (tos:defmethod (io:<port-stream> write-byte) (byte)
+      (lmud.int:port-write-byte .port byte))
+   
+   (tos:defmethod (io:<port-stream> unread-char) (char)
+      (lmud.int:port-unread-char .port char))
+   
+   (tos:defmethod (io:<port-stream> eof-p) ()
+      (lmud.int:port-eof-p .port))
+
+   (tos:defmethod (io:<port-stream> close) ()
+      (lmud.int:close-port .port))
+   
+   (defun io:wrap-port (port)
+      [(tos:make-instance io:<port-stream>) construct port])
+
    (defun io:the-stream (stream)
       (or stream (lmud.int:current-port)))
 
@@ -1429,10 +1454,10 @@
              (io.reader:read-integer stream 8))
             ((io.reader:checkstr stream "#x")
              (io.reader:read-integer stream 16))
-            ((io.reader:checkstr stream ".")
-             (list 'tos:at 'self (list 'quote (io.reader:read stream meta))))
             ((io.reader:checkstr stream "~")
              (list 'tos:find (list 'quote (io.reader:read stream meta))))
+            ((io.reader:checkstr stream ".")
+             (list 'tos:at 'self (list 'quote (io.reader:read stream meta))))
             ((io.reader:checkstr stream "[")
              (let ((sequence (io.reader:read-sequence stream meta "]")))
                (list* 'tos:send

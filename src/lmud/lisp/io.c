@@ -226,7 +226,9 @@ bool LMud_Lisp_Read_IsBreakingChar(char c)
 {
     return LMud_Lisp_Read_IsWhitespace(c)
         || (c == '(')
-        || (c == ')');
+        || (c == ')')
+        || (c == '[')
+        || (c == ']');
 }
 
 
@@ -245,6 +247,30 @@ bool LMud_Lisp_ReadList(struct LMud_Lisp* lisp, struct LMud_InputStream* stream,
         value = LMud_Lisp_Nil(lisp);
     } else {
         if (!(LMud_Lisp_Read(lisp, stream, &value) && LMud_Lisp_ReadList(lisp, stream, &rest)))
+            return false;
+        value = LMud_Lisp_Cons(
+            lisp,
+            value,
+            rest
+        );
+    }
+
+    *result = value;
+
+    return true;
+}
+
+bool LMud_Lisp_ReadSequence(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, const char* terminator, LMud_Any* result)
+{
+    LMud_Any  value;
+    LMud_Any  rest;
+
+    LMud_InputStream_SkipIf(stream, &LMud_Lisp_Read_IsWhitespace);
+
+    if (LMud_InputStream_CheckStr(stream, terminator)) {
+        value = LMud_Lisp_Nil(lisp);
+    } else {
+        if (!(LMud_Lisp_Read(lisp, stream, &value) && LMud_Lisp_ReadSequence(lisp, stream, terminator, &rest)))
             return false;
         value = LMud_Lisp_Cons(
             lisp,
@@ -484,6 +510,45 @@ bool LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMu
         return LMud_Lisp_ReadList(lisp, stream, result);
     } else if (LMud_InputStream_CheckStr(stream, ":")) {
         return LMud_Lisp_ReadKeyword(lisp, stream, result);
+    } else if (LMud_InputStream_CheckStr(stream, ".")) {
+        LMud_Any  value;
+
+        if (LMud_Lisp_Read(lisp, stream, &value)) {
+            *result = LMud_Lisp_Cons(
+                lisp,
+                LMud_Lisp_EasyIntern(lisp, "TOS", "AT"),
+                LMud_Lisp_Cons(
+                    lisp,
+                    LMud_Lisp_Intern(lisp, "SELF"),
+                    LMud_Lisp_Cons(
+                        lisp,
+                        value,
+                        LMud_Lisp_Nil(lisp)
+                    )
+                )
+            );
+
+            return true;
+        }
+    } else if (LMud_InputStream_CheckStr(stream, "[")) {
+        LMud_Any  sequence;
+
+        if (LMud_Lisp_ReadSequence(lisp, stream, "]", &sequence)) {
+            *result = LMud_Lisp_Cons(
+                lisp,
+                LMud_Lisp_EasyIntern(lisp, "TOS", "SEND"),
+                LMud_Lisp_Cons(
+                    lisp,
+                    LMud_Lisp_Car(lisp, sequence),
+                    LMud_Lisp_Cons(
+                        lisp,
+                        LMud_Lisp_Quote(lisp, LMud_Lisp_Cadr(lisp, sequence)),
+                        LMud_Lisp_Cddr(lisp, sequence)
+                    )
+                )
+            );
+            return true;
+        }
     } else {
         return LMud_Lisp_ReadAtom(lisp, stream, result);
     }
