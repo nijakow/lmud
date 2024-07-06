@@ -1165,9 +1165,9 @@
                             (b2 (io:read-byte-from-stream stream)))
                          (and b1
                               b2
-                              (logior (ash (logand byte #xF) 12)
-                                      (ash (logand (io:read-byte-from-stream stream) #x3F) 6)
-                                      (logand (io:read-byte-from-stream stream) #x3F)))))
+                              (logior (ash (logand byte #x0F) 12)
+                                      (ash (logand b1   #x3F)  6)
+                                      (logand b2 #x3F)))))
                      ((< byte #xF8)
                       (let ((b1 (io:read-byte-from-stream stream))
                             (b2 (io:read-byte-from-stream stream))
