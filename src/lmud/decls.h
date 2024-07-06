@@ -18,6 +18,7 @@ struct LMud_GCStats;
 struct LMud_Net;
 struct LMud_Process;
 struct LMud_Profile;
+struct LMud_Symbol;
 
 
 #define LMud_XLogf(lmud, loglevel, format, ...) \
