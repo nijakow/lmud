@@ -21,6 +21,7 @@ void LMud_InputStream_Destroy(struct LMud_InputStream* self);
 bool LMud_InputStream_Eof(struct LMud_InputStream* self);
 
 void LMud_InputStream_Advance(struct LMud_InputStream* self);
+bool LMud_InputStream_GetSafely(struct LMud_InputStream* self, char* c);
 char LMud_InputStream_Get(struct LMud_InputStream* self);
 char LMud_InputStream_Read(struct LMud_InputStream* self);
 

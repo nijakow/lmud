@@ -34,7 +34,11 @@ void LMud_InputStream_Destroy(struct LMud_InputStream* self)
 
 bool LMud_InputStream_Eof(struct LMud_InputStream* self)
 {
-    return (self->file_based) ? (feof(self->file) || LMud_InputStream_Get(self) == 0xff) : (self->data[self->index] == '\0');
+    char  c;
+
+    (void) c;
+
+    return !LMud_InputStream_GetSafely(self, &c);
 }
 
 static void LMud_InputStream_Unread(struct LMud_InputStream* self, char c)
@@ -51,6 +55,25 @@ void LMud_InputStream_Advance(struct LMud_InputStream* self)
             fgetc(self->file);
         else
             self->index++;
+    }
+}
+
+bool LMud_InputStream_GetSafely(struct LMud_InputStream* self, char* c)
+{
+    int  value;
+
+    if (self->file_based) {
+        if (feof(self->file))
+            return false;
+        value = fgetc(self->file);
+        if (value == EOF)
+            return false;
+        *c = (char) value;
+        LMud_InputStream_Unread(self, *c);
+        return true;
+    } else {
+        *c = self->data[self->index];
+        return *c != '\0';
     }
 }
 
