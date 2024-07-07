@@ -34,7 +34,7 @@ void LMud_InputStream_Destroy(struct LMud_InputStream* self)
 
 bool LMud_InputStream_Eof(struct LMud_InputStream* self)
 {
-    return (self->file_based) ? feof(self->file) : (self->data[self->index] == '\0');
+    return (self->file_based) ? (feof(self->file) || LMud_InputStream_Get(self) == 0xff) : (self->data[self->index] == '\0');
 }
 
 static void LMud_InputStream_Unread(struct LMud_InputStream* self, char c)
