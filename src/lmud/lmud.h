@@ -15,6 +15,7 @@ struct LMud
     struct LMud_Profiles  profiles;
     struct LMud_Net       net;
     struct LMud_Lisp      lisp;
+    struct timeval        start_time;
     bool                  running;
 };
 

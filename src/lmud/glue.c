@@ -38,6 +38,11 @@ struct LMud_Net* LMud_GetNet(struct LMud* self)
     return &self->net;
 }
 
+struct timeval* LMud_GetStartTime(struct LMud* self)
+{
+    return &self->start_time;
+}
+
 void LMud_Logf(struct LMud* mud, enum LMud_LogLevel loglevel, const char* format, ...)
 {
     va_list                  args;

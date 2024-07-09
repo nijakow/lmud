@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <time.h>
+#include <sys/time.h>
 
 // Networking stuff
 #include <sys/types.h>

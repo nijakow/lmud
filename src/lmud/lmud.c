@@ -10,6 +10,7 @@
 bool LMud_Create(struct LMud* self)
 {
     self->running = true;
+    gettimeofday(&self->start_time, NULL);
     return LMud_Log_Create(&self->log)
         && LMud_Profiles_Create(&self->profiles)
         && LMud_Net_Create(&self->net, self)

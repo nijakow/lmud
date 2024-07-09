@@ -1762,6 +1762,9 @@
       (io.printer:fresh-line (io:the-stream stream)))
 
    (defun io:uformat (stream format-string &rest args)
+      (when (null stream)
+         (return (with-string-output-stream string-stream
+                    (apply #'io:uformat string-stream format-string args))))
       (setq stream
             (io:the-stream (cond ((eq stream nil) nil)
                                  ((eq stream t)   nil)
@@ -1803,7 +1806,8 @@
                        message)))
 
    (defun load (path)
-      (let ((port (lmud.int:open-file path)))
+      (let ((start-time (lmud.int:get-clock))
+            (port       (lmud.int:open-file path)))
          (unless port (lmud.util:simple-error "Could not open file!"))
          (setq port (io:wrap-port port))
          (lmud:log :info (string:concatenate "Loading file '" path "' ..."))

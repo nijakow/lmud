@@ -1447,6 +1447,22 @@ void LMud_Builtin_DumpProcess(struct LMud_Fiber* fiber, LMud_Any* arguments, LMu
     }
 }
 
+void LMud_Builtin_GetClock(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    struct timeval  now;
+    struct timeval  diff;
+
+    NO_ARGS;
+
+    gettimeofday(&now, NULL);
+
+    // Extract diff from now - LMud_GetStartTime()
+
+    timersub(&now, LMud_GetStartTime(fiber->lisp->mud), &diff);
+
+    LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(diff.tv_sec * 1000 + diff.tv_usec / 1000));
+}
+
 
 void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
 {
@@ -1570,6 +1586,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "STACK-FRAME-FUNCTION", LMud_Builtin_StackFrameFunction);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "STACK-FRAME-IP", LMud_Builtin_StackFrameIp);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "DUMP-PROCESS", LMud_Builtin_DumpProcess);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "GET-CLOCK", LMud_Builtin_GetClock);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRIN1", LMud_Builtin_Prin1);

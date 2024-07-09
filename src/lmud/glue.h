@@ -11,6 +11,7 @@ struct LMud_Log*      LMud_GetLog(struct LMud* self);
 struct LMud_Profiles* LMud_GetProfiles(struct LMud* self);
 struct LMud_Lisp*     LMud_GetLisp(struct LMud* self);
 struct LMud_Net*      LMud_GetNet(struct LMud* self);
+struct timeval*       LMud_GetStartTime(struct LMud* self);
 
 void LMud_NotifyIncomingConnection(struct LMud* self, LMud_Any startup_function, struct LMud_Connection* connection);
 
