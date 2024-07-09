@@ -1810,12 +1810,14 @@
             (port       (lmud.int:open-file path)))
          (unless port (lmud.util:simple-error "Could not open file!"))
          (setq port (io:wrap-port port))
-         (lmud:log :info (string:concatenate "Loading file '" path "' ..."))
+         (lmud:log :note (string:concatenate "Loading file '" path "' ..."))
          (while t
             (let ((expr (read port :eof-error-p nil :eof-value :eof)))
                (if (eq expr :eof)
-                   (return)
+                   (progn (lmud:log :info (io:uformat nil "Loaded file '~a'! (~a s)" path (/ (- (lmud.int:get-clock) start-time) 1000)))
+                          (return (values)))
                    (eval expr))))))
+
    
    (defun load-module (path)
       (load (string:concatenate "../boot/" path ".lisp")))
