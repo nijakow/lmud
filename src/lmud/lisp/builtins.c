@@ -1429,6 +1429,24 @@ void LMud_Builtin_StackFrameIp(struct LMud_Fiber* fiber, LMud_Any* arguments, LM
     }
 }
 
+void LMud_Builtin_DumpProcess(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    struct LMud_Process*  process;
+    struct LMud_Fiber*    process_fiber;
+
+    CHECK_ARGS(1, 1);
+    CHECK_ARG_TYPE(0, Process);
+
+    if (!LMud_Lisp_IsProcess(fiber->lisp, arguments[0])) {
+        LMud_Fiber_PerformError(fiber, "Expected a process.");
+        return;
+    } else {
+        process       = LMud_Any_AsPointer(arguments[0]);
+        process_fiber = LMud_Process_GetFiber(process);
+        LMud_Fiber_Dump(process_fiber);
+    }
+}
+
 
 void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
 {
@@ -1551,6 +1569,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "STACK-FRAME-LEXICAL", LMud_Builtin_StackFrameLexical);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "STACK-FRAME-FUNCTION", LMud_Builtin_StackFrameFunction);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "STACK-FRAME-IP", LMud_Builtin_StackFrameIp);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "DUMP-PROCESS", LMud_Builtin_DumpProcess);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRIN1", LMud_Builtin_Prin1);

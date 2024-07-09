@@ -37,7 +37,9 @@ void LMud_Port_Eof(struct LMud_Port* self, struct LMud_Fiber* fiber)
 
     connection = self->connection.connection;
 
-    if (connection == NULL)
+    if (self->pushbacks_fill > 0)
+        LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, false));
+    else if (connection == NULL)
         LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, true));
     else
         LMud_Connection_FiberEof(connection, fiber);
@@ -107,16 +109,16 @@ bool LMud_Port_FiberReadByte(struct LMud_Port* self, struct LMud_Fiber* fiber)
 
     connection = self->connection.connection;
 
-    if (connection == NULL)
-    {
-        // TODO: Error handling.
-        return false;
-    }
-
     if (self->pushbacks_fill > 0)
     {
         LMud_Fiber_SetAccumulator(fiber, LMud_Any_FromInteger(((LMud_Integer) 0) | (unsigned char) self->pushbacks[--self->pushbacks_fill]));
         return true;
+    }
+
+    if (connection == NULL)
+    {
+        // TODO: Error handling.
+        return false;
     }
 
     LMud_Connection_FiberReadByte(connection, fiber);

@@ -1840,9 +1840,9 @@
       (lmud.bootstrap::banner port)
       (lmud.bootstrap::repl port))
 
+   (load-module "test")
    (load-module "webserver")
    (load-module "game")
-   (load-module "test")
 
    (lmud.int:open-v4 "127.0.0.1" 4242 #'game::start-from-telnet "telnet")
    (lmud.int:open-v6 "::1"       4244 #'game::start-from-telnet "telnet")

@@ -63,6 +63,21 @@
          (:h1 "LMUD")
          (:p "This is just a test page."))))
 
+; (defun webserver::cut-html (html)
+;    (if (endp html)
+;        (values nil nil)
+;        (if (symbolp (car html))
+;            (multiple-value-bind (vars body)
+;                  (webserver::cut-html (cddr html))
+;               (values (cons (cons (car html)
+;                                   (cadr html))
+;                             vars)
+;                       body))
+;            (multiple-value-bind (vars body)
+;                  (webserver::cut-html (cdr html))
+;               (values vars (cons (car html) body))))))
+
+
 (defun webserver::write-html (html stream)
    (let ((tag-name (symbol-name (car html))))
       (io:uformat stream "<~a>" tag-name)
