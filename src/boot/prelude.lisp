@@ -1075,13 +1075,18 @@
    (tos:defmethod (io:<port-stream> unread-char) (char)
       (lmud.int:port-unread-char .port char))
    
+   (tos:defmethod (io:<port-stream> read-char) ()
+      (io:read-utf8-char self))
+
+   (tos:defmethod (io:<port-stream> write-char) (char)
+      (io:write-utf8-char char self))
+   
    (tos:defmethod (io:<port-stream> eof-p) ()
       (lmud.int:port-eof-p .port))
 
    (tos:defmethod (io:<port-stream> close) ()
       (lmud.int:close-port .port))
    
-
 
    (tos:defmethod (tos.classes:<port> port) () self)
 
@@ -1091,6 +1096,12 @@
    (tos:defmethod (tos.classes:<port> write-byte) (byte)
       (lmud.int:port-write-byte self byte))
    
+   (tos:defmethod (tos.classes:<port> read-char) ()
+      (io:read-utf8-char self))
+
+   (tos:defmethod (tos.classes:<port> write-char) (char)
+      (io:write-utf8-char char self))
+   
    (tos:defmethod (tos.classes:<port> unread-char) (char)
       (lmud.int:port-unread-char self char))
    
@@ -1099,6 +1110,21 @@
    
    (tos:defmethod (tos.classes:<port> close) ()
       (lmud.int:close-port self))
+   
+
+   (tos:defclass io:<string-output-port> ()
+      (with (chars nil)))
+   
+   (tos:defmethod (io:<string-output-port> write-char) (char)
+      (push char .chars))
+   
+   (tos:defmethod (io:<string-output-port> build) ()
+      (conversions:->string (reverse .chars)))
+   
+   (defmacro with-string-output-stream (var &body body)
+      (list 'let (list (list var (list 'tos:make-instance 'io:<string-output-port>)))
+         (cons 'progn body)
+         (list 'tos:send var ''build)))
 
    
    (defun io:wrap-port (port)
@@ -1182,10 +1208,10 @@
                      (t (lmud.util:simple-error "Invalid UTF-8 encoding!")))))))
 
    (defun io:read-char-from-stream (stream)
-      (io:read-utf8-char stream))
+      [stream read-char])
    
    (defun io:write-char-to-stream (stream char)
-      (io:write-utf8-char char stream))
+      [stream write-char char])
    
    (defun io:eof-p (&optional stream)
       (io:raw-eof-p (io:the-stream stream)))
