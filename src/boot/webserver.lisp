@@ -56,21 +56,26 @@
                (return (http:parse-request request-line headers))
                (push line headers))))))
 
+(defvar webserver::*test-html*
+   '(:html
+      (:head (:title "LMUD"))
+      (:body
+         (:h1 "LMUD")
+         (:p "This is just a test page."))))
+
+(defun webserver::write-html (html stream)
+   (let ((tag-name (symbol-name (car html))))
+      (io:uformat stream "<~a>" tag-name)
+      (let ((args (cdr html)))
+         (until (endp args)
+            (let ((arg (pop args)))
+               (cond ((listp   arg) (webserver::write-html arg stream))
+                     ((stringp arg) (io:uformat stream "~a" arg))))))
+      (io:uformat stream "</~a>" tag-name)))
+
 (defun webserver::standard-page ()
-   "
-<!DOCTYPE html>
-<html>
-   <head>
-      <title>LMUD</title>
-   </head>
-   <body>
-      <h1>LMUD</h1>
-      <p>
-         This is a test page.
-      </p>
-   </body>
-</html>
-")
+   (with-string-output-stream stream
+      (webserver::write-html webserver::*test-html* stream)))
 
 (defun webserver::new-connection (port)
    (lmud.int:set-current-port port)
