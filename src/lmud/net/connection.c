@@ -146,7 +146,7 @@ void LMud_Connection_RegisterOnSelector(struct LMud_Connection* self, struct LMu
         if (LMud_Ringbuffer_HasData(&self->outbuf))
             LMud_Selector_AddWrite(selector, self->fd);
 
-        if (!self->closing)
+        if (!self->closing && !LMud_Ringbuffer_IsFull(&self->inbuf))
             LMud_Selector_AddRead(selector, self->fd);
         
         LMud_Selector_AddExcept(selector, self->fd);
@@ -276,7 +276,14 @@ void LMud_Connection_Tick(struct LMud_Connection* self, struct LMud_Selector* se
 
     if (LMud_Selector_IsRead(selector, self->fd))
     {
-        ssize = read(self->fd, buffer, sizeof(buffer));
+        size = LMud_Ringbuffer_GetFreeSpace(&self->inbuf);
+
+        LMud_Debugf(self->net->mud, LMud_LogLevel_HALF_DEBUG, "FD(%d): Free space in inbuf: %lu", self->fd, size);
+
+        if (size > sizeof(buffer))
+            size = sizeof(buffer);
+
+        ssize = read(self->fd, buffer, size);
 
         LMud_Debugf(self->net->mud, LMud_LogLevel_HALF_DEBUG, "FD(%d): Read  %4ld bytes", self->fd, ssize);
 

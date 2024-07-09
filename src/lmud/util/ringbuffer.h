@@ -18,6 +18,8 @@ bool LMud_Ringbuffer_IsFull(struct LMud_Ringbuffer* self);
 bool LMud_Ringbuffer_IsEmpty(struct LMud_Ringbuffer* self);
 bool LMud_Ringbuffer_HasData(struct LMud_Ringbuffer* self);
 
+LMud_Size LMud_Ringbuffer_GetFreeSpace(struct LMud_Ringbuffer* self);
+
 LMud_Size LMud_Ringbuffer_PeekBytes(struct LMud_Ringbuffer* self, char* bytes, LMud_Size size);
 bool      LMud_Ringbuffer_SkipBytes(struct LMud_Ringbuffer* self, LMud_Size size);
 

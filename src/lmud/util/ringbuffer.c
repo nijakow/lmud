@@ -36,6 +36,16 @@ bool LMud_Ringbuffer_HasData(struct LMud_Ringbuffer* self)
     return !LMud_Ringbuffer_IsEmpty(self);
 }
 
+LMud_Size LMud_Ringbuffer_GetFreeSpace(struct LMud_Ringbuffer* self)
+{
+    if (LMud_Ringbuffer_IsFull(self))
+        return 0;
+    else if (self->write > self->read)
+        return self->alloc - self->write + self->read - 1;
+    else
+        return self->read - self->write - 1;
+}
+
 LMud_Size LMud_Ringbuffer_PeekBytes(struct LMud_Ringbuffer* self, char* bytes, LMud_Size size)
 {
     LMud_Size  i;
