@@ -158,7 +158,7 @@ static void LMud_Connection_ReleaseFibersWithByte(struct LMud_Connection* self, 
 {
     while (self->waiting_fibers.fibers != NULL)
     {
-        LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Fiber %p released from the waiting fiber list!");
+        LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Fiber %p released from the waiting fiber list!", self->fd);
         LMud_Fiber_ControlRestartWithValue(self->waiting_fibers.fibers, LMud_Any_FromInteger(((LMud_Integer) 0) | (unsigned char) byte));
     }
 }
@@ -167,7 +167,7 @@ static void LMud_Connection_ReleaseEofFibers(struct LMud_Connection* self, bool 
 {
     while (self->waiting_fibers_eof.fibers != NULL)
     {
-        LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Fiber %p released from the waiting EOF fiber list (signalling no EOF)!");
+        LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Fiber %p released from the waiting EOF fiber list (signalling no EOF)!", self->fd);
         LMud_Fiber_ControlRestartWithValue(self->waiting_fibers_eof.fibers, LMud_Lisp_Boolean(LMud_GetLisp(self->net->mud), eof));
     }
 }
@@ -194,11 +194,11 @@ static void LMud_Connection_MaybeReleaseFibers(struct LMud_Connection* self)
 
 static void LMud_Connection_ReleaseFibersWithEof(struct LMud_Connection* self)
 {
-    LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Releasing fibers with EOF...");
+    LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Releasing fibers with EOF...", self->fd);
 
     while (self->waiting_fibers.fibers != NULL)
     {
-        LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Fiber %p released from the waiting fiber list!");
+        LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Fiber %p released from the waiting fiber list!", self->fd);
         LMud_Fiber_ControlRestartWithValue(self->waiting_fibers.fibers, LMud_Lisp_Nil(LMud_GetLisp(self->net->mud)));
     }
 
@@ -253,14 +253,14 @@ bool LMud_Connection_WriteByte(struct LMud_Connection* self, char byte)
 
 void LMud_Connection_HandleError(struct LMud_Connection* self)
 {
-    LMud_Debugf(self->net->mud, LMud_LogLevel_HALF_DEBUG, "FD(%d): Handling connection error!");
+    LMud_Debugf(self->net->mud, LMud_LogLevel_HALF_DEBUG, "FD(%d): Handling connection error!", self->fd);
     self->eof = true;
     LMud_Connection_ReleaseFibersWithEof(self);
 }
 
 void LMud_Connection_HandleDisconnect(struct LMud_Connection* self)
 {
-    LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Handling disconnect!");
+    LMud_Debugf(self->net->mud, LMud_LogLevel_HALF_DEBUG, "FD(%d): Handling disconnect!", self->fd);
     LMud_Connection_HandleError(self);
 }
 
@@ -278,7 +278,7 @@ void LMud_Connection_Tick(struct LMud_Connection* self, struct LMud_Selector* se
     {
         ssize = read(self->fd, buffer, sizeof(buffer));
 
-        LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Read  %4ld bytes", self->fd, ssize);
+        LMud_Debugf(self->net->mud, LMud_LogLevel_HALF_DEBUG, "FD(%d): Read  %4ld bytes", self->fd, ssize);
 
         if (ssize <= 0) {
             LMud_Connection_HandleDisconnect(self);
@@ -297,7 +297,7 @@ void LMud_Connection_Tick(struct LMud_Connection* self, struct LMud_Selector* se
         {
             written = write(self->fd, buffer, size);
 
-            LMud_Debugf(self->net->mud, LMud_LogLevel_FULL_DEBUG, "FD(%d): Wrote %4ld bytes out of %4lu", self->fd, written, size);
+            LMud_Debugf(self->net->mud, LMud_LogLevel_HALF_DEBUG, "FD(%d): Wrote %4ld bytes out of %4lu", self->fd, written, size);
 
             if (written < 0) {
                 LMud_Connection_HandleDisconnect(self);
@@ -309,6 +309,7 @@ void LMud_Connection_Tick(struct LMud_Connection* self, struct LMud_Selector* se
 
     if (LMud_Selector_IsExcept(selector, self->fd))
     {
+        LMud_Debugf(self->net->mud, LMud_LogLevel_HALF_DEBUG, "FD(%d): Handling exception!", self->fd);
         LMud_Connection_HandleError(self);
     }
 
