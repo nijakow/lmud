@@ -25,9 +25,14 @@
 (defun game:loop (player-object)
    (while t
       (princ "> ")
-      (let ((command (game:split-input-chars (read-line))))
-         (cond ((null command) nil)
-               ((string= (first command) "quit" :key #'char-upcase) (return))
+      (let* ((input   (game:split-input-chars (read-line)))
+             (command (first input)))
+         (cond ((null input) nil)
+               ((string= command "quit" :key #'char-upcase) (return))
+               ((string= command "repl" :key #'char-upcase)
+                (%signal-handler (e)
+                     (lmud.bootstrap::repl (lmud.int:current-port))
+                  (io:uformat t "~&An error occurred!~%")))
                (t (princ "I don't understand that command.")
                   (terpri))))))
 

@@ -1834,12 +1834,14 @@
    (defun lmud.bootstrap::repl (port)
       (while t
          (princ "⍝ " port)
-         (let* ((expr    (read port))
-                (results (multiple-value-list (lmud.bootstrap::safely-evaluate expr))))
-            (dolist (e results)
-               (princ "  " port)
-               (prin1 e port)
-               (terpri port)))))
+         (let ((expr (read port)))
+            (when (eq expr :q)
+               (return))
+            (let ((results (multiple-value-list (lmud.bootstrap::safely-evaluate expr))))
+               (dolist (e results)
+                  (princ "  " port)
+                  (prin1 e port)
+                  (terpri port))))))
 
    (defun lmud.bootstrap::hi (port)
       (lmud.int:set-current-port (io:wrap-port port))
@@ -1850,8 +1852,8 @@
    (load-module "webserver")
    (load-module "game")
 
-   (lmud.int:open-v4 "127.0.0.1" 4242 #'game::start-from-telnet "telnet")
-   (lmud.int:open-v6 "::1"       4244 #'game::start-from-telnet "telnet")
+   (lmud.int:open-v4 "0.0.0.0" 4242 #'game::start-from-telnet "telnet")
+   (lmud.int:open-v6 "::1"     4244 #'game::start-from-telnet "telnet")
 
    ))
 
