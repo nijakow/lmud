@@ -32,6 +32,7 @@ struct LMud_Lisp
     struct LMud_Objects      objects;
     struct LMud_Constants    constants;
     struct LMud_Scheduler    scheduler;
+    struct LMud_FrameList    floating_frames;
     struct LMud_InputStream  standard_input;
 };
 

@@ -175,8 +175,6 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct L
 
     self->port          = LMud_Lisp_Nil(lisp);
 
-    LMud_FrameList_Create(&self->floating_frames);
-
     LMud_FiberQueue_Create(&self->waiting_for_result);
 
     self->state          = LMud_FiberState_CREATED;
@@ -198,7 +196,6 @@ void LMud_Fiber_Destroy(struct LMud_Fiber* self)
 
     LMud_Fiber_UnlinkQueue(self);
     LMud_FiberQueue_Destroy(&self->waiting_for_result);
-    LMud_FrameList_Destroy(&self->floating_frames);
     LMud_Free(self->stack);
     LMud_Fiber_Unlink(self);
     LMud_ProfileRef_Destroy(&self->profile_ref);
@@ -546,7 +543,7 @@ void LMud_Fiber_PopFrame(struct LMud_Fiber* self)
             "Moving frame %p to floating frames list...",
             frame
         );
-        LMud_FrameList_Insert(&self->floating_frames, frame);
+        LMud_FrameList_Insert(&self->lisp->floating_frames, frame);
     } else {
         LMud_Frame_Destroy(frame);
     }

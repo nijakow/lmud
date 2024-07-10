@@ -63,6 +63,7 @@ bool LMud_Lisp_Create(struct LMud_Lisp* self, struct LMud* mud)
     self->mud = mud;
 
     LMud_InputStream_CreateFromFile(&self->standard_input, stdin);
+    LMud_FrameList_Create(&self->floating_frames);
 
     return LMud_Objects_Create(&self->objects, self)
         && LMud_Constants_Create(&self->constants, self)
@@ -71,6 +72,7 @@ bool LMud_Lisp_Create(struct LMud_Lisp* self, struct LMud* mud)
 
 void LMud_Lisp_Destroy(struct LMud_Lisp* self)
 {
+    LMud_FrameList_Destroy(&self->floating_frames);
     LMud_Scheduler_Destroy(&self->scheduler);
     LMud_Constants_Destroy(&self->constants);
     LMud_Objects_Destroy(&self->objects);

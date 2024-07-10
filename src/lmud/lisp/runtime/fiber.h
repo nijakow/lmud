@@ -80,8 +80,6 @@ struct LMud_Fiber
 
     LMud_Any                       port;
 
-    struct LMud_FrameList          floating_frames;
-
     struct LMud_FiberQueue         waiting_for_result;
 
     enum LMud_FiberState           state;
