@@ -1,10 +1,19 @@
+/**
+ * @file decls.h
+ * @brief LMud Declarations
+ * 
+ * This file contains the root declarations for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #pragma once
 
 #include <lmud/defs.h>
 #include <lmud/config.h>
 #include <lmud/log/loglevel.h>
-
 
 struct LMud;
 enum   LMud_LogLevel;

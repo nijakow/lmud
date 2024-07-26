@@ -1,3 +1,13 @@
+/**
+ * @file lmud.h
+ * @brief The LMud Kernel Header
+ * 
+ * This file contains the root structure and functions for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #pragma once
 

@@ -1,3 +1,13 @@
+/**
+ * @file config.h
+ * @brief LMud Build Configuration
+ * 
+ * This file contains the build flags and configuration options for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #pragma once
 

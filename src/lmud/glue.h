@@ -1,3 +1,13 @@
+/**
+ * @file glue.h
+ * @brief The LMud Kernel Glue Code Header
+ * 
+ * This file contains the glue code for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #pragma once
 

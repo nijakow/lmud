@@ -1,3 +1,14 @@
+/**
+ * @file main.c
+ * @brief LMud Entry Point
+ * 
+ * This file contains the `main` function for the LMud project,
+ * as well as the signal handlers and the global variables.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #include <lmud/lmud.h>
 

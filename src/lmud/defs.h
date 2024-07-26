@@ -1,3 +1,13 @@
+/**
+ * @file defs.h
+ * @brief LMud Definitions
+ * 
+ * This file contains the root definitions for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #pragma once
 

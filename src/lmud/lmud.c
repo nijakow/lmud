@@ -1,3 +1,13 @@
+/**
+ * @file lmud.c
+ * @brief The LMud Kernel
+ * 
+ * This file contains the root structure and functions for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #include <lmud/glue.h>
 #include <lmud/log/log.h>
