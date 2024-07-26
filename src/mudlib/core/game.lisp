@@ -8,7 +8,7 @@
 
 (defun game:start ()
    (game:banner)
-   (game:loop nil))
+   (shell:loop nil))
 
 (defun game:start-from-telnet (port)
    (lmud.int:set-current-port port)

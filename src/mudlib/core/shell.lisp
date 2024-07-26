@@ -1,5 +1,5 @@
 
-(defun game:huh? ()
+(defun shell:huh? ()
    (io:uformat t "~a~%"
       (random:pick "I don't understand."
                    "Huh?"
@@ -8,7 +8,7 @@
                    "No worky."
                    "Say what?")))
 
-(defun game:loop (player-object)
+(defun shell:loop (player-object)
    (while t
       (princ "> ")
       (let* ((input   (game:split-input-chars (read-line)))
@@ -23,4 +23,4 @@
                      (game:find-command input)
                   (if command
                       (game:run-command command bindings)
-                      (game:huh?))))))))
+                      (shell:huh?))))))))

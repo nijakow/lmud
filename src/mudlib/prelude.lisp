@@ -1783,6 +1783,9 @@
                                    (t (lmud.util:simple-error "Unknown format directive!")))))
                    (princ char stream))
                (incf index)))))
+   
+   (defun format (&ignore-rest)
+      (lmud.int:funcall-forward #'io:uformat))
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
