@@ -19,6 +19,13 @@
 #include <lmud/user/profile.h>
 #include <lmud/util/stream.h>
 
+/**
+ * @brief The LMud Kernel
+ * 
+ * The LMud Kernel is the root structure for the LMud project,
+ * containing all the submodules and being responsible for the
+ * main loop and initialization.
+ */
 struct LMud
 {
     struct LMud_Log       log;
