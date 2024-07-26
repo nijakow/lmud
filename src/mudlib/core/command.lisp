@@ -52,10 +52,3 @@
                        (values t bindings))
                     (values nil nil)))))
          (t (values nil nil))))
-
-
-(game:defcommand :hello ("hello")
-   (io:uformat t "Hello!~%"))
-
-(game:defcommand :pick-up ("pick" "up" item)
-   (io:uformat t "You pick up ~a.~%" item))

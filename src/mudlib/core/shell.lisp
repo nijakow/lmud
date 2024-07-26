@@ -1,12 +1,12 @@
 
 (defun shell:huh? ()
-   (io:uformat t "~a~%"
-      (random:pick "I don't understand."
-                   "Huh?"
-                   "What?"
-                   "Pardon?"
-                   "No worky."
-                   "Say what?")))
+   (let ((phrase (random:pick "I don't understand."
+                              "Huh?"
+                              "What?"
+                              "Pardon?"
+                              "No worky."
+                              "Say what?")))
+      (tell phrase cr)))
 
 (defun shell:loop (player-object)
    (while t
@@ -18,7 +18,7 @@
                ((string= command "repl" :key #'char-upcase)
                 (%signal-handler (e)
                      (lmud.bootstrap::repl (lmud.int:current-port))
-                  (io:uformat t "~&An error occurred!~%")))
+                  (format t "~&An error occurred!~%")))
                (t (multiple-value-bind (command bindings)
                      (game:find-command input)
                   (if command

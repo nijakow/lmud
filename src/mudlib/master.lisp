@@ -1,6 +1,8 @@
 
 (load-modules "core/util"
+              "core/tell"
               "core/command"
+              "core/commands"
               "core/shell"
               "core/game")
 
