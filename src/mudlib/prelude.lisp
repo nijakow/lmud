@@ -989,6 +989,10 @@
                        the-class))))
             (t (lmud.util:simple-error "Invalid class!"))))
 
+   (defmacro tos:define-class-hook (name args &body body)
+      (list 'setf (list 'get (list 'quote name) ''tos.int:defclass-hook)
+         (list* 'lambda args body)))
+
    (defmacro tos:defclass (name supers &body body)
       (when (null supers)
          (setq supers (list tos.classes:<t>)))
@@ -999,6 +1003,7 @@
             (apply #'append
                (domap (clause body)
                   (cond ((listp clause)
+                         ;; TODO: Add support for class hooks
                          (case (car clause)
                             ((:with with)
                              (domap (var (cdr clause))
