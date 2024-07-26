@@ -1,3 +1,13 @@
+/**
+ * @file profile.c
+ * @brief User Profiles
+ * 
+ * This file contains the user profile system for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #include <lmud/util/memory.h>
 

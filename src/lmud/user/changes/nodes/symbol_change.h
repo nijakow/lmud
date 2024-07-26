@@ -1,3 +1,13 @@
+/**
+ * @file symbol_change.h
+ * @brief Symbol Change Nodes
+ * 
+ * This file contains change nodes for tracking symbol manipulation by users.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #pragma once
 

@@ -1,3 +1,13 @@
+/**
+ * @file changelist.c
+ * @brief Change Lists
+ * 
+ * This file contains change list for tracking changes by users.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #include <lmud/util/memory.h>
 
