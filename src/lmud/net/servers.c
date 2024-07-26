@@ -1,3 +1,13 @@
+/**
+ * @file servers.c
+ * @brief Server management for the LMud project
+ * 
+ * This file contains server and port management for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #include <lmud/net/net.h>
 #include <lmud/lisp/gc.h>

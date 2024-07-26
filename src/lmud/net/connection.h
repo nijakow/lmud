@@ -1,3 +1,13 @@
+/**
+ * @file connection.h
+ * @brief Connections
+ * 
+ * This file contains the connection structures for the LMud project. 
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #pragma once
 

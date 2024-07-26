@@ -1,3 +1,13 @@
+/**
+ * @file net.c
+ * @brief The Networking Module
+ * 
+ * This file contains the networking module for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #include <lmud/glue.h>
 #include <lmud/net/selector.h>

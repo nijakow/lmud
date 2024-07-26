@@ -1,3 +1,13 @@
+/**
+ * @file selector.c
+ * @brief Wrappers around the select system call
+ * 
+ * This file contains wrappers around the select system call for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #include "selector.h"
 

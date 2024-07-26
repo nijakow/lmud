@@ -1,3 +1,13 @@
+/**
+ * @file servers.h
+ * @brief Server management for the LMud project
+ * 
+ * This file contains server and port management for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #pragma once
 
