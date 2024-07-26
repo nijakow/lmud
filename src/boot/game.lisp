@@ -13,13 +13,26 @@
 
 (defmacro game:defcommand (id pattern &body body)
    (flet ((extract-args (pattern)
-            (remove-if-not #'symbolp pattern)))
-      `(progn
-          (push (cons (cons ',id ',pattern) (lambda () ,@body)) game:*commands*))))
+            (remove-if-not #'symbolp pattern))
+          (create-alist-let (bindings-var vars body)
+            `(let (,@(mapcar (lambda (var)
+                               `(,var (cdr (assoc ',var ,bindings-var))))
+                            vars))
+               ,@body)))
+      (let ((vars (extract-args pattern))
+            (bindings-var (gensym)))
+         `(progn
+             (push (cons (cons ',id ',pattern)
+                         (lambda (,bindings-var)
+                           ,(create-alist-let bindings-var vars body)))
+                   game:*commands*)))))
 
 
 (game:defcommand :hello ("hello")
    (io:uformat t "Hello!~%"))
+
+(game:defcommand :pick-up ("pick" "up" item)
+   (io:uformat t "You pick up ~a.~%" item))
 
 
 (defun game:compare-pattern-elements (input-element pattern-element)
@@ -57,7 +70,7 @@
 
 
 (defun game:run-command (command bindings)
-   (funcall (cadr command)))
+   (funcall (cadr command) bindings))
 
 (defun game:punctuationp (char)
    (member char '(#\. #\, #\! #\? #\; #\:)))
