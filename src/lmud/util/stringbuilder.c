@@ -1,3 +1,14 @@
+/**
+ * @file stringbuilder.c
+ * @brief An Efficient String Builder
+ * 
+ * This file contains a string builder implementation
+ * to concatenate strings efficiently.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #include <lmud/util/memory.h>
 #include <lmud/util/utf8.h>

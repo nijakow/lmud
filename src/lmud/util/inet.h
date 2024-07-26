@@ -1,3 +1,13 @@
+/**
+ * @file inet.h
+ * @brief The LMud Networking Utilities Header
+ * 
+ * This file contains networking utilities for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #pragma once
 

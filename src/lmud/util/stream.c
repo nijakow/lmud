@@ -1,3 +1,13 @@
+/**
+ * @file stream.c
+ * @brief Input and Output Streams
+ * 
+ * This file contains input and output streams for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #include <lmud/log/log.h>
 #include <lmud/util/stringbuilder.h>

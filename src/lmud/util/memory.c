@@ -1,3 +1,14 @@
+/**
+ * @file memory.c
+ * @brief The LMud Memory Utilities Implementation
+ * 
+ * This file contains a thin wrapper around the libc memory allocation
+ * and string manipulation functions for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #include "memory.h"
 

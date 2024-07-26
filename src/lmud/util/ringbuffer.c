@@ -1,3 +1,13 @@
+/**
+ * @file ringbuffer.c
+ * @brief A Small Ringbuffer Implementation
+ * 
+ * This file contains a small ringbuffer implementation for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #include <lmud/util/memory.h>
 

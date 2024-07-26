@@ -1,3 +1,14 @@
+/**
+ * @file inet.c
+ * @brief The LMud Networking Utilities Implementation
+ * 
+ * This file contains the implementation of the networking utilities
+ * for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #include "inet.h"
 

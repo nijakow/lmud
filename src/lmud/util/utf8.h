@@ -1,3 +1,14 @@
+/**
+ * @file utf8.h
+ * @brief UTF-8 Encoding and Decoding
+ * 
+ * This file contains the UTF-8 encoding and decoding functions
+ * for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #pragma once
 

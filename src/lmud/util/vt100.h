@@ -1,3 +1,13 @@
+/**
+ * @file vt100.h
+ * @brief VT100 Terminal Codes
+ * 
+ * This file contains VT100 terminal codes for text formatting.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #pragma once
 

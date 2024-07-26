@@ -1,3 +1,14 @@
+/**
+ * @file stringbuilder.h
+ * @brief An Efficient String Builder
+ * 
+ * This file contains a string builder implementation
+ * to concatenate strings efficiently.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #pragma once
 
