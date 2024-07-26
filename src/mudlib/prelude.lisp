@@ -1820,7 +1820,7 @@
 
    
    (defun load-module (path)
-      (load (string:concatenate "../boot/" path ".lisp")))
+      (load (string:concatenate "../mudlib/" path ".lisp")))
 
    (defun lmud.bootstrap::banner (port)
       (io:uformat port "~&~%Welcome to the LMud REPL!~%"))
@@ -1848,8 +1848,6 @@
       (lmud.bootstrap::banner port)
       (lmud.bootstrap::repl port))
 
-   (load-module "test")
-   (load-module "webserver")
    (load-module "game")
 
    (lmud.int:open-v4 "0.0.0.0" 4242 #'game::start-from-telnet "telnet")
