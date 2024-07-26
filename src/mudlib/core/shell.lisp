@@ -6,7 +6,7 @@
                               "Pardon?"
                               "No worky."
                               "Say what?")))
-      (tell phrase cr)))
+      (tell (:p phrase))))
 
 (defun shell:loop (player-object)
    (while t

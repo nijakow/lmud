@@ -1,6 +1,6 @@
 
 (game:defcommand :hello ("hello")
-   (tell "Hello!" cr))
+   (tell (:p "Hello!")))
 
 (game:defcommand :pick-up ("pick" "up" item)
-   (tell "You pick up " item cr))
+   (tell (:p "You pick up " item)))

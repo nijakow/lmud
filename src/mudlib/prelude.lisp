@@ -1793,6 +1793,9 @@
    ;;;    REPL and Tools
    ;;;
 
+   (defun error (&ignore-rest)
+      (lmud.int:funcall-forward #'lmud.util:simple-error))
+
    (defun lmud:log (level format)
       (let ((message format))
          (lmud.int:log (case level
