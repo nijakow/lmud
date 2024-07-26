@@ -67,11 +67,17 @@ static void LMud_Fiber_CheckType_Error(struct LMud_Fiber* fiber, LMud_Any value,
 
 void LMud_Builtin_Log(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
-    CHECK_ARGS(2, 2);
+    enum LMud_LogLevel  level;
 
+    CHECK_ARGS(2, 2);
     CHECK_ARG_TYPE(0, Integer);
 
-    LMud_Logf(fiber->lisp->mud, LMud_Any_AsInteger(arguments[0]), "%s", LMud_String_Chars(LMud_Any_AsPointer(arguments[1])));
+    level = LMud_Any_AsInteger(arguments[0]);
+
+    if (level >= LMud_HARDCODED_LOG_LEVEL)
+    {
+        LMud_Logf(fiber->lisp->mud, level, "%s", LMud_String_Chars(LMud_Any_AsPointer(arguments[1])));
+    }
 }
 
 void LMud_Builtin_Quit(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
