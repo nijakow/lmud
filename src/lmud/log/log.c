@@ -1,3 +1,13 @@
+/**
+ * @file log.c
+ * @brief Logging Utilities
+ * 
+ * This file contains logging utilities for the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #include <lmud/util/memory.h>
 

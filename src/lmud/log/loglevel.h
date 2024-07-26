@@ -1,3 +1,13 @@
+/**
+ * @file loglevel.h
+ * @brief Logging Levels
+ * 
+ * This file contains the log levels used in the LMud project.
+ * 
+ * @copyright Copyright (c) 2024 Eric Felix Nijakowski
+ * 
+ * @license See LICENSE file for details.
+ */
 
 #pragma once
 
