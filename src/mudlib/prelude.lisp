@@ -1499,6 +1499,14 @@
             ((io.reader:checkstr stream ";")
              (io.reader:skip stream (lambda (char) (not (char= char #\Newline))))
              (io.reader:read stream meta :eof-error-p eof-error-p :eof-value eof-value))
+            ((io.reader:checkstr stream "(.")
+             (let ((message  (io.reader:read stream meta))
+                   (receiver (io.reader:read stream meta))
+                   (args     (io.reader:read-list stream meta)))
+                (list* 'tos:send
+                       receiver
+                       (list 'quote message)
+                       args)))
             ((io.reader:checkstr stream "(")
              (io.reader:read-list stream meta))
             ((io.reader:checkstr stream ":")
@@ -1861,7 +1869,7 @@
 
    (defun lmud.bootstrap::repl (port)
       (while t
-         (princ "⍝ " port)
+         (princ ". " port)
          (let ((expr (read port)))
             (when (eq expr :q)
                (return))
