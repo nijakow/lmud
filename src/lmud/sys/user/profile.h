@@ -14,7 +14,7 @@
 #include <lmud/defs.h>
 #include <lmud/decls.h>
 
-#include <lmud/user/changes/changelist.h>
+#include <lmud/sys/user/changes/changelist.h>
 
 struct LMud_ProfileRef
 {

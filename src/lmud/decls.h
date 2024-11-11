@@ -13,7 +13,7 @@
 
 #include <lmud/defs.h>
 #include <lmud/config.h>
-#include <lmud/log/loglevel.h>
+#include <lmud/sys/log/loglevel.h>
 
 struct LMud;
 enum   LMud_LogLevel;

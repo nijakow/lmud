@@ -12,7 +12,7 @@
 #pragma once
 
 #include <lmud/defs.h>
-#include <lmud/log/loglevel.h>
+#include <lmud/sys/log/loglevel.h>
 #include <lmud/util/stringbuilder.h>
 
 struct LMud_Line

@@ -4,7 +4,7 @@
 #include <lmud/lisp/base.h>
 #include <lmud/lisp/bytecodes.h>
 #include <lmud/lisp/runtime/frame.h>
-#include <lmud/user/profile.h>
+#include <lmud/sys/user/profile.h>
 
 #define LMud_Fiber_MAX_ACCUMULATORS 16
 

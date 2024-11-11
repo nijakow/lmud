@@ -12,12 +12,12 @@
 #pragma once
 
 #include <lmud/defs.h>
-#include <lmud/log/log.h>
-#include <lmud/net/net.h>
 #include <lmud/lisp/lisp.h>
 #include <lmud/lisp/runtime/scheduler.h>
-#include <lmud/user/profile.h>
-#include <lmud/util/console.h>
+#include <lmud/net/net.h>
+#include <lmud/sys/console/console.h>
+#include <lmud/sys/log/log.h>
+#include <lmud/sys/user/profile.h>
 #include <lmud/util/stream.h>
 
 /**

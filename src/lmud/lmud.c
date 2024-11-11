@@ -10,9 +10,9 @@
  */
 
 #include <lmud/glue.h>
-#include <lmud/log/log.h>
 #include <lmud/lisp/io.h>
 #include <lmud/lisp/runtime/fiber.h>
+#include <lmud/sys/log/log.h>
 
 #include "lmud.h"
 

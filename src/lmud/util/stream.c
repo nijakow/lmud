@@ -9,7 +9,7 @@
  * @license See LICENSE file for details.
  */
 
-#include <lmud/log/log.h>
+#include <lmud/sys/log/log.h>
 #include <lmud/util/stringbuilder.h>
 #include <lmud/util/utf8.h>
 
