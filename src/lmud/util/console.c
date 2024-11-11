@@ -10,11 +10,27 @@
  * @license See LICENSE file for details.
  */
 
+#include <lmud/glue.h>
+
 #include "console.h"
 
-void LMud_Console_Create(struct LMud_Console* self)
+bool LMud_Console_Create(struct LMud_Console* self, struct LMud* lmud)
 {
-    (void) self;
+    struct winsize w;
+
+    self->lmud = lmud;
+
+    /*
+     * Get the width and height of the console (terminal).
+     */
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+
+    self->width  = w.ws_col;
+    self->height = w.ws_row;
+
+    LMud_Logf(self->lmud, LMud_LogLevel_DEBUG, "Console size: %dx%d", self->width, self->height);
+
+    return true;
 }
 
 void LMud_Console_Destroy(struct LMud_Console* self)

@@ -13,11 +13,15 @@
 #pragma once
 
 #include <lmud/defs.h>
+#include <lmud/decls.h>
 
 struct LMud_Console
 {
+    struct LMud*  lmud;
 
+    unsigned int  width;
+    unsigned int  height;
 };
 
-void LMud_Console_Create(struct LMud_Console* self);
+bool LMud_Console_Create(struct LMud_Console* self, struct LMud* lmud);
 void LMud_Console_Destroy(struct LMud_Console* self);

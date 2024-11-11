@@ -32,6 +32,7 @@ bool LMud_Create(struct LMud* self)
     self->running = true;
     gettimeofday(&self->start_time, NULL);
     return LMud_Log_Create(&self->log)
+        && LMud_Console_Create(&self->console, self)
         && LMud_Profiles_Create(&self->profiles)
         && LMud_Net_Create(&self->net, self)
         && LMud_Lisp_Create(&self->lisp, self);
@@ -48,6 +49,8 @@ void LMud_Destroy(struct LMud* self)
 {
     LMud_Lisp_Destroy(&self->lisp);
     LMud_Net_Destroy(&self->net);
+    LMud_Profiles_Destroy(&self->profiles);
+    LMud_Console_Destroy(&self->console);
     LMud_Log_Destroy(&self->log);
 }
 

@@ -17,6 +17,7 @@
 #include <lmud/lisp/lisp.h>
 #include <lmud/lisp/runtime/scheduler.h>
 #include <lmud/user/profile.h>
+#include <lmud/util/console.h>
 #include <lmud/util/stream.h>
 
 /**
@@ -29,6 +30,7 @@
 struct LMud
 {
     struct LMud_Log       log;
+    struct LMud_Console   console;
     struct LMud_Profiles  profiles;
     struct LMud_Net       net;
     struct LMud_Lisp      lisp;

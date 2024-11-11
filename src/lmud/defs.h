@@ -39,6 +39,11 @@
 
 #include <lmud/config.h>
 
+#ifdef LMud_FEATURE_CONSOLE
+# include <sys/ioctl.h>
+# include <termios.h>
+#endif
+
 
 typedef size_t        LMud_Size;
 typedef int           LMud_Integer;
