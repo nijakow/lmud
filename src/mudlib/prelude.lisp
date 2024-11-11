@@ -1026,7 +1026,9 @@
    (defmacro tos:defmethod (info params &body body)
       (let ((class       (car info))
             (method-name (cadr info)))
-         (let ((method (list 'lambda (cons 'self params) (list* 'block method-name body))))
+         (let ((method (list 'lambda (cons 'self params)
+                          (list 'declare (list 'method-name method-name))
+                          (list* 'block method-name body))))
             (list 'tos.int:%class-push-method! (list 'tos.int:ensure-class class) (list 'quote method-name) method))))
 
    (defun tos:at (object variable)

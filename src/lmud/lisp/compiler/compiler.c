@@ -331,6 +331,7 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->cached.symbol_andignorerest = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&IGNORE-REST");
 
     self->cached.symbol_function_name = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FUNCTION-NAME");
+    self->cached.symbol_method_name   = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "METHOD-NAME");
 
     LMud_Compiler_PushScope(self);
 }
@@ -1271,7 +1272,8 @@ void LMud_Compiler_HandleDeclaration(struct LMud_Compiler* self, LMud_Any declar
         return;
     }
     
-    if (LMud_Any_Eq(name, self->cached.symbol_function_name)) LMud_Compiler_HandleDeclarationFunctionName(self, args);
+         if (LMud_Any_Eq(name, self->cached.symbol_function_name)) LMud_Compiler_HandleDeclarationFunctionName(self, args);
+    else if (LMud_Any_Eq(name, self->cached.symbol_method_name))   LMud_Compiler_HandleDeclarationFunctionName(self, args);
 }
 
 void LMud_Compiler_CompileSpecialDeclare(struct LMud_Compiler* self, LMud_Any arguments)
