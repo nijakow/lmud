@@ -280,6 +280,47 @@ void LMud_Register_Delete(struct LMud_Register* self)
 
 
 
+void LMud_CompilerCache_Create(struct LMud_CompilerCache* self, struct LMud_CompilerSession* session)
+{
+    struct LMud_Lisp*  lisp;
+
+    lisp = LMud_CompilerSession_GetLisp(session);
+
+    self->symbol_declare        = LMud_Lisp_Intern(lisp, "DECLARE");
+    self->symbol_quote          = LMud_Lisp_Intern(lisp, "QUOTE");
+    self->symbol_function       = LMud_Lisp_Intern(lisp, "FUNCTION");
+    self->symbol_lambda         = LMud_Lisp_Intern(lisp, "LAMBDA");
+    self->symbol_block          = LMud_Lisp_Intern(lisp, "BLOCK");
+    self->symbol_progn          = LMud_Lisp_Intern(lisp, "PROGN");
+    self->symbol_setq           = LMud_Lisp_Intern(lisp, "SETQ");
+    self->symbol_let            = LMud_Lisp_Intern(lisp, "LET");
+    self->symbol_flet           = LMud_Lisp_Intern(lisp, "FLET");
+    self->symbol_labels         = LMud_Lisp_Intern(lisp, "LABELS");
+    self->symbol_if             = LMud_Lisp_Intern(lisp, "IF");
+    self->symbol_while          = LMud_Lisp_Intern(lisp, "WHILE");
+    self->symbol_mvb            = LMud_Lisp_Intern(lisp, "MULTIPLE-VALUE-BIND");
+    self->symbol_mvl            = LMud_Lisp_Intern(lisp, "MULTIPLE-VALUE-LIST");
+    self->symbol_return_from    = LMud_Lisp_Intern(lisp, "RETURN-FROM");
+    self->symbol_unwind_protect = LMud_Lisp_Intern(lisp, "UNWIND-PROTECT");
+    self->symbol_signal_handler = LMud_Lisp_Intern(lisp, "%SIGNAL-HANDLER");
+
+    self->symbol_andrest       = LMud_Lisp_Intern(lisp, "&REST");
+    self->symbol_andbody       = LMud_Lisp_Intern(lisp, "&BODY");
+    self->symbol_andoptional   = LMud_Lisp_Intern(lisp, "&OPTIONAL");
+    self->symbol_andkey        = LMud_Lisp_Intern(lisp, "&KEY");
+    self->symbol_andignorerest = LMud_Lisp_Intern(lisp, "&IGNORE-REST");
+
+    self->symbol_function_name = LMud_Lisp_Intern(lisp, "FUNCTION-NAME");
+    self->symbol_macro_name    = LMud_Lisp_Intern(lisp, "MACRO-NAME");
+    self->symbol_method_name   = LMud_Lisp_Intern(lisp, "METHOD-NAME");
+}
+
+void LMud_CompilerCache_Destroy(struct LMud_CompilerCache* self)
+{
+    (void) self;
+}
+
+
 void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSession* session)
 {
     self->session = session;
@@ -306,33 +347,7 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
 
     self->unwind_protect_stack_pointer = 0;
 
-    self->cached.symbol_declare        = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "DECLARE");
-    self->cached.symbol_quote          = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "QUOTE");
-    self->cached.symbol_function       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FUNCTION");
-    self->cached.symbol_lambda         = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LAMBDA");
-    self->cached.symbol_block          = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "BLOCK");
-    self->cached.symbol_progn          = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "PROGN");
-    self->cached.symbol_setq           = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "SETQ");
-    self->cached.symbol_let            = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LET");
-    self->cached.symbol_flet           = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FLET");
-    self->cached.symbol_labels         = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LABELS");
-    self->cached.symbol_if             = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "IF");
-    self->cached.symbol_while          = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "WHILE");
-    self->cached.symbol_mvb            = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "MULTIPLE-VALUE-BIND");
-    self->cached.symbol_mvl            = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "MULTIPLE-VALUE-LIST");
-    self->cached.symbol_return_from    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "RETURN-FROM");
-    self->cached.symbol_unwind_protect = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "UNWIND-PROTECT");
-    self->cached.symbol_signal_handler = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "%SIGNAL-HANDLER");
-
-    self->cached.symbol_andrest       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&REST");
-    self->cached.symbol_andbody       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&BODY");
-    self->cached.symbol_andoptional   = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&OPTIONAL");
-    self->cached.symbol_andkey        = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&KEY");
-    self->cached.symbol_andignorerest = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&IGNORE-REST");
-
-    self->cached.symbol_function_name = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FUNCTION-NAME");
-    self->cached.symbol_macro_name    = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "MACRO-NAME");
-    self->cached.symbol_method_name   = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "METHOD-NAME");
+    LMud_CompilerCache_Create(&self->cached, session);
 
     LMud_Compiler_PushScope(self);
 }
@@ -362,6 +377,8 @@ void LMud_Compiler_Destroy(struct LMud_Compiler* self)
 
     LMud_Free(self->bytecodes);
     LMud_Free(self->constants);
+
+    LMud_CompilerCache_Destroy(&self->cached);
 }
 
 
