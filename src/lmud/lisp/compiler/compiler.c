@@ -1,4 +1,5 @@
 
+#include <lmud/glue.h>
 #include <lmud/lisp/lisp.h>
 #include <lmud/lisp/io.h>
 #include <lmud/util/memory.h>
@@ -365,6 +366,11 @@ void LMud_Compiler_Destroy(struct LMud_Compiler* self)
 struct LMud_Lisp* LMud_Compiler_GetLisp(struct LMud_Compiler* self)
 {
     return LMud_CompilerSession_GetLisp(self->session);
+}
+
+struct LMud_Log*  LMud_Compiler_GetLog(struct LMud_Compiler* self)
+{
+    return LMud_GetLog(LMud_Compiler_GetLisp(self)->mud);
 }
 
 
@@ -1229,15 +1235,24 @@ void LMud_Compiler_CompileFuncall(struct LMud_Compiler* self, LMud_Any function,
 
 void LMud_Compiler_HandleDeclarationFunctionName(struct LMud_Compiler* self, LMud_Any args)
 {
-    LMud_Any  name;
+    LMud_Any                  name;
+    struct LMud_LogComposer   composer;
+    struct LMud_OutputStream  stream;
 
     if (LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), args))
     {
         name = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), args);
         
-        printf("Compiling function name: ");
-        LMud_Lisp_PrintToFile(LMud_Compiler_GetLisp(self), name, stdout, false);
-        printf("\n");
+        {
+            LMud_LogComposer_Create(&composer, LMud_Compiler_GetLog(self), LMud_LogLevel_DEBUG);
+            LMud_OutputStream_CreateOnLogComposer(&stream, &composer);
+            LMud_OutputStream_Printf(&stream, "Compiling function: ");
+            LMud_Lisp_Print(LMud_Compiler_GetLisp(self), name, &stream, false);
+            LMud_OutputStream_WriteChar(&stream, '\n');
+            LMud_OutputStream_Destroy(&stream);
+            LMud_LogComposer_Commit(&composer);
+            LMud_LogComposer_Destroy(&composer);
+        }
     }
 }
 
