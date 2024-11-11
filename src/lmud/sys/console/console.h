@@ -50,6 +50,7 @@ void LMud_Console_GetCursor(struct LMud_Console* self, unsigned int* x, unsigned
 
 void LMud_Console_MoveCursor(struct LMud_Console* self, unsigned int x, unsigned int y);
 void LMud_Console_MoveCursorToLine(struct LMud_Console* self, unsigned int line);
+void LMud_Console_MoveCursorToBottomLineAndColumn(struct LMud_Console* self, unsigned int column);
 void LMud_Console_MoveCursorToBottomLine(struct LMud_Console* self);
 
 void LMud_Console_SaveCursor(struct LMud_Console* self, struct LMud_ConsolePosition* pos);

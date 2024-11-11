@@ -162,6 +162,11 @@ void LMud_Console_MoveCursorToLine(struct LMud_Console* self, unsigned int line)
     LMud_Console_MoveCursor(self, 1, line);
 }
 
+void LMud_Console_MoveCursorToBottomLineAndColumn(struct LMud_Console* self, unsigned int column)
+{
+    LMud_Console_MoveCursor(self, column, self->height);
+}
+
 void LMud_Console_MoveCursorToBottomLine(struct LMud_Console* self)
 {
     LMud_Console_MoveCursorToLine(self, self->height);
@@ -233,9 +238,13 @@ static void LMud_Console_RedrawStatusLine(struct LMud_Console* self)
         LMud_Console_MoveCursorToBottomLine(self);
         LMud_Console_KillLine(self);
         printf(
-            "%s %s | %lu objects", 
+            "%s %s", 
             LMud_Console_GetSpinner(now),
-            self->status,
+            self->status
+        );
+        LMud_Console_MoveCursorToBottomLineAndColumn(self, self->width - 30);
+        printf(
+            "| %lu objects",
             report.objects_allocated
         );
         LMud_MemoryReport_Destroy(&report);
