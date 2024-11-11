@@ -71,6 +71,13 @@ void LMud_Log_Destroy(struct LMud_Log* self)
     }
 }
 
+bool LMud_Log_AcceptsLogLevel(struct LMud_Log* self, enum LMud_LogLevel loglevel)
+{
+    (void) self;
+
+    return loglevel >= LMud_HARDCODED_LOG_LEVEL;
+}
+
 void LMud_Log_Append(struct LMud_Log* self, const char* text)
 {
     struct LMud_Line*  line;
@@ -128,7 +135,11 @@ void LMud_LogComposer_Commit(struct LMud_LogComposer* self)
     {
         LMud_StringBuilder_AppendChar(&self->builder, '\n');
     }
-    printf("%s", self->builder.data);
+
+    if (LMud_Log_AcceptsLogLevel(self->log, self->loglevel))
+    {
+        printf("%s", self->builder.data);
+    }
 }
 
 void LMud_LogComposer_AppendChar(struct LMud_LogComposer* self, char c)

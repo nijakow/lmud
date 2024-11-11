@@ -227,7 +227,6 @@ static void LMud_GC_FinalBookeeping(struct LMud_GC* self)
 
 void LMud_GC_Run(struct LMud_GC* self)
 {
-    LMud_Logf(self->lisp->mud, LMud_LogLevel_NOTE, "Garbage Collection...\n");
     LMud_SetStatus(self->lisp->mud, "Garbage Collection...");
 
     LMud_GC_InitialBookeeping(self);

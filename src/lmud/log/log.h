@@ -37,6 +37,8 @@ struct LMud_Log
 bool LMud_Log_Create(struct LMud_Log* self);
 void LMud_Log_Destroy(struct LMud_Log* self);
 
+bool LMud_Log_AcceptsLogLevel(struct LMud_Log* self, enum LMud_LogLevel loglevel);
+
 void LMud_Log_Append(struct LMud_Log* self, const char* text);
 
 

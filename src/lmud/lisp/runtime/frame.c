@@ -328,7 +328,8 @@ void LMud_Frame_RemoveReference(struct LMud_Frame* self, struct LMud_FrameRef* r
      */
     if (LMud_Frame_IsReadyForShipDeletion(self))
     {
-        printf("[Note]: Frame/Ship %p would have been freed here.\n", self);
+#warning "TODO: Free frame here."
+        // printf("[Note]: Frame/Ship %p would have been freed here.\n", self);
     }
 }
 

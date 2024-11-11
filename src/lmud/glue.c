@@ -59,16 +59,22 @@ void LMud_Logf(struct LMud* mud, enum LMud_LogLevel loglevel, const char* format
     struct LMud_LogComposer  composer;
     struct LMud_OutputStream stream;
 
-    va_start(args, format);
+    /*
+     * If the log won't print this level, don't bother.
+     */
+    if (LMud_Log_AcceptsLogLevel(LMud_GetLog(mud), loglevel))
     {
-        LMud_LogComposer_Create(&composer, LMud_GetLog(mud), loglevel);
-        LMud_OutputStream_CreateOnLogComposer(&stream, &composer);
-        LMud_OutputStream_VPrintf(&stream, format, args);
-        LMud_OutputStream_Destroy(&stream);
-        LMud_LogComposer_Commit(&composer);
-        LMud_LogComposer_Destroy(&composer);
+        va_start(args, format);
+        {
+            LMud_LogComposer_Create(&composer, LMud_GetLog(mud), loglevel);
+            LMud_OutputStream_CreateOnLogComposer(&stream, &composer);
+            LMud_OutputStream_VPrintf(&stream, format, args);
+            LMud_OutputStream_Destroy(&stream);
+            LMud_LogComposer_Commit(&composer);
+            LMud_LogComposer_Destroy(&composer);
+        }
+        va_end(args);
     }
-    va_end(args);
 }
 
 void LMud_SetStatus(struct LMud* self, const char* status)
