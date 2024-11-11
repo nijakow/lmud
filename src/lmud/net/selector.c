@@ -71,10 +71,11 @@ void LMud_Selector_Select(struct LMud_Selector* self, bool block)
     if (block) {
         timeout.tv_sec  = 0;
         timeout.tv_usec = 100000;
+        timeout_ptr     = &timeout;
     } else {
         timeout.tv_sec  = 0;
         timeout.tv_usec = 0;
-        timeout_ptr = &timeout;
+        timeout_ptr     = &timeout;
     }
 
     /*
