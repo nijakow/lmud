@@ -101,6 +101,11 @@ void LMud_Net_Tick(struct LMud_Net* self, bool block)
 
         LMud_Connections_Tick(&self->connections, &selector);
         LMud_Servers_Tick(&self->servers, &selector);
+
+        if (block && LMud_Lisp_NeedsControlBackImmediately(LMud_GetLisp(self->mud)))
+        {
+            LMud_SetStatus(self->mud, "Running...");
+        }
     }
     LMud_Selector_Destroy(&selector);
 }
