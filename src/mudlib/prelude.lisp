@@ -45,7 +45,9 @@
 (set-symbol-macro 'defmacro
    (lambda (name args &rest body)
       (list 'set-symbol-macro (list 'quote name)
-            (list 'lambda args (list* 'block name body)))))
+            (list 'lambda args
+               (list 'declare (list 'macro-name name))
+               (list* 'block name body)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

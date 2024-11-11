@@ -159,6 +159,7 @@ struct LMud_Compiler
         LMud_Any                    symbol_andignorerest;
 
         LMud_Any                    symbol_function_name; // For DECLARE forms
+        LMud_Any                    symbol_macro_name;    // For DECLARE forms
         LMud_Any                    symbol_method_name;   // For DECLARE forms
     }                               cached;
 };
