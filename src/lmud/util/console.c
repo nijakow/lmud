@@ -30,6 +30,8 @@ bool LMud_Console_Create(struct LMud_Console* self, struct LMud* lmud)
 
     LMud_Logf(self->lmud, LMud_LogLevel_DEBUG, "Console size: %dx%d", self->width, self->height);
 
+    self->status = strdup("");
+
     return true;
 }
 
@@ -191,14 +193,59 @@ void LMud_Console_RestoreExcursion(struct LMud_Console* self, struct LMud_Consol
     LMud_Console_RestoreCursor(self, &excursion->pos);
 }
 
-void LMud_Console_Tick(struct LMud_Console* self)
+static const char* LMud_Console_GetSpinner(unsigned int tick)
 {
-    struct LMud_ConsoleExcursion excursion;
+    static const char* spinners[] =
+    {
+        /*
+        "|",
+        "/",
+        "-",
+        "\\"
+        */
+
+       // Use braille spinner
+       "⣾",
+       "⣽",
+       "⣻",
+       "⢿",
+       "⡿",
+       "⣟",
+       "⣯",
+       "⣷"
+    };
+
+    return spinners[tick % (sizeof(spinners) / sizeof(spinners[0]))];
+}
+
+static void LMud_Console_RedrawStatusLine(struct LMud_Console* self)
+{
+    struct LMud_ConsoleExcursion  excursion;
+    time_t                        now;
+
+    now = time(NULL);
 
     LMud_Console_SaveExcursion(self, &excursion);
     {
         LMud_Console_MoveCursorToBottomLine(self);
-        printf("Tick: %ld", time(NULL));
+        LMud_Console_KillLine(self);
+        printf(
+            "%s %s", 
+            LMud_Console_GetSpinner(now),
+            self->status
+        );
     }
     LMud_Console_RestoreExcursion(self, &excursion);
+}
+
+void LMud_Console_SetStatus(struct LMud_Console* self, const char* status)
+{
+    free(self->status);
+    self->status = strdup(status);
+    LMud_Console_RedrawStatusLine(self);
+}
+
+void LMud_Console_Tick(struct LMud_Console* self)
+{
+    LMud_Console_RedrawStatusLine(self);
 }

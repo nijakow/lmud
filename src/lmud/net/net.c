@@ -92,6 +92,11 @@ void LMud_Net_Tick(struct LMud_Net* self, bool block)
         LMud_Servers_RegisterOnSelector(&self->servers, &selector);
         LMud_Connections_RegisterOnSelector(&self->connections, &selector);
 
+        if (block)
+        {
+            LMud_SetStatus(self->mud, "Waiting for network activity...");
+        }
+        
         LMud_Selector_Select(&selector, block);
 
         LMud_Connections_Tick(&self->connections, &selector);

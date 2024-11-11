@@ -1237,23 +1237,22 @@ void LMud_Compiler_CompileFuncall(struct LMud_Compiler* self, LMud_Any function,
 
 void LMud_Compiler_HandleDeclarationFunctionName(struct LMud_Compiler* self, LMud_Any args)
 {
-    LMud_Any                  name;
-    struct LMud_LogComposer   composer;
-    struct LMud_OutputStream  stream;
+    LMud_Any                   name;
+    struct LMud_StringBuilder  sb;
+    struct LMud_OutputStream   stream;
 
     if (LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), args))
     {
         name = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), args);
         
         {
-            LMud_LogComposer_Create(&composer, LMud_Compiler_GetLog(self), LMud_LogLevel_DEBUG);
-            LMud_OutputStream_CreateOnLogComposer(&stream, &composer);
+            LMud_StringBuilder_Create(&sb);
+            LMud_OutputStream_CreateOnStringBuilder(&stream, &sb);
             LMud_OutputStream_Printf(&stream, "Compiling function: ");
             LMud_Lisp_Print(LMud_Compiler_GetLisp(self), name, &stream, false);
-            LMud_OutputStream_WriteChar(&stream, '\n');
             LMud_OutputStream_Destroy(&stream);
-            LMud_LogComposer_Commit(&composer);
-            LMud_LogComposer_Destroy(&composer);
+            LMud_SetStatus(LMud_Compiler_GetLisp(self)->mud, LMud_StringBuilder_GetStatic(&sb));
+            LMud_StringBuilder_Destroy(&sb);
         }
     }
 }

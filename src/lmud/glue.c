@@ -70,3 +70,8 @@ void LMud_Logf(struct LMud* mud, enum LMud_LogLevel loglevel, const char* format
     }
     va_end(args);
 }
+
+void LMud_SetStatus(struct LMud* self, const char* status)
+{
+    LMud_Console_SetStatus(&self->console, status);
+}

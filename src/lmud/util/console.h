@@ -33,6 +33,8 @@ struct LMud_Console
 
     unsigned int  width;
     unsigned int  height;
+
+    char*         status;
 };
 
 bool LMud_Console_Create(struct LMud_Console* self, struct LMud* lmud);
@@ -55,5 +57,7 @@ void LMud_Console_RestoreCursor(struct LMud_Console* self, struct LMud_ConsolePo
 
 void LMud_Console_SaveExcursion(struct LMud_Console* self, struct LMud_ConsoleExcursion* excursion);
 void LMud_Console_RestoreExcursion(struct LMud_Console* self, struct LMud_ConsoleExcursion* excursion);
+
+void LMud_Console_SetStatus(struct LMud_Console* self, const char* status);
 
 void LMud_Console_Tick(struct LMud_Console* self);
