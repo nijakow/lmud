@@ -38,7 +38,9 @@
                        (list 'lambda args (list* 'block name body))))
           ;; Normal defun
           (list 'set-symbol-function (list 'quote name)
-                (list 'lambda args (list* 'block name body))))))
+                (list 'lambda args
+                   (list 'declare (list 'function-name name))
+                   (list* 'block name body))))))
 
 (set-symbol-macro 'defmacro
    (lambda (name args &rest body)

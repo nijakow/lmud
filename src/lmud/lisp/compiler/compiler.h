@@ -134,6 +134,7 @@ struct LMud_Compiler
         LMud_Any                    symbol_set_symbol_value;
         LMud_Any                    symbol_set_symbol_function;
 
+        LMud_Any                    symbol_declare;
         LMud_Any                    symbol_quote;
         LMud_Any                    symbol_function;
         LMud_Any                    symbol_lambda;
@@ -156,6 +157,8 @@ struct LMud_Compiler
         LMud_Any                    symbol_andoptional;
         LMud_Any                    symbol_andkey;
         LMud_Any                    symbol_andignorerest;
+
+        LMud_Any                    symbol_function_name; // For DECLARE forms
     }                               cached;
 };
 

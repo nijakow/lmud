@@ -1,5 +1,6 @@
 
 #include <lmud/lisp/lisp.h>
+#include <lmud/lisp/io.h>
 #include <lmud/util/memory.h>
 
 #include "compiler.h"
@@ -304,6 +305,7 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
 
     self->unwind_protect_stack_pointer = 0;
 
+    self->cached.symbol_declare        = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "DECLARE");
     self->cached.symbol_quote          = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "QUOTE");
     self->cached.symbol_function       = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FUNCTION");
     self->cached.symbol_lambda         = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "LAMBDA");
@@ -326,6 +328,8 @@ void LMud_Compiler_Create(struct LMud_Compiler* self, struct LMud_CompilerSessio
     self->cached.symbol_andoptional   = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&OPTIONAL");
     self->cached.symbol_andkey        = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&KEY");
     self->cached.symbol_andignorerest = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "&IGNORE-REST");
+
+    self->cached.symbol_function_name = LMud_Lisp_Intern(LMud_CompilerSession_GetLisp(session), "FUNCTION-NAME");
 
     LMud_Compiler_PushScope(self);
 }
@@ -1223,6 +1227,49 @@ void LMud_Compiler_CompileFuncall(struct LMud_Compiler* self, LMud_Any function,
     LMud_Compiler_WriteCall(self, arity);
 }
 
+void LMud_Compiler_HandleDeclarationFunctionName(struct LMud_Compiler* self, LMud_Any args)
+{
+    LMud_Any  name;
+
+    if (LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), args))
+    {
+        name = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), args);
+        
+        printf("Compiling function name: ");
+        LMud_Lisp_Print(LMud_Compiler_GetLisp(self), name, stdout, false);
+        printf("\n");
+    }
+}
+
+void LMud_Compiler_HandleDeclaration(struct LMud_Compiler* self, LMud_Any declaration)
+{
+    LMud_Any  name;
+    LMud_Any  args;
+
+    if (LMud_Lisp_IsSymbol(LMud_Compiler_GetLisp(self), declaration)) {
+        name = declaration;
+        args = LMud_Lisp_Nil(LMud_Compiler_GetLisp(self));
+    } else if (LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), declaration)) {
+        name = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), declaration);
+        args = LMud_Lisp_Cdr(LMud_Compiler_GetLisp(self), declaration);
+    } else {
+        return;
+    }
+    
+    if (LMud_Any_Eq(name, self->cached.symbol_function_name)) LMud_Compiler_HandleDeclarationFunctionName(self, args);
+}
+
+void LMud_Compiler_CompileSpecialDeclare(struct LMud_Compiler* self, LMud_Any arguments)
+{
+    LMud_Any  declaration;
+
+    while (LMud_Lisp_IsCons(LMud_Compiler_GetLisp(self), arguments))
+    {
+        LMud_Lisp_TakeNext(LMud_Compiler_GetLisp(self), &arguments, &declaration);
+        LMud_Compiler_HandleDeclaration(self, declaration);
+    }
+}
+
 void LMud_Compiler_CompileSpecialQuote(struct LMud_Compiler* self, LMud_Any arguments)
 {
     LMud_Any  value;
@@ -1705,7 +1752,8 @@ void LMud_Compiler_CompileCombination(struct LMud_Compiler* self, LMud_Any expre
     /*
      * Handle special forms
      */
-         if (LMud_Any_Eq(function, self->cached.symbol_quote))          LMud_Compiler_CompileSpecialQuote(self, arguments);
+         if (LMud_Any_Eq(function, self->cached.symbol_declare))        LMud_Compiler_CompileSpecialDeclare(self, arguments);
+    else if (LMud_Any_Eq(function, self->cached.symbol_quote))          LMud_Compiler_CompileSpecialQuote(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_function))       LMud_Compiler_CompileSpecialFunction(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_lambda))         LMud_Compiler_CompileSpecialLambda(self, arguments);
     else if (LMud_Any_Eq(function, self->cached.symbol_block))          LMud_Compiler_CompileSpecialBlock(self, arguments);
