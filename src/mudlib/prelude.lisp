@@ -1894,7 +1894,7 @@
 
    ))
 
-   (let ((port (lmud.int::open-fd 0)))
-      (lmud.int:set-current-port (io:wrap-port port))
-      (lmud.bootstrap::repl port))
+   ;; (let ((port (lmud.int::open-fd 0)))
+   ;;    (lmud.int:set-current-port (io:wrap-port port))
+   ;;    (lmud.bootstrap::repl port))
 )

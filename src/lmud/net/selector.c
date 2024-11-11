@@ -68,9 +68,10 @@ void LMud_Selector_Select(struct LMud_Selector* self, bool block)
     struct timeval   timeout;
     struct timeval*  timeout_ptr;
 
-    if (block)
-        timeout_ptr = NULL;
-    else {
+    if (block) {
+        timeout.tv_sec  = 0;
+        timeout.tv_usec = 100000;
+    } else {
         timeout.tv_sec  = 0;
         timeout.tv_usec = 0;
         timeout_ptr = &timeout;

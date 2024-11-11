@@ -96,6 +96,7 @@ void LMud_Tick(struct LMud* self)
 {
     LMud_Net_Tick(&self->net, !LMud_Lisp_NeedsControlBackImmediately(&self->lisp));
     LMud_Lisp_Tick(&self->lisp);
+    LMud_Console_Tick(&self->console);
 }
 
 /**
