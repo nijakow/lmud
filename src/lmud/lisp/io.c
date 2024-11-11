@@ -8,35 +8,35 @@
 #include "io.h"
 
 
-void LMud_Lisp_PrintList(struct LMud_Lisp* lisp, LMud_Any list, FILE* stream, bool escaped)
+void LMud_Lisp_PrintList(struct LMud_Lisp* lisp, LMud_Any list, struct LMud_OutputStream* stream, bool escaped)
 {
-    fprintf(stream, "(");
+    LMud_OutputStream_Printf(stream, "(");
 
     LMud_Lisp_Print(lisp, LMud_Lisp_Car(lisp, list), stream, escaped);
     list = LMud_Lisp_Cdr(lisp, list);
 
     while (LMud_Lisp_IsCons(lisp, list))
     {
-        fprintf(stream, " ");
+        LMud_OutputStream_Printf(stream, " ");
         LMud_Lisp_Print(lisp, LMud_Lisp_Car(lisp, list), stream, escaped);
         list = LMud_Lisp_Cdr(lisp, list);
     }
 
     if (!LMud_Lisp_IsNil(lisp, list)) {
-        fprintf(stream, " . ");
+        LMud_OutputStream_Printf(stream, " . ");
         LMud_Lisp_Print(lisp, list, stream, escaped);
     }
 
-    fprintf(stream, ")");
+    LMud_OutputStream_Printf(stream, ")");
 }
 
-void LMud_Lisp_PrintArray(struct LMud_Lisp* lisp, struct LMud_Array* array, FILE* stream, bool escaped)
+void LMud_Lisp_PrintArray(struct LMud_Lisp* lisp, struct LMud_Array* array, struct LMud_OutputStream* stream, bool escaped)
 {
     LMud_Any   default_value;
     LMud_Size  index;
     LMud_Size  size;
 
-    fprintf(stream, "〈");
+    LMud_OutputStream_Printf(stream, "〈");
 
     default_value = LMud_Lisp_Nil(lisp);
     size          = LMud_Array_GetSize(array);
@@ -44,35 +44,35 @@ void LMud_Lisp_PrintArray(struct LMud_Lisp* lisp, struct LMud_Array* array, FILE
     for (index = 0; index < size; index++)
     {
         if (index > 0)
-            fprintf(stream, " ");
+            LMud_OutputStream_Printf(stream, " ");
         LMud_Lisp_Print(lisp, LMud_Array_Aref(array, index, default_value), stream, escaped);
     }
 
-    fprintf(stream, "〉");
+    LMud_OutputStream_Printf(stream, "〉");
 }
 
-void LMud_Lisp_PrintBytes(struct LMud_Lisp* lisp, struct LMud_Bytes* bytes, FILE* stream)
+void LMud_Lisp_PrintBytes(struct LMud_Lisp* lisp, struct LMud_Bytes* bytes, struct LMud_OutputStream* stream)
 {
     LMud_Size  index;
     LMud_Size  size;
 
     (void) lisp;
 
-    fprintf(stream, "⦑");
+    LMud_OutputStream_Printf(stream, "⦑");
 
     size = LMud_Bytes_GetSize(bytes);
 
     for (index = 0; index < size; index++)
     {
         if (index > 0)
-            fprintf(stream, " ");
-        fprintf(stream, "%02x", (unsigned char) LMud_Bytes_At(bytes, index));
+            LMud_OutputStream_Printf(stream, " ");
+        LMud_OutputStream_Printf(stream, "%02x", (unsigned char) LMud_Bytes_At(bytes, index));
     }
 
-    fprintf(stream, "⦒");
+    LMud_OutputStream_Printf(stream, "⦒");
 }
 
-void LMud_Lisp_PrintCharacter(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool escaped)
+void LMud_Lisp_PrintCharacter(struct LMud_Lisp* lisp, LMud_Any object, struct LMud_OutputStream* stream, bool escaped)
 {
     struct LMud_Utf8_Encoder  encoder;
     const char*               generic_name;
@@ -86,17 +86,17 @@ void LMud_Lisp_PrintCharacter(struct LMud_Lisp* lisp, LMud_Any object, FILE* str
         generic_name = LMud_Rune_Name(rune);
 
         if (generic_name != NULL)
-            fprintf(stream, "#\\%s", generic_name);
+            LMud_OutputStream_Printf(stream, "#\\%s", generic_name);
         else if (!LMud_Rune_IsPrintable(rune))
-            fprintf(stream, "#\\U+%04X", rune);
+            LMud_OutputStream_Printf(stream, "#\\U+%04X", rune);
         else {
             LMud_Utf8_Encoder_Create(&encoder, rune);
-            fprintf(stream, "#\\%s", LMud_Utf8_Encoder_AsString(&encoder));
+            LMud_OutputStream_Printf(stream, "#\\%s", LMud_Utf8_Encoder_AsString(&encoder));
             LMud_Utf8_Encoder_Destroy(&encoder);
         }
     } else {
         LMud_Utf8_Encoder_Create(&encoder, rune);
-        fprintf(stream, "%s", LMud_Utf8_Encoder_AsString(&encoder));
+        LMud_OutputStream_Printf(stream, "%s", LMud_Utf8_Encoder_AsString(&encoder));
         LMud_Utf8_Encoder_Destroy(&encoder);
     }
 }
@@ -108,17 +108,17 @@ bool LMud_Lisp_IsQuoteClause(struct LMud_Lisp* lisp, LMud_Any object)
         && LMud_Any_Eq(LMud_Lisp_Car(lisp, object), lisp->constants.quote);
 }
 
-void LMud_Lisp_BeginPrintList(struct LMud_Lisp* lisp, LMud_Any list, FILE* stream, bool escaped)
+void LMud_Lisp_BeginPrintList(struct LMud_Lisp* lisp, LMud_Any list, struct LMud_OutputStream* stream, bool escaped)
 {
     if (LMud_Lisp_IsQuoteClause(lisp, list)) {
-        fprintf(stream, "'");
+        LMud_OutputStream_Printf(stream, "'");
         LMud_Lisp_Print(lisp, LMud_Lisp_Cadr(lisp, list), stream, escaped);
     } else {
         LMud_Lisp_PrintList(lisp, list, stream, escaped);
     }
 }
 
-void LMud_Lisp_PrintSymbol(struct LMud_Lisp* lisp, LMud_Any symbol, FILE* stream, bool escaped)
+void LMud_Lisp_PrintSymbol(struct LMud_Lisp* lisp, LMud_Any symbol, struct LMud_OutputStream* stream, bool escaped)
 {
     LMud_Any             package;
     struct LMud_Symbol*  symbol_object;
@@ -129,28 +129,28 @@ void LMud_Lisp_PrintSymbol(struct LMud_Lisp* lisp, LMud_Any symbol, FILE* stream
     package       = LMud_Symbol_Package(symbol_object);
 
     if (LMud_Symbol_IsGensym(symbol_object)) {
-        fprintf(stream, "⦍" LMud_VT100_Underline "GENSYM" LMud_VT100_Normal " %p⦎", symbol_object);
+        LMud_OutputStream_Printf(stream, "⦍" LMud_VT100_Underline "GENSYM" LMud_VT100_Normal " %p⦎", symbol_object);
     } else {
         if (LMud_Lisp_IsPackage(lisp, package)) {
             if (LMud_Any_Eq(package, lisp->constants.default_package)) {
                 // Do nothing
             } else if (LMud_Any_Eq(package, lisp->constants.keyword_package)) {
-                fprintf(stream, ":");
+                LMud_OutputStream_Printf(stream, ":");
             } else {
                 LMud_Lisp_Print(lisp, LMud_Package_Name(LMud_Any_AsPointer(package)), stream, false);
-                fprintf(stream, "::");
+                LMud_OutputStream_Printf(stream, "::");
             }
         }
-        fprintf(stream, "%s", LMud_Symbol_NameChars(symbol_object));
+        LMud_OutputStream_Printf(stream, "%s", LMud_Symbol_NameChars(symbol_object));
     }
 }
 
-void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool escaped)
+void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, struct LMud_OutputStream* stream, bool escaped)
 {
     void*  pointer;
 
     if (LMud_Any_IsInteger(object)) {
-        fprintf(stream, "%d", LMud_Any_AsInteger(object));
+        LMud_OutputStream_Printf(stream, "%d", LMud_Any_AsInteger(object));
     } else if (LMud_Any_IsCharacter(object)) {
         LMud_Lisp_PrintCharacter(lisp, object, stream, escaped);
     } else if (LMud_Any_IsPointer(object)) {
@@ -164,18 +164,18 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
             LMud_Lisp_PrintBytes(lisp, pointer, stream);
         } else if (LMud_Lisp_IsStringPointer(lisp, pointer)) {
             if (escaped) {
-                fprintf(stream, "\"%s\"", ((struct LMud_String*) pointer)->chars);
+                LMud_OutputStream_Printf(stream, "\"%s\"", ((struct LMud_String*) pointer)->chars);
             } else {
-                fprintf(stream, "%s", ((struct LMud_String*) pointer)->chars);
+                LMud_OutputStream_Printf(stream, "%s", ((struct LMud_String*) pointer)->chars);
             }
         } else if (LMud_Lisp_IsSymbolPointer(lisp, pointer)) {
             LMud_Lisp_PrintSymbol(lisp, object, stream, escaped);
         } else if (LMud_Lisp_IsFunctionPointer(lisp, pointer)) {
-            fprintf(stream, "⦍" LMud_VT100_Underline "BYTE-COMPILED-FUNCTION" LMud_VT100_Normal " %p :BYTECODES ", pointer);
+            LMud_OutputStream_Printf(stream, "⦍" LMud_VT100_Underline "BYTE-COMPILED-FUNCTION" LMud_VT100_Normal " %p :BYTECODES ", pointer);
             LMud_Lisp_Print(lisp, LMud_Function_Bytecodes(pointer), stream, true);
-            fprintf(stream, " :CONSTANTS ");
+            LMud_OutputStream_Printf(stream, " :CONSTANTS ");
             LMud_Lisp_Print(lisp, LMud_Function_Constants(pointer), stream, true);
-            fprintf(
+            LMud_OutputStream_Printf(
                 stream,
                 " :STACK-SIZE %lu :REGISTER-COUNT %lu :FIXED-ARGUMENT-COUNT %lu :LEXICALIZED %s :VARIADIC %s⦎",
                 ((struct LMud_Function*) pointer)->info.stack_size,
@@ -185,27 +185,36 @@ void LMud_Lisp_Print(struct LMud_Lisp* lisp, LMud_Any object, FILE* stream, bool
                 ((struct LMud_Function*) pointer)->info.variadic ? "T" : "NIL"
             );
         } else if (LMud_Lisp_IsClosurePointer(lisp, pointer)) {
-            fprintf(stream, "⦍" LMud_VT100_Underline "CLOSURE" LMud_VT100_Normal " %p⦎", pointer);
+            LMud_OutputStream_Printf(stream, "⦍" LMud_VT100_Underline "CLOSURE" LMud_VT100_Normal " %p⦎", pointer);
         } else if (LMud_Lisp_IsBuiltinPointer(lisp, pointer)) {
-            fprintf(stream, "⦍" LMud_VT100_Underline "MACHINE-CODE-FUNCTION" LMud_VT100_Normal " :NAME %s⦎", ((struct LMud_Builtin*) pointer)->name);
+            LMud_OutputStream_Printf(stream, "⦍" LMud_VT100_Underline "MACHINE-CODE-FUNCTION" LMud_VT100_Normal " :NAME %s⦎", ((struct LMud_Builtin*) pointer)->name);
         } else if (LMud_Lisp_IsRatioPointer(lisp, pointer)) {
             LMud_Lisp_Print(lisp, LMud_Ratio_Numerator((struct LMud_Ratio*) pointer), stream, escaped);
-            fprintf(stream, "/");
+            LMud_OutputStream_Printf(stream, "/");
             LMud_Lisp_Print(lisp, LMud_Ratio_Denominator((struct LMud_Ratio*) pointer), stream, escaped);
         } else if (LMud_Lisp_IsPackagePointer(lisp, pointer)) {
-            fprintf(stream, "⦍" LMud_VT100_Underline "PACKAGE" LMud_VT100_Normal " :NAME ");
+            LMud_OutputStream_Printf(stream, "⦍" LMud_VT100_Underline "PACKAGE" LMud_VT100_Normal " :NAME ");
             LMud_Lisp_Print(lisp, LMud_Package_Name((struct LMud_Package*) pointer), stream, true);
-            fprintf(stream, "⦎");
+            LMud_OutputStream_Printf(stream, "⦎");
         } else if (LMud_Lisp_IsPortPointer(lisp, pointer)) {
-            fprintf(stream, "⦍" LMud_VT100_Underline "PORT" LMud_VT100_Normal " %p⦎", pointer);
+            LMud_OutputStream_Printf(stream, "⦍" LMud_VT100_Underline "PORT" LMud_VT100_Normal " %p⦎", pointer);
         } else if (LMud_Lisp_IsCustomPointer(lisp, pointer)) {
-            fprintf(stream, "⦍" LMud_VT100_Underline "CUSTOM" LMud_VT100_Normal " %p⦎", pointer);
+            LMud_OutputStream_Printf(stream, "⦍" LMud_VT100_Underline "CUSTOM" LMud_VT100_Normal " %p⦎", pointer);
         } else {
-            fprintf(stream, "⦍" LMud_VT100_Underline "UNKNOWN" LMud_VT100_Normal " %p⦎", pointer);
+            LMud_OutputStream_Printf(stream, "⦍" LMud_VT100_Underline "UNKNOWN" LMud_VT100_Normal " %p⦎", pointer);
         }
     } else {
-        fprintf(stream, "⦍" LMud_VT100_Underline "UNKNOWN" LMud_VT100_Normal "⦎");
+        LMud_OutputStream_Printf(stream, "⦍" LMud_VT100_Underline "UNKNOWN" LMud_VT100_Normal "⦎");
     }
+}
+
+void LMud_Lisp_PrintToFile(struct LMud_Lisp* lisp, LMud_Any object, FILE* file, bool escaped)
+{
+    struct LMud_OutputStream  stream;
+
+    LMud_OutputStream_CreateOnFile(&stream, file);
+    LMud_Lisp_Print(lisp, object, &stream, escaped);
+    LMud_OutputStream_Destroy(&stream);
 }
 
 

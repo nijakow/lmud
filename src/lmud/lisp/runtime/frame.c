@@ -570,7 +570,7 @@ void LMud_Frame_Dump(struct LMud_Frame* self, struct LMud_Lisp* lisp)
             printf("          ");
         }
         printf(" [%3lu] ", index);
-        LMud_Lisp_Print(lisp, self->payload[index], stdout, true);
+        LMud_Lisp_PrintToFile(lisp, self->payload[index], stdout, true);
         printf("\n");
     }
 }

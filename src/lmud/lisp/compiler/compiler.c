@@ -1236,7 +1236,7 @@ void LMud_Compiler_HandleDeclarationFunctionName(struct LMud_Compiler* self, LMu
         name = LMud_Lisp_Car(LMud_Compiler_GetLisp(self), args);
         
         printf("Compiling function name: ");
-        LMud_Lisp_Print(LMud_Compiler_GetLisp(self), name, stdout, false);
+        LMud_Lisp_PrintToFile(LMud_Compiler_GetLisp(self), name, stdout, false);
         printf("\n");
     }
 }

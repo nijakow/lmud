@@ -746,14 +746,14 @@ void LMud_Builtin_Read(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size 
 void LMud_Builtin_Princ(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
-    LMud_Lisp_Print(fiber->lisp, arguments[0], stdout, false);
+    LMud_Lisp_PrintToFile(fiber->lisp, arguments[0], stdout, false);
     LMud_Fiber_SetAccumulator(fiber, arguments[0]);
 }
 
 void LMud_Builtin_Prin1(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
-    LMud_Lisp_Print(fiber->lisp, arguments[0], stdout, true);
+    LMud_Lisp_PrintToFile(fiber->lisp, arguments[0], stdout, true);
     LMud_Fiber_SetAccumulator(fiber, arguments[0]);
 }
 
