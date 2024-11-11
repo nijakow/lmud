@@ -102,6 +102,12 @@ struct LMud_Types* LMud_Lisp_Types(struct LMud_Lisp* self)
 }
 
 
+void LMud_Lisp_FetchMemoryReport(struct LMud_Lisp* self, struct LMud_MemoryReport* report)
+{
+    report->objects_allocated = self->objects.objects_allocated;
+}
+
+
 bool LMud_Lisp_IsArrayPointer(struct LMud_Lisp* self, void* object)
 {
     return LMud_Types_IsArray(LMud_Lisp_Types(self), object);

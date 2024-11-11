@@ -161,6 +161,7 @@ static void LMud_GC_Collect(struct LMud_GC* self)
                 LMud_Free(header);
                 self->stats.objects_freed++;
                 self->stats.bytes_freed += object_size;
+                self->lisp->objects.objects_allocated--;
                 break;
 
             case LMud_GCBits_Black:
@@ -227,6 +228,7 @@ static void LMud_GC_FinalBookeeping(struct LMud_GC* self)
 void LMud_GC_Run(struct LMud_GC* self)
 {
     LMud_Logf(self->lisp->mud, LMud_LogLevel_NOTE, "Garbage Collection...\n");
+    LMud_SetStatus(self->lisp->mud, "Garbage Collection...");
 
     LMud_GC_InitialBookeeping(self);
     LMud_GC_MarkRoots(self);

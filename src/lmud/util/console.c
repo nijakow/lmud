@@ -221,19 +221,24 @@ static const char* LMud_Console_GetSpinner(unsigned int tick)
 static void LMud_Console_RedrawStatusLine(struct LMud_Console* self)
 {
     struct LMud_ConsoleExcursion  excursion;
+    struct LMud_MemoryReport      report;
     time_t                        now;
 
     now = time(NULL);
 
     LMud_Console_SaveExcursion(self, &excursion);
     {
+        LMud_MemoryReport_Create(&report);
+        LMud_Lisp_FetchMemoryReport(LMud_GetLisp(self->lmud), &report);
         LMud_Console_MoveCursorToBottomLine(self);
         LMud_Console_KillLine(self);
         printf(
-            "%s %s", 
+            "%s %s | %lu objects", 
             LMud_Console_GetSpinner(now),
-            self->status
+            self->status,
+            report.objects_allocated
         );
+        LMud_MemoryReport_Destroy(&report);
     }
     LMud_Console_RestoreExcursion(self, &excursion);
 }

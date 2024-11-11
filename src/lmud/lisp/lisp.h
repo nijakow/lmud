@@ -3,6 +3,7 @@
 
 #include <lmud/lisp/base.h>
 #include <lmud/lisp/objects.h>
+#include <lmud/lisp/memory.h>
 #include <lmud/lisp/runtime/scheduler.h>
 #include <lmud/util/stream.h>
 
@@ -43,6 +44,8 @@ void LMud_Lisp_Mark(struct LMud_GC* gc, struct LMud_Lisp* self);
 struct LMud_Objects*   LMud_Lisp_Objects(struct LMud_Lisp* self);
 struct LMud_Scheduler* LMud_Lisp_Scheduler(struct LMud_Lisp* self);
 struct LMud_Types*     LMud_Lisp_Types(struct LMud_Lisp* self);
+
+void LMud_Lisp_FetchMemoryReport(struct LMud_Lisp* self, struct LMud_MemoryReport* report);
 
 bool LMud_Lisp_IsArrayPointer(struct LMud_Lisp* self, void* object);
 bool LMud_Lisp_IsBuiltinPointer(struct LMud_Lisp* self, void* object);

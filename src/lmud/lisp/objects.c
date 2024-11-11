@@ -118,6 +118,7 @@ bool LMud_Objects_Create(struct LMud_Objects* self, struct LMud_Lisp* lisp)
 
     self->bytes_allocated          = 0;
     self->bytes_allocated_since_gc = 0;
+    self->objects_allocated        = 0;
 
     LMud_Types_Create(&self->types);
 
@@ -156,6 +157,7 @@ void* LMud_Objects_Allocate(struct LMud_Objects* self, struct LMud_Type* type, L
     if (object != NULL)
     {
         LMud_Header_Create(object, self, type);
+        self->objects_allocated++;
     }
 
     return LMud_Header_ToObject(object);

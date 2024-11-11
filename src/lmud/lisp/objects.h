@@ -65,6 +65,7 @@ struct LMud_Objects
 
     LMud_Size                bytes_allocated;
     LMud_Size                bytes_allocated_since_gc;
+    LMud_Size                objects_allocated;
 };
 
 bool LMud_Objects_Create(struct LMud_Objects* self, struct LMud_Lisp* lisp);
