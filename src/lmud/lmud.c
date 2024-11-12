@@ -130,8 +130,8 @@ void LMud_Banner(struct LMud* self)
     (void) self;
 
     printf("\n");
-    printf("  LMud v%s %s '%s'\n", LMud_VERSION, LMud_VERSION_EXTRA, LMud_RELEASE_NAME);
-    printf("  Copyright (c) 2024 nijakow\n");
+    printf("  LMud v%s-%s '%s'\n", LMud_VERSION, LMud_VERSION_EXTRA, LMud_RELEASE_NAME);
+    printf("  Copyright (c) 2024 Eric Felix Nijakowski\n");
     printf("\n");
 }
 

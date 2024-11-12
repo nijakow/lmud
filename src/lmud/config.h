@@ -12,8 +12,8 @@
 #pragma once
 
 #define LMud_VERSION "0.1"
-#define LMud_VERSION_EXTRA "beta"
-#define LMud_RELEASE_NAME "Beta Banana"
+#define LMud_VERSION_EXTRA "rc1"
+#define LMud_RELEASE_NAME "Fuzzy Fireball"
 
 #define LMud_ENABLE_COMPRESSED_ANYS
 
