@@ -1455,6 +1455,16 @@ void LMud_Builtin_DumpProcess(struct LMud_Fiber* fiber, LMud_Any* arguments, LMu
 
 void LMud_Builtin_GetClock(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
+    /*
+     * Doch zittre vor der langsamen,
+     * der stillen Macht der Zeit.
+     *              - Friedrich Schiller
+     * 
+     * But tremble before the slow,
+     * the silent power of time.
+     *             - Friedrich Schiller
+     */
+
     struct timeval  now;
     struct timeval  diff;
 

@@ -29,6 +29,14 @@
  */
 bool LMud_Create(struct LMud* self)
 {
+    /*
+     * Nil fieri ex nihilo, in nihilum nil posse reverti.
+     *                                  - Lucretius
+     * 
+     * Nothing can be created from nothing, and nothing can be returned to nothing.
+     *                                                    - Lucretius
+     */
+
     self->running = true;
     gettimeofday(&self->start_time, NULL);
     return LMud_Log_Create(&self->log)
@@ -47,6 +55,14 @@ bool LMud_Create(struct LMud* self)
  */
 void LMud_Destroy(struct LMud* self)
 {
+    /*
+     * Μηδὲν ἄγαν.
+     *      - Χίλων
+     * 
+     * Nothing in excess.
+     *     - Chilon
+     */
+
     LMud_Lisp_Destroy(&self->lisp);
     LMud_Net_Destroy(&self->net);
     LMud_Profiles_Destroy(&self->profiles);
@@ -66,6 +82,14 @@ void LMud_Destroy(struct LMud* self)
  */
 void LMud_SignalInterrupt(struct LMud* self, int signal)
 {
+    /*
+     * μή μου τοὺς κύκλους τάραττε!
+     *              - Ἀρχιμήδης
+     * 
+     * Do not disturb my circles!
+     *             - Archimedes
+     */
+
     LMud_Logf(self, LMud_LogLevel_NOTE, "Caught signal %d", signal);
 
     switch (signal)
@@ -111,6 +135,10 @@ void LMud_Tick(struct LMud* self)
  */
 void LMud_Loop(struct LMud* self)
 {
+    /*
+     * The millstones of the gods grind late, but they grind fine.
+     *                                      - Ancient Proverb
+     */
     while (self->running)
     {
         LMud_Tick(self);
@@ -236,6 +264,14 @@ void LMud_Shutdown(struct LMud* self)
  */
 void LMud_Main(struct LMud* self, int argc, char* argv[])
 {
+    /*
+     * ὁδὸς ἄνω κάτω μία καὶ ὡυτή
+     *             - Ἡράκλειτος
+     *
+     * The way up and the way down are one and the same.
+     *                                - Heraclitus
+     */
+
     (void) argc;
     (void) argv;
 
@@ -243,8 +279,6 @@ void LMud_Main(struct LMud* self, int argc, char* argv[])
      * Start up the LMud Kernel with the mudlib,
      * run the main loop, and shut down after everything
      * is done.
-     * 
-     * No magic here :)
      */
     LMud_Startup(self);
     LMud_Loop(self);
