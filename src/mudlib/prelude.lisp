@@ -345,6 +345,11 @@
              (cons (car list) (remove-if-not predicate (cdr list))))
             (t (remove-if-not predicate (cdr list)))))
 
+   (defun remove (item list)
+      (cond ((endp list) nil)
+            ((eq item (car list))
+             (remove item (cdr list)))
+            (t (cons (car list) (remove item (cdr list))))))
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
@@ -1037,10 +1042,10 @@
                           (list* 'block method-name body))))
             (list 'tos.int:%class-push-method! (list 'tos.int:ensure-class class) (list 'quote method-name) method))))
 
-   (defun tos:at (object variable)
+   (defun tos:dot (object variable)
       (tos.int:get-variable-value object variable))
    
-   (defun (setf tos:at) (value object variable)
+   (defun (setf tos:dot) (value object variable)
       (list 'tos.int:set-variable-value object variable value))
 
    (defun tos:send (object message &ignore-rest)
@@ -1065,10 +1070,6 @@
    (defun tos:all-bound-objects ()
       (domap (symbol (tos:all-bound-object-symbols))
          (get symbol 'tos.int:object-value)))
-
-   (defalias define-class  tos:defclass)
-   (defalias define-method tos:defmethod)
-   (defalias make          tos:make-instance)
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1548,7 +1549,7 @@
             ((io.reader:checkstr stream "~")
              (list 'tos:find (list 'quote (io.reader:read stream meta))))
             ((io.reader:checkstr stream ".")
-             (list 'tos:at 'self (list 'quote (io.reader:read stream meta))))
+             (list 'tos:dot 'self (list 'quote (io.reader:read stream meta))))
             ((io.reader:checkstr stream "[")
              (let ((sequence (io.reader:read-sequence stream meta "]")))
                (list* 'tos:send

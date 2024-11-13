@@ -525,7 +525,7 @@ bool LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMu
         if (LMud_Lisp_Read(lisp, stream, &value)) {
             *result = LMud_Lisp_Cons(
                 lisp,
-                LMud_Lisp_EasyIntern(lisp, "TOS", "AT"),
+                LMud_Lisp_EasyIntern(lisp, "TOS", "DOT"),
                 LMud_Lisp_Cons(
                     lisp,
                     LMud_Lisp_Intern(lisp, "SELF"),
