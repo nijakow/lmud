@@ -64,6 +64,10 @@
    ;;;    Base Macros
    ;;;
 
+   (defmacro defalias (original alias)
+      (list 'defmacro original '(&rest args)
+         (list 'cons (list 'quote alias) 'args)))
+
    (defmacro return (&rest args)
       (list* 'return-from 'nil args))
    
@@ -1061,6 +1065,10 @@
    (defun tos:all-bound-objects ()
       (domap (symbol (tos:all-bound-object-symbols))
          (get symbol 'tos.int:object-value)))
+
+   (defalias define-class  tos:defclass)
+   (defalias define-method tos:defmethod)
+   (defalias make          tos:make-instance)
 
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
