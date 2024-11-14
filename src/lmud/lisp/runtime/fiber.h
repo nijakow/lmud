@@ -120,6 +120,8 @@ void LMud_Fiber_ControlYield(struct LMud_Fiber* self);
 void LMud_Fiber_ControlUnyield(struct LMud_Fiber* self);
 void LMud_Fiber_ControlTerminate(struct LMud_Fiber* self);
 
+void LMud_Fiber_Yield(struct LMud_Fiber* self);
+
 enum LMud_ExecutionResumption LMud_Fiber_GetExecutionResumptionMode(struct LMud_Fiber* self);
 void                          LMud_Fiber_SetExecutionResumptionMode(struct LMud_Fiber* self, enum LMud_ExecutionResumption mode);
 

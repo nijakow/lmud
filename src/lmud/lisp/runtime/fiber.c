@@ -360,6 +360,14 @@ void LMud_Fiber_ControlUnyield(struct LMud_Fiber* self)
     LMud_Fiber_SetState(self, LMud_FiberState_RUNNING);
 }
 
+/*
+ * The public yielding interface.
+ */
+void LMud_Fiber_Yield(struct LMud_Fiber* self)
+{
+    LMud_Fiber_ControlYield(self);
+}
+
 void LMud_Fiber_ContinueTerminate_FRIEND(struct LMud_Fiber* self)
 {
     /*

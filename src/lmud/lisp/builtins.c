@@ -1267,6 +1267,13 @@ void LMud_Builtin_SetPlayer(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_
     LMud_Fiber_SetAccumulator(fiber, arguments[0]);
 }
 
+void LMud_Builtin_Yield(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    NO_ARGS;
+    LMud_Fiber_Yield(fiber);
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Nil(fiber->lisp));
+}
+
 void LMud_Builtin_Processp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
@@ -1618,6 +1625,7 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "GET-CLOCK", LMud_Builtin_GetClock);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PLAYER", LMud_Builtin_GetPlayer);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "SET-PLAYER", LMud_Builtin_SetPlayer);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "YIELD", LMud_Builtin_Yield);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRIN1", LMud_Builtin_Prin1);
