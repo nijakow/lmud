@@ -1152,30 +1152,29 @@
 
    
    (defun io:wrap-port (port)
-      [(tos:make-instance io:<port-stream>) construct port])
-      ;; port)
+      (.construct (tos:make-instance io:<port-stream>) port))
    
    (defun io:unwrap-port (stream)
-      [stream port])
+      (.port stream))
 
    (defun io:the-stream (stream)
       (or stream (lmud.int:current-port)))
 
    (defun io:write-raw-byte-to-stream (stream byte)
-      [stream write-byte byte])
+      (.write-byte stream byte))
    
    (defun io:read-raw-byte-from-stream (stream)
-      [stream read-byte])
+      (.read-byte stream))
    
    (defun io:unread-raw-char-from-stream (stream char)
       (when char
-         [stream unread-char char]))
+         (.unread-char stream char)))
    
    (defun io:close-stream (stream)
-      [stream close])
+      (.close stream))
    
    (defun io:raw-eof-p (stream)
-      [stream eof-p])
+      (.eof-p stream))
 
    (defun io:write-byte-to-stream (stream byte)
       (io:write-raw-byte-to-stream (io:unwrap-port stream) byte))
@@ -1232,10 +1231,10 @@
                      (t (lmud.util:simple-error "Invalid UTF-8 encoding!")))))))
 
    (defun io:read-char-from-stream (stream)
-      [stream read-char])
+      (.read-char stream))
    
    (defun io:write-char-to-stream (stream char)
-      [stream write-char char])
+      (.write-char stream char))
    
    (defun io:eof-p (&optional stream)
       (io:raw-eof-p (io:the-stream stream)))

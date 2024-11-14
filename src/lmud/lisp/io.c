@@ -515,6 +515,26 @@ bool LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMu
         return LMud_Lisp_ReadInteger(lisp, stream, 8, result);
     } else if (LMud_InputStream_CheckStr(stream, "#x")) {
         return LMud_Lisp_ReadInteger(lisp, stream, 16, result);
+    } else if (LMud_InputStream_CheckStr(stream, "(.")) {
+        LMud_Any  message;
+        LMud_Any  sequence;
+
+        if (LMud_Lisp_Read(lisp, stream, &message) && LMud_Lisp_ReadSequence(lisp, stream, ")", &sequence)) {
+            *result = LMud_Lisp_Cons(
+                lisp,
+                LMud_Lisp_EasyIntern(lisp, "TOS", "SEND"),
+                LMud_Lisp_Cons(
+                    lisp,
+                    LMud_Lisp_Car(lisp, sequence),
+                    LMud_Lisp_Cons(
+                        lisp,
+                        LMud_Lisp_Quote(lisp, message),
+                        LMud_Lisp_Cdr(lisp, sequence)
+                    )
+                )
+            );
+            return true;
+        }
     } else if (LMud_InputStream_CheckStr(stream, "(")) {
         return LMud_Lisp_ReadList(lisp, stream, result);
     } else if (LMud_InputStream_CheckStr(stream, ":")) {
@@ -537,25 +557,6 @@ bool LMud_Lisp_Read(struct LMud_Lisp* lisp, struct LMud_InputStream* stream, LMu
                 )
             );
 
-            return true;
-        }
-    } else if (LMud_InputStream_CheckStr(stream, "[")) {
-        LMud_Any  sequence;
-
-        if (LMud_Lisp_ReadSequence(lisp, stream, "]", &sequence)) {
-            *result = LMud_Lisp_Cons(
-                lisp,
-                LMud_Lisp_EasyIntern(lisp, "TOS", "SEND"),
-                LMud_Lisp_Cons(
-                    lisp,
-                    LMud_Lisp_Car(lisp, sequence),
-                    LMud_Lisp_Cons(
-                        lisp,
-                        LMud_Lisp_Quote(lisp, LMud_Lisp_Cadr(lisp, sequence)),
-                        LMud_Lisp_Cddr(lisp, sequence)
-                    )
-                )
-            );
             return true;
         }
     } else {
