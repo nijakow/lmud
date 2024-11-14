@@ -3,8 +3,27 @@
    (with (parent   nil)
          (children '())))
 
+(tos:defclass <room> (<object>))
+
 (tos:defmethod (<object> game:parent)   () .parent)
 (tos:defmethod (<object> game:children) () .children)
+
+(defalias make          tos:make-instance)
+(defalias define-method tos:defmethod)
+
+(defmacro define-class (name supers &rest body)
+   `(tos:defclass ,name ,(or supers '(<object>))
+      ,@body))
+
+(defmacro define-object (name supers &rest body)
+   `(tos:defobject ,name ,(or supers '(<object>))
+      ,@body))
+
+(defmacro define-room (name supers &rest body)
+   `(tos:defobject ,name ,(or supers '(<room>))
+      ,@body))
+
+
 
 (tos:defmethod (<object> game:unlink-child) (child)
    (setf .children (remove child .children)))
@@ -39,18 +58,6 @@
 
 (defun environment (e)
    (parent e))
-
-(defalias make          tos:make-instance)
-(defalias define-method tos:defmethod)
-
-(defmacro define-class (name supers &rest body)
-   `(tos:defclass ,name ,(or supers '(<object>))
-      ,@body))
-
-(defmacro define-object (name supers &rest body)
-   `(tos:defobject ,name ,(or supers '(<object>))
-      ,@body))
-
 
 (define-method (<object> describe) ()
    (tell (:p "You see nothing special.")))

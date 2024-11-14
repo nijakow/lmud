@@ -1003,7 +1003,7 @@
             (t (lmud.util:simple-error "Invalid class!"))))
 
    (defmacro tos:define-class-hook (name args &body body)
-      (list 'setf (list 'get (list 'quote name) ''tos.int:defclass-hook)
+      (list 'setf (list 'get (list 'quote name) ''tos.int:defclass-hook-function)
          (list* 'lambda args body)))
 
    (defmacro tos:defclass (name supers &body body)
@@ -1021,8 +1021,13 @@
                             ((:with with)
                              (domap (var (cdr clause))
                                 (cond ((symbolp var) (list 'tos.int:%class-push-var! class (list 'quote var) nil))
-                                      ((consp var)   (list 'tos.int:%class-push-var! class (list 'quote (car var)) (cons 'progn (cdr var))))
-                                      (t (lmud.util:simple-error "Invalid tos:defclass variable definition!")))))))
+                                      ((consp   var) (list 'tos.int:%class-push-var! class (list 'quote (car var)) (cons 'progn (cdr var))))
+                                      (t (lmud.util:simple-error "Invalid tos:defclass variable definition!")))))
+                            ((nil) (lmud:log :warning "Empty tos:defclass clause!") nil)
+                            (t (let ((hook-function (or (get (car clause) 'tos.int:defclass-hook-function)
+                                                        (lambda (&rest args)
+                                                           (lmud.util:simple-error "Invalid tos:defclass clause!")))))
+                                 (apply hook-function class (cdr clause))))))
                         (t (lmud.util:simple-error "Invalid tos:defclass clause!"))))))))
 
    (defun tos.int:ensure-singleton-class (e)
