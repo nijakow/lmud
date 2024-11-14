@@ -20,6 +20,8 @@ bool LMud_Console_Create(struct LMud_Console* self, struct LMud* lmud)
 
     self->lmud = lmud;
 
+    gettimeofday(&self->last_update, NULL);
+
     /*
      * Get the width and height of the console (terminal).
      */
@@ -250,6 +252,8 @@ static void LMud_Console_RedrawStatusLine(struct LMud_Console* self)
         LMud_MemoryReport_Destroy(&report);
     }
     LMud_Console_RestoreExcursion(self, &excursion);
+
+    gettimeofday(&self->last_update, NULL);
 }
 
 void LMud_Console_SetStatus(struct LMud_Console* self, const char* status)
@@ -261,5 +265,13 @@ void LMud_Console_SetStatus(struct LMud_Console* self, const char* status)
 
 void LMud_Console_Tick(struct LMud_Console* self)
 {
-    LMud_Console_RedrawStatusLine(self);
+    struct timeval now;
+
+    gettimeofday(&now, NULL);
+
+    // Every 100ms
+    if (now.tv_sec > self->last_update.tv_sec || now.tv_usec - self->last_update.tv_usec > 100000)
+    {
+        LMud_Console_RedrawStatusLine(self);
+    }
 }

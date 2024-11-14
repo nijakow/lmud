@@ -1870,44 +1870,14 @@
                    (eval expr))))))
 
    
-   (defun load-module (path)
-      (load (string:concatenate "../mudlib/" path ".lisp")))
+   (defun load-kernel-module (path)
+      (load (string:concatenate "../kernel/" path ".lisp")))
    
-   (defun load-modules (&rest paths)
+   (defun load-kernel-modules (&rest paths)
       (dolist (path paths)
-         (load-module path)))
+         (load-kernel-module path)))
 
-   (defun lmud.bootstrap::banner (port)
-      (io:uformat port "~&~%Welcome to the LMud REPL!~%"))
-
-   (defun lmud.bootstrap::safely-evaluate (expression)
-      (%signal-handler (e)
-            (eval expression)
-         (io:uformat t "~&Error: ~a~%" e)
-         (values)))
-
-   (defun lmud.bootstrap::repl (port)
-      (while t
-         (princ ". " port)
-         (let ((expr (read port)))
-            (when (eq expr :q)
-               (return))
-            (let ((results (multiple-value-list (lmud.bootstrap::safely-evaluate expr))))
-               (dolist (e results)
-                  (princ "  " port)
-                  (prin1 e port)
-                  (terpri port))))))
-
-   (defun lmud.bootstrap::hi (port)
-      (lmud.int:set-current-port (io:wrap-port port))
-      (lmud.bootstrap::banner port)
-      (lmud.bootstrap::repl port))
-
-   (load-module "master")
+   (load-kernel-module "master")
 
    ))
-
-   ;; (let ((port (lmud.int::open-fd 0)))
-   ;;    (lmud.int:set-current-port (io:wrap-port port))
-   ;;    (lmud.bootstrap::repl port))
 )

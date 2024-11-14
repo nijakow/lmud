@@ -29,12 +29,14 @@ struct LMud_ConsoleExcursion
 
 struct LMud_Console
 {
-    struct LMud*  lmud;
+    struct LMud*   lmud;
 
-    unsigned int  width;
-    unsigned int  height;
+    struct timeval last_update;
 
-    char*         status;
+    unsigned int   width;
+    unsigned int   height;
+
+    char*          status;
 };
 
 bool LMud_Console_Create(struct LMud_Console* self, struct LMud* lmud);

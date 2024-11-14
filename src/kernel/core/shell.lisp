@@ -17,7 +17,7 @@
                ((string= command "quit" :key #'char-upcase) (return))
                ((string= command "repl" :key #'char-upcase)
                 (%signal-handler (e)
-                     (lmud.bootstrap::repl (lmud.int:current-port))
+                     (repl:repl)
                   (format t "~&An error occurred!~%")))
                (t (multiple-value-bind (command bindings)
                      (game:find-command input)
