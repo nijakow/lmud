@@ -79,6 +79,7 @@ struct LMud_Fiber
     struct LMud_Process*           self_process;
 
     LMud_Any                       port;
+    LMud_Any                       player;
 
     struct LMud_FiberQueue         waiting_for_result;
 
@@ -133,6 +134,9 @@ LMud_Any*  LMud_Fiber_RawValues_UNSAFE(struct LMud_Fiber* self);
 
 LMud_Any   LMud_Fiber_GetPort(struct LMud_Fiber* self);
 void       LMud_Fiber_SetPort(struct LMud_Fiber* self, LMud_Any port);
+
+LMud_Any   LMud_Fiber_GetPlayer(struct LMud_Fiber* self);
+void       LMud_Fiber_SetPlayer(struct LMud_Fiber* self, LMud_Any player);
 
 struct LMud_Frame* LMud_Fiber_PushFrame(struct LMud_Fiber* self, struct LMud_Function* function, struct LMud_Frame* lexical, LMud_Any* arguments, LMud_Size argument_count);
 void               LMud_Fiber_PopFrame(struct LMud_Fiber* self);

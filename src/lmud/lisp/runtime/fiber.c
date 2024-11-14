@@ -174,6 +174,7 @@ void LMud_Fiber_Create(struct LMud_Fiber* self, struct LMud_Lisp* lisp, struct L
     self->self_process  = NULL;
 
     self->port          = LMud_Lisp_Nil(lisp);
+    self->player        = LMud_Lisp_Nil(lisp);
 
     LMud_FiberQueue_Create(&self->waiting_for_result);
 
@@ -215,6 +216,7 @@ void LMud_Fiber_Mark(struct LMud_GC* gc, struct LMud_Fiber* self)
     LMud_GC_MarkObject(gc, self->self_process);
 
     LMud_GC_MarkAny(gc, self->port);
+    LMud_GC_MarkAny(gc, self->player);
 
     LMud_GC_MarkFrame(gc, self->top);  // This will run recursively.
 }
@@ -454,6 +456,16 @@ LMud_Any LMud_Fiber_GetPort(struct LMud_Fiber* self)
 void LMud_Fiber_SetPort(struct LMud_Fiber* self, LMud_Any port)
 {
     self->port = port;
+}
+
+LMud_Any LMud_Fiber_GetPlayer(struct LMud_Fiber* self)
+{
+    return self->player;
+}
+
+void LMud_Fiber_SetPlayer(struct LMud_Fiber* self, LMud_Any player)
+{
+    self->player = player;
 }
 
 

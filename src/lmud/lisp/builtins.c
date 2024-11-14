@@ -1254,6 +1254,19 @@ void LMud_Builtin_SetCurrentPort(struct LMud_Fiber* fiber, LMud_Any* arguments, 
     LMud_Fiber_SetAccumulator(fiber, arguments[0]);
 }
 
+void LMud_Builtin_GetPlayer(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    CHECK_ARGS(0, 0);
+    LMud_Fiber_SetAccumulator(fiber, LMud_Fiber_GetPlayer(fiber));
+}
+
+void LMud_Builtin_SetPlayer(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    CHECK_ARGS(1, 1);
+    LMud_Fiber_SetPlayer(fiber, arguments[0]);
+    LMud_Fiber_SetAccumulator(fiber, arguments[0]);
+}
+
 void LMud_Builtin_Processp(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     CHECK_ARGS(1, 1);
@@ -1603,6 +1616,8 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "STACK-FRAME-IP", LMud_Builtin_StackFrameIp);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "DUMP-PROCESS", LMud_Builtin_DumpProcess);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "GET-CLOCK", LMud_Builtin_GetClock);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "PLAYER", LMud_Builtin_GetPlayer);
+    LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.INT", "SET-PLAYER", LMud_Builtin_SetPlayer);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%READ", LMud_Builtin_Read);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRINC", LMud_Builtin_Princ);
     LMud_Lisp_InstallPackagedBuiltin(lisp, "LMUD.DUMMY", "%PRIN1", LMud_Builtin_Prin1);
