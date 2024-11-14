@@ -1023,7 +1023,6 @@
                                 (cond ((symbolp var) (list 'tos.int:%class-push-var! class (list 'quote var) nil))
                                       ((consp   var) (list 'tos.int:%class-push-var! class (list 'quote (car var)) (cons 'progn (cdr var))))
                                       (t (lmud.util:simple-error "Invalid tos:defclass variable definition!")))))
-                            ((nil) (lmud:log :warning "Empty tos:defclass clause!") nil)
                             (t (let ((hook-function (or (get (car clause) 'tos.int:defclass-hook-function)
                                                         (lambda (&rest args)
                                                            (lmud.util:simple-error "Invalid tos:defclass clause!")))))
@@ -1035,9 +1034,9 @@
             (t (lmud.util:simple-error "Expected an object!"))))
    
    (defmacro tos:defobject (name supers &body body)
-      (list 'tos:defclass (list 'tos.int:ensure-singleton-class (if (symbolp name) (list 'quote name) name))
-            supers
-            body))
+      (list* 'tos:defclass (list 'tos.int:ensure-singleton-class (if (symbolp name) (list 'quote name) name))
+             supers
+             body))
 
    (defmacro tos:defmethod (info params &body body)
       (let ((class       (car info))

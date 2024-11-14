@@ -1,4 +1,7 @@
 
+(tos:define-class-hook name (class &key short)
+   (list (when short (list 'tos.int:%class-push-var! class ''short-name short))))
+
 (tos:defclass <object> ()
    (with (parent   nil)
          (children '())))
