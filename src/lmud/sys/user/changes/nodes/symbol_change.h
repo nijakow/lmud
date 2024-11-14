@@ -15,7 +15,7 @@
 #include <lmud/decls.h>
 #include <lmud/lisp/any.h>
 #include <lmud/lisp/objects/symbol.h>
-#include <lmud/user/changes/changelist.h>
+#include <lmud/sys/user/changes/changelist.h>
 
 struct LMud_SymbolChangeNode
 {
