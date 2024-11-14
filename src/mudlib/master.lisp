@@ -2,6 +2,7 @@
 (load-modules "core/util"
               "core/tell"
               "core/objects"
+              "core/rooms"
               "core/command"
               "core/commands"
               "core/shell"

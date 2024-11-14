@@ -1,4 +1,9 @@
 
+(defun game:make-player ()
+   (let ((player (make <object>)))
+      (move player ~the-void)
+      player))
+
 (defun game:banner ()
    (fresh-line)
    (terpri)
@@ -12,6 +17,7 @@
 
 (defun game:start-from-telnet (port)
    (lmud.int:set-current-port port)
+   (lmud.int:set-player (game:make-player))
    (%signal-handler (e)
          (game:start)
       (format port "~&An error occurred!~%" e))

@@ -3,6 +3,9 @@
    (with (parent   nil)
          (children '())))
 
+(tos:defmethod (<object> game:parent)   () .parent)
+(tos:defmethod (<object> game:children) () .children)
+
 (tos:defmethod (<object> game:unlink-child) (child)
    (setf .children (remove child .children)))
 
@@ -17,11 +20,11 @@
    (when new-parent
       (push self (tos:dot new-parent 'children))))
 
-(defun parent   (e) (.parent   e))
-(defun children (e) (.children e))
+(defun parent   (e) (.game:parent   e))
+(defun children (e) (.game:children e))
 
 (defun has-parent? (e)
-   (not (null (.parent e))))
+   (not (null (.game:parent e))))
 
 (defun directly-in? (a b)
    (member a (children b)))
@@ -32,7 +35,10 @@
             (in? (parent a) b))))
 
 (defun unlink (a) (.game:unlink a))
-(defun move (a b) (.game:move b a))
+(defun move (a b) (.game:move a b))
+
+(defun environment (e)
+   (parent e))
 
 (defalias make          tos:make-instance)
 (defalias define-method tos:defmethod)
@@ -44,7 +50,6 @@
 (defmacro define-object (name supers &rest body)
    `(tos:defobject ,name ,(or supers '(<object>))
       ,@body))
-
 
 
 (define-method (<object> describe) ()
