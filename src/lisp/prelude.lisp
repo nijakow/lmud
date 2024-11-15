@@ -1870,7 +1870,7 @@
 
    
    (defun load-kernel-module (path)
-      (load (string:concatenate "../kernel/" path ".lisp")))
+      (load (string:concatenate "../lisp/kernel/" path ".lisp")))
    
    (defun load-kernel-modules (&rest paths)
       (dolist (path paths)

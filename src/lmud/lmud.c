@@ -232,7 +232,7 @@ void LMud_Startup(struct LMud* self)
 
     LMud_StartupInfo(self);
 
-    if (LMud_Lisp_LoadFile(&self->lisp, system_profile, "../kernel/prelude.lisp", &boot_function))
+    if (LMud_Lisp_LoadFile(&self->lisp, system_profile, "../lisp/prelude.lisp", &boot_function))
     {
         LMud_Lisp_Kickstart(&self->lisp, system_profile, boot_function);
     }
