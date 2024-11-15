@@ -17,4 +17,4 @@
             (return))
          (let ((results (multiple-value-list (repl::safely-evaluate expr))))
             (dolist (e results)
-               (format t "  ~a~%" e))))))
+               (format t "  ~s~%" e))))))

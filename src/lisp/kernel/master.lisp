@@ -4,8 +4,8 @@
    "engine/io/tell"
    "engine/objects/objects"
    "engine/objects/rooms"
-   "core/command"
-   "core/commands"
+   "shell/cmd/command"
+   "shell/cmd/commands"
    "shell/repl"
    "shell/shell"
    "game")
