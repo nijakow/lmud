@@ -13,7 +13,9 @@
    (while t
       (princ ". ")
       (let ((expr (read)))
-         (when (eq expr :q)
+         (when (or (eq expr :q)
+                   (and (consp expr)
+                        (eq (car expr) 'quit)))
             (return))
          (let ((results (multiple-value-list (repl::safely-evaluate expr))))
             (dolist (e results)

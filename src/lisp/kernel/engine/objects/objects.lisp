@@ -1,9 +1,10 @@
 
-(tos:define-class-hook name (class &key short)
-   (list (when short (list 'tos.int:%class-push-var! class ''short-name short))))
+(tos:define-class-hook name (class &rest args)
+   (list `(tos.int:%class-push-var! ,class 'name (.construct (tos:make-instance <name>) ,@args))))
 
 (tos:defclass <object> ()
-   (with (parent   nil)
+   (with (name     (tos:make-instance <name>))
+         (parent   nil)
          (children '())))
 
 (tos:defclass <room> (<object>))
@@ -44,6 +45,12 @@
 
 (defun parent   (e) (.game:parent   e))
 (defun children (e) (.game:children e))
+
+(defun article (e)
+   (tos:dot (tos:dot e 'name) 'article))
+
+(defun short-name (e)
+   (tos:dot (tos:dot e 'name) 'short))
 
 (defun has-parent? (e)
    (not (null (.game:parent e))))

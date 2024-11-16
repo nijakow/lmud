@@ -2,6 +2,7 @@
 (load-kernel-modules
    "util"
    "engine/io/tell"
+   "engine/objects/name"
    "engine/objects/objects"
    "engine/objects/rooms"
    "shell/cmd/command"
