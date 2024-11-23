@@ -1311,6 +1311,9 @@
                (push char result)))
          (conversions:->string (reverse result))))
    
+   (defun io.reader:read-until-char (stream char)
+      (io.reader:read-until stream (lambda (c) (char= c char)) :slurp-last t))
+
    (defun io.reader:skip-whitespace (stream)
       (io.reader:skip stream #'lmud.char:whitespacep))
    
