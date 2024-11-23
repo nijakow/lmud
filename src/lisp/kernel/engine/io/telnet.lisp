@@ -106,7 +106,8 @@
 
 (tos:defmethod (telnet:<telnet-port> read-char) ()
    (if .pushbacks
-       (pop .pushbacks)
+       (progn (.io:advance-text-position self 1)
+              (pop .pushbacks))
        (let ((char (.telnet::basic-read-char self)))
           (when .echoing?
              (.write-char self char))
@@ -119,6 +120,7 @@
       (t (.telnet::basic-write-char self char))))
 
 (tos:defmethod (telnet:<telnet-port> unread-char) (char)
+   (.io:advance-text-position self -1)
    (push char .pushbacks))
 
 (tos:defmethod (telnet:<telnet-port> eof-p) ()

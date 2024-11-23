@@ -1090,16 +1090,26 @@
    ;;;    Streams and I/O
    ;;;
 
+   (tos:defclass io:<basic-stream> (tos.classes:<t>)
+      (with (io:text-position 0)))
+
+   (tos:defmethod (io:<basic-stream> io:advance-text-position) (&optional (amount 1))
+      (incf .io:text-position amount))
+
    (tos:defmethod (io:<basic-stream> read-char) ()
+      (.io:advance-text-position self 1)
       (io:read-utf8-char self))
 
    (tos:defmethod (io:<basic-stream> write-char) (char)
       (io:write-utf8-char char self))
    
+   (tos:defmethod (io:<basic-stream> unread-char) (char)
+      (.io:advance-text-position self -1))
+   
    (tos:defmethod (io:<basic-stream> flush) () ())
 
    (tos:defmethod (io:<basic-stream> cursor-position) () (values nil nil))
-   (tos:defmethod (io:<basic-stream> text-position)   () nil)
+   (tos:defmethod (io:<basic-stream> text-position)   () .io:text-position)
 
    (tos:defmethod (io:<basic-stream> disable-echo) () ())
    (tos:defmethod (io:<basic-stream> enable-echo)  () ())
@@ -1117,6 +1127,7 @@
       (lmud.int:port-write-byte (.port self) byte))
    
    (tos:defmethod (io:<port-stream> unread-char) (char)
+      (.io:advance-text-position self -1)
       (lmud.int:port-unread-char (.port self) char))
    
    (tos:defmethod (io:<port-stream> eof-p) ()
