@@ -10,6 +10,32 @@
 (tos:defmethod (telnet:<telnet-port> telnet::basic-write-byte) (byte)
    (tos:xsend io:<wrapped-port-stream> self 'write-byte byte))
 
+
+(tos:defmethod (telnet:<telnet-port> telnet::send-will) (option)
+   (.telnet::basic-write-byte self 255)
+   (.telnet::basic-write-byte self 251)
+   (.telnet::basic-write-byte self option)
+   (.flush self))
+
+(tos:defmethod (telnet:<telnet-port> telnet::send-wont) (option)
+   (.telnet::basic-write-byte self 255)
+   (.telnet::basic-write-byte self 252)
+   (.telnet::basic-write-byte self option)
+   (.flush self))
+
+(tos:defmethod (telnet:<telnet-port> telnet::send-do) (option)
+   (.telnet::basic-write-byte self 255)
+   (.telnet::basic-write-byte self 253)
+   (.telnet::basic-write-byte self option)
+   (.flush self))
+
+(tos:defmethod (telnet:<telnet-port> telnet::send-dont) (option)
+   (.telnet::basic-write-byte self 255)
+   (.telnet::basic-write-byte self 254)
+   (.telnet::basic-write-byte self option)
+   (.flush self))
+
+
 (tos:defmethod (telnet:<telnet-port> telnet::begin-receive-sub-negotiation) ()
    ;; Only read in the data - don't do anything with it
    (let ((command (.telnet::basic-read-byte self))
@@ -18,27 +44,19 @@
 
 (tos:defmethod (telnet:<telnet-port> telnet::begin-receive-will) ()
    (let ((option (.telnet::basic-read-byte self)))
-      (.telnet::basic-write-byte self 255)
-      (.telnet::basic-write-byte self 252)
-      (.telnet::basic-write-byte self option)))
+      (.telnet::send-wont self option)))
 
 (tos:defmethod (telnet:<telnet-port> telnet::begin-receive-wont) ()
    (let ((option (.telnet::basic-read-byte self)))
-      (.telnet::basic-write-byte self 255)
-      (.telnet::basic-write-byte self 252)
-      (.telnet::basic-write-byte self option)))
+      (.telnet::send-will self option)))
 
 (tos:defmethod (telnet:<telnet-port> telnet::begin-receive-do) ()
    (let ((option (.telnet::basic-read-byte self)))
-      (.telnet::basic-write-byte self 255)
-      (.telnet::basic-write-byte self 252)
-      (.telnet::basic-write-byte self option)))
+      (.telnet::send-will self option)))
 
 (tos:defmethod (telnet:<telnet-port> telnet::begin-receive-dont) ()
    (let ((option (.telnet::basic-read-byte self)))
-      (.telnet::basic-write-byte self 255)
-      (.telnet::basic-write-byte self 252)
-      (.telnet::basic-write-byte self option)))
+      (.telnet::send-wont self option)))
 
 (tos:defmethod (telnet:<telnet-port> telnet::begin-receive-command) ()
    (let ((command (.telnet::basic-read-byte self)))
@@ -71,7 +89,7 @@
 
 
 (defun telnet:disable-echo (&optional (stream (io:default-stream)))
-   (.write-byte stream 255)
-   (.write-byte stream 251)
-   (.write-byte stream 1)
-   (.flush      stream))
+   (.telnet::send-will stream 1))
+
+(defun telnet:enable-echo (&optional (stream (io:default-stream)))
+   (.telnet::send-wont stream 1))
