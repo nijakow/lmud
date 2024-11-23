@@ -1154,9 +1154,6 @@
 
    (defun io:the-stream (stream)
       (or stream (io:default-stream)))
-
-   (defun io:write-raw-byte-to-stream (stream byte)
-      (.write-byte stream byte))
    
    (defun io:read-raw-byte-from-stream (stream)
       (.read-byte stream))
@@ -1170,9 +1167,6 @@
    
    (defun io:raw-eof-p (stream)
       (.eof-p stream))
-
-   (defun io:write-byte-to-stream (stream byte)
-      (io:write-raw-byte-to-stream (io:unwrap-port stream) byte))
    
    (defun io:read-byte-from-stream (stream)
       (io:read-raw-byte-from-stream (io:unwrap-port stream)))
@@ -1183,16 +1177,16 @@
    
    (defun io:write-utf8-char (char stream)
       (let ((code (char-code char)))
-         (cond ((< code #x80)    (io:write-byte-to-stream stream code))
-               ((< code #x800)   (io:write-byte-to-stream stream (logior #xC0 (ash code -6)))
-                                 (io:write-byte-to-stream stream (logior #x80 (logand code #x3F))))
-               ((< code #x10000) (io:write-byte-to-stream stream (logior #xE0 (ash code -12)))
-                                 (io:write-byte-to-stream stream (logior #x80 (logand (ash code -6) #x3F)))
-                                 (io:write-byte-to-stream stream (logior #x80 (logand code #x3F))))
-               (t                (io:write-byte-to-stream stream (logior #xF0 (ash code -18)))
-                                 (io:write-byte-to-stream stream (logior #x80 (logand (ash code -12) #x3F)))
-                                 (io:write-byte-to-stream stream (logior #x80 (logand (ash code -6) #x3F)))
-                                 (io:write-byte-to-stream stream (logior #x80 (logand code #x3F)))))))
+         (cond ((< code #x80)    (.write-byte stream code))
+               ((< code #x800)   (.write-byte stream (logior #xC0 (ash code -6)))
+                                 (.write-byte stream (logior #x80 (logand code #x3F))))
+               ((< code #x10000) (.write-byte stream (logior #xE0 (ash code -12)))
+                                 (.write-byte stream (logior #x80 (logand (ash code -6) #x3F)))
+                                 (.write-byte stream (logior #x80 (logand code #x3F))))
+               (t                (.write-byte stream (logior #xF0 (ash code -18)))
+                                 (.write-byte stream (logior #x80 (logand (ash code -12) #x3F)))
+                                 (.write-byte stream (logior #x80 (logand (ash code -6) #x3F)))
+                                 (.write-byte stream (logior #x80 (logand code #x3F)))))))
    
    (defun io:read-utf8-char (stream)
       (let ((byte (io:read-byte-from-stream stream)))
@@ -1234,10 +1228,10 @@
    (defun io:eof-p (&optional stream)
       (io:raw-eof-p (io:the-stream stream)))
 
-   (defun write-byte (byte &optional stream)
-      (io:write-byte-to-stream (io:the-stream stream) byte))
+   (defun write-byte (byte &optional (stream (io:default-stream)))
+      (.write-byte stream byte))
    
-   (defun read-byte (&optional stream)
+   (defun read-byte (&optional (stream (io:default-stream)))
       (io:read-byte-from-stream (io:the-stream stream)))
    
    (defun write-char (char &optional stream)
