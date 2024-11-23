@@ -117,6 +117,9 @@
 (tos:defmethod (telnet:<telnet-port> unread-char) (char)
    (push char .pushbacks))
 
+(tos:defmethod (telnet:<telnet-port> cursor-position) ()
+   (vt100:get-cursor-position self))
+
 (defun telnet:make-telnet-port (port)
    (let ((tp (tos:make-instance telnet:<telnet-port>)))
       (.construct tp port)

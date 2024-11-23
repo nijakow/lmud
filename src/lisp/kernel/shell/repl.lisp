@@ -10,7 +10,6 @@
 
 (defun repl::read ()
    (let ((expr (read)))
-      (io.reader:read-until-newline (io:default-stream))
       expr))
 
 (defun repl::repl ()
@@ -24,4 +23,4 @@
             (return))
          (let ((results (multiple-value-list (repl::safely-evaluate expr))))
             (dolist (e results)
-               (format t "  ~s~%" e))))))
+               (format t "~&  ~s~%" e))))))

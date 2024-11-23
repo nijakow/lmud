@@ -1098,6 +1098,8 @@
    
    (tos:defmethod (io:<basic-stream> flush) () ())
 
+   (tos:defmethod (io:<basic-stream> cursor-position) () (values nil nil))
+
    (tos:defmethod (io:<basic-stream> disable-echo) () ())
    (tos:defmethod (io:<basic-stream> enable-echo)  () ())
    
@@ -1806,7 +1808,10 @@
       (io.printer:write-char stream nil #\Return)
       (io.printer:write-char stream nil #\Newline))
    
-   (defun io.printer:fresh-line (stream))
+   (defun io.printer:fresh-line (stream)
+      (multiple-value-bind (x y) (.cursor-position stream)
+         (unless (and x (= x 0))
+             (io.printer:terpri stream))))
 
    (defun prin1 (e &optional stream)
       (io.printer:prin1 (io:the-stream stream) e))
@@ -1819,6 +1824,9 @@
    
    (defun fresh-line (&optional stream)
       (io.printer:fresh-line (io:the-stream stream)))
+   
+   (defun cursor-position (&optional (stream (io:default-stream)))
+      (.cursor-position stream))
 
    (defun io:uformat (stream format-string &rest args)
       (when (null stream)
