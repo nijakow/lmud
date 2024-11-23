@@ -1262,17 +1262,32 @@
       (io:close-stream stream))
    
 
+   (tos:defclass io.reader:<reporter> ()
+      (with (openings nil)))
+
+   (tos:defmethod (io.reader:<reporter> report-data) (data &key from to) nil)
+
+   (tos:defmethod (io.reader:<reporter> push-opening) (what)
+      (push what .openings))
+   
+   (tos:defmethod (io.reader:<reporter> pop-opening) ()
+      (pop .openings))
+
+
    (tos:defclass io.reader:<meta> ()
       (with (eof-error-p t)
-            (eof-value   :eof)))
+            (eof-value   :eof)
+            (reporter    nil)))
    
    (tos:defmethod (io.reader:<meta> eof-error-p) () .eof-error-p)
    (tos:defmethod (io.reader:<meta> eof-value)   () .eof-value)
-   
-   (defun io.reader:make-meta (&key (eof-error-p t) (eof-value nil))
+   (tos:defmethod (io.reader:<meta> reporter)    () .reporter)
+
+   (defun io.reader:make-meta (&key (eof-error-p t) (eof-value nil) reporter)
       (let ((meta (tos:make-instance io.reader:<meta>)))
          (setf (tos::dot meta 'eof-error-p) eof-error-p)
          (setf (tos::dot meta 'eof-value)   eof-value)
+         (setf (tos::dot meta 'reporter)    (or reporter (tos:make-instance io.reader:<reporter>)))
          meta))
 
    (defun io.reader:breaking-char-p (char)
@@ -1501,7 +1516,7 @@
                     number)
                 nil))))
 
-   (defun io.reader:read-list (stream meta)
+   (defun io.reader:read-list-loop (stream meta)
       (io.reader:skip-whitespace stream)
       (cond ((io:eof-p stream) (io.reader:eof-error stream))
             ((io.reader:checkstr stream ")") nil)
@@ -1509,8 +1524,13 @@
                (prog1 (io.reader:read stream meta)
                       (unless (io.reader:checkstr stream ")")
                          (lmud.util:simple-error "Expected ')' after '.'!"))))
-            (t (cons (io.reader:read      stream meta)
-                     (io.reader:read-list stream meta)))))
+            (t (cons (io.reader:read           stream meta)
+                     (io.reader:read-list-loop stream meta)))))
+   
+   (defun io.reader:read-list (stream meta)
+      (.push-opening (.reporter meta) (.text-position stream))
+      (unwind-protect (io.reader:read-list-loop stream meta)
+         (.pop-opening (.reporter meta))))
    
    (defun io.reader:read-sequence (stream meta terminator)
       (io.reader:skip-whitespace stream)
@@ -1600,7 +1620,7 @@
       (let ((start (.text-position stream))
             (data  (io.reader:core-read stream meta))
             (end   (.text-position stream)))
-         ;; TODO: Report position and content
+         (.report-data (.reporter meta) data :from start :to end)
          data))
    
    (defun io.reader:begin-read (stream &rest rest)
