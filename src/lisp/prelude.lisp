@@ -911,7 +911,8 @@
    (defparameter tos.classes:<character> (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<character>))
    (defparameter tos.classes:<function>  (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<function>))
    (defparameter tos.classes:<string>    (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<string>))
-   (defparameter tos.classes:<port>      (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<port>))
+   (defparameter io:<basic-stream>       (tos.int:pre-make-class (list tos.classes:<t>) :name 'io:<basic-stream>))
+   (defparameter tos.classes:<port>      (tos.int:pre-make-class (list io:<basic-stream>) :name 'tos.classes:<port>))
    (defparameter tos.classes:<process>   (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<process>))
 
    (defun tos.int:class-of (object)
@@ -1081,7 +1082,14 @@
    ;;;    Streams and I/O
    ;;;
 
-   (tos:defclass io:<port-stream> ()
+   (tos:defmethod (io:<basic-stream> read-char) ()
+      (io:read-utf8-char self))
+
+   (tos:defmethod (io:<basic-stream> write-char) (char)
+      (io:write-utf8-char char self))
+
+
+   (tos:defclass io:<port-stream> (io:<basic-stream>)
       (with (port nil)))
    
    (tos:defmethod (io:<port-stream> construct) (port)
@@ -1099,12 +1107,6 @@
    (tos:defmethod (io:<port-stream> unread-char) (char)
       (lmud.int:port-unread-char .port char))
    
-   (tos:defmethod (io:<port-stream> read-char) ()
-      (io:read-utf8-char self))
-
-   (tos:defmethod (io:<port-stream> write-char) (char)
-      (io:write-utf8-char char self))
-   
    (tos:defmethod (io:<port-stream> eof-p) ()
       (lmud.int:port-eof-p .port))
 
@@ -1119,12 +1121,6 @@
    
    (tos:defmethod (tos.classes:<port> write-byte) (byte)
       (lmud.int:port-write-byte self byte))
-   
-   (tos:defmethod (tos.classes:<port> read-char) ()
-      (io:read-utf8-char self))
-
-   (tos:defmethod (tos.classes:<port> write-char) (char)
-      (io:write-utf8-char char self))
    
    (tos:defmethod (tos.classes:<port> unread-char) (char)
       (lmud.int:port-unread-char self char))
