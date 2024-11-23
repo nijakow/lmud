@@ -912,7 +912,8 @@
    (defparameter tos.classes:<function>  (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<function>))
    (defparameter tos.classes:<string>    (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<string>))
    (defparameter io:<basic-stream>       (tos.int:pre-make-class (list tos.classes:<t>) :name 'io:<basic-stream>))
-   (defparameter tos.classes:<port>      (tos.int:pre-make-class (list io:<basic-stream>) :name 'tos.classes:<port>))
+   (defparameter io:<port-stream>        (tos.int:pre-make-class (list io:<basic-stream>) :name 'io:<port-stream>))
+   (defparameter tos.classes:<port>      (tos.int:pre-make-class (list io:<port-stream>) :name 'tos.classes:<port>))
    (defparameter tos.classes:<process>   (tos.int:pre-make-class (list tos.classes:<t>) :name 'tos.classes:<process>))
 
    (defun tos.int:class-of (object)
@@ -1089,7 +1090,23 @@
       (io:write-utf8-char char self))
 
 
-   (tos:defclass io:<wrapped-port-stream> (io:<basic-stream>)
+   (tos:defmethod (io:<port-stream> read-byte) ()
+      (lmud.int:port-read-byte (.port self)))
+   
+   (tos:defmethod (io:<port-stream> write-byte) (byte)
+      (lmud.int:port-write-byte (.port self) byte))
+   
+   (tos:defmethod (io:<port-stream> unread-char) (char)
+      (lmud.int:port-unread-char (.port self) char))
+   
+   (tos:defmethod (io:<port-stream> eof-p) ()
+      (lmud.int:port-eof-p (.port self)))
+
+   (tos:defmethod (io:<port-stream> close) ()
+      (lmud.int:close-port (.port self)))
+
+
+   (tos:defclass io:<wrapped-port-stream> (io:<port-stream>)
       (with (port nil)))
    
    (tos:defmethod (io:<wrapped-port-stream> construct) (port)
@@ -1098,38 +1115,7 @@
    
    (tos:defmethod (io:<wrapped-port-stream> port) () .port)
    
-   (tos:defmethod (io:<wrapped-port-stream> read-byte) ()
-      (lmud.int:port-read-byte .port))
-   
-   (tos:defmethod (io:<wrapped-port-stream> write-byte) (byte)
-      (lmud.int:port-write-byte .port byte))
-   
-   (tos:defmethod (io:<wrapped-port-stream> unread-char) (char)
-      (lmud.int:port-unread-char .port char))
-   
-   (tos:defmethod (io:<wrapped-port-stream> eof-p) ()
-      (lmud.int:port-eof-p .port))
-
-   (tos:defmethod (io:<wrapped-port-stream> close) ()
-      (lmud.int:close-port .port))
-   
-
    (tos:defmethod (tos.classes:<port> port) () self)
-
-   (tos:defmethod (tos.classes:<port> read-byte) ()
-      (lmud.int:port-read-byte self))
-   
-   (tos:defmethod (tos.classes:<port> write-byte) (byte)
-      (lmud.int:port-write-byte self byte))
-   
-   (tos:defmethod (tos.classes:<port> unread-char) (char)
-      (lmud.int:port-unread-char self char))
-   
-   (tos:defmethod (tos.classes:<port> eof-p) ()
-      (lmud.int:port-eof-p self))
-   
-   (tos:defmethod (tos.classes:<port> close) ()
-      (lmud.int:close-port self))
    
 
    (tos:defclass io:<string-output-port> ()
