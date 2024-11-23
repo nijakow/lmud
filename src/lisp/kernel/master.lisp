@@ -1,6 +1,7 @@
 
 (load-kernel-modules
    "util"
+   "engine/io/telnet"
    "engine/io/vt100"
    "engine/io/tell"
    "engine/objects/name"

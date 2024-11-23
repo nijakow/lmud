@@ -1088,6 +1088,9 @@
 
    (tos:defmethod (io:<basic-stream> write-char) (char)
       (io:write-utf8-char char self))
+   
+   (tos:defmethod (io:<basic-stream> flush) ()
+      ())
 
 
    (tos:defmethod (io:<port-stream> read-byte) ()
