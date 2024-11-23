@@ -52,11 +52,11 @@
 
 (tos:defmethod (telnet:<telnet-port> telnet::begin-receive-will) ()
    (let ((option (.telnet::basic-read-byte self)))
-      (.telnet::send-wont self option)))
+   ))
 
 (tos:defmethod (telnet:<telnet-port> telnet::begin-receive-wont) ()
    (let ((option (.telnet::basic-read-byte self)))
-      (.telnet::send-will self option)))
+   ))
 
 (tos:defmethod (telnet:<telnet-port> telnet::begin-receive-do) ()
    (let ((option (.telnet::basic-read-byte self)))
