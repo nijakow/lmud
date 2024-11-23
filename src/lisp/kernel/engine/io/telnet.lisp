@@ -121,6 +121,10 @@
 (tos:defmethod (telnet:<telnet-port> unread-char) (char)
    (push char .pushbacks))
 
+(tos:defmethod (telnet:<telnet-port> eof-p) ()
+   (and (null .pushbacks)
+        (tos:xsend io:<wrapped-port-stream> self 'eof-p)))
+
 (tos:defmethod (telnet:<telnet-port> cursor-position) ()
    (vt100:get-cursor-position self))
 
