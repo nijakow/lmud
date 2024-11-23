@@ -1089,28 +1089,28 @@
       (io:write-utf8-char char self))
 
 
-   (tos:defclass io:<port-stream> (io:<basic-stream>)
+   (tos:defclass io:<wrapped-port-stream> (io:<basic-stream>)
       (with (port nil)))
    
-   (tos:defmethod (io:<port-stream> construct) (port)
+   (tos:defmethod (io:<wrapped-port-stream> construct) (port)
       (prog1 self
          (setf .port port)))
    
-   (tos:defmethod (io:<port-stream> port) () .port)
+   (tos:defmethod (io:<wrapped-port-stream> port) () .port)
    
-   (tos:defmethod (io:<port-stream> read-byte) ()
+   (tos:defmethod (io:<wrapped-port-stream> read-byte) ()
       (lmud.int:port-read-byte .port))
    
-   (tos:defmethod (io:<port-stream> write-byte) (byte)
+   (tos:defmethod (io:<wrapped-port-stream> write-byte) (byte)
       (lmud.int:port-write-byte .port byte))
    
-   (tos:defmethod (io:<port-stream> unread-char) (char)
+   (tos:defmethod (io:<wrapped-port-stream> unread-char) (char)
       (lmud.int:port-unread-char .port char))
    
-   (tos:defmethod (io:<port-stream> eof-p) ()
+   (tos:defmethod (io:<wrapped-port-stream> eof-p) ()
       (lmud.int:port-eof-p .port))
 
-   (tos:defmethod (io:<port-stream> close) ()
+   (tos:defmethod (io:<wrapped-port-stream> close) ()
       (lmud.int:close-port .port))
    
 
@@ -1148,7 +1148,7 @@
 
    
    (defun io:wrap-port (port)
-      (.construct (tos:make-instance io:<port-stream>) port))
+      (.construct (tos:make-instance io:<wrapped-port-stream>) port))
    
    (defun io:unwrap-port (stream)
       (.port stream))
