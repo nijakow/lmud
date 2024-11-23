@@ -16,9 +16,7 @@
    (tos:xsend io:<wrapped-port-stream> self 'read-char))
 
 (tos:defmethod (telnet:<telnet-port> telnet::basic-write-char) (char)
-   (tos:xsend io:<wrapped-port-stream> self 'write-char char)
-   (.flush self))
-
+   (tos:xsend io:<wrapped-port-stream> self 'write-char char))
 
 
 (tos:defmethod (telnet:<telnet-port> telnet::send-will) (option)
