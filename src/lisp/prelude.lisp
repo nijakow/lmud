@@ -966,6 +966,10 @@
    (defun tos.int:lookup-method-in-object (object message)
       (or (tos.int:lookup-method-in-class (tos.int:class-of object) message)
           #'tos.int:error-method))
+   
+   (defun tos.int:lookup-method-in-class-or-error (class message)
+      (or (tos.int:lookup-method-in-class class message)
+          (lmud.util:simple-error "No such method!")))
 
    (defun tos.int:lookup-variable-slot-in-object (object variable)
       (dolist (var (tos.int:%object-vars object))
@@ -1054,8 +1058,11 @@
    (defun (setf tos:dot) (value object variable)
       (list 'tos.int:set-variable-value object variable value))
 
+   (defun tos:xsend (class object message &ignore-rest)
+      (lmud.int:funcall-forward-rest (tos.int:lookup-method-in-class-or-error class message) object))
+
    (defun tos:send (object message &ignore-rest)
-      (lmud.int:funcall-forward-rest (tos.int:lookup-method-in-object object message) object))
+      (lmud.int:funcall-forward-rest #'tos:xsend (tos.int:class-of object) object message))
 
    (defun tos:make-instance (class &ignore-rest)
       (lmud.int:funcall-forward-rest #'tos.int:pre-make-instance class))
