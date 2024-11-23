@@ -7,6 +7,7 @@
    "engine/objects/name"
    "engine/objects/objects"
    "engine/objects/rooms"
+   "engine/describe"
    "shell/cmd/command"
    "shell/cmd/commands"
    "shell/repl"

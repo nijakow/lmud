@@ -16,6 +16,6 @@
          (:p "  " ((:color :cyan) "help") " " ((:color :green) "commands") " - View available commands")
          (:p "  " ((:color :cyan) "help") " " ((:color :green) "<topic> ") " - View help for a specific topic")))
 
-(game:defcommand :hello ("look")
+(game:defcommand :look ("look")
    (let ((environment (environment (lmud.int:player))))
-      (.describe environment)))
+      (describe-location environment)))
