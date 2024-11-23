@@ -1524,16 +1524,16 @@
             ((io.reader:checkstr stream ";")
              (io.reader:skip stream (lambda (char) (not (char= char #\Newline))))
              (io.reader:read stream meta :eof-error-p eof-error-p :eof-value eof-value))
-            ((io.reader:checkstr stream "(.")
-             (let ((message  (io.reader:read stream meta))
-                   (receiver (io.reader:read stream meta))
-                   (args     (io.reader:read-list stream meta)))
-                (list* 'tos:send
-                       receiver
-                       (list 'quote message)
-                       args)))
             ((io.reader:checkstr stream "(")
-             (io.reader:read-list stream meta))
+             (if (io.reader:checkstr stream ".")
+                 (let ((message  (io.reader:read stream meta))
+                       (receiver (io.reader:read stream meta))
+                       (args     (io.reader:read-list stream meta)))
+                    (list* 'tos:send
+                           receiver
+                           (list 'quote message)
+                           args))
+                 (io.reader:read-list stream meta)))
             ((io.reader:checkstr stream ":")
              (io.reader:read-keyword stream))
             ((io.reader:checkstr stream "'")
