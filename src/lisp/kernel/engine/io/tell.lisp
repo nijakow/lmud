@@ -44,6 +44,7 @@
                           (princ "-=" ,stream-var))
                        (terpri ,stream-var)))
       ((:lisp) `(princ (progn ,@args) ,stream-var))
+      ((:object) `(tell ((:color :magenta) (:lisp (short-name ,@args)))))
       (t        (error "Unknown tell tag: ~S" tag))))
 
 (defun tell:compile-form (form stream-var)

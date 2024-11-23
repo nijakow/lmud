@@ -1,4 +1,10 @@
 
+(defun util:timeschar (char count)
+   (let ((result '()))
+      (dotimes (index count)
+         (push char result))
+      (conversions:->string result)))
+
 (defmacro random:pick (&body body)
    (let ((count (length body))
          (index 0))
