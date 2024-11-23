@@ -1,7 +1,7 @@
 
 (game:defcommand :clear ("clear")
    ;; Full clear of the screen
-   (princ "\e[2J\e[1;1H"))
+   (vt100:clear-screen))
 
 (game:defcommand :help-commands ("help" topic)
    (cond ((string= (car topic) "commands")

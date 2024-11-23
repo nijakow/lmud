@@ -1114,7 +1114,7 @@
          (setf .port port)))
    
    (tos:defmethod (io:<wrapped-port-stream> port) () .port)
-   
+
    (tos:defmethod (tos.classes:<port> port) () self)
    
 
@@ -1139,8 +1139,11 @@
    (defun io:unwrap-port (stream)
       (.port stream))
 
+   (defun io:default-stream ()
+      (lmud.int:current-port))
+
    (defun io:the-stream (stream)
-      (or stream (lmud.int:current-port)))
+      (or stream (io:default-stream)))
 
    (defun io:write-raw-byte-to-stream (stream byte)
       (.write-byte stream byte))
@@ -1548,6 +1551,14 @@
    
    (defun read-line (&optional stream)
       (io.reader:read-until (io:the-stream stream) #'lmud.char:newlinep :slurp-last t))
+   
+   (defun io:parse-number (chars &optional (base 10))
+      (io.reader:parse-number chars base))
+
+   (defun io:parse-number-from-stream (&optional stream (base 10))
+      (let* ((stream (io:the-stream stream))
+             (chars  (io.reader:read-until stream #'lmud.char:whitespacep)))
+         (io.reader:parse-number chars base)))
 
 
    (defun io.printer:meta-escaped-p (meta) meta)
