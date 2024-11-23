@@ -1297,12 +1297,28 @@
                   (return (conversions:->string (reverse result))))
                (push char result)))
          (conversions:->string (reverse result))))
+
+   (defun io.reader:read-at-least-one-until (stream predicate &key slurp-last)
+      (let ((result '()))
+         (while (not (io:eof-p stream))
+            (let ((char (read-char stream)))
+               (when (or (not (characterp char))
+                         (and (funcall predicate char)
+                              (not (null result))))
+                  (unless slurp-last
+                     (unread-char char stream))
+                  (return (conversions:->string (reverse result))))
+               (push char result)))
+         (conversions:->string (reverse result))))
    
    (defun io.reader:skip-whitespace (stream)
       (io.reader:skip stream #'lmud.char:whitespacep))
-
+   
    (defun io.reader:read-until-breaking-char (stream)
       (io.reader:read-until stream #'io.reader:breaking-char-p))
+   
+   (defun io.reader:read-at-least-one-until-breaking-char (stream)
+      (io.reader:read-at-least-one-until stream #'io.reader:breaking-char-p))
    
    (defun io.reader:read-escaped (stream escape-sequence terminator)
       (let ((result '()))
@@ -1488,7 +1504,7 @@
          (intern (string-upcase text) (find-package "KEYWORD"))))
 
    (defun io.reader:parse-character (stream)
-      (lmud.char:character-by-name (io.reader:read-until-breaking-char stream)))
+      (lmud.char:character-by-name (io.reader:read-at-least-one-until-breaking-char stream)))
    
    (defun io.reader:parse-string (stream)
       (io.reader:read-escaped stream "\\" "\""))
