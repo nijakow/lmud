@@ -1249,6 +1249,20 @@
    (defun close (stream)
       (io:close-stream stream))
    
+
+   (tos:defclass io.reader:<meta> ()
+      (with (eof-error-p t)
+            (eof-value   :eof)))
+   
+   (tos:defmethod (io.reader:<meta> eof-error-p) () .eof-error-p)
+   (tos:defmethod (io.reader:<meta> eof-value)   () .eof-value)
+   
+   (defun io.reader:make-meta (&key (eof-error-p t) (eof-value nil))
+      (let ((meta (tos:make-instance io.reader:<meta>)))
+         (setf (tos::dot meta 'eof-error-p) eof-error-p)
+         (setf (tos::dot meta 'eof-value)   eof-value)
+         meta))
+
    (defun io.reader:breaking-char-p (char)
       (or (char= char (code-char 40))  ; '('
           (char= char (code-char 41))  ; ')'
@@ -1483,14 +1497,14 @@
                (prog1 (io.reader:read stream meta)
                       (unless (io.reader:checkstr stream ")")
                          (lmud.util:simple-error "Expected ')' after '.'!"))))
-            (t (cons (io.reader:read stream meta)
+            (t (cons (io.reader:read      stream meta)
                      (io.reader:read-list stream meta)))))
    
    (defun io.reader:read-sequence (stream meta terminator)
       (io.reader:skip-whitespace stream)
       (cond ((io:eof-p stream) (io.reader:eof-error stream))
             ((io.reader:checkstr stream terminator) nil)
-            (t (cons (io.reader:read stream meta)
+            (t (cons (io.reader:read          stream meta)
                      (io.reader:read-sequence stream meta terminator)))))
 
    (defun io.reader:read-atom (stream meta)
@@ -1517,19 +1531,19 @@
    (defun io.reader:parse-string (stream)
       (io.reader:read-escaped stream "\\" "\""))
 
-   (defun io.reader:read (stream meta &key (eof-error-p t) (eof-value nil))
+   (defun io.reader:read (stream meta)
       (io.reader:skip-whitespace stream)
       (cond ((io:eof-p stream)
-             (if eof-error-p
+             (if (.eof-error-p meta)
                  (io.reader:eof-error stream)
-                 eof-value))
+                 (.eof-value meta)))
             ((io.reader:checkstr stream ";")
              (io.reader:skip stream (lambda (char) (not (char= char #\Newline))))
-             (io.reader:read stream meta :eof-error-p eof-error-p :eof-value eof-value))
+             (io.reader:read stream meta))
             ((io.reader:checkstr stream "(")
              (if (io.reader:checkstr stream ".")
-                 (let ((message  (io.reader:read stream meta))
-                       (receiver (io.reader:read stream meta))
+                 (let ((message  (io.reader:read      stream meta))
+                       (receiver (io.reader:read      stream meta))
                        (args     (io.reader:read-list stream meta)))
                     (list* 'tos:send
                            receiver
@@ -1569,9 +1583,12 @@
                       (list 'quote (cadr sequence))
                       (cddr sequence))))
             (t (io.reader:read-atom stream meta))))
+   
+   (defun io.reader:begin-read (stream &rest rest)
+      (io.reader:read stream (apply #'io.reader:make-meta rest)))
 
-   (defun read (&optional stream &rest rest)
-      (apply #'io.reader:read (io:the-stream stream) nil rest))
+   (defun read (&optional (stream (io:default-stream)) &rest rest)
+      (apply #'io.reader:begin-read stream rest))
    
    (defun read-line (&optional stream)
       (io.reader:read-until (io:the-stream stream) #'lmud.char:newlinep :slurp-last t))
