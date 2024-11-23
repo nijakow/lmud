@@ -1118,6 +1118,9 @@
    
    (tos:defmethod (io:<port-stream> eof-p) ()
       (lmud.int:port-eof-p (.port self)))
+   
+   (tos:defmethod (io:<port-stream> flush) ()
+      (lmud.int:port-flush (.port self)))
 
    (tos:defmethod (io:<port-stream> close) ()
       (lmud.int:close-port (.port self)))
@@ -1310,6 +1313,9 @@
    
    (defun io.reader:read-until-char (stream char)
       (io.reader:read-until stream (lambda (c) (char= c char)) :slurp-last t))
+   
+   (defun io.reader:read-until-newline (stream)
+      (io.reader:read-until-char stream #\Newline))
 
    (defun io.reader:skip-whitespace (stream)
       (io.reader:skip stream #'lmud.char:whitespacep))

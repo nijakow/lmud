@@ -1,5 +1,7 @@
 
-(tos:defclass telnet:<telnet-port> (io:<wrapped-port-stream>))
+(tos:defclass telnet:<telnet-port> (io:<wrapped-port-stream>)
+   (with (echoing?  t)
+         (pushbacks nil)))
 
 (tos:defmethod (telnet:<telnet-port> construct) (port)
    (tos:xsend io:<wrapped-port-stream> self 'construct port))
@@ -9,6 +11,14 @@
 
 (tos:defmethod (telnet:<telnet-port> telnet::basic-write-byte) (byte)
    (tos:xsend io:<wrapped-port-stream> self 'write-byte byte))
+
+(tos:defmethod (telnet:<telnet-port> telnet::basic-read-char) ()
+   (tos:xsend io:<wrapped-port-stream> self 'read-char))
+
+(tos:defmethod (telnet:<telnet-port> telnet::basic-write-char) (char)
+   (tos:xsend io:<wrapped-port-stream> self 'write-char char)
+   (.flush self))
+
 
 
 (tos:defmethod (telnet:<telnet-port> telnet::send-will) (option)
@@ -69,10 +79,11 @@
          ((255) nil)
          (t (error "Unknown telnet command: ~S" command)))))
 
-(tos:defmethod (telnet:<telnet-port> disable-echo) () (.telnet::send-will self 1))
-(tos:defmethod (telnet:<telnet-port> enable-echo)  () (.telnet::send-wont self 1))
+(tos:defmethod (telnet:<telnet-port> disable-echo) () (setf .echoing? nil))
+(tos:defmethod (telnet:<telnet-port> enable-echo)  () (setf .echoing? t))
 
 (tos:defmethod (telnet:<telnet-port> enable-character-mode) ()
+   (.telnet::send-will self 1)
    (.telnet::send-will self 3))
 
 (tos:defmethod (telnet:<telnet-port> read-byte) ()
@@ -81,8 +92,8 @@
           (progn (.telnet::begin-receive-command self)
                  (.read-byte self)) ; This is recursive -- turn this into a loop?
           (case byte
-             ((0) (.read-byte self)) ; Ignore NULLs
-             ((13) 10) ; Convert CR to LF
+             ((0)  (.read-byte self)) ; Ignore NULLs
+             ((13) 10) ; Ignore CRs
              (t byte)))))
 
 (tos:defmethod (telnet:<telnet-port> write-byte) (byte)
@@ -90,6 +101,23 @@
        (progn (.telnet::basic-write-byte self 255)
               (.telnet::basic-write-byte self 255))
        (.telnet::basic-write-byte self byte)))
+
+(tos:defmethod (telnet:<telnet-port> read-char) ()
+   (if .pushbacks
+       (pop .pushbacks)
+       (let ((char (.telnet::basic-read-char self)))
+          (when .echoing?
+             (.write-char self char))
+          char)))
+
+(tos:defmethod (telnet:<telnet-port> write-char) (char)
+   (cond
+      ((char= char #\Newline) (.telnet::basic-write-char self #\Return)
+                              (.telnet::basic-write-char self #\Newline))
+      (t (.telnet::basic-write-char self char))))
+
+(tos:defmethod (telnet:<telnet-port> unread-char) (char)
+   (push char .pushbacks))
 
 (defun telnet:make-telnet-port (port)
    (let ((tp (tos:make-instance telnet:<telnet-port>)))

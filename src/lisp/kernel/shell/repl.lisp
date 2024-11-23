@@ -8,11 +8,16 @@
       (format t "~&Error: ~a~%" e)
       (values)))
 
+(defun repl::read ()
+   (let ((expr (read)))
+      (io.reader:read-until-newline (io:default-stream))
+      expr))
+
 (defun repl::repl ()
    (repl::banner)
    (while t
       (princ ". ")
-      (let ((expr (read)))
+      (let ((expr (repl::read)))
          (when (or (eq expr :q)
                    (and (consp expr)
                         (eq (car expr) 'quit)))
