@@ -69,12 +69,21 @@
          ((255) nil)
          (t (error "Unknown telnet command: ~S" command)))))
 
+(tos:defmethod (telnet:<telnet-port> disable-echo) () (.telnet::send-will self 1))
+(tos:defmethod (telnet:<telnet-port> enable-echo)  () (.telnet::send-wont self 1))
+
+(tos:defmethod (telnet:<telnet-port> enable-character-mode) ()
+   (.telnet::send-will self 3))
+
 (tos:defmethod (telnet:<telnet-port> read-byte) ()
    (let ((byte (.telnet::basic-read-byte self)))
       (if (= byte 255)
           (progn (.telnet::begin-receive-command self)
                  (.read-byte self)) ; This is recursive -- turn this into a loop?
-          byte)))
+          (case byte
+             ((0) (.read-byte self)) ; Ignore NULLs
+             ((13) 10) ; Convert CR to LF
+             (t byte)))))
 
 (tos:defmethod (telnet:<telnet-port> write-byte) (byte)
    (if (= byte 255)
@@ -85,11 +94,5 @@
 (defun telnet:make-telnet-port (port)
    (let ((tp (tos:make-instance telnet:<telnet-port>)))
       (.construct tp port)
+      (.enable-character-mode tp)
       tp))
-
-
-(defun telnet:disable-echo (&optional (stream (io:default-stream)))
-   (.telnet::send-will stream 1))
-
-(defun telnet:enable-echo (&optional (stream (io:default-stream)))
-   (.telnet::send-wont stream 1))

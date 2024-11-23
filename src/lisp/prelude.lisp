@@ -1096,8 +1096,15 @@
    (tos:defmethod (io:<basic-stream> write-char) (char)
       (io:write-utf8-char char self))
    
-   (tos:defmethod (io:<basic-stream> flush) ()
-      ())
+   (tos:defmethod (io:<basic-stream> flush) () ())
+
+   (tos:defmethod (io:<basic-stream> disable-echo) () ())
+   (tos:defmethod (io:<basic-stream> enable-echo)  () ())
+   
+   (tos:defmethod (io:<basic-stream> set-echo) (v)
+      (if v
+          (.enable-echo  self)
+          (.disable-echo self)))
 
 
    (tos:defmethod (io:<port-stream> read-byte) ()
