@@ -1099,6 +1099,7 @@
    (tos:defmethod (io:<basic-stream> flush) () ())
 
    (tos:defmethod (io:<basic-stream> cursor-position) () (values nil nil))
+   (tos:defmethod (io:<basic-stream> text-position)   () nil)
 
    (tos:defmethod (io:<basic-stream> disable-echo) () ())
    (tos:defmethod (io:<basic-stream> enable-echo)  () ())
@@ -1531,8 +1532,7 @@
    (defun io.reader:parse-string (stream)
       (io.reader:read-escaped stream "\\" "\""))
 
-   (defun io.reader:read (stream meta)
-      (io.reader:skip-whitespace stream)
+   (defun io.reader:core-read (stream meta)
       (cond ((io:eof-p stream)
              (if (.eof-error-p meta)
                  (io.reader:eof-error stream)
@@ -1583,6 +1583,14 @@
                       (list 'quote (cadr sequence))
                       (cddr sequence))))
             (t (io.reader:read-atom stream meta))))
+   
+   (defun io.reader:read (stream meta)
+      (io.reader:skip-whitespace stream)
+      (let ((start (.text-position stream))
+            (data  (io.reader:core-read stream meta))
+            (end   (.text-position stream)))
+         ;; TODO: Report position and content
+         data))
    
    (defun io.reader:begin-read (stream &rest rest)
       (io.reader:read stream (apply #'io.reader:make-meta rest)))
