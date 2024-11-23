@@ -1155,9 +1155,6 @@
    (defun io:the-stream (stream)
       (or stream (io:default-stream)))
    
-   (defun io:read-raw-byte-from-stream (stream)
-      (.read-byte stream))
-   
    (defun io:unread-raw-char-from-stream (stream char)
       (when char
          (.unread-char stream char)))
@@ -1167,9 +1164,6 @@
    
    (defun io:raw-eof-p (stream)
       (.eof-p stream))
-   
-   (defun io:read-byte-from-stream (stream)
-      (io:read-raw-byte-from-stream (io:unwrap-port stream)))
    
    (defun io:unread-char-from-stream (stream char)
       (when char
@@ -1189,27 +1183,27 @@
                                  (.write-byte stream (logior #x80 (logand code #x3F)))))))
    
    (defun io:read-utf8-char (stream)
-      (let ((byte (io:read-byte-from-stream stream)))
+      (let ((byte (.read-byte stream)))
          (when byte
             (code-char
                (cond ((< byte #x80) byte)
                      ((< byte #xE0)
-                      (let ((b1 (io:read-byte-from-stream stream)))
+                      (let ((b1 (.read-byte stream)))
                          (and b1
                               (logior (ash (logand byte #x1F) 6)
                                       (logand b1 #x3F)))))
                      ((< byte #xF0)
-                      (let ((b1 (io:read-byte-from-stream stream))
-                            (b2 (io:read-byte-from-stream stream)))
+                      (let ((b1 (.read-byte stream))
+                            (b2 (.read-byte stream)))
                          (and b1
                               b2
                               (logior (ash (logand byte #x0F) 12)
                                       (ash (logand b1   #x3F)  6)
                                       (logand b2 #x3F)))))
                      ((< byte #xF8)
-                      (let ((b1 (io:read-byte-from-stream stream))
-                            (b2 (io:read-byte-from-stream stream))
-                            (b3 (io:read-byte-from-stream stream)))
+                      (let ((b1 (.read-byte stream))
+                            (b2 (.read-byte stream))
+                            (b3 (.read-byte stream)))
                          (and b1
                               b2
                               b3
@@ -1232,7 +1226,7 @@
       (.write-byte stream byte))
    
    (defun read-byte (&optional (stream (io:default-stream)))
-      (io:read-byte-from-stream (io:the-stream stream)))
+      (.read-byte stream))
    
    (defun write-char (char &optional stream)
       (io:write-char-to-stream (io:the-stream stream) char))
