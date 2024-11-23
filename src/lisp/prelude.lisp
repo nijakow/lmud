@@ -1155,19 +1155,11 @@
    (defun io:the-stream (stream)
       (or stream (io:default-stream)))
    
-   (defun io:unread-raw-char-from-stream (stream char)
-      (when char
-         (.unread-char stream char)))
-   
    (defun io:close-stream (stream)
       (.close stream))
    
    (defun io:raw-eof-p (stream)
       (.eof-p stream))
-   
-   (defun io:unread-char-from-stream (stream char)
-      (when char
-         (io:unread-raw-char-from-stream (io:unwrap-port stream) char)))
    
    (defun io:write-utf8-char (char stream)
       (let ((code (char-code char)))
@@ -1234,8 +1226,8 @@
    (defun read-char (&optional stream)
       (io:read-char-from-stream (io:the-stream stream)))
    
-   (defun unread-char (char &optional stream)
-      (io:unread-char-from-stream (io:the-stream stream) char))
+   (defun unread-char (char &optional (stream (io:default-stream)))
+      (.unread-char stream char))
    
    (defun peek-char (stream)
       (let ((char (read-char stream)))
