@@ -14,7 +14,10 @@
    (.telnet::basic-read-byte self))
 
 (tos:defmethod (telnet:<telnet-port> write-byte) (byte)
-   (.telnet::basic-write-byte self byte))
+   (if (= byte 255)
+       (progn (.telnet::basic-write-byte self 255)
+              (.telnet::basic-write-byte self 255))
+       (.telnet::basic-write-byte self byte)))
 
 (defun telnet:make-telnet-port (port)
    (let ((tp (tos:make-instance telnet:<telnet-port>)))
