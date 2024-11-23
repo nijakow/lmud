@@ -16,6 +16,7 @@
    (shell:loop nil))
 
 (defun game:start-from-telnet (port)
+   (setq port (telnet:make-telnet-port port))
    (lmud.int:set-current-port port)
    (lmud.int:set-player (game:make-player))
    (%signal-handler (e)
