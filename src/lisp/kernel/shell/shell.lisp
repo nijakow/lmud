@@ -10,6 +10,7 @@
 
 (defun shell:loop (player-object)
    (while t
+      (fresh-line)
       (princ "> ")
       (let* ((input   (game:split-input-chars (read-line)))
              (command (first input)))

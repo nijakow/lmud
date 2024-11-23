@@ -77,6 +77,9 @@
          ((255) nil)
          (t (error "Unknown telnet command: ~S" command)))))
 
+(tos:defmethod (telnet:<telnet-port> telnet::handle-interrupt) ()
+   (lmud.int:signal "Control-C interrupt!"))
+
 (tos:defmethod (telnet:<telnet-port> disable-echo) () (setf .echoing? nil))
 (tos:defmethod (telnet:<telnet-port> enable-echo)  () (setf .echoing? t))
 
@@ -86,13 +89,14 @@
 
 (tos:defmethod (telnet:<telnet-port> read-byte) ()
    (let ((byte (.telnet::basic-read-byte self)))
-      (if (= byte 255)
-          (progn (.telnet::begin-receive-command self)
-                 (.read-byte self)) ; This is recursive -- turn this into a loop?
-          (case byte
-             ((0)  (.read-byte self)) ; Ignore NULLs
-             ((13) 10) ; Ignore CRs
-             (t byte)))))
+      (case byte
+         ((0)  (.read-byte self)) ; Ignore NULLs
+         ((3)  (.telnet::handle-interrupt self)
+               (.read-byte self))
+         ((13) 10) ; Ignore CRs
+         ((255) (.telnet::begin-receive-command self)
+                (.read-byte self)) ; This is recursive -- turn this into a loop?
+         (t byte))))
 
 (tos:defmethod (telnet:<telnet-port> write-byte) (byte)
    (if (= byte 255)
