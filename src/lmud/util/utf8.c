@@ -305,6 +305,14 @@ bool LMud_Rune_ByName(const char* name, LMud_Rune* rune)
         result = '\b';
     else if (LMud_CStr_EqualsIgnoreCase(ptr, "escape"))
         result = '\e';
+    else if (LMud_CStr_EqualsIgnoreCase(ptr, "left"))
+        result = LMud_Rune_Left;
+    else if (LMud_CStr_EqualsIgnoreCase(ptr, "right"))
+        result = LMud_Rune_Right;
+    else if (LMud_CStr_EqualsIgnoreCase(ptr, "up"))
+        result = LMud_Rune_Up;
+    else if (LMud_CStr_EqualsIgnoreCase(ptr, "down"))
+        result = LMud_Rune_Down;
     else {
         LMud_Utf8_Decoder_Create(&decoder);
         {
@@ -332,6 +340,12 @@ const char* LMud_Rune_Name(LMud_Rune rune)
         case '\n': return "Newline";
         case '\r': return "Return";
         case '\t': return "Tab";
+        case '\b': return "Backspace";
+        case '\e': return "Escape";
+        case LMud_Rune_Left:  return "Left";
+        case LMud_Rune_Right: return "Right";
+        case LMud_Rune_Up:    return "Up";
+        case LMud_Rune_Down:  return "Down";
         default:   return NULL;
     }
 }

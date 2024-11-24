@@ -51,3 +51,12 @@ typedef unsigned int  LMud_Rune;
 
 typedef uint16_t      LMud_Port;
 typedef int           LMud_Socket;
+
+
+enum LMud_Runes
+{
+    LMud_Rune_Left  = 0xf0000000,
+    LMud_Rune_Right = 0xf0000001,
+    LMud_Rune_Up    = 0xf0000002,
+    LMud_Rune_Down  = 0xf0000003
+};
