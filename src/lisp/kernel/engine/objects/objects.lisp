@@ -2,23 +2,21 @@
 (tos:define-class-hook name (class &rest args)
    (list `(tos.int:%class-push-var! ,class 'name (.construct (tos:make-instance <name>) ,@args))))
 
-(tos:define-class-hook n-to (class &rest args)
-   (list `(game:push-direction! ,class 'n-to (progn ,@args))))
 
-(tos:define-class-hook s-to (class &rest args)
-   (list `(game:push-direction! ,class 's-to (progn ,@args))))
+(defmacro game:define-direction (name key)
+   `(tos:define-class-hook ,name (class &rest args)
+      (list (list 'game:push-direction! class (list 'quote ,key) (list* 'progn args)))))
 
-(tos:define-class-hook e-to (class &rest args)
-   (list `(game:push-direction! ,class 'e-to (progn ,@args))))
-
-(tos:define-class-hook w-to (class &rest args)
-   (list `(game:push-direction! ,class 'w-to (progn ,@args))))
-
-(tos:define-class-hook up-to (class &rest args)
-   (list `(game:push-direction! ,class 'up-to (progn ,@args))))
-
-(tos:define-class-hook down-to (class &rest args)
-   (list `(game:push-direction! ,class 'down-to (progn ,@args))))
+(game:define-direction n-to    :north)
+(game:define-direction s-to    :south)
+(game:define-direction e-to    :east)
+(game:define-direction w-to    :west)
+(game:define-direction ne-to   :northeast)
+(game:define-direction nw-to   :northwest)
+(game:define-direction se-to   :southeast)
+(game:define-direction sw-to   :southwest)
+(game:define-direction up-to   :up)
+(game:define-direction down-to :down)
 
 
 (tos:defclass <object> ()
@@ -93,7 +91,7 @@
    (parent e))
 
 (defun direction (e d)
-   (assoc d (tos.int:%class-annotation (tos.int:class-of e) 'directions)))
+   (cdr (assoc d (tos.int:%class-annotation (tos.int:class-of e) 'directions))))
 
 (define-method (<object> describe) ()
    (tell (:p "You see nothing special.")))
