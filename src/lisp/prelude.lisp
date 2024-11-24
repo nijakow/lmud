@@ -631,6 +631,17 @@
    (defmacro decf (place &optional (amount 1))
       (list 'setf place (list '- place amount)))
 
+   (defun (setf assoc) (value item alist &key (key #'car) (test #'eq))
+      (let ((handle-var (gensym))
+            (item-var   (gensym))
+            (value-var  (gensym)))
+         (list 'let* (list (list item-var   item)
+                           (list value-var  value)
+                           (list handle-var (list 'assoc item-var alist :key key :test test)))
+            (list 'if handle-var
+               (list 'setf (list 'cdr handle-var) value-var)
+               (list 'push (list 'cons item-var value-var) alist)))))
+
 
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
    ;;;
@@ -861,14 +872,19 @@
    ;;;    The Type- and Object System
    ;;;
 
-   (defun tos.int:%class-supers  (class) (lmud.int:%custom-at class 0))
-   (defun tos.int:%class-methods (class) (lmud.int:%custom-at class 1))
-   (defun tos.int:%class-vars    (class) (lmud.int:%custom-at class 2))
-   (defun tos.int:%class-name    (class) (lmud.int:%custom-at class 3))
+   (defun tos.int:%class-supers      (class) (lmud.int:%custom-at class 0))
+   (defun tos.int:%class-methods     (class) (lmud.int:%custom-at class 1))
+   (defun tos.int:%class-vars        (class) (lmud.int:%custom-at class 2))
+   (defun tos.int:%class-name        (class) (lmud.int:%custom-at class 3))
+   (defun tos.int:%class-annotations (class) (lmud.int:%custom-at class 4))
 
-   (defun tos.int:%class-supers!  (class supers)  (lmud.int:%custom-set class 0 supers))
-   (defun tos.int:%class-methods! (class methods) (lmud.int:%custom-set class 1 methods))
-   (defun tos.int:%class-vars!    (class vars)    (lmud.int:%custom-set class 2 vars))
+   (defun tos.int:%class-supers!      (class supers)      (lmud.int:%custom-set class 0 supers))
+   (defun tos.int:%class-methods!     (class methods)     (lmud.int:%custom-set class 1 methods))
+   (defun tos.int:%class-vars!        (class vars)        (lmud.int:%custom-set class 2 vars))
+   (defun tos.int:%class-annotations! (class annotations) (lmud.int:%custom-set class 4 annotations))
+
+   (defun (setf tos.int:%class-annotations) (value class)
+      (list 'tos.int:%class-annotations! class value))
 
    (defun tos.int:%class-push-method! (class name method)
       (let ((methods (tos.int:%class-methods class)))
@@ -878,14 +894,23 @@
       (let ((vars (tos.int:%class-vars class)))
          (tos.int:%class-vars! class (cons (cons name value) vars))))
 
+   (defun tos.int:%class-clear-annotations! (class)
+      (tos.int:%class-annotations! class nil))
+   
+   (defun tos.int:%class-annotation (class name)
+      (cdr (assoc name (tos.int:%class-annotations class))))
+   
+   (defun (setf tos.int:%class-annotation) (value class name)
+      (list 'setf (list 'assoc name (list 'tos.int:%class-annotations class)) value))
+
    (defun tos.int:pre-make-class (supers &key name)
-      (lmud.int:%make-custom 'class supers nil nil name))
+      (lmud.int:%make-custom 'class supers nil nil name nil))
    
    (defun tos.int:%object-class (object) (lmud.int:%custom-meta object))
    (defun tos.int:%object-name  (object) (lmud.int:%custom-at object 0))
    (defun tos.int:%object-vars  (object) (lmud.int:%custom-at object 1))
 
-   (defun tos.int:%object-class! (object class) (lmud.int:%custom-set object 0 class))
+   (defun tos.int:%object-class! (object class) (lmud.int:%custom-set object 0 class)) ; TODO, FIXME, XXX, BUG?
    (defun tos.int:%object-name!  (object name)  (lmud.int:%custom-set object 0 name))
    (defun tos.int:%object-vars!  (object vars)  (lmud.int:%custom-set object 1 vars))
 
@@ -1017,8 +1042,10 @@
          (setq supers (list tos.classes:<t>)))
       (let ((class (gensym)))
          (list* 'let (list (list class (list 'tos.int:ensure-class (if (symbolp name) (list 'quote name) name))))
-            ;; TODO: Clear class methods and vars
             (list 'tos.int:%class-supers! class (cons 'list supers))
+            (list 'tos.int:%class-methods! class nil)
+            (list 'tos.int:%class-vars! class nil)
+            (list 'tos.int:%class-clear-annotations! class)
             (apply #'append
                (domap (clause body)
                   (cond ((listp clause)

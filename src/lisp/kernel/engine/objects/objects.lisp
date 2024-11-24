@@ -2,10 +2,33 @@
 (tos:define-class-hook name (class &rest args)
    (list `(tos.int:%class-push-var! ,class 'name (.construct (tos:make-instance <name>) ,@args))))
 
+(tos:define-class-hook n-to (class &rest args)
+   (list `(game:push-direction! ,class 'n-to (progn ,@args))))
+
+(tos:define-class-hook s-to (class &rest args)
+   (list `(game:push-direction! ,class 's-to (progn ,@args))))
+
+(tos:define-class-hook e-to (class &rest args)
+   (list `(game:push-direction! ,class 'e-to (progn ,@args))))
+
+(tos:define-class-hook w-to (class &rest args)
+   (list `(game:push-direction! ,class 'w-to (progn ,@args))))
+
+(tos:define-class-hook up-to (class &rest args)
+   (list `(game:push-direction! ,class 'up-to (progn ,@args))))
+
+(tos:define-class-hook down-to (class &rest args)
+   (list `(game:push-direction! ,class 'down-to (progn ,@args))))
+
+
 (tos:defclass <object> ()
    (with (name     (tos:make-instance <name>))
          (parent   nil)
-         (children '())))
+         (children '())
+         (directions '())))
+
+(defun game:push-direction! (class direction value)
+   nil)
 
 (tos:defclass <room> (<object>))
 
