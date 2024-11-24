@@ -24,11 +24,11 @@
 (tos:defclass <object> ()
    (with (name     (tos:make-instance <name>))
          (parent   nil)
-         (children '())
-         (directions '())))
+         (children '())))
 
 (defun game:push-direction! (class direction value)
-   nil)
+   (setf (assoc direction (tos.int:%class-annotation class 'directions)) value))
+
 
 (tos:defclass <room> (<object>))
 
@@ -91,6 +91,9 @@
 
 (defun environment (e)
    (parent e))
+
+(defun direction (e d)
+   (assoc d (tos.int:%class-annotation (tos.int:class-of e) 'directions)))
 
 (define-method (<object> describe) ()
    (tell (:p "You see nothing special.")))
