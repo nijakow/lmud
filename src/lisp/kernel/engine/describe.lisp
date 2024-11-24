@@ -6,7 +6,7 @@
                 (:object item)))
       (describe-items (children item) (+ indentation 3))))
 
-(defun describe-location (location)
+(defun describe-location (&optional (location (game:current-location)))
    (tell (:p)
          (:p ((:color :cyan) (:lisp (short-name location)))))
    (.describe location)

@@ -1,4 +1,10 @@
 
+(defun game:current-player ()
+   (lmud.int:player))
+
+(defun game:current-location ()
+   (environment (game:current-player)))
+
 (defun game:make-player ()
    (let ((player (make <object>)))
       (move player ~the-void)
@@ -13,7 +19,7 @@
 
 (defun game:start ()
    (game:banner)
-   (shell:loop nil))
+   (shell:loop))
 
 (defun game:start-from-telnet (port)
    (setq port (telnet:make-telnet-port port))

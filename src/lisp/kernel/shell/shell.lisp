@@ -8,7 +8,7 @@
                               "Say what?")))
       (tell (:p phrase))))
 
-(defun shell:loop (player-object)
+(defun shell:loop (&optional (player-object (game:current-player)))
    (while t
       (fresh-line)
       (princ "> ")

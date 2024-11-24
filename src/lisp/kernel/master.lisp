@@ -9,6 +9,7 @@
    "engine/objects/objects"
    "engine/objects/rooms"
    "engine/describe"
+   "engine/movement"
    "shell/cmd/command"
    "shell/cmd/commands"
    "shell/repl"
