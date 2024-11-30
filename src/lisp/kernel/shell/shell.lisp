@@ -11,8 +11,7 @@
 (defun shell:loop (&optional (player-object (game:current-player)))
    (while t
       (fresh-line)
-      (princ "> ")
-      (let* ((input   (game:split-input-chars (read-line)))
+      (let* ((input   (game:split-input-chars (readline:read-line :prompt "> ")))
              (command (first input)))
          (cond ((null input) nil)
                ((string= command "quit" :key #'char-upcase) (return))

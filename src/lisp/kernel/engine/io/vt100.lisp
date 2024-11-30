@@ -2,6 +2,15 @@
 (defun vt100:clear-screen (&optional (stream (io:default-stream)))
    (princ "\e[2J\e[1;1H" stream))
 
+(defun vt100:clear-full-line (&optional (stream (io:default-stream)))
+   (princ "\e[2K" stream))
+
+(defun vt100:jump-to-beginning-of-line (&optional (stream (io:default-stream)))
+   (princ "\e[1G" stream))
+
+(defun vt100:jump-to-line-pos (index &optional (stream (io:default-stream)))
+   (format stream "\e[~aG" index))
+
 (defun vt100:move-cursor (x y &optional (stream (io:default-stream)))
    (format stream "\e[~a;~aH" y x))
 

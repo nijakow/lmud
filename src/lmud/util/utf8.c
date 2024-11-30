@@ -317,6 +317,8 @@ bool LMud_Rune_ByName(const char* name, LMud_Rune* rune)
         result = LMud_Rune_Home;
     else if (LMud_CStr_EqualsIgnoreCase(ptr, "end"))
         result = LMud_Rune_End;
+    else if (LMud_CStr_EqualsIgnoreCase(ptr, "delete"))
+        result = 127;
     else {
         LMud_Utf8_Decoder_Create(&decoder);
         {
@@ -346,6 +348,7 @@ const char* LMud_Rune_Name(LMud_Rune rune)
         case '\t': return "Tab";
         case '\b': return "Backspace";
         case '\e': return "Escape";
+        case  127: return "Delete";
         case LMud_Rune_Left:  return "Left";
         case LMud_Rune_Right: return "Right";
         case LMud_Rune_Up:    return "Up";

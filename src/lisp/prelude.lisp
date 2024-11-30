@@ -456,6 +456,7 @@
             (cons #\Newline   "Newline")
             (cons #\Return    "Return")
             (cons #\Backspace "Backspace")
+            (cons #\Delete    "Delete")
             (cons #\Escape    "Escape")
             (cons #\Left      "Left")
             (cons #\Right     "Right")

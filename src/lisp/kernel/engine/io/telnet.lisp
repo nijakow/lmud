@@ -130,6 +130,7 @@
 (tos:defmethod (telnet:<telnet-port> telnet::read-char-wrapped) ()
    (let ((char (.telnet::basic-read-char self)))
       (cond ((char= char #\Escape) (.telnet::begin-escape-command self))
+            ((char= char #\Delete) #\Backspace)
             (t char))))
 
 (tos:defmethod (telnet:<telnet-port> read-char) ()
