@@ -456,7 +456,13 @@
             (cons #\Newline   "Newline")
             (cons #\Return    "Return")
             (cons #\Backspace "Backspace")
-            (cons #\Escape    "Escape")))
+            (cons #\Escape    "Escape")
+            (cons #\Left      "Left")
+            (cons #\Right     "Right")
+            (cons #\Up        "Up")
+            (cons #\Down      "Down")
+            (cons #\Home      "Home")
+            (cons #\End       "End")))
 
    (defun lmud.char:special-character-by-name (name)
       (dolist (pair lmud.char:*special-character-names*)
@@ -1156,6 +1162,9 @@
    (tos:defmethod (io:<port-stream> unread-char) (char)
       (.io:advance-text-position self -1)
       (lmud.int:port-unread-char (.port self) char))
+   
+   (tos:defmethod (io:<port-stream> unread-byte) (byte)
+      (lmud.int:port-unread-byte (.port self) byte))
    
    (tos:defmethod (io:<port-stream> eof-p) ()
       (lmud.int:port-eof-p (.port self)))

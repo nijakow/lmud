@@ -516,6 +516,19 @@ void LMud_Builtin_Eq(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size ar
     LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_T(fiber->lisp));
 }
 
+void LMud_Builtin_Eql(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    return LMud_Builtin_Eq(fiber, arguments, argument_count);
+}
+
+void LMud_Builtin_CharEqual(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
+{
+    CHECK_ARGS(2, 2);
+    CHECK_ARG_TYPE(0, Character);
+    CHECK_ARG_TYPE(1, Character);
+    LMud_Fiber_SetAccumulator(fiber, LMud_Lisp_Boolean(fiber->lisp, LMud_Any_AsCharacter(arguments[0]) == LMud_Any_AsCharacter(arguments[1])));
+}
+
 void LMud_Builtin_List(struct LMud_Fiber* fiber, LMud_Any* arguments, LMud_Size argument_count)
 {
     LMud_Any  list;
@@ -1536,6 +1549,8 @@ void LMud_Lisp_InstallBuiltins(struct LMud_Lisp* lisp)
     LMud_Lisp_InstallBuiltin(lisp, "RPLACA", LMud_Builtin_Rplaca);
     LMud_Lisp_InstallBuiltin(lisp, "RPLACD", LMud_Builtin_Rplacd);
     LMud_Lisp_InstallBuiltin(lisp, "EQ", LMud_Builtin_Eq);
+    LMud_Lisp_InstallBuiltin(lisp, "EQL", LMud_Builtin_Eql);
+    LMud_Lisp_InstallBuiltin(lisp, "CHAR=", LMud_Builtin_CharEqual);
     LMud_Lisp_InstallBuiltin(lisp, "LIST", LMud_Builtin_List);
     LMud_Lisp_InstallBuiltin(lisp, "LIST*", LMud_Builtin_ListStar);
     LMud_Lisp_InstallBuiltin(lisp, "LENGTH", LMud_Builtin_Length);

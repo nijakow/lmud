@@ -313,6 +313,10 @@ bool LMud_Rune_ByName(const char* name, LMud_Rune* rune)
         result = LMud_Rune_Up;
     else if (LMud_CStr_EqualsIgnoreCase(ptr, "down"))
         result = LMud_Rune_Down;
+    else if (LMud_CStr_EqualsIgnoreCase(ptr, "home"))
+        result = LMud_Rune_Home;
+    else if (LMud_CStr_EqualsIgnoreCase(ptr, "end"))
+        result = LMud_Rune_End;
     else {
         LMud_Utf8_Decoder_Create(&decoder);
         {
@@ -346,6 +350,8 @@ const char* LMud_Rune_Name(LMud_Rune rune)
         case LMud_Rune_Right: return "Right";
         case LMud_Rune_Up:    return "Up";
         case LMud_Rune_Down:  return "Down";
+        case LMud_Rune_Home:  return "Home";
+        case LMud_Rune_End:   return "End";
         default:   return NULL;
     }
 }

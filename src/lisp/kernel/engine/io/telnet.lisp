@@ -9,6 +9,9 @@
 (tos:defmethod (telnet:<telnet-port> telnet::basic-read-byte) ()
    (tos:xsend io:<wrapped-port-stream> self 'read-byte))
 
+(tos:defmethod (telnet:<telnet-port> telnet::basic-unread-byte) (byte)
+   (tos:xsend io:<wrapped-port-stream> self 'unread-byte byte))
+
 (tos:defmethod (telnet:<telnet-port> telnet::basic-write-byte) (byte)
    (tos:xsend io:<wrapped-port-stream> self 'write-byte byte))
 
@@ -104,11 +107,36 @@
               (.telnet::basic-write-byte self 255))
        (.telnet::basic-write-byte self byte)))
 
+(tos:defmethod (telnet:<telnet-port> telnet::read-character-escape-sequence) ()
+   (let ((command (.telnet::basic-read-byte self)))
+      (case command
+         ((65) #\Up)
+         ((66) #\Down)
+         ((67) #\Right)
+         ((68) #\Left)
+         ((70) #\End)
+         ((72) #\Home)
+         (t (.telnet::basic-unread-byte self command)
+            (.telnet::basic-unread-byte self 91)
+            #\Escape))))
+
+(tos:defmethod (telnet:<telnet-port> telnet::begin-escape-command) ()
+   (let ((command (.telnet::basic-read-byte self)))
+      (case command
+         ((91) (.telnet::read-character-escape-sequence self))
+         (t (.telnet::basic-unread-byte self command)
+            #\Escape))))
+
+(tos:defmethod (telnet:<telnet-port> telnet::read-char-wrapped) ()
+   (let ((char (.telnet::basic-read-char self)))
+      (cond ((char= char #\Escape) (.telnet::begin-escape-command self))
+            (t char))))
+
 (tos:defmethod (telnet:<telnet-port> read-char) ()
    (if .pushbacks
        (progn (.io:advance-text-position self 1)
               (pop .pushbacks))
-       (let ((char (.telnet::basic-read-char self)))
+       (let ((char (.telnet::read-char-wrapped self)))
           (when .echoing?
              (.write-char self char))
           char)))

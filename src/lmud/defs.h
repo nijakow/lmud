@@ -58,5 +58,7 @@ enum LMud_Runes
     LMud_Rune_Left  = 0x70000000,
     LMud_Rune_Right = 0x70000001,
     LMud_Rune_Up    = 0x70000002,
-    LMud_Rune_Down  = 0x70000003
+    LMud_Rune_Down  = 0x70000003,
+    LMud_Rune_Home  = 0x70000004,
+    LMud_Rune_End   = 0x70000005
 };
