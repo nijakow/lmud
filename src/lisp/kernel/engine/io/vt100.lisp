@@ -5,6 +5,10 @@
 (defun vt100:clear-full-line (&optional (stream (io:default-stream)))
    (princ "\e[2K" stream))
 
+(defun vt100:move-up-by (n &optional (stream (io:default-stream)))
+   (when (> n 0)
+      (format stream "\e[~aA" n)))
+
 (defun vt100:jump-to-beginning-of-line (&optional (stream (io:default-stream)))
    (princ "\e[1G" stream))
 
