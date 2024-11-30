@@ -8,7 +8,10 @@
                  (<  index (cdar style)))
          (return (cdr style)))))
 
-(defun readline:read-line (&key (prompt "") (stream (io:default-stream)) (analyze-function #'readline:dont-analyze))
+(defun readline:read-line (&key (prompt "")
+                                (stream (io:default-stream))
+                                (analyze-function #'readline:dont-analyze)
+                                (multi-line nil))
    (let ((characters-left  '())
          (characters-right '()))
       (while t
@@ -28,7 +31,9 @@
             (vt100:jump-to-line-pos (+ 1 (length prompt) (length characters-left)) stream)
             (let ((char (read-char stream)))
                (case char
-                  ((#\Newline)   (return current-line-string))
+                  ((#\Newline)   (when (or (not multi-line)
+                                           (cdr (assoc :success analysis))) ; TODO: What if `:success` is not present?
+                                    (return current-line-string)))
                   ((#\Left)      (when characters-left  (push (pop characters-left)  characters-right)))
                   ((#\Right)     (when characters-right (push (pop characters-right) characters-left)))
                   ((#\Backspace) (when characters-left  (pop characters-left)))
