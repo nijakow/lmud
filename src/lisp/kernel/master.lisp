@@ -1,7 +1,8 @@
 
 (load-kernel-modules
    "util"
-   "engine/io/async-stream"
+   "engine/io/streams/async"
+   "engine/io/streams/string"
    "engine/io/readline"
    "engine/io/telnet"
    "engine/io/vt100"
