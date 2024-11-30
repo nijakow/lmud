@@ -14,7 +14,8 @@
    "engine/movement"
    "shell/cmd/command"
    "shell/cmd/commands"
-   "shell/repl"
+   "shell/repl/genius"
+   "shell/repl/repl"
    "shell/shell"
    "game")
 
