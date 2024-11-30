@@ -1661,7 +1661,13 @@
          data))
    
    (defun io.reader:begin-read (stream &rest rest)
-      (io.reader:read stream (apply #'io.reader:make-meta rest)))
+      (let ((meta (apply #'io.reader:make-meta rest)))
+         (%signal-handler (e)
+               (io.reader:read stream meta)
+            (if (.eof-error-p meta)
+                (lmud.int:signal e)
+                (.eof-value meta)))))
+         
 
    (defun read (&optional (stream (io:default-stream)) &rest rest)
       (apply #'io.reader:begin-read stream rest))

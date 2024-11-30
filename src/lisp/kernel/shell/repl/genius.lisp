@@ -18,10 +18,13 @@
 (defun genius:analyze-string (text)
    (let ((stream   (io:make-string-stream text))
          (reporter (genius::make-reporter)))
-      (let ((eof-value nil)))
-         (read stream :reporter    reporter
-                      :eof-error-p nil
-                      :eof-value   eof-value)))
+      (let* ((eof-value nil)
+             (result (read stream :reporter    reporter
+                                  :eof-error-p nil
+                                  :eof-value   eof-value)))
+         (if (eq result eof-value)
+             (progn (lmud.dummy:%princ "EOF")
+                    (lmud.dummy:%terpri))))))
 
 (defun genius:read-line ()
    (readline:read-line :prompt           "@ "
