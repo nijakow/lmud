@@ -20,7 +20,8 @@
                              ((stringp object)    (list #'vt100-styles:fg-yellow))
                              ((characterp object) (list #'vt100-styles:fg-green))
                              ((symbolp object)
-                              (if (fboundp object)
+                              (if (or (fboundp object)
+                                      (symbol-macro object))
                                   (list #'vt100-styles:underline
                                         #'vt100-styles:fg-magenta)
                                   (list #'vt100-styles:fg-magenta)))
