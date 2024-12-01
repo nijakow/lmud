@@ -52,6 +52,6 @@
                (cons :styles  (genius:generate-styles (reverse (.get-tokens reporter))))))))
 
 (defun genius:read-line ()
-   (readline:read-line :prompt           "@ "
+   (readline:read-line :prompt           "* "
                        :analyze-function #'genius:analyze-string
                        :multi-line       t))

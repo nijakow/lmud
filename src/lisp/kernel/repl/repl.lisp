@@ -12,9 +12,8 @@
    (read (io:make-string-stream (genius:read-line))))
 
 (defun repl::repl ()
-   (repl::banner)
+   ;; (repl::banner)
    (while t
-      (princ ". ")
       (let ((expr (repl::read)))
          (when (or (eq expr :q)
                    (and (consp expr)
