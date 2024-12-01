@@ -1,4 +1,13 @@
 
+(defun telnet::echoable-char-p (char)
+   (and (characterp char)
+        (not (char= char #\Up))
+        (not (char= char #\Down))
+        (not (char= char #\Right))
+        (not (char= char #\Left))
+        (not (char= char #\Home))
+        (not (char= char #\End))))
+
 (tos:defclass telnet:<telnet-port> (io:<wrapped-port-stream>)
    (with (echoing?  t)
          (pushbacks nil)))
@@ -138,7 +147,7 @@
        (progn (.io:advance-text-position self 1)
               (pop .pushbacks))
        (let ((char (.telnet::read-char-wrapped self)))
-          (when .echoing?
+          (when (and .echoing? (telnet::echoable-char-p char))
              (.write-char self char))
           char)))
 
