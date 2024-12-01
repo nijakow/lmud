@@ -32,7 +32,7 @@
 (set-symbol-function 'sourcer:register-defun
    (lambda (name args full-source)
       (set-symbol-plist name
-         (list* 'sourcer::defun-info-tag
+         (list* 'sourcer::defun-definition
                  (list (cons :name name)
                        (cons :args args)
                        (cons :source full-source))
@@ -41,7 +41,7 @@
 (set-symbol-function 'sourcer:register-defmacro
    (lambda (name args full-source)
       (set-symbol-plist name
-         (list* 'sourcer::defmacro-info-tag
+         (list* 'sourcer::defmacro-definition
                  (list (cons :name name)
                        (cons :args args)
                        (cons :source full-source))

@@ -51,7 +51,13 @@
                (cons :result  result)
                (cons :styles  (genius:generate-styles (reverse (.get-tokens reporter))))))))
 
-(defun genius:read-line ()
-   (readline:read-line :prompt           "* "
+(defun genius:read-line (&key prompt (text ""))
+   (readline:read-line :prompt           (or prompt "* ")
                        :analyze-function #'genius:analyze-string
-                       :multi-line       t))
+                       :multi-line       t
+                       :text             text))
+
+(defun genius:edit-expression (expression)
+   (fresh-line)
+   (genius:read-line :prompt "Edit> "
+                     :text   (format nil "~a" expression)))

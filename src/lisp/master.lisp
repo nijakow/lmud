@@ -1,5 +1,6 @@
 
 (load-modules
+   "kernel/modules/sourcer/sourcer"  ; Load the sourcer first
    "kernel/util"
    "kernel/io/streams/async"
    "kernel/io/streams/string"
@@ -9,7 +10,6 @@
    "kernel/io/tell"
    "kernel/modules/repl/genius"
    "kernel/modules/repl/repl"
-   "kernel/modules/sourcer/sourcer"
    "engine/world/objects/name"
    "engine/world/objects/objects"
    "engine/world/objects/rooms"
