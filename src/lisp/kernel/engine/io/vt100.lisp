@@ -40,6 +40,7 @@
 (defun vt100-styles:blink      (&optional (stream (io:default-stream))) (princ "\e[5m" stream))
 (defun vt100-styles:reverse    (&optional (stream (io:default-stream))) (princ "\e[7m" stream))
 (defun vt100-styles:invisible  (&optional (stream (io:default-stream))) (princ "\e[8m" stream))
+(defun vt100-styles:strike     (&optional (stream (io:default-stream))) (princ "\e[9m" stream))
 (defun vt100-styles:fg-black   (&optional (stream (io:default-stream))) (princ "\e[30m" stream))
 (defun vt100-styles:fg-red     (&optional (stream (io:default-stream))) (princ "\e[31m" stream))
 (defun vt100-styles:fg-green   (&optional (stream (io:default-stream))) (princ "\e[32m" stream))
@@ -48,3 +49,5 @@
 (defun vt100-styles:fg-magenta (&optional (stream (io:default-stream))) (princ "\e[35m" stream))
 (defun vt100-styles:fg-cyan    (&optional (stream (io:default-stream))) (princ "\e[36m" stream))
 (defun vt100-styles:fg-white   (&optional (stream (io:default-stream))) (princ "\e[37m" stream))
+
+(defun vt100-styles:fg-dark-gray   (&optional (stream (io:default-stream))) (princ "\e[90m" stream))

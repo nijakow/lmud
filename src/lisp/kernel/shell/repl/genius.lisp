@@ -3,7 +3,10 @@
    (with (tokens nil)))
 
 (tos:defmethod (genius::<genius-reporter> report-data) (data &key from to)
-   (push (cons (cons from to) data) .tokens))
+   (push (cons (cons from to) (cons :object data)) .tokens))
+
+(tos:defmethod (genius::<genius-reporter> report-comment) (data &key from to)
+   (push (cons (cons from to) (cons :comment data)) .tokens))
 
 (tos:defmethod (genius::<genius-reporter> get-tokens) ()
    .tokens)
@@ -13,18 +16,24 @@
 
 (defun genius:generate-styles (tokens)
    (mapcar (lambda (token)
-              (let ((range  (car token))
-                    (object (cdr token)))
+              (let ((range  (car  token))
+                    (type   (cadr token))
+                    (object (cddr token)))
                  (cons range
-                       (cond ((numberp object)    (list #'vt100-styles:fg-red))
+                       (cond ((eq type :comment)  (list #'vt100-styles:italic
+                                                        #'vt100-styles:fg-dark-gray))
+                             ((numberp object)    (list #'vt100-styles:fg-red))
                              ((stringp object)    (list #'vt100-styles:fg-yellow))
                              ((characterp object) (list #'vt100-styles:fg-green))
                              ((symbolp object)
-                              (if (or (fboundp object)
-                                      (symbol-macro object))
-                                  (list #'vt100-styles:underline
-                                        #'vt100-styles:fg-magenta)
-                                  (list #'vt100-styles:fg-magenta)))
+                              (let ((color (if (special-operator-p object)
+                                               #'vt100-styles:fg-cyan
+                                               #'vt100-styles:fg-blue)))
+                                 (if (or (fboundp object)
+                                         (symbol-macro object))
+                                     (list #'vt100-styles:underline
+                                           color)
+                                     (list color))))
                              ((consp object)
                               (cond ((eq (car object) 'quote) (list #'vt100-styles:fg-blue))))
                              (t '())))))

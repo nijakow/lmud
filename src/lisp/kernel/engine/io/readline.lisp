@@ -58,6 +58,7 @@
                (vt100:jump-to-line-pos (+ 1 (length prompt) (length characters-left)) stream)
                (let ((char (read-char stream)))
                   (case char
+                     ((#\Tab)       nil) ; Do nothing for now
                      ((#\Newline)   (if multi-line
                                         (if (cdr (assoc :success analysis)) ; TODO: What if `:success` is not present?
                                             (return full-text-string)

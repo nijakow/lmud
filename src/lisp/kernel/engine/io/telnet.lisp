@@ -1,6 +1,7 @@
 
 (defun telnet::echoable-char-p (char)
    (and (characterp char)
+        (not (char= char #\Tab))
         (not (char= char #\Up))
         (not (char= char #\Down))
         (not (char= char #\Right))
