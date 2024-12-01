@@ -60,7 +60,7 @@
                   (case char
                      ((#\Tab)       nil) ; Do nothing for now
                      ((#\Newline)   (if multi-line
-                                        (if (cdr (assoc :success analysis)) ; TODO: What if `:success` is not present?
+                                        (if (and (null lines-below) (cdr (assoc :success analysis))) ; TODO: What if `:success` is not present?
                                             (return full-text-string)
                                             (progn (push current-line-string lines-above)
                                                    (setf characters-left  '())

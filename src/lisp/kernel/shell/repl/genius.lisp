@@ -22,9 +22,10 @@
                  (cons range
                        (cond ((eq type :comment)  (list #'vt100-styles:italic
                                                         #'vt100-styles:fg-dark-gray))
-                             ((numberp object)    (list #'vt100-styles:fg-red))
-                             ((stringp object)    (list #'vt100-styles:fg-yellow))
+                             ((stringp    object) (list #'vt100-styles:fg-yellow))
                              ((characterp object) (list #'vt100-styles:fg-green))
+                             ((keywordp   object) (list #'vt100-styles:fg-magenta))
+                             ((constantp  object) (list #'vt100-styles:fg-red))
                              ((symbolp object)
                               (let ((color (if (special-operator-p object)
                                                #'vt100-styles:fg-cyan
@@ -42,7 +43,7 @@
 (defun genius:analyze-string (text)
    (let ((stream   (io:make-string-stream text))
          (reporter (genius::make-reporter)))
-      (let* ((eof-value nil)
+      (let* ((eof-value 'genius:eof-value)
              (result (read stream :reporter    reporter
                                   :eof-error-p nil
                                   :eof-value   eof-value)))

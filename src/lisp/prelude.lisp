@@ -597,6 +597,15 @@
    ;;;    Other stuff
    ;;;
 
+   (defun keywordp (e)
+      (and (symbolp e)
+           (eq (symbol-package e) lmud:*keyword-package*)))
+
+   (defun constantp (e)
+      (or (and (not (symbolp e))
+               (not (consp e)))
+          (keywordp e)))
+
    (defun special-operator-p (e)
       (and (symbolp e)
            (or (eq e 'declare)
