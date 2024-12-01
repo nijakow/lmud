@@ -2041,14 +2041,14 @@
                    (eval expr))))))
 
    
-   (defun load-kernel-module (path)
-      (load (string:concatenate "../lisp/kernel/" path ".lisp")))
+   (defun load-module (path)
+      (load (string:concatenate "../lisp/" path ".lisp")))
    
-   (defun load-kernel-modules (&rest paths)
+   (defun load-modules (&rest paths)
       (dolist (path paths)
-         (load-kernel-module path)))
+         (load-module path)))
 
-   (load-kernel-module "master")
+   (load-module "master")
 
    ))
 )
