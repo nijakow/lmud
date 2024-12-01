@@ -29,6 +29,24 @@
    (lambda (expression)
       (funcall (compile expression))))
 
+(set-symbol-function 'sourcer:register-defun
+   (lambda (name args full-source)
+      (set-symbol-plist name
+         (list* 'sourcer::defun-info-tag
+                 (list (cons :name name)
+                       (cons :args args)
+                       (cons :source full-source))
+                 (symbol-plist name)))))
+
+(set-symbol-function 'sourcer:register-defmacro
+   (lambda (name args full-source)
+      (set-symbol-plist name
+         (list* 'sourcer::defmacro-info-tag
+                 (list (cons :name name)
+                       (cons :args args)
+                       (cons :source full-source))
+                 (symbol-plist name)))))
+
 (set-symbol-macro 'defun
    (lambda (name args &rest body)
       (if (if (consp name) (if (eq (car name) 'setf) t))
@@ -37,17 +55,25 @@
                  (list 'lmud.int:set-setf-expander-function (list 'quote name)
                        (list 'lambda args (list* 'block name body))))
           ;; Normal defun
-          (list 'set-symbol-function (list 'quote name)
-                (list 'lambda args
-                   (list 'declare (list 'function-name name))
-                   (list* 'block name body))))))
+          (list 'progn
+             (list 'set-symbol-function (list 'quote name)
+                   (list 'lambda args
+                      (list 'declare (list 'function-name name))
+                      (list* 'block name body)))
+             (list 'sourcer:register-defun (list 'quote name)
+                                           (list 'quote args)
+                                           (list 'quote (list* 'defun name args body)))))))
 
 (set-symbol-macro 'defmacro
    (lambda (name args &rest body)
-      (list 'set-symbol-macro (list 'quote name)
-            (list 'lambda args
-               (list 'declare (list 'macro-name name))
-               (list* 'block name body)))))
+      (list 'progn
+         (list 'set-symbol-macro (list 'quote name)
+               (list 'lambda args
+                  (list 'declare (list 'macro-name name))
+                  (list* 'block name body)))
+         (list 'sourcer:register-defmacro (list 'quote name)
+                                          (list 'quote args)
+                                          (list 'quote (list* 'defmacro name args body))))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
