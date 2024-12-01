@@ -71,12 +71,16 @@
                   (case char
                      ((#\Tab)       nil) ; Do nothing for now
                      ((#\Newline)   (if multi-line
-                                        (if (and (null lines-below) (cdr (assoc :success analysis))) ; TODO: What if `:success` is not present?
-                                            (return full-text-string)
-                                            (progn (push current-line-string lines-above)
-                                                   (setf characters-left  '())
-                                                   (setf characters-right '())
-                                                   (setq redo t)))
+                                        (if characters-right
+                                           (progn (push (conversions:->string (reverse characters-left)) lines-above)
+                                                  (setf characters-left  '())
+                                                  (setq redo t))
+                                           (if (and (null lines-below) (cdr (assoc :success analysis))) ; TODO: What if `:success` is not present?
+                                               (return full-text-string)
+                                               (progn (push current-line-string lines-above)
+                                                      (setf characters-left  '())
+                                                      (setf characters-right '())
+                                                      (setq redo t))))
                                         (return full-text-string)))
                      ((#\Left)      (when characters-left  (push (pop characters-left)  characters-right)))
                      ((#\Right)     (when characters-right (push (pop characters-right) characters-left)))
@@ -90,7 +94,13 @@
                                                       (setf characters-right '())
                                                       (vt100:move-down-by 1 stream)
                                                       (setq redo t)))
-                     ((#\Backspace) (when characters-left  (pop characters-left)))
+                     ((#\Backspace) (if characters-left
+                                        (pop characters-left)
+                                        (when lines-above
+                                           (setf characters-left (reverse (conversions:->list (pop lines-above))))
+                                           (vt100:move-up-by 1 stream)
+                                           (push "" lines-below) ; Avoid empty lines
+                                           (setq redo t))))
                      ((#\Home)      (setf characters-right (append (reverse characters-left) characters-right))
                                     (setf characters-left  '()))
                      ((#\End)       (setf characters-left  (append (reverse characters-right) characters-left))
