@@ -22,6 +22,11 @@
    (cond ((symbolp definition-path) (sourcer:retrieve-symbol-definition definition-path definition-kind))
          (t (error "Definition could not be retrieved!"))))
 
+(defun sourcer:defined-p (definition-path definition-kind)
+   (if (sourcer:retrieve-definition definition-path definition-kind)
+      t
+      nil))
+
 (defun sourcer:retrieve-defun (name)
    (sourcer:retrieve-definition name 'sourcer:defun-definition))
 
@@ -29,14 +34,23 @@
    (sourcer:retrieve-definition name 'sourcer:defmacro-definition))
 
 
-(defun sourcer:edit-definition (definition-path definition-kind)
+(defun sourcer:default-template-function (definition-path definition-kind)
+   (case definition-kind
+      ((sourcer:defun-definition)
+       `(defun ,definition-path ()
+           "Documentation"))
+      ((sourcer:defmacro-definition)
+       `(defmacro ,definition-path ()
+           "Documentation"))
+      (t "No template available!")))
+
+(defun sourcer:edit-definition (definition-path definition-kind &key (template-function #'sourcer:default-template-function))
    (let ((definition (sourcer:retrieve-definition definition-path definition-kind)))
-      (unless definition
-         (error "Definition not found!"))
       (let ((source-handle (assoc :source definition)))
-         (unless source-handle
-            (error "Source not available!"))
-         (genius:edit-expression (cdr source-handle)))))
+         (genius:edit-expression (if source-handle
+                                     (cdr source-handle)
+                                     (funcall template-function definition-path definition-kind))))))
+
 
 (defun sourcer:edit-function (name)
    (sourcer:edit-definition name 'sourcer:defun-definition))

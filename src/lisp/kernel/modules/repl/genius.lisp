@@ -60,4 +60,4 @@
 (defun genius:edit-expression (expression)
    (fresh-line)
    (genius:read-line :prompt "Edit> "
-                     :text   (format nil "~a" expression)))
+                     :text   (format nil "~s" expression)))
