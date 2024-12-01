@@ -56,12 +56,13 @@
                (return (http:parse-request request-line headers))
                (push line headers))))))
 
-(defvar webserver::*test-html*
-   '(:html
+(defun webserver::build-index-page ()
+   `(:html
       (:head (:title "LMUD"))
       (:body
          (:h1 "LMUD")
-         (:p "This is just a test page."))))
+         (:p "This is just a test page.")
+         (:p ,(format nil "Current uptime is: ~a" (lmud.int:get-clock))))))
 
 (defun webserver::cut-html (html)
    (if (endp html)
@@ -93,7 +94,7 @@
 
 (defun webserver::standard-page ()
    (with-string-output-stream stream
-      (webserver::write-html webserver::*test-html* stream)))
+      (webserver::write-html (webserver::build-index-page) stream)))
 
 (defun webserver::new-connection (port)
    (lmud.int:set-current-port port)
