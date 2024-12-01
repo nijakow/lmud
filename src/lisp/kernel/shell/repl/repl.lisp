@@ -9,7 +9,7 @@
       (values)))
 
 (defun repl::read ()
-   (read (io:default-stream)))
+   (read (io:make-string-stream (genius:read-line))))
 
 (defun repl::repl ()
    (repl::banner)
