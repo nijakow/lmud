@@ -24,7 +24,6 @@ struct LMud_FrameExtension
 {
     struct LMud_FrameRef     lexical;
     struct LMud_FrameRef*    references;
-    struct LMud_Frame*       return_to;
     struct LMud_StackFrame*  lisp_stack_frame;
 };
 
@@ -60,9 +59,6 @@ void LMud_Frame_Destroy(struct LMud_Frame* self);
 void LMud_Frame_Move(struct LMud_Frame* self, struct LMud_Frame* location);
 
 struct LMud_FrameExtension* LMud_Frame_EnsureExtension(struct LMud_Frame* self);
-
-struct LMud_Frame* LMud_Frame_GetReturnTo(struct LMud_Frame* self);
-void               LMud_Frame_SetReturnTo(struct LMud_Frame* self, struct LMud_Frame* value);
 
 struct LMud_Frame*    LMud_Frame_GetParent(struct LMud_Frame* self);
 struct LMud_Frame*    LMud_Frame_GetLexical(struct LMud_Frame* self);
